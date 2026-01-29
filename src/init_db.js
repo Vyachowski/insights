@@ -5,14 +5,14 @@ import Database from 'better-sqlite3';
 const initDb = () => {
     const dbName = 'ses-statistics'
     const dbFileExtension = 'sqlite3'
-    const dbFileName = `db/${dbName}.${dbFileExtension}`
-    const dbPath = path.resolve(process.cwd, dbFileName)
-
-    if (fs.accessSync(dbPath)) {
+    const dbFileName = `${dbName}.${dbFileExtension}`
+    const dbPath = path.resolve(process.cwd(), 'db', dbFileName)
+    
+    if (fs.existsSync(dbPath)) {
         return null;
     }
 
-    const db = new Database(dbFileName);
+    const db = new Database(dbPath);
 
     if (db) {
         return true;
