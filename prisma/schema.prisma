@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model City {
+  id           Int                      @id @default(autoincrement())
+  name         String
+  alt_names    Json?
+  revenue_share Decimal?                @db.Decimal(10,8)
+  priority     String?
+  display_order Int?
+
+  monthlyMetrics CityMonthlyMetric[]
+  weeklyRevenue  WeeklyRevenue[]
+}
+
+model Call {
+  id            Int      @id @default(autoincrement())
+  date_time     DateTime
+  caller_number String
+  region        String?
+  project       String?
+  destination   String?
+  duration      Int?      // в секундах
+  record_url    String?
+  comment       String?
+  call_completed Boolean?
+}
+
+model CityMonthlyMetric {
+  id                         Int      @id @default(autoincrement())
+  city_id                    Int
+  month                      DateTime
+  yandex_users               Int      @default(0)
+  google_users               Int      @default(0)
+  visit_duration_yandex_in_sec Int     @default(0)
+  visit_duration_google_in_sec Int     @default(0)
+  bounce_yandex              Float    @default(0)
+  bounce_google              Float    @default(0)
+  leads_yandex               Int      @default(0)
+  leads_google               Int      @default(0)
+
+  city City @relation(fields: [city_id], references: [id])
+
+  @@unique([city_id, month])
+}
+
+model WeeklyRevenue {
+  id         Int      @id @default(autoincrement())
+  city_id    Int?
+  week_start DateTime
+  revenue    Decimal  @default(0) @db.Decimal(12,2)
+
+  city City? @relation(fields: [city_id], references: [id])
+
+  @@unique([city_id, week_start])
+}
