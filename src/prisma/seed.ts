@@ -14,6 +14,7 @@ const durationToSeconds = (str: string): number | null => {
   return minutes * 60 + seconds;
 };
 
+const parseCityName = (project: string) => project.replaceAll('Дезинсекция – ', '').replaceAll(' – Дезинсекция', '')
 const parseCallDate = (str: string) => {
   const [datePart, timePart] = str.split(' ');
   if (!datePart || !timePart) process.exit(1);
@@ -60,8 +61,8 @@ const normalizeCallData = (data: { [k: string]: string | undefined }[]) => {
     caller_number: row['Кто звонил'] || null,
     region: row['Откуда'] || null,
     class: row['Класс'] || null,
-    project: row['Проект'] || null,
-    city: row['Куда звонил'] || null,
+    city: parseCityName(row['Проект']),
+    number_name: row['Куда звонил'],
     call_order: Number(row['№']),
     duration_in_sec: durationToSeconds(row['Запись']) || 0,
     comment: row['Комментарий'] || null,

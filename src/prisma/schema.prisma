@@ -26,7 +26,7 @@ model Call {
   region          String
   call_order      Int
   class           String?
-  project         String?
+  number_name     String?
   city            String
   duration_in_sec Int?
   comment         String?
