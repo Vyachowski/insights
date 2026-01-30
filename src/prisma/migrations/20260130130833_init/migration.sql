@@ -3,6 +3,7 @@ CREATE TABLE "City" (
     "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
     "alt_names" JSONB,
+    "url" TEXT NOT NULL,
     "revenue_share" DECIMAL(10,8),
     "priority" TEXT,
     "display_order" INTEGER,
