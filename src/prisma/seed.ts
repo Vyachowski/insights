@@ -14,6 +14,19 @@ const durationToSeconds = (str: string): number | null => {
   return minutes * 60 + seconds;
 };
 
+const parseCallDate = (str: string) => {
+  const [datePart, timePart] = str.split(' ');
+  if (!datePart || !timePart) process.exit(1);
+
+  const [day, month, year] = datePart.split('.').map(Number);
+
+  if (!year || !month || !day) process.exit(1);
+
+  const [hour, minute] = timePart.split(':').map(Number);
+
+  const fullYear = year < 100 ? 2000 + year : year;
+  return new Date(fullYear, month - 1, day, hour, minute);
+};
 
 // ---------------- PARSE CSV ----------------
 const parseCSV = (filepath: string, delimeter = ',') => {
@@ -28,20 +41,7 @@ const parseCSV = (filepath: string, delimeter = ',') => {
   });
 };
 
-const parseCallDate = (str: string) => {
-  const [datePart, timePart] = str.split(' ');
-  if (!datePart || !timePart) return null;
-
-  const [day, month, year] = datePart.split('.').map(Number);
-
-  if (!year || !month || !day) return null;
-
-  const [hour, minute] = timePart.split(':').map(Number);
-
-  const fullYear = year < 100 ? 2000 + year : year;
-  return new Date(fullYear, month - 1, day, hour, minute);
-};
-
+// ---------------- VALIDATE CSV -------------
 // ---------------- NORMALIZE ----------------
 const normalizeCityData = (data: { [k: string]: string | undefined }[]) => {
   return data.map((row: any) => ({
@@ -59,10 +59,10 @@ const normalizeCallData = (data: { [k: string]: string | undefined }[]) => {
     date_time: parseCallDate(row['Дата']),
     caller_number: row['Кто звонил'] || null,
     region: row['Откуда'] || null,
-    class: row['Класс'],
+    class: row['Класс'] || null,
     project: row['Проект'] || null,
     city: row['Куда звонил'] || null,
-    call_order: row['№'] ? Number(row['№']) : null,
+    call_order: Number(row['№']),
     duration_in_sec: durationToSeconds(row['Запись']) || 0,
     comment: row['Комментарий'] || null,
     redirect_number: row['Вызов завершен'],
