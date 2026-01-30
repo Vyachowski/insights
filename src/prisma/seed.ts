@@ -82,12 +82,24 @@ const main = async () => {
   });
   console.log('Cities seeded');
 
+  // --- Prepare city lookup ---
+  const cityList = await prisma.city.findMany({ select: { id: true, name: true } });
+  const cityMap = Object.fromEntries(cityList.map(c => [c.name, c.id]));
+
   // --- Calls ---
   const callRows = parseCSV(callsPath);
-  const callsData = normalizeCallData(callRows);
+  const callsData = normalizeCallData(callRows).map(call => {
+    const cityName = parseCityName(call.project);
+    const city_id = cityMap[cityName];
+    if (!city_id) {
+      console.warn(`City not found for call: ${cityName}`);
+      return null;
+    }
+    return { ...call, city_id };
+  }).filter(Boolean);
 
   await prisma.call.createMany({
-    data: callsData,
+    data: callsData as any[],
     skipDuplicates: true,
   });
   console.log('Calls seeded');
