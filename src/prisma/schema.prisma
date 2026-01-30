@@ -11,6 +11,7 @@ model City {
   id           Int                      @id @default(autoincrement())
   name         String
   alt_names    Json?
+  url          String
   revenue_share Decimal?                @db.Decimal(10,8)
   priority     String?
   display_order Int?
