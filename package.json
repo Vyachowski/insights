@@ -5,9 +5,9 @@
   "main": "src/app.js",
   "type": "module",
   "scripts": {
-    "start": "node --env-file=.env -r ts-node/register src/app.ts",
-    "create-db": "node --env-file=.env -r ts-node/register src/create-postgres.ts",
-    "remove-db": "node --env-file=.env -r ts-node/register src/remove-postgres.ts",
+    "start": "ts-node src/app.ts",
+    "create-db": "ts-node src/create-postgres.ts",
+    "remove-db": "ts-node src/remove-postgres.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",

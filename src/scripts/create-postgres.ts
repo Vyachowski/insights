@@ -1,3 +1,5 @@
+import "dotenv/config";
+
 import { execSync } from "child_process";
 
 const { 
