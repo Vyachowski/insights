@@ -92,7 +92,7 @@ const main = async () => {
     if (c.alt_names) {
       let altNames: string[] = [];
       try {
-        altNames = Array.isArray(c.alt_names) ? c.alt_names : JSON.parse(c.alt_names);
+        altNames = Array.isArray(c.alt_names) ? c.alt_names : JSON.parse(c.alt_names as string);
       } catch (e) {
         console.warn(`Failed to parse alt_names for city ${c.name}`, e);
       }

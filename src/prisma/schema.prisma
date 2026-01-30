@@ -16,7 +16,6 @@ model City {
   priority       String?
   display_order  Int?
   monthlyMetrics CityMonthlyMetric[]
-  weeklyRevenue  WeeklyRevenue[]
   call           Call[]
 }
 
@@ -53,12 +52,9 @@ model CityMonthlyMetric {
   @@unique([city_id, month])
 }
 
-model WeeklyRevenue {
-  id         Int      @id @default(autoincrement())
-  city_id    Int
-  week_start DateTime
-  revenue    Decimal  @default(0) @db.Decimal(12, 2)
-  city       City    @relation(fields: [city_id], references: [id])
-
-  @@unique([city_id, week_start])
+model Revenue {
+  id            Int      @id @default(autoincrement())
+  date          DateTime
+  amount        Decimal  @db.Decimal(12, 2)
+  active_cities Int
 }
