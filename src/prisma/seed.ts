@@ -83,16 +83,38 @@ const main = async () => {
   console.log('Cities seeded');
 
   // --- Prepare city lookup ---
-  const cityList = await prisma.city.findMany({ select: { id: true, name: true } });
-  const cityMap = Object.fromEntries(cityList.map(c => [c.name, c.id]));
+  const cityList = await prisma.city.findMany({ select: { id: true, name: true, alt_names: true } });
+  const cityMap: Record<string, number> = {};
+
+  for (const c of cityList) {
+    cityMap[c.name.toLowerCase()] = c.id;
+
+    if (c.alt_names) {
+      let altNames: string[] = [];
+      try {
+        altNames = Array.isArray(c.alt_names) ? c.alt_names : JSON.parse(c.alt_names);
+      } catch (e) {
+        console.warn(`Failed to parse alt_names for city ${c.name}`, e);
+      }
+
+      if (Array.isArray(altNames)) {
+        for (const alt of altNames) {
+          if (typeof alt === 'string') {
+            cityMap[alt.toLowerCase()] = c.id;
+          }
+        }
+      }
+    }
+  }
 
   // --- Calls ---
   const callRows = parseCSV(callsPath);
   const callsData = normalizeCallData(callRows).map(call => {
-    const cityName = parseCityName(call.project);
+    const cityName = parseCityName(call.project).toLowerCase();
     const city_id = cityMap[cityName];
     if (!city_id) {
-      console.warn(`City not found for call: ${cityName}`);
+      console.warn(`City not found for call: ${call.project} (parsed as: ${cityName})`);
+
       return null;
     }
     return { ...call, city_id };
