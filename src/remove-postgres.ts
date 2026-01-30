@@ -2,7 +2,7 @@ import { execSync } from "child_process";
 
 const { CONTAINER_NAME, VOLUME_NAME } = process.env;
 
-if (!CONTAINER_NAME || VOLUME_NAME) {
+if (!CONTAINER_NAME || !VOLUME_NAME) {
   console.error("❌ CONTAINER_NAME или VOLUME_NAME не задан в .env");
 
   process.exit(1);
