@@ -61,7 +61,7 @@ const normalizeCallData = (data: { [k: string]: string | undefined }[]) => {
     caller_number: row['Кто звонил'] || null,
     region: row['Откуда'] || null,
     class: row['Класс'] || null,
-    city: parseCityName(row['Проект']),
+    project: row['Проект'],
     number_name: row['Куда звонил'],
     call_order: Number(row['№']),
     duration_in_sec: durationToSeconds(row['Запись']) || 0,
