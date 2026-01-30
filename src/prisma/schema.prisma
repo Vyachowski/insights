@@ -20,16 +20,17 @@ model City {
 }
 
 model Call {
-  id             Int      @id @default(autoincrement())
-  date_time      DateTime
-  caller_number  String
-  region         String?
-  project        String?
-  destination    String?
-  duration       Int?
-  record_url     String?
-  comment        String?
-  call_completed Boolean?
+  id              Int      @id @default(autoincrement())
+  date_time       DateTime
+  caller_number   String
+  region          String
+  call_order      Int
+  class           String?
+  project         String?
+  city            String
+  duration_in_sec Int?
+  comment         String?
+  redirect_number String?
 }
 
 model CityMonthlyMetric {
