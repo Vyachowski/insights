@@ -8,8 +8,9 @@ const {
     CONTAINER_NAME
 } = process.env;
 
-if (!POSTGRES_PASSWORD) {
-  console.error("❌ POSTGRES_PASSWORD не задан в .env");
+if (!POSTGRES_USER || POSTGRES_DB || POSTGRES_PORT || POSTGRES_PASSWORD || CONTAINER_NAME) {
+  console.error("❌ POSTGRES_USER, POSTGRES_DB, POSTGRES_PORT, POSTGRES_PASSWORD или CONTAINER_NAME не задан в .env");
+
   process.exit(1);
 }
 
