@@ -15,6 +15,8 @@ model City {
   population    Int
   sites         Site[]
   calls         Call[]
+  revenues      Revenue[]
+  expenses      Expense[]
 }
 
 model Site {
@@ -22,8 +24,8 @@ model Site {
   city_id             Int
   name                String
   url                 String
-  yandex_counter_id   String?
-  google_analytics_id String?
+  yandex_counter_id   Int?
+  google_analytics_id Int?
   city                City         @relation(fields: [city_id], references: [id], onDelete: Cascade)
   metrics             SiteMetric[]
   
@@ -69,19 +71,22 @@ model Call {
 
 model Revenue {
   id            Int      @id @default(autoincrement())
+  city_id       Int?
   date          DateTime @db.Date
   amount        Decimal  @db.Decimal(12, 2)
-  active_cities Int
+  city          City?     @relation(fields: [city_id], references: [id], onDelete: Cascade)
   
   @@index([date])
 }
 
 model Expense {
   id      Int      @id @default(autoincrement())
+  city_id Int?
   date    DateTime @db.Date
   amount  Decimal  @db.Decimal(12, 2)
   type    String
   comment String?
+  city    City?     @relation(fields: [city_id], references: [id], onDelete: Cascade)
   
   @@index([date])
 }
