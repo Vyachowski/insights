@@ -24,10 +24,10 @@ model Site {
   city_id               Int
   name                  String
   url                   String
-  yandex_counter_id     Int?
-  google_counter_id   Int?
-  yandex_tag_manager_id Int?
-  google_tag_manager_id Int?
+  yandex_counter_id     String?
+  google_counter_id     String?
+  yandex_tag_manager_id String?
+  google_tag_manager_id String?
   city                  City         @relation(fields: [city_id], references: [id], onDelete: Cascade)
   metrics               SiteMetric[]
   
