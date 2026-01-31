@@ -20,14 +20,16 @@ model City {
 }
 
 model Site {
-  id                  Int          @id @default(autoincrement())
-  city_id             Int
-  name                String
-  url                 String
-  yandex_counter_id   Int?
-  google_analytics_id Int?
-  city                City         @relation(fields: [city_id], references: [id], onDelete: Cascade)
-  metrics             SiteMetric[]
+  id                    Int          @id @default(autoincrement())
+  city_id               Int
+  name                  String
+  url                   String
+  yandex_counter_id     Int?
+  google_counter_id   Int?
+  yandex_tag_manager_id Int?
+  google_tag_manager_id Int?
+  city                  City         @relation(fields: [city_id], references: [id], onDelete: Cascade)
+  metrics               SiteMetric[]
   
   @@index([city_id])
 }

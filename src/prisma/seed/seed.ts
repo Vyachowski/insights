@@ -4,9 +4,6 @@ import appRootPath from 'app-root-path';
 import { prisma } from '../../lib/prisma';
 import { Prisma } from '../../generated/prisma/client';
 
-const citiesPath = path.resolve(appRootPath.path, 'data', 'cities', 'cities.csv');
-const callsPath = path.resolve(appRootPath.path, 'data', 'calls', 'calls.csv');
-
 const durationToSeconds = (str: string): number | null => {
   if (!str) return null;
   const [minutes, seconds] = str.split(':').map(Number);
@@ -169,6 +166,29 @@ const main = async () => {
 
   console.log('Revenue seeded.');
 };
+
+const main = () => {
+  const citiesPath = path.resolve(appRootPath.path, 'data/cities/cities.csv');
+  const sitesPath = path.resolve(appRootPath.path, 'data/sites/sites.csv');
+  const callsPath = path.resolve(appRootPath.path, 'data/calls/calls.csv');
+  const revenuePath = path.resolve(appRootPath.path, 'data/calls/revenue.csv');
+
+  console.log('Читаем файлы экспорта...')
+
+  const citiesData = parseCSV(citiesPath, ';');
+
+  console.log('Проверяем корректность данных...')
+
+  const validatedCitiesData = ';'
+
+  console.log('Нормализуем данные для импорта...')
+
+  const normaizedCitiesData = ';'
+
+  console.log('Импортируем данные в базу...')
+
+
+}
 
 main()
   .then(async () => {
