@@ -9,10 +9,10 @@ datasource db {
 
 model City {
   id            Int      @id @default(autoincrement())
+  code          String
+  slug          String
   name          String
-  alt_names     Json?
-  priority      String?
-  display_order Int?
+  population    Int
   sites         Site[]
   calls         Call[]
 }
@@ -24,7 +24,6 @@ model Site {
   url                 String
   yandex_counter_id   String?
   google_analytics_id String?
-  revenue_share       Decimal?     @db.Decimal(10, 8)
   city                City         @relation(fields: [city_id], references: [id], onDelete: Cascade)
   metrics             SiteMetric[]
   
