@@ -15,22 +15,31 @@ const main = async () => {
   const callsData = parseCSV(callsPath);
   const revenueData = parseCSV(revenuePath);
 
-  console.log('Нормализуем данные для импорта...')
-  const normalizedCalls = normalizeCallData(callsData, citiesData);
+  console.log('Валидируем данные городов...')
+  const validatedCitiesData = validateCitiesData(citiesData);
+
+  console.log('Загружаем города с явными ID из CSV...')
+  for (const city of validatedCitiesData) {
+    await prisma.city.upsert({
+        where: { id: city.id },
+        update: city,
+        create: city,
+    });
+  }
+  console.log('Cities seeded');
+
+  console.log('Загружаем города из базы для маппинга...')
+  const importedCities = await prisma.city.findMany();
+
+  console.log('Нормализуем данные звонков...')
+  const normalizedCalls = normalizeCallData(callsData, importedCities);
 
   console.log('Проверяем данные для импорта...')
-  const validatedCitiesData = validateCitiesData(citiesData);
   const validatedSitesData = validateSitesData(sitesData);
   const validatedCallsData = validateCallsData(normalizedCalls);
   const validatedRevenueData = validateRevenuesData(revenueData);
   
-  console.log('Импортируем данные в базу...')
-  await prisma.city.createMany({
-    data: validatedCitiesData,
-    skipDuplicates: true,
-  });
-  console.log('Cities seeded');
-
+  console.log('Импортируем остальные данные в базу...')
   await prisma.site.createMany({
     data: validatedSitesData,
     skipDuplicates: true,
@@ -43,7 +52,6 @@ const main = async () => {
   });
 
   console.log('Calls seeded');
-
   await prisma.revenue.createMany({
     data: validatedRevenueData,
     skipDuplicates: true,

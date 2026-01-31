@@ -2,7 +2,7 @@ import * as z from "zod";
 
 // Schema
 const City = z.object({
-    city_id: z.number().nullable(),
+    id: z.coerce.number().positive(),
     code: z.string().min(1),
     slug: z.string().min(1),
     name: z.string().min(1),
@@ -12,7 +12,7 @@ const City = z.object({
 type City = z.infer<typeof City>;
 
 const Site = z.object({
-    city_id: z.number().min(1),
+    city_id: z.coerce.number().positive().min(1),
     name: z.string().min(1),
     url: z.string().min(1),
     yandex_counter_id: z.string(),
@@ -55,7 +55,13 @@ const Call = z.object({
 type Call = z.infer<typeof Call>;
 
 const Revenue = z.object({
-  city_id: z.coerce.number().int().positive().nullable(),
+  city_id: z.preprocess(
+    (val) => {
+      if (val === '' || val == null) return null;
+      return Number(val);
+    },
+    z.number().nullable()
+  ),
   date: z.coerce.date(),
   amount: z.coerce.number().positive(),
 })
@@ -82,7 +88,7 @@ export const validateCitiesData = (citiesData: { [k: string]: string | undefined
 export const validateSitesData = (sitesData: { [k: string]: string | undefined }[]) => {
     if (sitesData.length < 1) throw new Error("Нет данных сайта для валидации.");
 
-    return sitesData.map(city => Site.parse(city))
+    return sitesData.map(site => Site.parse(site))
 }
 
 export const validateSiteMetricsData = (
@@ -96,7 +102,19 @@ export const validateSiteMetricsData = (
 };
 
 export const validateCallsData = (
-  callsData: { [k: string]: string | undefined }[]
+  callsData: ({
+    date_time: Date;
+    caller_number: any;
+    region: any;
+    class: any;
+    project: any;
+    number_name: any;
+    call_order: number;
+    duration_in_sec: number;
+    comment: any;
+    redirect_number: any;
+    city_id: number;
+} | null)[]
 ) => {
   if (callsData.length < 1) {
     throw new Error("Нет данных звонков для валидации.");

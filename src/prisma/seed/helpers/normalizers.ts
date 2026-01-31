@@ -1,49 +1,53 @@
+import type { City } from "../../../generated/prisma";
 import { convertDurationToSeconds } from "./converters";
 import { parseCallDate } from "./parsers";
 
-export const normalizeCallData = (callData: { [k: string]: string | undefined }[], citiesData: {
-    [k: string]: string | undefined;
-}[]) => {
-  // Создаем маппинг: alt_name/name -> city_id
-  const cityAltNamesMap: Record<string, number> = {};
-  
-  citiesData.forEach((city, index) => {
-    const cityId = index + 1; // или city.id если он есть
-    
+export const normalizeCallData = (
+  callData: { [k: string]: string | undefined }[], 
+  citiesData: City[]
+) => {
+  // Встроенный маппинг альтернативных названий городов
+  const cityAltNames: Record<string, string[]> = {
+    'новосибирск': ['нск'],
+    'санкт-петербург': ['спб', 'петербург'],
+    'нижний новгород': ['нижний'],
+    'екатеринбург': ['екб'],
+    'ростов-на-дону': ['ростов'],
+    'набережные челны': ['челны'],
+  };
+
+  // Создаем маппинг: название (основное или альтернативное) -> city_id
+  const cityNameToIdMap: Record<string, number> = {};
+
+  citiesData.forEach((city) => {
+    const cityName = city.name.toLowerCase();
+
     // Добавляем основное название
-    cityAltNamesMap[city.name.toLowerCase()] = cityId;
-    
+    cityNameToIdMap[cityName] = city.id;
+
     // Добавляем альтернативные названия
-    if (city.alt_names) {
-      let altNames: string[] = [];
-      try {
-        altNames = typeof city.alt_names === 'string' 
-          ? JSON.parse(city.alt_names) 
-          : city.alt_names;
-      } catch (e) {
-        console.warn(`Failed to parse alt_names for city ${city.name}`, e);
-      }
-      
-      if (Array.isArray(altNames)) {
-        altNames.forEach(alt => {
-          if (typeof alt === 'string') {
-            cityAltNamesMap[alt.toLowerCase()] = cityId;
-          }
-        });
-      }
+    const altNames = cityAltNames[cityName];
+    if (altNames) {
+      altNames.forEach(alt => {
+        cityNameToIdMap[alt.toLowerCase()] = city.id;
+      });
     }
   });
 
   // Функция для извлечения названия города из проекта
   const parseCityName = (project: string) => 
-    project.replaceAll('Дезинсекция – ', '').replaceAll(' – Дезинсекция', '').toLowerCase();
+    project
+      .replaceAll('Дезинсекция – ', '')
+      .replaceAll(' – Дезинсекция', '')
+      .trim()
+      .toLowerCase();
 
   return callData.map((row: any) => {
     const dateTime = parseCallDate(row['Дата']);
     if (!dateTime || !row['Кто звонил']) return null;
 
     const cityName = parseCityName(row['Проект'] || '');
-    const city_id = cityAltNamesMap[cityName];
+    const city_id = cityNameToIdMap[cityName];
 
     if (!city_id) {
       console.warn(`City not found for call: ${row['Проект']} (parsed as: ${cityName})`);
