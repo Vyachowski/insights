@@ -58,3 +58,11 @@ model Revenue {
   amount        Decimal  @db.Decimal(12, 2)
   active_cities Int
 }
+
+model Expense {
+  id        Int      @id @default(autoincrement())
+  date      DateTime
+  amount    Decimal  @db.Decimal(12, 2)
+  type      String
+  comment   String?
+}

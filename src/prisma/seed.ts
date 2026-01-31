@@ -70,6 +70,42 @@ const normalizeCallData = (data: { [k: string]: string | undefined }[]) => {
   })).filter(row => row.date_time !== null && row.caller_number !== null);
 };
 
+// Загружаем JSON с сообщениями
+const revenueMessagesPath = path.resolve(appRootPath.path, 'data', 'revenueMessage.json');
+const revenueMessagesRaw = fs.readFileSync(revenueMessagesPath, 'utf-8');
+const revenueMessages: {
+  date: string;
+  from: string;
+  text: string;
+  numbers: number | number[];
+}[] = JSON.parse(revenueMessagesRaw);
+
+// Нормализация
+const normalizedRevenue = revenueMessages
+  .map(msg => {
+    let amount = 0;
+
+    if (Array.isArray(msg.numbers)) {
+      amount = msg.numbers.reduce((sum, n) => sum + n, 0);
+    } else if (typeof msg.numbers === 'number') {
+      amount = msg.numbers;
+    }
+
+    // Игнорируем суммы <1000 (если нужно)
+    if (amount < 1000) return null;
+
+    return {
+      date: new Date(msg.date),
+      amount: new Prisma.Decimal(amount),
+      active_cities: 19,
+    };
+  })
+  .filter(Boolean) as {
+    date: Date;
+    amount: Prisma.Decimal;
+    active_cities: number;
+  }[];
+
 // ---------------- MAIN ----------------
 const main = async () => {
   // --- Cities ---
@@ -125,6 +161,13 @@ const main = async () => {
     skipDuplicates: true,
   });
   console.log('Calls seeded');
+
+  await prisma.revenue.createMany({
+    data: normalizedRevenue,
+    skipDuplicates: true,
+  });
+
+  console.log('Revenue seeded.');
 };
 
 main()
