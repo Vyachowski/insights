@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
   output   = "../generated/prisma"
 }
 
@@ -8,15 +8,45 @@ datasource db {
 }
 
 model City {
-  id             Int                 @id @default(autoincrement())
-  name           String
-  alt_names      Json?
-  url            String
-  revenue_share  Decimal?            @db.Decimal(10, 8)
-  priority       String?
-  display_order  Int?
-  monthlyMetrics CityMonthlyMetric[]
-  call           Call[]
+  id            Int      @id @default(autoincrement())
+  name          String
+  alt_names     Json?
+  priority      String?
+  display_order Int?
+  sites         Site[]
+  calls         Call[]
+}
+
+model Site {
+  id                  Int          @id @default(autoincrement())
+  city_id             Int
+  name                String
+  url                 String
+  yandex_counter_id   String?
+  google_analytics_id String?
+  revenue_share       Decimal?     @db.Decimal(10, 8)
+  city                City         @relation(fields: [city_id], references: [id], onDelete: Cascade)
+  metrics             SiteMetric[]
+  
+  @@index([city_id])
+}
+
+model SiteMetric {
+  id                           Int      @id @default(autoincrement())
+  site_id                      Int
+  date                         DateTime @db.Date
+  yandex_users                 Int      @default(0)
+  google_users                 Int      @default(0)
+  visit_duration_yandex_in_sec Int      @default(0)
+  visit_duration_google_in_sec Int      @default(0)
+  bounce_yandex                Float    @default(0)
+  bounce_google                Float    @default(0)
+  leads_yandex                 Int      @default(0)
+  leads_google                 Int      @default(0)
+  site                         Site     @relation(fields: [site_id], references: [id], onDelete: Cascade)
+  
+  @@unique([site_id, date])
+  @@index([date])
 }
 
 model Call {
@@ -32,37 +62,27 @@ model Call {
   duration_in_sec Int?
   comment         String?
   redirect_number String?
-  city            City    @relation(fields: [city_id], references: [id])
-}
-
-model CityMonthlyMetric {
-  id                           Int      @id @default(autoincrement())
-  city_id                      Int
-  month                        DateTime
-  yandex_users                 Int      @default(0)
-  google_users                 Int      @default(0)
-  visit_duration_yandex_in_sec Int      @default(0)
-  visit_duration_google_in_sec Int      @default(0)
-  bounce_yandex                Float    @default(0)
-  bounce_google                Float    @default(0)
-  leads_yandex                 Int      @default(0)
-  leads_google                 Int      @default(0)
-  city                         City     @relation(fields: [city_id], references: [id])
-
-  @@unique([city_id, month])
+  city            City     @relation(fields: [city_id], references: [id], onDelete: Cascade)
+  
+  @@index([city_id])
+  @@index([date_time])
 }
 
 model Revenue {
   id            Int      @id @default(autoincrement())
-  date          DateTime
+  date          DateTime @db.Date
   amount        Decimal  @db.Decimal(12, 2)
   active_cities Int
+  
+  @@index([date])
 }
 
 model Expense {
-  id        Int      @id @default(autoincrement())
-  date      DateTime
-  amount    Decimal  @db.Decimal(12, 2)
-  type      String
-  comment   String?
+  id      Int      @id @default(autoincrement())
+  date    DateTime @db.Date
+  amount  Decimal  @db.Decimal(12, 2)
+  type    String
+  comment String?
+  
+  @@index([date])
 }

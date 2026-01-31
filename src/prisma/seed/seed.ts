@@ -1,8 +1,8 @@
 import fs from 'fs';
 import path from 'path';
 import appRootPath from 'app-root-path';
-import { prisma } from '../lib/prisma';
-import { Prisma } from '../generated/prisma/client';
+import { prisma } from '../../lib/prisma';
+import { Prisma } from '../../generated/prisma/client';
 
 const citiesPath = path.resolve(appRootPath.path, 'data', 'cities', 'cities.csv');
 const callsPath = path.resolve(appRootPath.path, 'data', 'calls', 'calls.csv');
