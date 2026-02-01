@@ -40,14 +40,18 @@ model SiteMetric {
   date                         DateTime @db.Date
   yandex_users                 Int      @default(0)
   google_users                 Int      @default(0)
+  other_users                  Int      @default(0)
   visit_duration_yandex_in_sec Int      @default(0)
   visit_duration_google_in_sec Int      @default(0)
+  visit_duration_other_in_sec  Int      @default(0)
   bounce_yandex                Float    @default(0)
   bounce_google                Float    @default(0)
+  bounce_other                 Float    @default(0)
   leads_yandex                 Int      @default(0)
   leads_google                 Int      @default(0)
+  leads_other                  Int      @default(0)
   site                         Site     @relation(fields: [site_id], references: [id], onDelete: Cascade)
-  
+
   @@unique([site_id, date])
   @@index([date])
 }
