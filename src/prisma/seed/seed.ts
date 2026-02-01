@@ -2,8 +2,8 @@ import path from 'path';
 import appRootPath from 'app-root-path';
 
 import { prisma } from '../../lib/prisma';
-import { checkDatabaseConnection } from "./helpers/checkers";
-import { checkFilesExistence } from './utils/checkFilesExistence';
+import { checkDatabaseConnection, checkFilesExistence } from './utils/checkers';
+import { seedCalls, seedCities, seedExpenses, seedRevenue, seedSiteMetrics, seedSites } from './utils/seeders';
 
 const main = async (logger = console.log) => {
   // SECTION: Paths
@@ -16,6 +16,8 @@ const main = async (logger = console.log) => {
   }
 
   // SECTION: Checks
+  logger('⏳ Check database connection...');
+
   await checkDatabaseConnection()
   logger('✅ Database connection succesfully established.');
 
@@ -23,17 +25,19 @@ const main = async (logger = console.log) => {
   logger('✅ Required files exists.');
 
   // SECTION: Seeding
-  seedCities()
+  logger('⏳ Seeding data...');
+
+  await seedCities(paths.cities)
   logger('✅ All cities succesfully imported to database.');
-  seedSites()
+  await seedSites(paths.sites)
   logger('✅ All sites succesfully imported to database.');
-  seedCalls()
+  await seedCalls(paths.calls)
   logger('✅ All calls succesfully imported to database.');
-  seedRevenue()
+  await seedRevenue(paths.revenue)
   logger('✅ All revenue succesfully imported to database.');
-  seedSiteMetrics()
+  await seedSiteMetrics(paths.siteMetrics)
   logger('✅ All site metrics succesfully imported to database.');
-  seedExpenses()
+  await seedExpenses('')
   logger('✅ All expenses succesfully imported to database.');
 }
 
