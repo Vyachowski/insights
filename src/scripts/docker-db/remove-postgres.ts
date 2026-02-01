@@ -1,8 +1,8 @@
 import { execSync } from "child_process";
 
-const { CONTAINER_NAME, VOLUME_NAME } = process.env;
+const { DB_CONTAINER, DB_VOLUME } = process.env;
 
-if (!CONTAINER_NAME || !VOLUME_NAME) {
+if (!DB_CONTAINER || !DB_VOLUME) {
   console.error("❌ CONTAINER_NAME или VOLUME_NAME не задан в .env");
 
   process.exit(1);
@@ -16,25 +16,25 @@ function runCommand(cmd: string) {
   }
 }
 
-const existing = runCommand(`docker ps -aq -f name=${CONTAINER_NAME}`);
+const existing = runCommand(`docker ps -aq -f name=${DB_CONTAINER}`);
 
 if (existing) {
-  console.log(`⚡ Останавливаем контейнер ${CONTAINER_NAME}...`);
-  runCommand(`docker stop ${CONTAINER_NAME}`);
+  console.log(`⚡ Останавливаем контейнер ${DB_CONTAINER}...`);
+  runCommand(`docker stop ${DB_CONTAINER}`);
 
-  console.log(`🗑 Удаляем контейнер ${CONTAINER_NAME}...`);
-  runCommand(`docker rm ${CONTAINER_NAME}`);
+  console.log(`🗑 Удаляем контейнер ${DB_CONTAINER}...`);
+  runCommand(`docker rm ${DB_CONTAINER}`);
 } else {
-  console.log(`❌ Контейнер ${CONTAINER_NAME} не найден`);
+  console.log(`❌ Контейнер ${DB_CONTAINER} не найден`);
 }
 
-const volumeExists = runCommand(`docker volume ls -q -f name=${VOLUME_NAME}`);
+const volumeExists = runCommand(`docker volume ls -q -f name=${DB_VOLUME}`);
 
 if (volumeExists) {
-  console.log(`🗑 Удаляем volume ${VOLUME_NAME}...`);
-  runCommand(`docker volume rm ${VOLUME_NAME}`);
+  console.log(`🗑 Удаляем volume ${DB_VOLUME}...`);
+  runCommand(`docker volume rm ${DB_VOLUME}`);
 } else {
-  console.log(`❌ Volume ${VOLUME_NAME} не найден`);
+  console.log(`❌ Volume ${DB_VOLUME} не найден`);
 }
 
 console.log("✅ Удаление контейнера и volume завершено");
