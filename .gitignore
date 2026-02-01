@@ -4,3 +4,6 @@ db/
 .env
 .DS_Store
 */generated/prisma
+
+# Temporary solution - delete
+*.env
