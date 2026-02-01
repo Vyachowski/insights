@@ -4,7 +4,7 @@ import { createObjectCsvWriter } from 'csv-writer';
 
 // Настройка csv-writer
 const csvWriter = createObjectCsvWriter({
-  path: config.paths.siteMetrics,
+  path: config.dataFilePaths.import.siteMetrics,
   header: [
     { id: 'site_id', title: 'site_id' },
     { id: 'date', title: 'date' },

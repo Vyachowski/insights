@@ -1,15 +1,26 @@
 import appRootPath from 'app-root-path';
 import path from 'path';
 
+const dataFolderPath = path.resolve(appRootPath.path, 'data')
+
 export default {
     START_DATE: '2021-05-01',
     END_DATE: '2025-12-31',
     BATCH_SIZE: 'month',
-    paths: {
-        cities: path.resolve(appRootPath.path, 'data/cities/cities.csv'),
-        sites: path.resolve(appRootPath.path, 'data/sites/sites.csv'),
-        calls: path.resolve(appRootPath.path, 'data/calls/calls.csv'),
-        revenue: path.resolve(appRootPath.path, 'data/revenue/revenue.csv'),
-        siteMetrics: path.resolve(appRootPath.path, 'data/site-metrics/site-metrics.csv'),
+    dataFilePaths: {
+        import: {
+            cities: path.resolve(dataFolderPath, 'cities/cities.csv'),
+            sites: path.resolve(dataFolderPath, 'sites/sites.csv'),
+            calls: path.resolve(dataFolderPath, 'calls/calls.csv'),
+            revenue: path.resolve(dataFolderPath, 'revenue/revenue.csv'),
+            siteMetrics: path.resolve(dataFolderPath, 'site-metrics/site-metrics.csv'),
+        },
+        rawData: {
+            cities: path.resolve(dataFolderPath, 'cities/import/cities.csv'),
+            sites: path.resolve(dataFolderPath, 'sites/import/sites.csv'),
+            calls: path.resolve(dataFolderPath, 'calls/import/calls.csv'),
+            revenue: path.resolve(dataFolderPath, 'revenue/import/revenue.csv'),
+            siteMetrics: path.resolve(dataFolderPath, 'site-metrics/import/site-metrics.csv'),
+        },
     }
 }
