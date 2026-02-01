@@ -1,18 +1,15 @@
-// src/yandexApi/client.ts
 import axios from 'axios';
 import type { AxiosInstance } from 'axios';
-import { YANDEX_TOKEN } from './config';
+import { env } from '../../lib/env';
 
 export class YandexClient {
   private client: AxiosInstance;
 
   constructor() {
-    if (!YANDEX_TOKEN) throw new Error('YANDEX_API_OAUTH_TOKEN not set');
-
     this.client = axios.create({
       baseURL: 'https://api-metrika.yandex.net',
       headers: {
-        Authorization: `OAuth ${YANDEX_TOKEN}`,
+        Authorization: `OAuth ${env.YANDEX_API_OAUTH_TOKEN}`,
         'Content-Type': 'application/json',
       },
       timeout: 15000,

@@ -1,11 +1,10 @@
-// src/csvWriter.ts
-import { CSV_PATH } from './config';
+import config from '../../config';
 import type { MetricRow } from './metrics';
 import { createObjectCsvWriter } from 'csv-writer';
 
 // Настройка csv-writer
 const csvWriter = createObjectCsvWriter({
-  path: CSV_PATH,
+  path: config.paths.siteMetrics,
   header: [
     { id: 'site_id', title: 'site_id' },
     { id: 'date', title: 'date' },

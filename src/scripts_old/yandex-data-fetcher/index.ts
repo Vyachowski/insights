@@ -3,7 +3,7 @@ import { getZayavkaGoalId } from './goals';
 import { getDailyMetrics, type MetricRow } from './metrics';
 import { getAllSites } from './db';
 import { writeMetricsToCsv } from './csvWriter';
-import { START_DATE, END_DATE } from './config';
+import config from '../../config';
 import dayjs from 'dayjs';
 
 async function main() {
@@ -24,8 +24,8 @@ async function main() {
         continue;
       }
 
-      let start = dayjs(START_DATE);
-      const end = dayjs(END_DATE);
+      let start = dayjs(config.START_DATE);
+      const end = dayjs(config.END_DATE);
 
       while (start.isBefore(end) || start.isSame(end, 'day')) {
         const yearStart = start.startOf('year');
