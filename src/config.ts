@@ -16,11 +16,8 @@ export default {
             siteMetrics: path.resolve(dataFolderPath, 'site-metrics/site-metrics.csv'),
         },
         rawData: {
-            cities: path.resolve(dataFolderPath, 'cities/import/cities.csv'),
-            sites: path.resolve(dataFolderPath, 'sites/import/sites.csv'),
             calls: path.resolve(dataFolderPath, 'calls/import/calls.csv'),
-            revenue: path.resolve(dataFolderPath, 'revenue/import/revenue.csv'),
-            siteMetrics: path.resolve(dataFolderPath, 'site-metrics/import/site-metrics.csv'),
+            revenueFolder: path.resolve(dataFolderPath, 'revenue/import'),
         },
     }
 }
