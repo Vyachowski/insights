@@ -6,8 +6,15 @@
   "type": "module",
   "scripts": {
     "start": "ts-node src/app.ts",
-    "create-db": "ts-node src/create-postgres.ts",
-    "remove-db": "ts-node src/remove-postgres.ts",
+    "db:create": "ts-node src/create-postgres.ts",
+    "db:remove": "ts-node src/remove-postgres.ts",
+    "db:migrate:init": "prisma migrate dev --name init",
+    "db:studio": "prisma studio",
+    "db:reset": "prisma migrate reset",
+    "db:reset:hard": "rm -rf src/prisma/migrations && prisma migrate reset",
+    "db:seed": "prisma db seed",
+    "db:sync": "prisma generate --watch",
+    "env:import": "infisical export > .env",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",

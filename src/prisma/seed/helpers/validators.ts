@@ -1,6 +1,6 @@
 import * as z from "zod";
 
-// Schema
+// Schemas
 const City = z.object({
     id: z.coerce.number().positive(),
     code: z.string().min(1),
@@ -22,21 +22,6 @@ const Site = z.object({
 })
 
 type Site = z.infer<typeof Site>;
-
-const SiteMetric = z.object({
-  site_id: z.number().min(1),
-  date: z.coerce.date(),
-  yandex_users: z.coerce.number().int().nonnegative().optional(),
-  google_users: z.coerce.number().int().nonnegative().optional(),
-  visit_duration_yandex_in_sec: z.coerce.number().int().nonnegative().optional(),
-  visit_duration_google_in_sec: z.coerce.number().int().nonnegative().optional(),
-  bounce_yandex: z.coerce.number().min(0).max(100).optional(),
-  bounce_google: z.coerce.number().min(0).max(100).optional(),
-  leads_yandex: z.coerce.number().int().nonnegative().optional(),
-  leads_google: z.coerce.number().int().nonnegative().optional(),
-})
-
-type SiteMetric = z.infer<typeof SiteMetric>;
 
 const Call = z.object({
   city_id: z.number().min(1),
@@ -78,6 +63,27 @@ const Expense = z.object({
 
 type Expense = z.infer<typeof Expense>;
 
+const SiteMetric = z.object({
+  site_id: z.coerce.number().int().positive(),
+  date: z.string().refine((val) => !isNaN(Date.parse(val)), {
+    message: 'Invalid date format',
+  }),
+  yandex_users: z.coerce.number().int().nonnegative().default(0),
+  google_users: z.coerce.number().int().nonnegative().default(0),
+  other_users: z.coerce.number().int().nonnegative().default(0),
+  visit_duration_yandex_in_sec: z.coerce.number().nonnegative().default(0),
+  visit_duration_google_in_sec: z.coerce.number().nonnegative().default(0),
+  visit_duration_other_in_sec: z.coerce.number().nonnegative().default(0),
+  bounce_yandex: z.coerce.number().nonnegative().default(0),
+  bounce_google: z.coerce.number().nonnegative().default(0),
+  bounce_other: z.coerce.number().nonnegative().default(0),
+  leads_yandex: z.coerce.number().int().nonnegative().default(0),
+  leads_google: z.coerce.number().int().nonnegative().default(0),
+  leads_other: z.coerce.number().int().nonnegative().default(0),
+});
+
+type SiteMetric = z.infer<typeof SiteMetric>;
+
 // Validators
 export const validateCitiesData = (citiesData: { [k: string]: string | undefined }[]) => {
     if (citiesData.length < 1) throw new Error("Нет данных города для валидации.");
@@ -90,16 +96,6 @@ export const validateSitesData = (sitesData: { [k: string]: string | undefined }
 
     return sitesData.map(site => Site.parse(site))
 }
-
-export const validateSiteMetricsData = (
-  metricsData: { [k: string]: string | undefined }[]
-) => {
-  if (metricsData.length < 1) {
-    throw new Error("Нет данных метрик сайта для валидации.");
-  }
-
-  return metricsData.map(metric => SiteMetric.parse(metric));
-};
 
 export const validateCallsData = (
   callsData: ({
@@ -142,3 +138,42 @@ export const validateExpensesData = (
 
   return expensesData.map(expense => Expense.parse(expense));
 };
+
+export function validateSiteMetricsData(siteMetricData: { [k: string]: string | undefined }[]): SiteMetric[] {
+  const validated: SiteMetric[] = [];
+  const errors: any[] = [];
+
+  for (let i = 0; i < siteMetricData.length; i++) {
+    const result = SiteMetric.safeParse(siteMetricData[i]);
+    
+    if (result.success) {
+      // Преобразуем дату в ISO формат
+      const metric = {
+        ...result.data,
+        date: new Date(result.data.date).toISOString(),
+      };
+      
+      validated.push(metric);
+    } else {
+      errors.push({
+        row: i + 1,
+        data: siteMetricData[i],
+        errors: result.error.errors,
+      });
+    }
+  }
+
+  if (errors.length > 0) {
+    console.warn(`⚠️  Найдено ${errors.length} ошибок валидации в метриках:`);
+    errors.slice(0, 5).forEach((err) => {
+      console.warn(`  Строка ${err.row}:`, err.errors);
+    });
+    if (errors.length > 5) {
+      console.warn(`  ... и еще ${errors.length - 5} ошибок`);
+    }
+  }
+
+  console.log(`✓ Валидировано метрик: ${validated.length} из ${siteMetricData.length}`);
+  
+  return validated;
+}

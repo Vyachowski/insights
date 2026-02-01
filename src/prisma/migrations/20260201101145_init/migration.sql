@@ -30,12 +30,16 @@ CREATE TABLE "SiteMetric" (
     "date" DATE NOT NULL,
     "yandex_users" INTEGER NOT NULL DEFAULT 0,
     "google_users" INTEGER NOT NULL DEFAULT 0,
+    "other_users" INTEGER NOT NULL DEFAULT 0,
     "visit_duration_yandex_in_sec" INTEGER NOT NULL DEFAULT 0,
     "visit_duration_google_in_sec" INTEGER NOT NULL DEFAULT 0,
+    "visit_duration_other_in_sec" INTEGER NOT NULL DEFAULT 0,
     "bounce_yandex" DOUBLE PRECISION NOT NULL DEFAULT 0,
     "bounce_google" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "bounce_other" DOUBLE PRECISION NOT NULL DEFAULT 0,
     "leads_yandex" INTEGER NOT NULL DEFAULT 0,
     "leads_google" INTEGER NOT NULL DEFAULT 0,
+    "leads_other" INTEGER NOT NULL DEFAULT 0,
 
     CONSTRAINT "SiteMetric_pkey" PRIMARY KEY ("id")
 );
