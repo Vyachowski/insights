@@ -71,11 +71,11 @@ export const normalizeCallData = (
 
 async function createCallsCSV() {
   const cities = await prisma.city.findMany();
-  const callsData = parseCSV(config.dataFilePaths.rawData.calls);
+  const callsData = parseCSV(config.paths.import.calls);
 
   const normalizedData = normalizeCallData(callsData, cities);
 
-  const filePath = config.dataFilePaths.import.calls;
+  const filePath = config.paths.output.calls;
   await fs.mkdir(path.dirname(filePath), { recursive: true });
 
   const headers = [

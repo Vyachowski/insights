@@ -13,8 +13,8 @@ interface Message {
 
 // NOTE: Simplified version - transforms JSON to CSV
 function createRevenueCSV () {
-    const inputFilePath = config.dataFilePaths.rawData.revenue
-    const outputFilePath = config.dataFilePaths.import.revenue
+    const inputFilePath = config.paths.import.revenue
+    const outputFilePath = config.paths.output.revenue
 
     const rawData = fs.readFileSync(inputFilePath, 'utf-8');
   
