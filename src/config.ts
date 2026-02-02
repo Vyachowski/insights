@@ -18,6 +18,7 @@ export default {
         },
         rawData: {
             calls: path.resolve(dataFolderPath, 'calls/import/calls.csv'),
+            revenue: path.resolve(dataFolderPath, 'revenue/drafts/revenue.json'),
             revenueFolder: path.resolve(dataFolderPath, 'revenue/import'),
         },
     }
