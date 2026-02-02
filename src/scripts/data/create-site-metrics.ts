@@ -9,7 +9,7 @@ import dayjs from 'dayjs';
 // TODO: REFACTORING 
 const settings = {
   METRICS_CHUNK_MONTHS: 3,
-  METRICS_REQUEST_DELAY_MS: 500,
+  METRICS_REQUEST_DELAY_MS: 1000,
 };
 
 const sleep = (ms: number) =>
@@ -37,7 +37,7 @@ async function main() {
     const end = dayjs(config.IMPORT_END_DATE);
 
     const CHUNK_MONTHS = settings.METRICS_CHUNK_MONTHS ?? 6;
-    const DELAY_MS = settings.METRICS_REQUEST_DELAY_MS ?? 300;
+    const DELAY_MS = settings.METRICS_REQUEST_DELAY_MS ?? 500;
 
     while (start.isBefore(end) || start.isSame(end, 'day')) {
       const chunkEnd = start

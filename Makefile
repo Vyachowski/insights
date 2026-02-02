@@ -1,3 +1,5 @@
+.PHONY: db data
+
 db:
 	npm run db:container:remove && npm run db:container:create && npm run db:migrate:init && npm run db:seed
 data:
