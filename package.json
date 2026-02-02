@@ -1,46 +1,15 @@
 {
-  "name": "ses-data",
-  "version": "1.0.0",
-  "description": "",
-  "main": "src/app.js",
-  "type": "module",
+  "name": "ses-dashboard",
+  "version": "0.1.0",
+  "description": "A dashboard for key analytics values for cleaning business",
+  "private": true,
+  "workspaces": [
+    "server",
+    "client"
+  ],
   "scripts": {
-    "start": "ts-node src/app.ts",
-    "data:create:cities": "tsx src/scripts/data/create-cities.ts",
-    "data:create:calls": "tsx src/scripts/data/create-calls.ts",
-    "data:create:expenses": "tsx src/scripts/data/create-expenses.ts",
-    "data:create:revenue": "tsx src/scripts/data/create-revenue.ts",
-    "data:create:sites": "tsx src/scripts/data/create-sites.ts",
-    "data:create:site-metrics": "tsx src/scripts/data/create-site-metrics.ts",
-    "db:container:create": "tsx src/scripts/db/create-postgres-container.ts",
-    "db:container:remove": "tsx src/scripts/db/remove-postgres-container.ts",
-    "db:migrate:init": "prisma migrate dev --name init",
-    "db:studio": "prisma studio",
-    "db:reset": "prisma migrate reset",
-    "db:reset:hard": "rm -rf src/prisma/migrations && prisma migrate reset",
-    "db:seed": "prisma db seed",
-    "db:sync": "prisma generate --watch",
-    "env:import": "infisical export > .env",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "@prisma/adapter-pg": "^7.3.0",
-    "@prisma/client": "^7.3.0",
-    "app-root-path": "^3.1.0",
-    "axios": "^1.13.4",
-    "cheerio": "^1.2.0",
-    "csv-writer": "^1.6.0",
-    "dayjs": "^1.11.19",
-    "dotenv": "^17.2.3",
-    "zod": "^4.3.6"
-  },
-  "devDependencies": {
-    "@types/node": "^25.1.0",
-    "prisma": "^7.3.0",
-    "ts-node": "^10.9.2",
-    "tsx": "^4.21.0",
-    "typescript": "^5.9.3"
-  }
+  "author": "Slava Haikin",
+  "license": "ISC"
 }

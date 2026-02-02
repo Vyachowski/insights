@@ -1,0 +1,10 @@
+node_modules/
+/data/
+/data_old/
+/import
+.env
+.DS_Store
+*/generated/prisma
+
+# Temporary solution - delete
+*.env
