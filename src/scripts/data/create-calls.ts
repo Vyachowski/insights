@@ -10,7 +10,6 @@ export const normalizeCallData = (
   callData: { [k: string]: string | undefined }[], 
   citiesData: City[]
 ) => {
-  // Встроенный маппинг альтернативных названий городов
   const cityAltNames: Record<string, string[]> = {
     'новосибирск': ['нск'],
     'санкт-петербург': ['спб', 'петербург'],
@@ -20,16 +19,13 @@ export const normalizeCallData = (
     'набережные челны': ['челны'],
   };
 
-  // Создаем маппинг: название (основное или альтернативное) -> city_id
   const cityNameToIdMap: Record<string, number> = {};
 
   citiesData.forEach((city) => {
     const cityName = city.name.toLowerCase();
 
-    // Добавляем основное название
     cityNameToIdMap[cityName] = city.id;
 
-    // Добавляем альтернативные названия
     const altNames = cityAltNames[cityName];
     if (altNames) {
       altNames.forEach(alt => {
@@ -38,7 +34,6 @@ export const normalizeCallData = (
     }
   });
 
-  // Функция для извлечения названия города из проекта
   const parseCityName = (project: string) => 
     project
       .replaceAll('Дезинсекция – ', '')
@@ -75,13 +70,11 @@ export const normalizeCallData = (
 };
 
 async function createCallsCSV() {
-  // Normalize
   const cities = await prisma.city.findMany();
   const callsData = parseCSV(config.dataFilePaths.rawData.calls);
 
   const normalizedData = normalizeCallData(callsData, cities);
 
-  // Write to CSV
   const filePath = config.dataFilePaths.import.calls;
   await fs.mkdir(path.dirname(filePath), { recursive: true });
 
