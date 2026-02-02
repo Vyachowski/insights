@@ -1,6 +1,8 @@
+import fs from 'fs/promises'
 import config from '../../../config';
 import type { MetricRow } from './metrics';
 import { createObjectCsvWriter } from 'csv-writer';
+import path from 'path';
 
 // Настройка csv-writer
 const csvWriter = createObjectCsvWriter({
@@ -30,7 +32,11 @@ const csvWriter = createObjectCsvWriter({
 export async function writeMetricsToCsv(siteId: number, metrics: MetricRow[]) {
   if (!metrics || metrics.length === 0) return;
 
-  // Добавляем site_id к каждой строке
+  const filePath = config.dataFilePaths.import.siteMetrics;
+  const dir = path.dirname(filePath);
+
+  await fs.mkdir(dir, { recursive: true });
+
   const records = metrics.map(m => ({ site_id: siteId, ...m }));
 
   await csvWriter.writeRecords(records);

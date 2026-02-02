@@ -24,7 +24,7 @@ model Site {
   city_id               Int
   name                  String
   url                   String
-  yandex_counter_id     String?
+  yandex_counter_id     String
   google_counter_id     String?
   yandex_tag_manager_id String?
   google_tag_manager_id String?

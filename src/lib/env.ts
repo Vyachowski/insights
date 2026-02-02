@@ -1,3 +1,4 @@
+import "dotenv/config"
 import * as z from "zod"
 
 const EnvSchema = z
@@ -20,11 +21,7 @@ const EnvSchema = z
 type EnvSchema = z.infer<typeof EnvSchema>
 
 function parseEnv(env: NodeJS.ProcessEnv): EnvSchema {
-  const parsed = EnvSchema.safeParse(env)
-
-  if (!parsed.success) throw new Error("Env config files is not valid.")
-
-  return parsed.data
+  return EnvSchema.parse(env)
 }
 
 export const env = parseEnv(process.env)

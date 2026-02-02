@@ -6,6 +6,14 @@ import { writeMetricsToCsv } from './site-metrics/csvWriter';
 import config from '../../config';
 import dayjs from 'dayjs';
 
+const settings = {
+  METRICS_CHUNK_MONTHS: 3,
+  METRICS_REQUEST_DELAY_MS: 200,
+};
+
+const sleep = (ms: number) =>
+  new Promise(resolve => setTimeout(resolve, ms));
+
 async function main() {
   const sites = await getAllSites();
   const yc = new YandexClient();
@@ -25,26 +33,38 @@ async function main() {
       }
 
       let start = dayjs(config.START_DATE);
-      const end = dayjs(config.END_DATE);
+    const end = dayjs(config.END_DATE);
 
-      while (start.isBefore(end) || start.isSame(end, 'day')) {
-        const yearStart = start.startOf('year');
-        const yearEnd = yearStart.endOf('year').isBefore(end) ? yearStart.endOf('year') : end;
+    const CHUNK_MONTHS = settings.METRICS_CHUNK_MONTHS ?? 6;
+    const DELAY_MS = settings.METRICS_REQUEST_DELAY_MS ?? 300;
 
-        console.log(`Fetching metrics from ${yearStart.format('YYYY-MM-DD')} to ${yearEnd.format('YYYY-MM-DD')}`);
+    while (start.isBefore(end) || start.isSame(end, 'day')) {
+      const chunkEnd = start
+        .add(CHUNK_MONTHS, 'month')
+        .subtract(1, 'day');
 
-        const metrics: MetricRow[] = await getDailyMetrics(
-          yc,
-          site.yandex_counter_id!,
-          goalId,
-          yearStart.format('YYYY-MM-DD'),
-          yearEnd.format('YYYY-MM-DD')
-        );
+      const effectiveEnd = chunkEnd.isAfter(end) ? end : chunkEnd;
 
-        await writeMetricsToCsv(site.id, metrics);
+      console.log(
+        `Fetching metrics from ${start.format('YYYY-MM-DD')} to ${effectiveEnd.format('YYYY-MM-DD')}`
+      );
 
-        start = yearEnd.add(1, 'day');
+      const metrics: MetricRow[] = await getDailyMetrics(
+        yc,
+        site.yandex_counter_id!,
+        goalId,
+        start.format('YYYY-MM-DD'),
+        effectiveEnd.format('YYYY-MM-DD')
+      );
+
+      await writeMetricsToCsv(site.id, metrics);
+
+      if (DELAY_MS > 0) {
+        await sleep(DELAY_MS);
       }
+
+      start = effectiveEnd.add(1, 'day');
+    }
 
       console.log(`✅ Finished site ${site.id}`);
     } catch (err: any) {
