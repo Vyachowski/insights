@@ -4,25 +4,34 @@ import path from 'path';
 const dataFolderPath = path.resolve(appRootPath.path, 'data')
 const importFolderPath = path.resolve(appRootPath.path, 'import')
 
-export default {
-    START_DATE: '2021-05-01',
-    END_DATE: '2025-12-31',
-    BATCH_SIZE: 'month',
-    paths: {
+const IMPORT_START_DATE = '2021-05-01'
+const IMPORT_END_DATE = '2025-12-31'
+const FILE_SEPARATOR = '_'
+
+const FILE_PREFIX = `${IMPORT_START_DATE}${FILE_SEPARATOR}${IMPORT_END_DATE}${FILE_SEPARATOR}`
+
+const BATCH_SIZE = 'month'
+const paths = {
         import: {
-            cities: path.resolve(importFolderPath, 'cities.csv'),
-            sites: path.resolve(importFolderPath, 'sites.csv'),
-            calls: path.resolve(importFolderPath, 'calls.csv'),
-            revenue: path.resolve(importFolderPath, 'revenue.json'),
-            revenueFolder: path.resolve(importFolderPath, 'revenue-tg'),
+            cities: path.resolve(importFolderPath, `${FILE_PREFIX}cities.csv`),
+            sites: path.resolve(importFolderPath, `${FILE_PREFIX}sites.csv`),
+            calls: path.resolve(importFolderPath, `${FILE_PREFIX}calls.csv`),
+            revenue: path.resolve(importFolderPath, `${FILE_PREFIX}revenue.json`),
+            revenueFolder: path.resolve(importFolderPath, `${FILE_PREFIX}revenue-tg`),
         },
         output: {
-            cities: path.resolve(dataFolderPath, 'cities.csv'),
-            sites: path.resolve(dataFolderPath, 'sites.csv'),
-            calls: path.resolve(dataFolderPath, 'calls.csv'),
-            revenue: path.resolve(dataFolderPath, 'revenue.csv'),
-            siteMetrics: path.resolve(dataFolderPath, 'site-metrics.csv'),
-            expenses: path.resolve(dataFolderPath, '2021-05-01_2025-12-31_expenses.csv'),
+            cities: path.resolve(dataFolderPath, `${FILE_PREFIX}cities.csv`),
+            sites: path.resolve(dataFolderPath, `${FILE_PREFIX}sites.csv`),
+            calls: path.resolve(dataFolderPath, `${FILE_PREFIX}calls.csv`),
+            revenue: path.resolve(dataFolderPath, `${FILE_PREFIX}revenue.csv`),
+            siteMetrics: path.resolve(dataFolderPath, `${FILE_PREFIX}site-metrics.csv`),
+            expenses: path.resolve(dataFolderPath, `${FILE_PREFIX}expenses.csv`),
         },
     }
+
+export default {
+    IMPORT_START_DATE,
+    IMPORT_END_DATE,
+    BATCH_SIZE,
+    paths
 }

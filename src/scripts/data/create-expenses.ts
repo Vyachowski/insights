@@ -31,7 +31,7 @@ const hostingAmount = (date: Date) =>
   date >= new Date("2025-12-01") ? 370 : 300;
 
 async function createExpensesCSV() {
-  const fileName = `${config.START_DATE}_${config.END_DATE}_expenses.csv`;
+  const fileName = `${config.IMPORT_START_DATE}_${config.IMPORT_END_DATE}_expenses.csv`;
   const filePath = path.resolve(appRootPath.path, "data", fileName);
 
   await fs.mkdir(path.dirname(filePath), { recursive: true });
@@ -43,8 +43,8 @@ async function createExpensesCSV() {
   });
 
   const months = getMonths(
-    new Date(config.START_DATE),
-    new Date(config.END_DATE)
+    new Date(config.IMPORT_START_DATE),
+    new Date(config.IMPORT_END_DATE)
   );
 
   const lines: string[] = [];
