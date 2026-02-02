@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# OS files
+.DS_Store
+
+# Private data
+/data/
+/data_old/
+/import
+/input
+/output
+*/generated/prisma
+
+# Env files
+*.env
+.env
