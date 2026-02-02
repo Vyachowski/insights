@@ -32,7 +32,7 @@ const hostingAmount = (date: Date) =>
 
 async function createExpensesCSV() {
   const fileName = `${config.START_DATE}_${config.END_DATE}_expenses.csv`;
-  const filePath = path.resolve(appRootPath.path, "data/expenses", fileName);
+  const filePath = path.resolve(appRootPath.path, "data", fileName);
 
   await fs.mkdir(path.dirname(filePath), { recursive: true });
   await fs.rm(filePath, { force: true });
@@ -70,4 +70,4 @@ async function createExpensesCSV() {
   await fs.writeFile(filePath, lines.join("\n"));
 }
 
-createExpensesCSV();
+await createExpensesCSV();

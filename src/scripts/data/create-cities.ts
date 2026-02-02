@@ -8,4 +8,4 @@ async function createCitiesCSV() {
     await fs.copyFile(importFilePath, outputFilePath)
 }
 
-createCitiesCSV()
+await createCitiesCSV()

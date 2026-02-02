@@ -6,7 +6,7 @@ import path from 'path';
 
 // Настройка csv-writer
 const csvWriter = createObjectCsvWriter({
-  path: config.dataFilePaths.import.siteMetrics,
+  path: config.paths.output.siteMetrics,
   header: [
     { id: 'site_id', title: 'site_id' },
     { id: 'date', title: 'date' },
@@ -32,7 +32,7 @@ const csvWriter = createObjectCsvWriter({
 export async function writeMetricsToCsv(siteId: number, metrics: MetricRow[]) {
   if (!metrics || metrics.length === 0) return;
 
-  const filePath = config.dataFilePaths.import.siteMetrics;
+  const filePath = config.paths.output.siteMetrics;
   const dir = path.dirname(filePath);
 
   await fs.mkdir(dir, { recursive: true });

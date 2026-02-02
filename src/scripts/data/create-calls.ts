@@ -117,4 +117,4 @@ async function createCallsCSV() {
   await fs.writeFile(filePath, lines.join("\n"));
 }
 
-createCallsCSV();
+await createCallsCSV();
