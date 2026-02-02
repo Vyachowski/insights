@@ -2,6 +2,7 @@ import appRootPath from 'app-root-path';
 import * as fs from 'fs';
 import path from 'path';
 
+// TODO: REFACTORING - FIND IT USER AND REFACTOR THE WHOLE PART
 interface Message {
   id: string;
   from: string;
@@ -12,11 +13,12 @@ interface Message {
   numbers: number[];
 }
 
-interface RevenueCSV {
-  city_id: string;
-  date: string;
-  amount: string;
-}
+// TODO: APPLY INTERFACE TO COMMENTED STRING
+// interface RevenueCSV {
+//   city_id: string;
+//   date: string;
+//   amount: string;
+// }
 
 function jsonToCsv(inputFile: string, outputFile: string): void {
   // Читаем JSON файл
@@ -24,7 +26,8 @@ function jsonToCsv(inputFile: string, outputFile: string): void {
   const messages: Message[] = JSON.parse(rawData);
 
   // Преобразуем в формат для CSV
-  const csvData: RevenueCSV[] = messages.map(msg => {
+  // const csvData: RevenueCSV[] = messages.map(msg => {
+  const csvData = messages.map(msg => {
     // Суммируем все числа из массива numbers
     const amount = msg.numbers.reduce((sum, num) => sum + num, 0);
     

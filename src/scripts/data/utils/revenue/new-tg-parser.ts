@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import appRootPath from 'app-root-path';
 
+// TODO: REFACTORING - FIND IT USER AND REFACTOR THE WHOLE PART
 // Types
 interface Message {
   id: string;

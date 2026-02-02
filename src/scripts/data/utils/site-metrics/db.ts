@@ -1,5 +1,5 @@
-import type { Site } from "../../../generated/prisma";
-import { prisma } from "../../../lib/prisma";
+import type { Site } from "../../../../generated/prisma";
+import { prisma } from "../../../../lib/prisma";
 
 export async function getAllSites(): Promise<Site[]> {
   const sites = await prisma.site.findMany();

@@ -3,6 +3,7 @@ import path from 'path';
 import * as cheerio from 'cheerio';
 import appRootPath from 'app-root-path';
 
+// TODO: REFACTORING - FIND IT USER AND REFACTOR THE WHOLE PART
 /** Загружает все HTML-файлы из указанной папки */
 export const loadHtmlFiles = async (dir: string): Promise<string[]> => {
   const files = fs.readdirSync(dir).filter(f => f.endsWith('.html'));

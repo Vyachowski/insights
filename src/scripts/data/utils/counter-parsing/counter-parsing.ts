@@ -2,6 +2,7 @@ import appRootPath from 'app-root-path';
 import fs from 'fs';
 import path from 'path';
 
+// TODO: REFACTORING - FIND IT USER AND REFACTOR THE WHOLE PART
 const data: Record<string, string> = JSON.parse(fs.readFileSync(path.resolve(appRootPath.path, 'data/metrika/counters/counters.json'), 'utf8'));
 
 if (data && Array.isArray(data.counters)) {

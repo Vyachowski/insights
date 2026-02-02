@@ -1,11 +1,12 @@
-import { YandexClient } from './site-metrics/client';
-import { getZayavkaGoalId } from './site-metrics/goals';
-import { getDailyMetrics, type MetricRow } from './site-metrics/metrics';
-import { getAllSites } from './site-metrics/db';
-import { writeMetricsToCsv } from './site-metrics/csvWriter';
+import { YandexClient } from './utils/site-metrics/client';
+import { getZayavkaGoalId } from './utils/site-metrics/goals';
+import { getDailyMetrics, type MetricRow } from './utils/site-metrics/metrics';
+import { getAllSites } from './utils/site-metrics/db';
+import { writeMetricsToCsv } from './utils/site-metrics/csvWriter';
 import config from '../../config';
 import dayjs from 'dayjs';
 
+// TODO: REFACTORING 
 const settings = {
   METRICS_CHUNK_MONTHS: 3,
   METRICS_REQUEST_DELAY_MS: 200,
