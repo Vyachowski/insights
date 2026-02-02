@@ -74,7 +74,7 @@ export const normalizeCallData = (
   }).filter(Boolean);
 };
 
-export async function createCallsFile() {
+async function createCallsCSV() {
   // Normalize
   const cities = await prisma.city.findMany();
   const callsData = parseCSV(config.dataFilePaths.rawData.calls);
@@ -124,4 +124,4 @@ export async function createCallsFile() {
   await fs.writeFile(filePath, lines.join("\n"));
 }
 
-createCallsFile();
+createCallsCSV();
