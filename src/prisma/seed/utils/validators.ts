@@ -24,7 +24,7 @@ const Site = z.object({
 type Site = z.infer<typeof Site>;
 
 const Call = z.object({
-  city_id: z.number().min(1),
+  city_id: z.coerce.number().positive().min(1),
   date_time: z.coerce.date(),
   caller_number: z.string().min(1),
   region: z.string().min(1),
@@ -98,19 +98,7 @@ export const validateSitesData = (sitesData: { [k: string]: string | undefined }
 }
 
 export const validateCallsData = (
-  callsData: ({
-    date_time: Date;
-    caller_number: any;
-    region: any;
-    class: any;
-    project: any;
-    number_name: any;
-    call_order: number;
-    duration_in_sec: number;
-    comment: any;
-    redirect_number: any;
-    city_id: number;
-} | null)[]
+  callsData: { [k: string]: string | undefined }[]
 ) => {
   if (callsData.length < 1) {
     throw new Error("Нет данных звонков для валидации.");

@@ -1,5 +1,4 @@
 import { prisma } from "../../../lib/prisma";
-import { normalizeCallData } from "./normalizers";
 import { parseCSV } from "./parsers";
 import { validateCallsData, validateCitiesData, validateRevenuesData, validateSiteMetricsData, validateSitesData } from "./validators";
 
@@ -27,10 +26,8 @@ export async function seedSites (sitesPath: string): Promise<void> {
 }
 
 export async function seedCalls (callsPath: string): Promise<void> {
-    const cities = await prisma.city.findMany()
     const callsData = parseCSV(callsPath)
-    const normalizedCalls = normalizeCallData(callsData, cities)
-    const validatedCallsData = validateCallsData(normalizedCalls)
+    const validatedCallsData = validateCallsData(callsData)
 
     await prisma.call.createMany({
         data: validatedCallsData,
@@ -65,4 +62,12 @@ export async function seedSiteMetrics (siteMetricsPath: string): Promise<void> {
     }
 }
 
-export async function seedExpenses (expensesPath: string): Promise<void> {}
+export async function seedExpenses (expensesPath: string): Promise<void> {
+    const expensesData = parseCSV(expensesPath)
+    const validatedExpensesData = validateRevenuesData(expensesData);
+
+    await prisma.revenue.createMany({
+        data: validatedExpensesData,
+        skipDuplicates: true,
+    });
+}

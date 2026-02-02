@@ -1,19 +1,17 @@
-import path from 'path';
-import appRootPath from 'app-root-path';
-
+import config from '../../config';
 import { prisma } from '../../lib/prisma';
 import { checkDatabaseConnection, checkFilesExistence } from './utils/checkers';
 import { seedCalls, seedCities, seedExpenses, seedRevenue, seedSiteMetrics, seedSites } from './utils/seeders';
 
 const main = async (logger = console.log) => {
-  // SECTION: Paths
-  const paths = {
-    cities: path.resolve(appRootPath.path, 'data/cities/cities.csv'),
-    sites: path.resolve(appRootPath.path, 'data/sites/sites.csv'),
-    calls: path.resolve(appRootPath.path, 'data/calls/calls.csv'),
-    revenue: path.resolve(appRootPath.path, 'data/revenue/revenue.csv'),
-    siteMetrics: path.resolve(appRootPath.path, 'data/site-metrics/site-metrics.csv'),
-  }
+  const {
+    cities,
+    sites,
+    calls,
+    revenue,
+    siteMetrics,
+    expenses
+  } = config.dataFilePaths.import
 
   // SECTION: Checks
   logger('⏳ Check database connection...');
@@ -21,23 +19,23 @@ const main = async (logger = console.log) => {
   await checkDatabaseConnection()
   logger('✅ Database connection succesfully established.');
 
-  await checkFilesExistence(Object.values(paths))
+  await checkFilesExistence(Object.values(config.dataFilePaths.import))
   logger('✅ Required files exists.');
 
   // SECTION: Seeding
   logger('⏳ Seeding data...');
 
-  await seedCities(paths.cities)
+  await seedCities(cities)
   logger('✅ All cities succesfully imported to database.');
-  await seedSites(paths.sites)
+  await seedSites(sites)
   logger('✅ All sites succesfully imported to database.');
-  await seedCalls(paths.calls)
+  await seedCalls(calls)
   logger('✅ All calls succesfully imported to database.');
-  await seedRevenue(paths.revenue)
+  await seedRevenue(revenue)
   logger('✅ All revenue succesfully imported to database.');
-  await seedSiteMetrics(paths.siteMetrics)
+  await seedSiteMetrics(siteMetrics)
   logger('✅ All site metrics succesfully imported to database.');
-  await seedExpenses('')
+  await seedExpenses(expenses)
   logger('✅ All expenses succesfully imported to database.');
 }
 
