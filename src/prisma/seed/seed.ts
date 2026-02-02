@@ -11,7 +11,7 @@ const main = async (logger = console.log) => {
     revenue,
     siteMetrics,
     expenses
-  } = config.dataFilePaths.import
+  } = config.paths.output
 
   // SECTION: Checks
   logger('⏳ Check database connection...');
@@ -19,7 +19,7 @@ const main = async (logger = console.log) => {
   await checkDatabaseConnection()
   logger('✅ Database connection succesfully established.');
 
-  await checkFilesExistence(Object.values(config.dataFilePaths.import))
+  await checkFilesExistence(Object.values(config.paths.output))
   logger('✅ Required files exists.');
 
   // SECTION: Seeding
