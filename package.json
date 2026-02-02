@@ -6,8 +6,8 @@
   "type": "module",
   "scripts": {
     "start": "ts-node src/app.ts",
-    "db:create": "ts-node src/create-postgres.ts",
-    "db:remove": "ts-node src/remove-postgres.ts",
+    "container:create": "tsx src/scripts/db/create-postgres-container.ts",
+    "container:remove": "tsx src/scripts/db/remove-postgres-container.ts",
     "db:migrate:init": "prisma migrate dev --name init",
     "db:studio": "prisma studio",
     "db:reset": "prisma migrate reset",

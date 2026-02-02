@@ -7,9 +7,10 @@ async function removePostgresContainer (logger = console.log) {
       DB_CONTAINER,
     } = env
 
-    const existing = runCommand(`docker ps -aq -f name=${DB_CONTAINER}`);
+    const containerId = runCommand(`docker ps -aq -f name=${DB_CONTAINER}`)
+    const isExisting = containerId.length !== 0
 
-    if (existing) {
+    if (isExisting) {
       logger(`⚡ Stopping container ${DB_CONTAINER}...`);
       runCommand(`docker stop ${DB_CONTAINER}`);
 
