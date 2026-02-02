@@ -1,8 +1,8 @@
-import { YandexClient } from './client';
-import { getZayavkaGoalId } from './goals';
-import { getDailyMetrics, type MetricRow } from './metrics';
-import { getAllSites } from './db';
-import { writeMetricsToCsv } from './csvWriter';
+import { YandexClient } from './site-metrics/client';
+import { getZayavkaGoalId } from './site-metrics/goals';
+import { getDailyMetrics, type MetricRow } from './site-metrics/metrics';
+import { getAllSites } from './site-metrics/db';
+import { writeMetricsToCsv } from './site-metrics/csvWriter';
 import config from '../../config';
 import dayjs from 'dayjs';
 

@@ -1,4 +1,4 @@
-import config from '../../config';
+import config from '../../../config';
 import type { MetricRow } from './metrics';
 import { createObjectCsvWriter } from 'csv-writer';
 

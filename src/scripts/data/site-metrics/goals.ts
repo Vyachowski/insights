@@ -1,4 +1,3 @@
-// src/yandexApi/goals.ts
 import { YandexClient } from './client';
 
 export interface Goal {
