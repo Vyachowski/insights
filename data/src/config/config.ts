@@ -37,4 +37,5 @@ export default {
   IMPORT_END_DATE,
   BATCH_SIZE,
   paths,
+  outputFolderPath,
 };

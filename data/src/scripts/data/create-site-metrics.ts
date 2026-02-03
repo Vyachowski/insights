@@ -8,7 +8,7 @@ import dayjs from "dayjs";
 
 // TODO: REFACTORING
 const settings = {
-  METRICS_CHUNK_MONTHS: 2,
+  METRICS_CHUNK_MONTHS: 1,
   METRICS_REQUEST_DELAY_MS: 750,
 };
 
