@@ -8,12 +8,30 @@ datasource db {
   provider = "postgresql"
 }
 
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  isAdmin   Boolean  @default(false)
+  firstName String?
+  lastName  String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([email])
+  @@map("users")
+}
+
 model City {
   id            Int      @id @default(autoincrement())
   code          String
   slug          String
   name          String
   population    Int
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
   sites         Site[]
   calls         Call[]
   revenues      Revenue[]
@@ -29,9 +47,12 @@ model Site {
   google_counter_id     String?
   yandex_tag_manager_id String?
   google_tag_manager_id String?
+  createdAt             DateTime     @default(now())
+  updatedAt             DateTime     @updatedAt
+
   city                  City         @relation(fields: [city_id], references: [id], onDelete: Cascade)
   metrics               SiteMetric[]
-  
+
   @@index([city_id])
 }
 
@@ -81,6 +102,9 @@ model Revenue {
   city_id       Int?
   date          DateTime @db.Date
   amount        Decimal  @db.Decimal(12, 2)
+  createdAt             DateTime     @default(now())
+  updatedAt             DateTime     @updatedAt
+
   city          City?     @relation(fields: [city_id], references: [id], onDelete: Cascade)
   
   @@index([date])
@@ -93,6 +117,9 @@ model Expense {
   amount  Decimal  @db.Decimal(12, 2)
   type    String
   comment String?
+  createdAt             DateTime     @default(now())
+  updatedAt             DateTime     @updatedAt
+
   city    City?     @relation(fields: [city_id], references: [id], onDelete: Cascade)
   
   @@index([date])
