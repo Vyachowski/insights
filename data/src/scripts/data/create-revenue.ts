@@ -13,7 +13,7 @@ interface Message {
 
 // NOTE: Simplified version - transforms JSON to CSV
 export async function createRevenueCSV() {
-  const inputFilePath = config.paths.import.revenue;
+  const inputFilePath = config.paths.input.revenue;
   const outputFilePath = config.paths.output.revenue;
 
   const rawData = await fs.readFile(inputFilePath, "utf-8");

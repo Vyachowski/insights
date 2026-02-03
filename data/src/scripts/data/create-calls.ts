@@ -22,7 +22,7 @@ async function readCitiesFromOutput(): Promise<City[]> {
 
 export async function createCallsCSV() {
   const cities = await readCitiesFromOutput();
-  const callsData = parseCSV(config.paths.import.calls);
+  const callsData = parseCSV(config.paths.input.calls);
 
   const normalizedData = normalizeCallData(callsData, cities);
 
