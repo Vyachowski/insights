@@ -1,9 +1,9 @@
 import fs from "fs/promises";
 import config from "../../config";
 import path from "path";
-import { parseCallDate, parseCSV } from "./utils/parsers";
-import { convertDurationToSeconds } from "./utils/converters";
+import { parseCSV } from "./utils/parsers";
 import type { City } from "./utils/validators";
+import { normalizeCallData } from "./utils/normalizers";
 
 async function readCitiesFromOutput(): Promise<City[]> {
   const rows = parseCSV(config.paths.output.cities);
@@ -20,74 +20,7 @@ async function readCitiesFromOutput(): Promise<City[]> {
     .filter(Boolean) as City[];
 }
 
-export const normalizeCallData = (
-  callData: { [k: string]: string | undefined }[],
-  citiesData: City[],
-) => {
-  const cityAltNames: Record<string, string[]> = {
-    новосибирск: ["нск"],
-    "санкт-петербург": ["спб", "петербург"],
-    "нижний новгород": ["нижний"],
-    екатеринбург: ["екб"],
-    "ростов-на-дону": ["ростов"],
-    "набережные челны": ["челны"],
-  };
-
-  const cityNameToIdMap: Record<string, number> = {};
-
-  citiesData.forEach((city) => {
-    const cityName = city.name.toLowerCase();
-
-    cityNameToIdMap[cityName] = city.id;
-
-    const altNames = cityAltNames[cityName];
-    if (altNames) {
-      altNames.forEach((alt) => {
-        cityNameToIdMap[alt.toLowerCase()] = city.id;
-      });
-    }
-  });
-
-  const parseCityName = (project: string) =>
-    project
-      .replaceAll("Дезинсекция – ", "")
-      .replaceAll(" – Дезинсекция", "")
-      .trim()
-      .toLowerCase();
-
-  return callData
-    .map((row: any) => {
-      const dateTime = parseCallDate(row["Дата"]);
-      if (!dateTime || !row["Кто звонил"]) return null;
-
-      const cityName = parseCityName(row["Проект"] || "");
-      const city_id = cityNameToIdMap[cityName];
-
-      if (!city_id) {
-        console.warn(
-          `City not found for call: ${row["Проект"]} (parsed as: ${cityName})`,
-        );
-        return null;
-      }
-
-      return {
-        date_time: dateTime,
-        caller_number: row["Кто звонил"] || null,
-        region: row["Откуда"] || null,
-        class: row["Класс"] || null,
-        project: row["Проект"],
-        number_name: row["Куда звонил"],
-        call_order: Number(row["№"]),
-        duration_in_sec: convertDurationToSeconds(row["Запись"]) || 0,
-        comment: row["Комментарий"] || null,
-        redirect_number: row["Вызов завершен"],
-        city_id,
-      };
-    })
-    .filter(Boolean);
-};
-
-async function createCallsCSV() {
+export async function createCallsCSV() {
   const cities = await readCitiesFromOutput();
   const callsData = parseCSV(config.paths.import.calls);
 
@@ -134,5 +67,3 @@ async function createCallsCSV() {
 
   await fs.writeFile(filePath, lines.join("\n"));
 }
-
-await createCallsCSV();

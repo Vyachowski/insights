@@ -14,7 +14,7 @@ const settings = {
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-async function main() {
+export async function createSiteMetricsCSV() {
   const sites = await getAllSites();
   const yc = new YandexClient();
 
@@ -72,8 +72,3 @@ async function main() {
 
   console.log("\n🎉 All done!");
 }
-
-main().catch((err) => {
-  console.error("Fatal error:", err);
-  process.exit(1);
-});

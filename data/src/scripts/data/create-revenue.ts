@@ -1,4 +1,4 @@
-import * as fs from "fs";
+import fs from "fs/promises";
 import config from "../../config";
 
 interface Message {
@@ -12,11 +12,11 @@ interface Message {
 }
 
 // NOTE: Simplified version - transforms JSON to CSV
-function createRevenueCSV() {
+export async function createRevenueCSV() {
   const inputFilePath = config.paths.import.revenue;
   const outputFilePath = config.paths.output.revenue;
 
-  const rawData = fs.readFileSync(inputFilePath, "utf-8");
+  const rawData = await fs.readFile(inputFilePath, "utf-8");
 
   const messages: Message[] = JSON.parse(rawData);
 
@@ -37,10 +37,8 @@ function createRevenueCSV() {
 
   const csvContent = [header, ...rows].join("\n");
 
-  fs.writeFileSync(outputFilePath, csvContent, "utf-8");
+  await fs.writeFile(outputFilePath, csvContent, "utf-8");
 
   console.log(`✓ Конвертировано ${csvData.length} записей`);
   console.log(`✓ CSV сохранён в ${outputFilePath}`);
 }
-
-createRevenueCSV();

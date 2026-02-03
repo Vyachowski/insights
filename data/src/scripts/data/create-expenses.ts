@@ -40,7 +40,7 @@ const telephonyAmount = (date: Date) => {
 const hostingAmount = (date: Date) =>
   date >= new Date("2025-12-01") ? 370 : 300;
 
-async function createExpensesCSV() {
+export async function createExpensesCSV() {
   const fileName = `${config.IMPORT_START_DATE}_${config.IMPORT_END_DATE}_expenses.csv`;
   const filePath = path.resolve(appRootPath.path, "data", fileName);
 
@@ -74,5 +74,3 @@ async function createExpensesCSV() {
 
   await fs.writeFile(filePath, lines.join("\n"));
 }
-
-await createExpensesCSV();
