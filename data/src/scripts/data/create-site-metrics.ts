@@ -8,8 +8,8 @@ import dayjs from "dayjs";
 
 // TODO: REFACTORING
 const settings = {
-  METRICS_CHUNK_MONTHS: 3,
-  METRICS_REQUEST_DELAY_MS: 1000,
+  METRICS_CHUNK_MONTHS: 2,
+  METRICS_REQUEST_DELAY_MS: 750,
 };
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
