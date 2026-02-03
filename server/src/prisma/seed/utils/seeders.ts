@@ -6,6 +6,7 @@ import {
   validateSiteMetricsData,
   validateSitesData,
 } from './validators';
+import * as argon2 from 'argon2';
 
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from 'generated/prisma/client';
@@ -82,3 +83,39 @@ export async function seedExpenses(expensesPath: string): Promise<void> {
     skipDuplicates: true,
   });
 }
+
+export const seedAdmin = async () => {
+  const adminEmail = process.env.ADMIN_EMAIL;
+  const adminPassword = process.env.ADMIN_PASSWORD;
+
+  if (!adminEmail || !adminPassword) {
+    throw new Error(
+      '❌ ADMIN_EMAIL and ADMIN_PASSWORD must be set in environment variables',
+    );
+  }
+
+  const existingAdmin = await prisma.user.findUnique({
+    where: { email: adminEmail },
+  });
+
+  if (existingAdmin) {
+    console.log(
+      `ℹ️  Admin user with email ${adminEmail} already exists. Skipping.`,
+    );
+    return;
+  }
+
+  const hashedPassword = await argon2.hash(adminPassword);
+
+  await prisma.user.create({
+    data: {
+      email: adminEmail,
+      password: hashedPassword,
+      isAdmin: true,
+      firstName: 'Admin',
+      isActive: true,
+    },
+  });
+
+  console.log(`✅ Admin user created with email: ${adminEmail}`);
+};

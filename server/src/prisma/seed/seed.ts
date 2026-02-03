@@ -7,6 +7,7 @@ import {
   seedRevenue,
   seedSiteMetrics,
   seedSites,
+  seedAdmin,
 } from './utils/seeders';
 
 const paths = config.paths;
@@ -37,6 +38,8 @@ const main = async (
   // SECTION: Seeding
   logger('⏳ Seeding data...');
 
+  await seedAdmin();
+  logger('✅ Admin user succesfully created.');
   await seedCities(cities);
   logger('✅ All cities succesfully imported to database.');
   await seedSites(sites);
