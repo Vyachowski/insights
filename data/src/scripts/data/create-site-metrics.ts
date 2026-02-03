@@ -3,7 +3,7 @@ import { getZayavkaGoalId } from "./utils/site-metrics/goals";
 import { getDailyMetrics, type MetricRow } from "./utils/site-metrics/metrics";
 import { getAllSites } from "./utils/site-metrics/db";
 import { writeMetricsToCsv } from "./utils/site-metrics/csvWriter";
-import config from "../../config";
+import config from "../../config/config";
 import dayjs from "dayjs";
 
 // TODO: REFACTORING

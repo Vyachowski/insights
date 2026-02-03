@@ -1,7 +1,6 @@
 import fs from "fs/promises";
 import path from "path";
-import appRootPath from "app-root-path";
-import config from "../../config";
+import config from "../../config/config";
 
 enum ExpenseType {
   Hosting = "hosting",
@@ -41,8 +40,7 @@ const hostingAmount = (date: Date) =>
   date >= new Date("2025-12-01") ? 370 : 300;
 
 export async function createExpensesCSV() {
-  const fileName = `${config.IMPORT_START_DATE}_${config.IMPORT_END_DATE}_expenses.csv`;
-  const filePath = path.resolve(appRootPath.path, "data", fileName);
+  const filePath = config.paths.output.expenses;
 
   await fs.mkdir(path.dirname(filePath), { recursive: true });
   await fs.rm(filePath, { force: true });

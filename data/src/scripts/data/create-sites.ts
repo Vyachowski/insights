@@ -1,5 +1,5 @@
 import fs from "fs/promises";
-import config from "../../config";
+import config from "../../config/config";
 
 export async function createSitesCSV() {
   const importFilePath = config.paths.input.sites;

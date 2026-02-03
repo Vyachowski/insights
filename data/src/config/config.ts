@@ -1,8 +1,8 @@
 import appRootPath from "app-root-path";
-import path from "path";
+import path, { join } from "path";
 
-const inputFolderPath = path.resolve(appRootPath.path, "input");
-const outputFolderPath = path.resolve(appRootPath.path, "output");
+const inputFolderPath = join(appRootPath.path, "data", "input");
+const outputFolderPath = join(appRootPath.path, "shared", "seed-data");
 
 const IMPORT_START_DATE = "2021-05-01";
 const IMPORT_END_DATE = "2025-12-31";
