@@ -9,8 +9,21 @@ import {
   seedSites,
 } from './utils/seeders';
 
-const main = async (logger = console.log) => {
-  const { cities, sites, calls, revenue, siteMetrics, expenses } = config.paths;
+const paths = config.paths;
+
+const main = async (
+  paths: {
+    cities: string;
+    sites: string;
+    calls: string;
+    revenue: string;
+    siteMetrics: string;
+    expenses: string;
+  },
+  options = { logger: console.log },
+) => {
+  const { cities, sites, calls, revenue, siteMetrics, expenses } = paths;
+  const logger = options.logger;
 
   // SECTION: Checks
   logger('⏳ Check database connection...');
@@ -38,9 +51,7 @@ const main = async (logger = console.log) => {
   logger('✅ All expenses succesfully imported to database.');
 };
 
-main()
-  .then()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  });
+main(paths).catch((e) => {
+  console.error(e);
+  process.exit(1);
+});
