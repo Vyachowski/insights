@@ -1,26 +1,25 @@
-import { YandexClient } from './utils/site-metrics/client';
-import { getZayavkaGoalId } from './utils/site-metrics/goals';
-import { getDailyMetrics, type MetricRow } from './utils/site-metrics/metrics';
-import { getAllSites } from './utils/site-metrics/db';
-import { writeMetricsToCsv } from './utils/site-metrics/csvWriter';
-import config from '../../config';
-import dayjs from 'dayjs';
+import { YandexClient } from "./utils/site-metrics/client";
+import { getZayavkaGoalId } from "./utils/site-metrics/goals";
+import { getDailyMetrics, type MetricRow } from "./utils/site-metrics/metrics";
+import { getAllSites } from "./utils/site-metrics/db";
+import { writeMetricsToCsv } from "./utils/site-metrics/csvWriter";
+import config from "../../config";
+import dayjs from "dayjs";
 
-// TODO: REFACTORING 
+// TODO: REFACTORING
 const settings = {
   METRICS_CHUNK_MONTHS: 3,
   METRICS_REQUEST_DELAY_MS: 1000,
 };
 
-const sleep = (ms: number) =>
-  new Promise(resolve => setTimeout(resolve, ms));
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 async function main() {
   const sites = await getAllSites();
   const yc = new YandexClient();
 
   console.log(`🚀 Starting metrics extraction for ${sites.length} sites`);
-  
+
   for (const site of sites) {
     console.log(`\n📊 Processing site: ${site.id} - ${site.name}`);
 
@@ -29,43 +28,41 @@ async function main() {
       console.log(`Goal "Заявка" found: ID=${goalId}`);
 
       if (!goalId) {
-        console.log('Цель не найдена — пропускаем сайт');
+        console.log("Цель не найдена — пропускаем сайт");
         continue;
       }
 
       let start = dayjs(config.IMPORT_START_DATE);
-    const end = dayjs(config.IMPORT_END_DATE);
+      const end = dayjs(config.IMPORT_END_DATE);
 
-    const CHUNK_MONTHS = settings.METRICS_CHUNK_MONTHS ?? 6;
-    const DELAY_MS = settings.METRICS_REQUEST_DELAY_MS ?? 500;
+      const CHUNK_MONTHS = settings.METRICS_CHUNK_MONTHS ?? 6;
+      const DELAY_MS = settings.METRICS_REQUEST_DELAY_MS ?? 500;
 
-    while (start.isBefore(end) || start.isSame(end, 'day')) {
-      const chunkEnd = start
-        .add(CHUNK_MONTHS, 'month')
-        .subtract(1, 'day');
+      while (start.isBefore(end) || start.isSame(end, "day")) {
+        const chunkEnd = start.add(CHUNK_MONTHS, "month").subtract(1, "day");
 
-      const effectiveEnd = chunkEnd.isAfter(end) ? end : chunkEnd;
+        const effectiveEnd = chunkEnd.isAfter(end) ? end : chunkEnd;
 
-      console.log(
-        `Fetching metrics from ${start.format('YYYY-MM-DD')} to ${effectiveEnd.format('YYYY-MM-DD')}`
-      );
+        console.log(
+          `Fetching metrics from ${start.format("YYYY-MM-DD")} to ${effectiveEnd.format("YYYY-MM-DD")}`,
+        );
 
-      const metrics: MetricRow[] = await getDailyMetrics(
-        yc,
-        site.yandex_counter_id!,
-        goalId,
-        start.format('YYYY-MM-DD'),
-        effectiveEnd.format('YYYY-MM-DD')
-      );
+        const metrics: MetricRow[] = await getDailyMetrics(
+          yc,
+          site.yandex_counter_id!,
+          goalId,
+          start.format("YYYY-MM-DD"),
+          effectiveEnd.format("YYYY-MM-DD"),
+        );
 
-      await writeMetricsToCsv(site.id, metrics);
+        await writeMetricsToCsv(site.id, metrics);
 
-      if (DELAY_MS > 0) {
-        await sleep(DELAY_MS);
+        if (DELAY_MS > 0) {
+          await sleep(DELAY_MS);
+        }
+
+        start = effectiveEnd.add(1, "day");
       }
-
-      start = effectiveEnd.add(1, 'day');
-    }
 
       console.log(`✅ Finished site ${site.id}`);
     } catch (err: any) {
@@ -73,10 +70,10 @@ async function main() {
     }
   }
 
-  console.log('\n🎉 All done!');
+  console.log("\n🎉 All done!");
 }
 
-main().catch(err => {
-  console.error('Fatal error:', err);
+main().catch((err) => {
+  console.error("Fatal error:", err);
   process.exit(1);
 });

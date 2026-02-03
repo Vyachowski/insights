@@ -12,7 +12,6 @@
     "target": "ES2023",
     "esModuleInterop": true,
     "strict": true,
-    "ignoreDeprecations": "6.0",
     // For nodejs:
     "lib": ["esnext"],
     "types": ["node"],
@@ -40,7 +39,7 @@
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
-    "skipLibCheck": true,
+    "skipLibCheck": true
   },
   "include": ["src"]
 }

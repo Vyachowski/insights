@@ -2,11 +2,21 @@ import fs from "fs/promises";
 import path from "path";
 import appRootPath from "app-root-path";
 import config from "../../config";
-import { prisma } from "../../lib/prisma";
 
 enum ExpenseType {
   Hosting = "hosting",
   Telephony = "telephony",
+}
+
+async function readCityIds(): Promise<number[]> {
+  const content = await fs.readFile(config.paths.output.cities, "utf-8");
+
+  const [, ...lines] = content.split("\n");
+
+  return lines
+    .map((line) => line.split(",")[0])
+    .map((id) => Number(id))
+    .filter((id) => Number.isFinite(id));
 }
 
 const getMonths = (start: Date, end: Date) => {
@@ -37,35 +47,30 @@ async function createExpensesCSV() {
   await fs.mkdir(path.dirname(filePath), { recursive: true });
   await fs.rm(filePath, { force: true });
 
-  const cities = await prisma.call.findMany({
-    distinct: ["city_id"],
-    select: { city_id: true },
-  });
+  const cityIds = await readCityIds();
 
   const months = getMonths(
     new Date(config.IMPORT_START_DATE),
-    new Date(config.IMPORT_END_DATE)
+    new Date(config.IMPORT_END_DATE),
   );
 
   const lines: string[] = [];
   lines.push("date,type,city_id,amount");
 
-    for (const month of months) {
-        // первый день месяца явно
-        const date = `${month.getFullYear()}-${String(month.getMonth() + 1).padStart(2,'0')}-01`;
+  for (const month of months) {
+    // первый день месяца явно
+    const date = `${month.getFullYear()}-${String(month.getMonth() + 1).padStart(2, "0")}-01`;
 
-        // hosting
-        lines.push(
-        `${date},${ExpenseType.Hosting},,${hostingAmount(month)}`
-        );
+    // hosting
+    lines.push(`${date},${ExpenseType.Hosting},,${hostingAmount(month)}`);
 
-        // telephony
-        for (const { city_id } of cities) {
-        lines.push(
-            `${date},${ExpenseType.Telephony},${city_id},${telephonyAmount(month)}`
-        );
-        }
+    // telephony
+    for (const city_id of cityIds) {
+      lines.push(
+        `${date},${ExpenseType.Telephony},${city_id},${telephonyAmount(month)}`,
+      );
     }
+  }
 
   await fs.writeFile(filePath, lines.join("\n"));
 }
