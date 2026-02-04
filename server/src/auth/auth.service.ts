@@ -1,11 +1,16 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+
 import { LoginRequestDto, LoginResponseDto } from './dto/auth.dto';
 import { PrismaService } from 'src/database/prisma.service';
 import * as argon2 from 'argon2';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly PrismaService: PrismaService) {}
+  constructor(
+    private readonly PrismaService: PrismaService,
+    private jwtService: JwtService,
+  ) {}
 
   async login(loginDto: LoginRequestDto): Promise<LoginResponseDto> {
     const { email, password } = loginDto;
@@ -21,11 +26,11 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    // 4. TODO: Генерация JWT токена (следующий шаг)
+    const payload = { sub: user.id, username: user.email };
+    const access_token = await this.jwtService.signAsync(payload);
 
     return {
-      token: '',
-      user,
+      access_token,
     };
   }
 }

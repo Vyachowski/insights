@@ -5,6 +5,8 @@ const envSchema = z.object({
     .enum(['development', 'production', 'test'])
     .default('development'),
   DB_URL: z.url(),
+  JWT_SECRET: z.string(),
+  JWT_EXPIRATION: z.string(),
 });
 
 export type EnvConfig = z.infer<typeof envSchema>;
