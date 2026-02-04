@@ -52,7 +52,11 @@ export async function seedRevenue(revenuePath: string): Promise<void> {
   const validatedRevenueData = validateRevenuesData(revenueData);
 
   await prisma.revenue.createMany({
-    data: validatedRevenueData,
+    data: validatedRevenueData.map(({ city_id, date, amount }) => ({
+      city_id: city_id ? city_id : null,
+      date: new Date(date),
+      amount: amount,
+    })),
     skipDuplicates: true,
   });
 }
@@ -79,7 +83,11 @@ export async function seedExpenses(expensesPath: string): Promise<void> {
   const validatedExpensesData = validateRevenuesData(expensesData);
 
   await prisma.revenue.createMany({
-    data: validatedExpensesData,
+    data: validatedExpensesData.map(({ city_id, date, amount }) => ({
+      city_id: city_id ? city_id : null,
+      date: new Date(date),
+      amount,
+    })),
     skipDuplicates: true,
   });
 }
