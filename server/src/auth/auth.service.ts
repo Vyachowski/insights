@@ -1,9 +1,9 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
-import { LoginRequestDto, LoginResponseDto } from './dto/auth.dto';
 import { PrismaService } from 'src/database/prisma.service';
 import * as argon2 from 'argon2';
+import { User } from 'generated/prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -12,8 +12,19 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async login(loginDto: LoginRequestDto): Promise<LoginResponseDto> {
-    const { email, password } = loginDto;
+  login(user: User) {
+    const payload = {
+      email: user.email,
+      sub: user.id,
+      isAdmin: user.isAdmin,
+    };
+
+    return {
+      access_token: this.jwtService.sign(payload),
+    };
+  }
+
+  async validateUser(email: string, password: string) {
     const user = await this.PrismaService.user.findUnique({ where: { email } });
 
     if (!user || !user.isActive) {
@@ -26,15 +37,9 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const payload = {
-      sub: user.id,
-      email: user.email,
-      isAdmin: user.isAdmin,
-    };
-    const access_token = await this.jwtService.signAsync(payload);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password: _, ...validatedUser } = user;
 
-    return {
-      access_token,
-    };
+    return validatedUser;
   }
 }

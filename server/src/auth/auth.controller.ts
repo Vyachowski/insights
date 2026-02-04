@@ -1,19 +1,30 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginRequestDto } from './dto/auth.dto';
+import { LocalAuthGuard } from './local.auth.guard';
+import { User } from 'generated/prisma/client';
+import { JwtAuthGuard } from './jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @UseGuards(JwtAuthGuard)
   @Get('profile')
-  getProfile() {
-    // TODO: добавим после guards
-    // Будет возвращать профиль текущего юзера
+  getProfile(@Request() req: LoginRequestDto & { user: User }) {
+    return req.user;
   }
 
+  @UseGuards(LocalAuthGuard)
   @Post('login')
-  login(@Body() loginRequestDto: LoginRequestDto) {
-    return this.authService.login(loginRequestDto);
+  login(@Request() req: LoginRequestDto & { user: User }) {
+    return this.authService.login(req.user);
   }
 }
