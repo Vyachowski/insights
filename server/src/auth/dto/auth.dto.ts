@@ -1,8 +1,5 @@
 import { IsEmail, IsString, MinLength } from 'class-validator';
-import {
-  LoginRequest,
-  LoginResponse,
-} from '../../../../shared/contracts/auth.types';
+import { LoginRequest, LoginResponse } from '@shared/contracts/auth.types';
 import { UserResponseDto } from './user.dto';
 
 export class LoginRequestDto implements LoginRequest {
