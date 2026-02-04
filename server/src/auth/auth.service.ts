@@ -22,11 +22,15 @@ export class AuthService {
 
     const isPasswordValid = await argon2.verify(user.password, password);
 
-    if (!user || !isPasswordValid) {
+    if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const payload = { sub: user.id, username: user.email };
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      isAdmin: user.isAdmin,
+    };
     const access_token = await this.jwtService.signAsync(payload);
 
     return {
