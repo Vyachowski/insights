@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { runCommand } from './utils';
 
 function createPostgresContainer(logger = console.log) {

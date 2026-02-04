@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { runCommand } from './utils';
 
 function removePostgresContainer(logger = console.log) {
