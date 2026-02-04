@@ -84,13 +84,15 @@ export async function seedExpenses(expensesPath: string): Promise<void> {
   });
 }
 
-export const seedAdmin = async () => {
+export async function seedUsers(): Promise<void> {
   const adminEmail = process.env.ADMIN_EMAIL;
   const adminPassword = process.env.ADMIN_PASSWORD;
+  const userEmail = process.env.USER_EMAIL;
+  const userPassword = process.env.USER_PASSWORD;
 
-  if (!adminEmail || !adminPassword) {
+  if (!adminEmail || !adminPassword || !userEmail || !userPassword) {
     throw new Error(
-      '❌ ADMIN_EMAIL and ADMIN_PASSWORD must be set in environment variables',
+      '❌ ADMIN_EMAIL, ADMIN_PASSWORD, USER_EMAIL and USER_PASSWORD must be set in environment variables',
     );
   }
 
@@ -98,24 +100,43 @@ export const seedAdmin = async () => {
     where: { email: adminEmail },
   });
 
-  if (existingAdmin) {
-    console.log(
-      `ℹ️  Admin user with email ${adminEmail} already exists. Skipping.`,
-    );
-    return;
-  }
-
-  const hashedPassword = await argon2.hash(adminPassword);
-
-  await prisma.user.create({
-    data: {
-      email: adminEmail,
-      password: hashedPassword,
-      isAdmin: true,
-      firstName: 'Admin',
-      isActive: true,
-    },
+  const existingUser = await prisma.user.findUnique({
+    where: { email: userEmail },
   });
 
-  console.log(`✅ Admin user created with email: ${adminEmail}`);
-};
+  if (!existingAdmin) {
+    const hashedAdminPassword = await argon2.hash(adminPassword);
+    await prisma.user.create({
+      data: {
+        email: adminEmail,
+        password: hashedAdminPassword,
+        isAdmin: true,
+        firstName: 'Admin',
+        isActive: true,
+      },
+    });
+    console.log(`✅ Admin user created with email: ${adminEmail}`);
+  } else {
+    console.log(
+      `ℹ️ Admin user with email ${adminEmail} already exists. Skipping.`,
+    );
+  }
+
+  if (!existingUser) {
+    const hashedUserPassword = await argon2.hash(userPassword);
+    await prisma.user.create({
+      data: {
+        email: userEmail,
+        password: hashedUserPassword,
+        isAdmin: false,
+        firstName: 'User',
+        isActive: true,
+      },
+    });
+    console.log(`✅ Regular user created with email: ${userEmail}`);
+  } else {
+    console.log(
+      `ℹ️ Regular user with email ${userEmail} already exists. Skipping.`,
+    );
+  }
+}
