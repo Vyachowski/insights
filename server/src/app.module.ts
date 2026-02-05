@@ -11,6 +11,7 @@ import { CitiesModule } from './cities/cities.module';
 import { SitesModule } from './sites/sites.module';
 import { MetricsModule } from './metrics/metrics.module';
 import { RevenueModule } from './revenue/revenue.module';
+import { ExpensesModule } from './expenses/expenses.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { RevenueModule } from './revenue/revenue.module';
     SitesModule,
     MetricsModule,
     RevenueModule,
+    ExpensesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
