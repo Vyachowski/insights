@@ -9,6 +9,7 @@ import { JwtModule } from '@nestjs/jwt';
 import type { StringValue } from 'ms';
 import { CitiesModule } from './cities/cities.module';
 import { SitesModule } from './sites/sites.module';
+import { MetricsModule } from './metrics/metrics.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { SitesModule } from './sites/sites.module';
     AuthModule,
     CitiesModule,
     SitesModule,
+    MetricsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

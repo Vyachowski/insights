@@ -1,27 +1,23 @@
-import { IsOptional, IsDateString, IsEnum, IsInt } from 'class-validator';
+import { IsOptional, IsDateString, IsInt } from 'class-validator';
 import { Type } from 'class-transformer';
-import { GroupBy, AnalyticsQuery } from '@shared/contracts/analytics.types';
+import { AnalyticsQuery } from '@shared/contracts/analytics.types';
 
 export class AnalyticsQueryDto implements AnalyticsQuery {
   @IsOptional()
   @IsInt()
   @Type(() => Number)
-  cityId?: number;
+  city_id?: number;
 
   @IsOptional()
   @IsInt()
   @Type(() => Number)
-  siteId?: number;
+  site_id?: number;
 
   @IsOptional()
   @IsDateString()
-  startDate?: string;
+  start_date?: string;
 
   @IsOptional()
   @IsDateString()
-  endDate?: string;
-
-  @IsOptional()
-  @IsEnum(GroupBy)
-  groupBy?: GroupBy;
+  end_date?: string;
 }

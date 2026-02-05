@@ -6,9 +6,8 @@ export enum GroupBy {
 }
 
 export interface AnalyticsQuery {
-  cityId?: number;
-  siteId?: number;
-  startDate?: string;
-  endDate?: string;
-  groupBy?: GroupBy;
+  city_id?: number;
+  site_id?: number;
+  start_date?: string;
+  end_date?: string;
 }
