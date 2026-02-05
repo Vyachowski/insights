@@ -8,7 +8,7 @@ import { User } from 'generated/prisma/client';
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly PrismaService: PrismaService,
+    private readonly prismaService: PrismaService,
     private jwtService: JwtService,
   ) {}
 
@@ -25,7 +25,7 @@ export class AuthService {
   }
 
   async validateUser(email: string, password: string) {
-    const user = await this.PrismaService.user.findUnique({ where: { email } });
+    const user = await this.prismaService.user.findUnique({ where: { email } });
 
     if (!user || !user.isActive) {
       throw new UnauthorizedException('Invalid credentials');
