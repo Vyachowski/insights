@@ -13,11 +13,9 @@ export class AnalyticsQueryDto implements AnalyticsQuery {
   @Type(() => Number)
   site_id?: number;
 
-  @IsOptional()
   @IsDateString()
-  start_date?: string;
+  start_date: string;
 
-  @IsOptional()
   @IsDateString()
-  end_date?: string;
+  end_date: string;
 }

@@ -10,6 +10,7 @@ import type { StringValue } from 'ms';
 import { CitiesModule } from './cities/cities.module';
 import { SitesModule } from './sites/sites.module';
 import { MetricsModule } from './metrics/metrics.module';
+import { RevenueModule } from './revenue/revenue.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { MetricsModule } from './metrics/metrics.module';
     CitiesModule,
     SitesModule,
     MetricsModule,
+    RevenueModule,
   ],
   controllers: [AppController],
   providers: [AppService],
