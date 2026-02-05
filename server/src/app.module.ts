@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
 import type { StringValue } from 'ms';
 import { CitiesModule } from './cities/cities.module';
+import { SitesModule } from './sites/sites.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { CitiesModule } from './cities/cities.module';
     DatabaseModule,
     AuthModule,
     CitiesModule,
+    SitesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
