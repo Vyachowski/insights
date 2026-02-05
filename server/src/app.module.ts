@@ -7,6 +7,7 @@ import { DatabaseModule } from './database/database.module';
 import { AuthModule } from './auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
 import type { StringValue } from 'ms';
+import { CitiesModule } from './cities/cities.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import type { StringValue } from 'ms';
     }),
     DatabaseModule,
     AuthModule,
+    CitiesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
