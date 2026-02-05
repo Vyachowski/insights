@@ -12,6 +12,7 @@ import { SitesModule } from './sites/sites.module';
 import { MetricsModule } from './metrics/metrics.module';
 import { RevenueModule } from './revenue/revenue.module';
 import { ExpensesModule } from './expenses/expenses.module';
+import { CallsModule } from './calls/calls.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { ExpensesModule } from './expenses/expenses.module';
     MetricsModule,
     RevenueModule,
     ExpensesModule,
+    CallsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
