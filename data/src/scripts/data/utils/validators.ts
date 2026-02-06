@@ -12,8 +12,10 @@ const City = z.object({
 export type City = z.infer<typeof City>;
 
 const Site = z.object({
+  id: z.coerce.number().positive(),
   city_id: z.coerce.number().positive().min(1),
-  name: z.string().min(1),
+  name: z.string().min(1).optional(),
+  group: z.string().min(1).optional(),
   url: z.string().min(1),
   yandex_counter_id: z.string(),
   google_counter_id: z.string(),
@@ -21,7 +23,7 @@ const Site = z.object({
   google_tag_manager_id: z.string(),
 });
 
-type Site = z.infer<typeof Site>;
+export type Site = z.infer<typeof Site>;
 
 const Call = z.object({
   city_id: z.coerce.number().positive().min(1),
@@ -37,7 +39,7 @@ const Call = z.object({
   redirect_number: z.string().nullable(),
 });
 
-type Call = z.infer<typeof Call>;
+export type Call = z.infer<typeof Call>;
 
 const Revenue = z.object({
   city_id: z.preprocess((val) => {
@@ -58,7 +60,7 @@ const Expense = z.object({
   comment: z.string().optional(),
 });
 
-type Expense = z.infer<typeof Expense>;
+export type Expense = z.infer<typeof Expense>;
 
 const SiteMetric = z.object({
   site_id: z.coerce.number().int().positive(),
@@ -79,12 +81,12 @@ const SiteMetric = z.object({
   leads_other: z.coerce.number().int().nonnegative().default(0),
 });
 
-type SiteMetric = z.infer<typeof SiteMetric>;
+export type SiteMetric = z.infer<typeof SiteMetric>;
 
 // Validators
 export const validateCitiesData = (
   citiesData: { [k: string]: string | undefined }[],
-) => {
+): City[] => {
   if (citiesData.length < 1)
     throw new Error("Нет данных города для валидации.");
 
@@ -93,7 +95,7 @@ export const validateCitiesData = (
 
 export const validateSitesData = (
   sitesData: { [k: string]: string | undefined }[],
-) => {
+): Site[] => {
   if (sitesData.length < 1) throw new Error("Нет данных сайта для валидации.");
 
   return sitesData.map((site) => Site.parse(site));

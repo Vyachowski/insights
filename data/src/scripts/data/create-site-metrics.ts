@@ -1,10 +1,10 @@
 import { YandexClient } from "./utils/site-metrics/client";
 import { getZayavkaGoalId } from "./utils/site-metrics/goals";
 import { getDailyMetrics, type MetricRow } from "./utils/site-metrics/metrics";
-import { getAllSites } from "./utils/site-metrics/db";
 import { writeMetricsToCsv } from "./utils/site-metrics/csvWriter";
 import config from "../../config/config";
 import dayjs from "dayjs";
+import type { Site } from "./utils/site-metrics/db";
 
 // TODO: REFACTORING
 const settings = {
@@ -14,8 +14,7 @@ const settings = {
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-export async function createSiteMetricsCSV() {
-  const sites = await getAllSites();
+export async function createSiteMetricsCSV(sites: Site[]) {
   const yc = new YandexClient();
 
   console.log(`🚀 Starting metrics extraction for ${sites.length} sites`);

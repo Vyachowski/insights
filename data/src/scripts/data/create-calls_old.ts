@@ -2,14 +2,29 @@ import fs from "fs/promises";
 import config from "../../config/config";
 import path from "path";
 import { parseCSV } from "./utils/parsers";
-import { normalizeCallData } from "./utils/normalizers";
-// import type { Site } from "./utils/site-metrics/db";
 import type { City } from "./utils/validators";
+import { normalizeCallData } from "./utils/normalizers";
 
-export async function createCallsCSV(sites: City[]) {
+async function readCitiesFromOutput(): Promise<City[]> {
+  const rows = parseCSV(config.paths.output.cities);
+
+  return rows
+    .map((row) => {
+      if (!row["id"] || !row["name"]) return null;
+
+      return {
+        id: Number(row["id"]),
+        name: row["name"],
+      };
+    })
+    .filter(Boolean) as City[];
+}
+
+export async function createCallsCSV() {
+  const cities = await readCitiesFromOutput();
   const callsData = parseCSV(config.paths.input.calls);
 
-  const normalizedData = normalizeCallData(callsData, sites as City[]);
+  const normalizedData = normalizeCallData(callsData, cities);
 
   const filePath = config.paths.output.calls;
   await fs.mkdir(path.dirname(filePath), { recursive: true });
