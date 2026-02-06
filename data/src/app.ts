@@ -6,7 +6,7 @@ import { createCitiesCSV } from "./scripts/data/create-cities";
 
 import { createSitesCSV } from "./scripts/data/create-sites";
 import { createCallsCSV } from "./scripts/calls";
-// import { createSiteMetricsCSV } from "./scripts/data/create-site-metrics";
+import { createSiteMetricsCSV } from "./scripts/data/create-site-metrics";
 // import { createRevenueCSV } from "./scripts/data/create-revenue";
 // import { createExpensesCSV } from "./scripts/data/create-expenses";
 

@@ -4,7 +4,7 @@ import { getDailyMetrics, type MetricRow } from "./utils/site-metrics/metrics";
 import { writeMetricsToCsv } from "./utils/site-metrics/csvWriter";
 import config from "../../config/config";
 import dayjs from "dayjs";
-import type { Site } from "./utils/site-metrics/db";
+import type { Site } from "./utils/validators";
 
 // TODO: REFACTORING
 const settings = {
