@@ -1,96 +1,20 @@
-import * as z from "zod";
+import {
+  CitySchema,
+  SiteSchema,
+  CallSchema,
+  RevenueSchema,
+  ExpenseSchema,
+  SiteMetricSchema,
+} from "../../schemas";
+import type { City, Site, SiteMetric } from "../../types";
 
-// Schemas
-const City = z.object({
-  id: z.coerce.number().positive(),
-  code: z.string().min(1),
-  slug: z.string().min(1),
-  name: z.string().min(1),
-  population: z.coerce.number().positive(),
-});
-
-export type City = z.infer<typeof City>;
-
-const Site = z.object({
-  id: z.coerce.number().positive(),
-  city_id: z.coerce.number().positive().min(1),
-  name: z.string().min(1).optional(),
-  group: z.string().min(1).optional(),
-  url: z.string().min(1),
-  yandex_counter_id: z.string(),
-  google_counter_id: z.string(),
-  yandex_tag_manager_id: z.string(),
-  google_tag_manager_id: z.string(),
-});
-
-export type Site = z.infer<typeof Site>;
-
-const Call = z.object({
-  city_id: z.coerce.number().positive().min(1),
-  date_time: z.coerce.date(),
-  caller_number: z.string().min(1),
-  region: z.string().min(1),
-  call_order: z.coerce.number().int().positive(),
-  class: z.string().nullable(),
-  number_name: z.string().nullable(),
-  project: z.string().min(1),
-  duration_in_sec: z.coerce.number().int().nonnegative().nullable(),
-  comment: z.string().nullable(),
-  redirect_number: z.string().nullable(),
-});
-
-export type Call = z.infer<typeof Call>;
-
-const Revenue = z.object({
-  city_id: z.preprocess((val) => {
-    if (val === "" || val == null) return null;
-    return Number(val);
-  }, z.number().nullable()),
-  date: z.coerce.date(),
-  amount: z.coerce.number().positive(),
-});
-
-type Revenue = z.infer<typeof Revenue>;
-
-const Expense = z.object({
-  city_id: z.coerce.number().int().positive().nullable(),
-  date: z.coerce.date(),
-  amount: z.coerce.number().positive(),
-  type: z.string().min(1),
-  comment: z.string().optional(),
-});
-
-export type Expense = z.infer<typeof Expense>;
-
-const SiteMetric = z.object({
-  site_id: z.coerce.number().int().positive(),
-  date: z.string().refine((val) => !isNaN(Date.parse(val)), {
-    message: "Invalid date format",
-  }),
-  yandex_users: z.coerce.number().int().nonnegative().default(0),
-  google_users: z.coerce.number().int().nonnegative().default(0),
-  other_users: z.coerce.number().int().nonnegative().default(0),
-  visit_duration_yandex_in_sec: z.coerce.number().nonnegative().default(0),
-  visit_duration_google_in_sec: z.coerce.number().nonnegative().default(0),
-  visit_duration_other_in_sec: z.coerce.number().nonnegative().default(0),
-  bounce_yandex: z.coerce.number().nonnegative().default(0),
-  bounce_google: z.coerce.number().nonnegative().default(0),
-  bounce_other: z.coerce.number().nonnegative().default(0),
-  leads_yandex: z.coerce.number().int().nonnegative().default(0),
-  leads_google: z.coerce.number().int().nonnegative().default(0),
-  leads_other: z.coerce.number().int().nonnegative().default(0),
-});
-
-export type SiteMetric = z.infer<typeof SiteMetric>;
-
-// Validators
 export const validateCitiesData = (
   citiesData: { [k: string]: string | undefined }[],
 ): City[] => {
   if (citiesData.length < 1)
     throw new Error("Нет данных города для валидации.");
 
-  return citiesData.map((city) => City.parse(city));
+  return citiesData.map((city) => CitySchema.parse(city));
 };
 
 export const validateSitesData = (
@@ -98,7 +22,7 @@ export const validateSitesData = (
 ): Site[] => {
   if (sitesData.length < 1) throw new Error("Нет данных сайта для валидации.");
 
-  return sitesData.map((site) => Site.parse(site));
+  return sitesData.map((site) => SiteSchema.parse(site));
 };
 
 export const validateCallsData = (
@@ -108,7 +32,7 @@ export const validateCallsData = (
     throw new Error("Нет данных звонков для валидации.");
   }
 
-  return callsData.map((call) => Call.parse(call));
+  return callsData.map((call) => CallSchema.parse(call));
 };
 
 export const validateRevenuesData = (
@@ -118,7 +42,7 @@ export const validateRevenuesData = (
     throw new Error("Нет данных доходов для валидации.");
   }
 
-  return revenuesData.map((revenue) => Revenue.parse(revenue));
+  return revenuesData.map((revenue) => RevenueSchema.parse(revenue));
 };
 
 export const validateExpensesData = (
@@ -128,7 +52,7 @@ export const validateExpensesData = (
     throw new Error("Нет данных расходов для валидации.");
   }
 
-  return expensesData.map((expense) => Expense.parse(expense));
+  return expensesData.map((expense) => ExpenseSchema.parse(expense));
 };
 
 export function validateSiteMetricsData(
@@ -138,7 +62,7 @@ export function validateSiteMetricsData(
   const errors: any[] = [];
 
   for (let i = 0; i < siteMetricData.length; i++) {
-    const result = SiteMetric.safeParse(siteMetricData[i]);
+    const result = SiteMetricSchema.safeParse(siteMetricData[i]);
 
     if (result.success) {
       // Преобразуем дату в ISO формат
