@@ -13,12 +13,12 @@ export async function createSitesCSV() {
   const importFilePath = config.paths.input.sites;
   const outputFilePath = config.paths.output.sites;
 
-  const result = await getAllSites(outputFilePath);
+  const result = await getAllSites(importFilePath);
 
   await fs.copyFile(importFilePath, outputFilePath);
 
   return {
-    message: createResultMessage("Sites", result.length),
+    message: createResultMessage("Sites", result.length, outputFilePath),
     data: result,
   };
 }

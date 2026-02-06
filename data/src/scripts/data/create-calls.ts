@@ -3,13 +3,12 @@ import config from "../../config/config";
 import path from "path";
 import { parseCSV } from "./utils/parsers";
 import { normalizeCallData } from "./utils/normalizers";
-// import type { Site } from "./utils/site-metrics/db";
 import type { City } from "./utils/validators";
 
-export async function createCallsCSV(sites: City[]) {
+export async function createCallsCSV(cities: City[]) {
   const callsData = parseCSV(config.paths.input.calls);
 
-  const normalizedData = normalizeCallData(callsData, sites as City[]);
+  const normalizedData = normalizeCallData(callsData, cities);
 
   const filePath = config.paths.output.calls;
   await fs.mkdir(path.dirname(filePath), { recursive: true });

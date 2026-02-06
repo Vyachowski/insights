@@ -3,11 +3,14 @@ import fs from "fs/promises";
 
 import config from "./config/config";
 import { createCitiesCSV } from "./scripts/data/create-cities";
-// import { createCallsCSV } from "./scripts/data/create-calls";
+
 import { createSitesCSV } from "./scripts/data/create-sites";
+import { createCallsCSV } from "./scripts/calls";
 // import { createSiteMetricsCSV } from "./scripts/data/create-site-metrics";
 // import { createRevenueCSV } from "./scripts/data/create-revenue";
 // import { createExpensesCSV } from "./scripts/data/create-expenses";
+
+const breaker = "\n\n=======================\n";
 
 async function removeFiles(dir: string) {
   const entries = await fs.readdir(dir, { withFileTypes: true });
@@ -24,10 +27,11 @@ async function app(logger = console.log) {
   await removeFiles(outputFolderPath);
 
   const cities = await createCitiesCSV();
-  logger(cities.data);
+  logger(cities.message, breaker);
   const sites = await createSitesCSV();
-  logger(sites.data);
-  // await createCallsCSV(sites);
+  logger(sites.message, breaker);
+  const calls = await createCallsCSV(cities.data);
+  logger(calls.message, breaker);
   // await createSiteMetricsCSV(sites.data);
   // await createRevenueCSV();
   // await createExpensesCSV();

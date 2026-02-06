@@ -13,12 +13,12 @@ export async function createCitiesCSV() {
   const importFilePath = config.paths.input.cities;
   const outputFilePath = config.paths.output.cities;
 
-  const result = await getAllCities(outputFilePath);
+  const result = await getAllCities(importFilePath);
 
   await fs.copyFile(importFilePath, outputFilePath);
 
   return {
-    message: createResultMessage("Cities", result.length),
+    message: createResultMessage("Cities", result.length, outputFilePath),
     data: result,
   };
 }
