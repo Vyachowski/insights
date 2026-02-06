@@ -5,8 +5,8 @@ import config from "./config/config";
 import { createCitiesCSV } from "./creators/create-cities";
 
 import { createSitesCSV } from "./creators/create-sites";
-import { createCallsCSV } from "./creators/calls";
-import { createSiteMetricsCSV } from "./creators/site-metrics/index";
+import { createCallsCSV } from "./creators/calls/main";
+import { createSiteMetricsCSV } from "./creators/site-metrics/main";
 import { createRevenueCSV } from "./creators/create-revenue";
 import { createExpensesCSV } from "./creators/create-expenses";
 

@@ -2,12 +2,12 @@ import config from "../../config/config";
 import { createResultMessage } from "../utils/create-result-mesage";
 import { YandexClient } from "./client";
 import { fetchGoalId } from "./fetch-goal-id";
-import type { Site } from "../utils/validators";
 import { appendMetricsToCSV, initializeCSVFile } from "./csv-writer";
 import { splitDateRangeIntoChunks, formatDateRange } from "./date-chunkers";
 import { ErrorTracker } from "./error-tracker";
 import { fetchMetricsForPeriod } from "./metrics-fetcher";
 import type { MetricsSettings, SiteMetricRow } from "./site-metrics-schema";
+import type { Site } from "../../types";
 
 /**
  * Settings for metrics extraction

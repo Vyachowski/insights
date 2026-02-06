@@ -7,7 +7,7 @@ import { mapCSVRowToCallRaw } from "./csv-to-raw-call";
 import { generateCallsRawCSV } from "./csv-formatter";
 import { parseCSV } from "../utils/parsers";
 import { createResultMessage } from "../utils/create-result-mesage";
-import type { City } from "../utils/validators";
+import type { City } from "../../types";
 
 interface CSVCreation {
   data: Record<string, any>[];

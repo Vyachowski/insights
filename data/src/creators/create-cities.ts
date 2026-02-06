@@ -1,8 +1,9 @@
 import fs from "fs/promises";
 import config from "../config/config";
 import { parseCSV } from "./utils/parsers";
-import { validateCitiesData, type City } from "./utils/validators";
+import { validateCitiesData } from "./utils/validators";
 import { createResultMessage } from "./utils/create-result-mesage";
+import type { City } from "../types";
 
 async function getAllCities(path: string): Promise<City[]> {
   const rows = parseCSV(path);
