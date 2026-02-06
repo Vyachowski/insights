@@ -1,5 +1,5 @@
 import config from "../../config/config";
-import { createResultMessage } from "../data/utils/message/create-result-mesage";
+import { createResultMessage } from "../utils/message/create-result-mesage";
 import { YandexClient } from "./client";
 import { fetchGoalId } from "./fetch-goal-id";
 import type { Site } from "../data/utils/validators";

@@ -6,7 +6,7 @@ import { buildCityToSiteMap, findSiteIdByProject } from "./city-matcher";
 import { mapCSVRowToCallRaw } from "./csv-to-raw-call";
 import { generateCallsRawCSV } from "./csv-formatter";
 import { parseCSV } from "../data/utils/parsers";
-import { createResultMessage } from "../data/utils/message/create-result-mesage";
+import { createResultMessage } from "../utils/message/create-result-mesage";
 import type { City } from "../data/utils/validators";
 
 interface CSVCreation {

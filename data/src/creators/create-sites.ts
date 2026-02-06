@@ -1,8 +1,8 @@
 import fs from "fs/promises";
-import config from "../../config/config";
-import { parseCSV } from "./utils/parsers";
+import config from "../config/config";
+import { parseCSV } from "./data/utils/parsers";
 import { createResultMessage } from "./utils/message/create-result-mesage";
-import { validateSitesData, type Site } from "./utils/validators";
+import { validateSitesData, type Site } from "./data/utils/validators";
 
 async function getAllSites(path: string): Promise<Site[]> {
   const rows = parseCSV(path);

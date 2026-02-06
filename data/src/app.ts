@@ -2,9 +2,9 @@ import path from "path";
 import fs from "fs/promises";
 
 import config from "./config/config";
-import { createCitiesCSV } from "./scripts/data/create-cities";
+import { createCitiesCSV } from "./scripts/create-cities";
 
-import { createSitesCSV } from "./scripts/data/create-sites";
+import { createSitesCSV } from "./scripts/create-sites";
 import { createCallsCSV } from "./scripts/calls";
 import { createSiteMetricsCSV } from "./scripts/site-metrics/index";
 // import { createRevenueCSV } from "./scripts/data/create-revenue";
