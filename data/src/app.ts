@@ -21,7 +21,7 @@ async function removeOnlyFiles(dir: string) {
 
 async function app() {
   const outputFolderPath = config.outputFolderPath;
-  removeOnlyFiles(outputFolderPath);
+  await removeOnlyFiles(outputFolderPath);
 
   await createCitiesCSV();
   await createSitesCSV();
