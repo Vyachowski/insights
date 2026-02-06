@@ -1,6 +1,6 @@
 import fs from "fs/promises";
 import path from "path";
-import config from "../../config/config";
+import config from "../config/config";
 
 enum ExpenseType {
   Hosting = "hosting",

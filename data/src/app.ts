@@ -2,13 +2,13 @@ import path from "path";
 import fs from "fs/promises";
 
 import config from "./config/config";
-import { createCitiesCSV } from "./scripts/create-cities";
+import { createCitiesCSV } from "./creators/create-cities";
 
-import { createSitesCSV } from "./scripts/create-sites";
-import { createCallsCSV } from "./scripts/calls";
-import { createSiteMetricsCSV } from "./scripts/site-metrics/index";
-// import { createRevenueCSV } from "./scripts/data/create-revenue";
-// import { createExpensesCSV } from "./scripts/data/create-expenses";
+import { createSitesCSV } from "./creators/create-sites";
+import { createCallsCSV } from "./creators/calls";
+import { createSiteMetricsCSV } from "./creators/site-metrics/index";
+import { createRevenueCSV } from "./creators/create-revenue";
+import { createExpensesCSV } from "./creators/create-expenses";
 
 const breaker = "\n\n=======================\n";
 
@@ -32,9 +32,11 @@ async function app(logger = console.log) {
   logger(sites.message, breaker);
   const calls = await createCallsCSV(cities.data);
   logger(calls.message, breaker);
+
+  // TODO: RESUME HERE!!!
   await createSiteMetricsCSV(sites.data);
-  // await createRevenueCSV();
-  // await createExpensesCSV();
+  await createRevenueCSV();
+  await createExpensesCSV();
 }
 
 await app();

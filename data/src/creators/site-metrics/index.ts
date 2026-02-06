@@ -1,8 +1,8 @@
 import config from "../../config/config";
-import { createResultMessage } from "../utils/message/create-result-mesage";
+import { createResultMessage } from "../utils/create-result-mesage";
 import { YandexClient } from "./client";
 import { fetchGoalId } from "./fetch-goal-id";
-import type { Site } from "../data/utils/validators";
+import type { Site } from "../utils/validators";
 import { appendMetricsToCSV, initializeCSVFile } from "./csv-writer";
 import { splitDateRangeIntoChunks, formatDateRange } from "./date-chunkers";
 import { ErrorTracker } from "./error-tracker";
@@ -159,15 +159,16 @@ export async function createSiteMetricsCSV(sitesAll: Site[]) {
     allMetrics.push(...siteMetrics);
   }
 
+  // TODO: DELETE EXCESS LOGGING
   // Log summary
-  console.log("\n" + "=".repeat(60));
-  console.log("📊 METRICS EXTRACTION SUMMARY");
-  console.log("=".repeat(60));
-  console.log(`✅ Total sites processed: ${sites.length}`);
-  console.log(`📝 Total metric rows: ${allMetrics.length}`);
-  console.log(`❌ Errors encountered: ${errorTracker.getErrorCount()}`);
-  console.log(`📄 Output file: ${outputPath}`);
-  console.log("=".repeat(60));
+  // console.log("\n" + "=".repeat(60));
+  // console.log("📊 METRICS EXTRACTION SUMMARY");
+  // console.log("=".repeat(60));
+  // console.log(`✅ Total sites processed: ${sites.length}`);
+  // console.log(`📝 Total metric rows: ${allMetrics.length}`);
+  // console.log(`❌ Errors encountered: ${errorTracker.getErrorCount()}`);
+  // console.log(`📄 Output file: ${outputPath}`);
+  // console.log("=".repeat(60));
 
   // Log errors if any
   if (errorTracker.hasErrors()) {

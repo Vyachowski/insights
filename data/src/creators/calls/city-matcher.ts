@@ -1,4 +1,4 @@
-import type { City } from "../data/utils/validators";
+import type { City } from "../utils/validators";
 
 /**
  * Alternative city names for matching

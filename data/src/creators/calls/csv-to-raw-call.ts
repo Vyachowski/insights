@@ -1,5 +1,5 @@
 import { convertDurationToSeconds } from "../data/utils/converters";
-import { parseCallDate } from "../data/utils/parsers";
+import { parseCallDate } from "../utils/parsers";
 import type { CSVCallRow, CallRaw } from "./calls-raw-schema";
 
 /**

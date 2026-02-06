@@ -5,9 +5,9 @@ import type { CSVCallRow } from "./calls-raw-schema";
 import { buildCityToSiteMap, findSiteIdByProject } from "./city-matcher";
 import { mapCSVRowToCallRaw } from "./csv-to-raw-call";
 import { generateCallsRawCSV } from "./csv-formatter";
-import { parseCSV } from "../data/utils/parsers";
-import { createResultMessage } from "../utils/message/create-result-mesage";
-import type { City } from "../data/utils/validators";
+import { parseCSV } from "../utils/parsers";
+import { createResultMessage } from "../utils/create-result-mesage";
+import type { City } from "../utils/validators";
 
 interface CSVCreation {
   data: Record<string, any>[];
