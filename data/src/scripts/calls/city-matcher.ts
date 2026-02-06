@@ -1,10 +1,4 @@
-export interface City {
-  id: number;
-  code: string;
-  slug: string;
-  name: string;
-  population: number;
-}
+import type { City } from "../data/utils/validators";
 
 /**
  * Alternative city names for matching
