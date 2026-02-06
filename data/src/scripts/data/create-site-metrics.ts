@@ -1,5 +1,5 @@
-import { YandexClient } from "./utils/site-metrics/client";
-import { getZayavkaGoalId } from "./utils/site-metrics/goals";
+import { YandexClient } from "../site-metrics/client";
+import { getZayavkaGoalId } from "../site-metrics/fetch-goal-id";
 import { getDailyMetrics, type MetricRow } from "./utils/site-metrics/metrics";
 import { writeMetricsToCsv } from "./utils/site-metrics/csvWriter";
 import config from "../../config/config";

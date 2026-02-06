@@ -1,4 +1,4 @@
-import { YandexClient } from './client';
+import { YandexClient } from "./client";
 
 export interface Goal {
   id: number;
@@ -6,12 +6,12 @@ export interface Goal {
   type: string;
 }
 
-export async function getZayavkaGoalId(
+export async function fetchGoalId(
   yandexClient: YandexClient,
-  counterId: string
+  counterId: string,
 ): Promise<number> {
   const data = await yandexClient.get<{ goals: Goal[] }>(
-    `/management/v1/counter/${counterId}/goals`
+    `/management/v1/counter/${counterId}/goals`,
   );
 
   const goals = data.goals || [];
@@ -19,9 +19,7 @@ export async function getZayavkaGoalId(
     throw new Error(`No goals found for counter ${counterId}`);
   }
 
-  const goal = goals.find(
-    g => g.name.trim().toLowerCase() === 'заявка'
-  );
+  const goal = goals.find((g) => g.name.trim().toLowerCase() === "заявка");
 
   if (!goal) {
     throw new Error(`Goal "Заявка" not found for counter ${counterId}`);

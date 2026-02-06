@@ -1,18 +1,18 @@
-import axios from 'axios';
-import type { AxiosInstance } from 'axios';
-import { env } from '../../../../lib/env';
+import axios from "axios";
+import type { AxiosInstance } from "axios";
+import { env } from "../../lib/env";
 
 export class YandexClient {
   private client: AxiosInstance;
 
   constructor() {
     this.client = axios.create({
-      baseURL: 'https://api-metrika.yandex.net',
+      baseURL: "https://api-metrika.yandex.net",
       headers: {
         Authorization: `OAuth ${env.YANDEX_API_OAUTH_TOKEN}`,
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
-      timeout: 15000,
+      timeout: 3000,
     });
   }
 
@@ -22,10 +22,10 @@ export class YandexClient {
       return res.data;
     } catch (err: any) {
       console.error(
-        'Yandex API GET Error:',
+        "Yandex API GET Error:",
         url,
         params,
-        err.response?.data || err.message
+        err.response?.data || err.message,
       );
       throw err;
     }

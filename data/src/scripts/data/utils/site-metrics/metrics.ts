@@ -1,4 +1,4 @@
-import { YandexClient } from './client';
+import { YandexClient } from "../../../site-metrics/client";
 
 export interface MetricRow {
   date: string; // YYYY-MM-DD
@@ -32,27 +32,29 @@ export async function getDailyMetrics(
   counterId: string,
   goalId: number | null,
   startDate: string,
-  endDate: string
+  endDate: string,
 ): Promise<MetricRow[]> {
-
   if (!goalId) {
-    console.log('Цель не задана — данные не запрашиваются');
+    console.log("Цель не задана — данные не запрашиваются");
     return [];
   }
 
   const params = {
     ids: counterId,
     metrics: `ym:s:users,ym:s:avgVisitDurationSeconds,ym:s:bounceRate,ym:s:goal${goalId}users`,
-    dimensions: 'ym:s:date,ym:s:lastSearchEngineRoot',
+    dimensions: "ym:s:date,ym:s:lastSearchEngineRoot",
     filters: "ym:s:trafficSource=='organic'",
-    robots: 'no',
+    robots: "no",
     date1: startDate,
     date2: endDate,
-    accuracy: 'full',
+    accuracy: "full",
     limit: 10000,
   };
 
-  const response: YandexApiReportResponse = await yandexClient.get(`/stat/v1/data`, params);
+  const response: YandexApiReportResponse = await yandexClient.get(
+    `/stat/v1/data`,
+    params,
+  );
 
   const resultMap = new Map<string, MetricRow>();
 
@@ -60,8 +62,11 @@ export async function getDailyMetrics(
     const date = row.dimensions[0].name;
     const sourceRaw = row.dimensions[1].name.toLowerCase();
 
-    const source = sourceRaw.includes('yandex') ? 'yandex' :
-                   sourceRaw.includes('google') ? 'google' : 'other';
+    const source = sourceRaw.includes("yandex")
+      ? "yandex"
+      : sourceRaw.includes("google")
+        ? "google"
+        : "other";
 
     if (!resultMap.has(date)) {
       resultMap.set(date, {
@@ -87,14 +92,17 @@ export async function getDailyMetrics(
     metric[`${source}_users`] += row.metrics[0] || 0;
 
     // visit duration (среднее)
-    const prevDuration = metric[`visit_duration_${source}_in_sec`] * metric[`${source}_users`];
+    const prevDuration =
+      metric[`visit_duration_${source}_in_sec`] * metric[`${source}_users`];
     const newDuration = row.metrics[1] * row.metrics[0];
-    metric[`visit_duration_${source}_in_sec`] = (prevDuration + newDuration) / (metric[`${source}_users`] || 1);
+    metric[`visit_duration_${source}_in_sec`] =
+      (prevDuration + newDuration) / (metric[`${source}_users`] || 1);
 
     // bounce
     const prevBounce = metric[`bounce_${source}`] * metric[`${source}_users`];
-    const newBounce = row.metrics[2] * row.metrics[0] / 100;
-    metric[`bounce_${source}`] = (prevBounce + newBounce) / (metric[`${source}_users`] || 1);
+    const newBounce = (row.metrics[2] * row.metrics[0]) / 100;
+    metric[`bounce_${source}`] =
+      (prevBounce + newBounce) / (metric[`${source}_users`] || 1);
 
     // leads
     metric[`leads_${source}`] += row.metrics[3] || 0;

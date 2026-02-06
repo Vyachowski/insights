@@ -6,7 +6,7 @@ import { createCitiesCSV } from "./scripts/data/create-cities";
 
 import { createSitesCSV } from "./scripts/data/create-sites";
 import { createCallsCSV } from "./scripts/calls";
-import { createSiteMetricsCSV } from "./scripts/data/create-site-metrics";
+import { createSiteMetricsCSV } from "./scripts/site-metrics/index";
 // import { createRevenueCSV } from "./scripts/data/create-revenue";
 // import { createExpensesCSV } from "./scripts/data/create-expenses";
 
@@ -32,7 +32,7 @@ async function app(logger = console.log) {
   logger(sites.message, breaker);
   const calls = await createCallsCSV(cities.data);
   logger(calls.message, breaker);
-  // await createSiteMetricsCSV(sites.data);
+  await createSiteMetricsCSV(sites.data);
   // await createRevenueCSV();
   // await createExpensesCSV();
 }
