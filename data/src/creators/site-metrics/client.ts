@@ -12,7 +12,7 @@ export class YandexClient {
         Authorization: `OAuth ${env.YANDEX_API_OAUTH_TOKEN}`,
         "Content-Type": "application/json",
       },
-      timeout: 3000,
+      timeout: 10000,
     });
   }
 

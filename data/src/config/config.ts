@@ -18,6 +18,10 @@ const paths = {
     calls: path.resolve(inputFolderPath, `${FILE_PREFIX}calls.csv`),
     revenue: path.resolve(inputFolderPath, `${FILE_PREFIX}revenue.json`),
     revenueFolder: path.resolve(inputFolderPath, `${FILE_PREFIX}revenue-tg`),
+    siteMetricsBackup: path.resolve(
+      outputFolderPath,
+      `archive/${FILE_PREFIX}site-metrics.csv`,
+    ),
   },
   output: {
     cities: path.resolve(outputFolderPath, `${FILE_PREFIX}cities.csv`),

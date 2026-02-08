@@ -1,3 +1,4 @@
+import fs from "fs/promises";
 import config from "../../config/config";
 import { createResultMessage } from "../utils/create-result-mesage";
 import { YandexClient } from "./client";
@@ -129,7 +130,22 @@ async function processSite(
  * @param sites - Array of sites to process
  * @returns Object with all metrics data and result message
  */
-export async function createSiteMetricsCSV(sites: Site[]) {
+export async function createSiteMetricsCSV(
+  sites: Site[],
+  options?: { source: "api" | "backup" },
+) {
+  if (options?.source === "backup") {
+    const importFilePath = config.paths.input.siteMetricsBackup;
+    const outputFilePath = config.paths.output.siteMetrics;
+
+    await fs.copyFile(importFilePath, outputFilePath);
+
+    return {
+      message: createResultMessage("Site Metrics", 22_781, outputFilePath),
+      data: null,
+    };
+  }
+
   const yandexClient = new YandexClient();
   const outputPath = config.paths.output.siteMetrics;
   const errorTracker = new ErrorTracker();
@@ -143,10 +159,8 @@ export async function createSiteMetricsCSV(sites: Site[]) {
     `⚙️  Settings: ${METRICS_SETTINGS.chunkMonths} month chunks, ${METRICS_SETTINGS.requestDelayMs}ms delay\n`,
   );
 
-  // Initialize CSV file (clear previous data)
   await initializeCSVFile(outputPath);
 
-  // Process each site
   for (const site of sites) {
     const siteMetrics = await processSite(
       site,
@@ -157,18 +171,6 @@ export async function createSiteMetricsCSV(sites: Site[]) {
     allMetrics.push(...siteMetrics);
   }
 
-  // TODO: DELETE EXCESS LOGGING
-  // Log summary
-  // console.log("\n" + "=".repeat(60));
-  // console.log("📊 METRICS EXTRACTION SUMMARY");
-  // console.log("=".repeat(60));
-  // console.log(`✅ Total sites processed: ${sites.length}`);
-  // console.log(`📝 Total metric rows: ${allMetrics.length}`);
-  // console.log(`❌ Errors encountered: ${errorTracker.getErrorCount()}`);
-  // console.log(`📄 Output file: ${outputPath}`);
-  // console.log("=".repeat(60));
-
-  // Log errors if any
   if (errorTracker.hasErrors()) {
     errorTracker.logErrors();
   }
