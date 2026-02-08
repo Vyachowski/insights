@@ -22,7 +22,8 @@
     "prisma:seed": "prisma db seed",
     "prisma:reset": "npx prisma migrate reset --force && prisma db seed",
     "db:container:create": "tsx src/scripts/db/create-postgres-container.ts",
-    "db:container:remove": "tsx src/scripts/db/remove-postgres-container.ts"
+    "db:container:remove": "tsx src/scripts/db/remove-postgres-container.ts",
+    "db:reset:hard": "colima start && npm run db:container:remove && npm run db:container:create && npm run prisma:reset"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",

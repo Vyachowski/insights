@@ -33,7 +33,6 @@ model City {
   updatedAt     DateTime @updatedAt
 
   sites         Site[]
-  calls         Call[]
   revenues      Revenue[]
   expenses      Expense[]
 }
@@ -51,6 +50,8 @@ model Site {
   updatedAt             DateTime     @updatedAt
 
   city                  City         @relation(fields: [city_id], references: [id], onDelete: Cascade)
+  calls                 Call[]
+  callsRaw              CallImport[]
   metrics               SiteMetric[]
 
   @@index([city_id])
@@ -78,23 +79,52 @@ model SiteMetric {
   @@index([date])
 }
 
-model Call {
-  id              Int      @id @default(autoincrement())
-  city_id         Int
-  date_time       DateTime
-  caller_number   String
-  region          String
-  call_order      Int
-  class           String?
-  number_name     String?
-  project         String
-  duration_in_sec Int?
-  comment         String?
-  redirect_number String?
-  city            City     @relation(fields: [city_id], references: [id], onDelete: Cascade)
+model CallImport {
+  id                Int       @id @default(autoincrement())
+  site_id           Int
+  date              DateTime  // Дата и время звонка
+  src               String    // Номер звонящего (Кто звонил)
+  region            String?   // Регион звонящего (Откуда)
+  call_number       Int       // Порядковый номер звонка (№)
+  class             String?   // Класс звонка (Класс) - например "Лид"
+  project_title     String    // Название проекта (Проект)
+  adv_channel_name  String    // Название канала (Куда звонил)
+  billsec           Int       // Длительность разговора в секундах (Запись)
+  comment           String?   // Комментарий
+  redirect_number   String?   // Номер переадресации (Вызов завершен)
+  source            String    @default("csv") // Источник данных
+  imported_at       DateTime  @default(now()) // Время импорта
   
-  @@index([city_id])
-  @@index([date_time])
+  site              Site      @relation(fields: [site_id], references: [id], onDelete: Cascade)
+  
+  @@index([site_id])
+}
+
+model Call {
+  id                Int       @id @default(autoincrement())
+  site_id           Int  
+  gudok_id          Int?      @unique // ID звонка в Гудок (null для CSV данных)
+  project_id        Int?      // ID проекта в Гудок
+  project_title     String    // Название проекта
+  dst               String?   // Гудок-номер (виртуальный номер)
+  adv_channel_id    String?   // ID Гудок-номера
+  adv_channel_name  String    // Название Гудок-номера
+  src               String    // Номер звонящего
+  duration          Int?      // Продолжительность всего звонка (сек)
+  billsec           Int       // Продолжительность разговора (сек)
+  callstatus        String?   // BUSY, ANSWERED, NO ANSWER
+  date              DateTime  // Дата и время звонка (UTC)
+  region            String?   // Регион звонящего
+  call_number       Int       // Какой по счету звонок с этого номера
+  audio             String?   // Ссылка на запись разговора
+
+  source            String    @default("webhook") // webhook или csv (после merge)
+  created_at        DateTime  @default(now())
+  updated_at        DateTime  @updatedAt
+  
+  site              Site      @relation(fields: [site_id], references: [id], onDelete: Cascade)
+  
+  @@index([site_id])
 }
 
 model Revenue {
