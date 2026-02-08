@@ -129,13 +129,11 @@ async function processSite(
  * @param sites - Array of sites to process
  * @returns Object with all metrics data and result message
  */
-export async function createSiteMetricsCSV(sitesAll: Site[]) {
+export async function createSiteMetricsCSV(sites: Site[]) {
   const yandexClient = new YandexClient();
   const outputPath = config.paths.output.siteMetrics;
   const errorTracker = new ErrorTracker();
   const allMetrics: SiteMetricRow[] = [];
-  const [site1, ..._] = sitesAll;
-  const sites = [site1] as Site[];
 
   console.log(`🚀 Starting metrics extraction for ${sites.length} site(s)`);
   console.log(
