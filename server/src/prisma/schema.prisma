@@ -4,23 +4,37 @@ generator client {
   output   = "../../generated/prisma"
 }
 
+generator zod {
+  provider = "prisma-zod-generator"
+  output = "../../../shared/schema"
+}
+
 datasource db {
   provider = "postgresql"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  DEACTIVATED
 }
 
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
   password  String
-  isAdmin   Boolean  @default(false)
+  role      Role     @default(USER)
   firstName String?
   lastName  String?
-  isActive  Boolean  @default(true)
+  status    UserStatus  @default(ACTIVE)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   
   @@index([email])
-  @@map("users")
 }
 
 model City {
@@ -103,20 +117,20 @@ model CallImport {
 model Call {
   id                Int       @id @default(autoincrement())
   site_id           Int  
-  gudok_id          Int?      @unique // ID звонка в Гудок (null для CSV данных)
-  project_id        Int?      // ID проекта в Гудок
+  gudok_id          Int       @unique // ID звонка в Гудок (null для CSV данных)
+  project_id        Int       // ID проекта в Гудок
   project_title     String    // Название проекта
-  dst               String?   // Гудок-номер (виртуальный номер)
-  adv_channel_id    String?   // ID Гудок-номера
+  dst               String    // Гудок-номер (виртуальный номер)
+  adv_channel_id    String    // ID Гудок-номера
   adv_channel_name  String    // Название Гудок-номера
   src               String    // Номер звонящего
-  duration          Int?      // Продолжительность всего звонка (сек)
+  duration          Int       // Продолжительность всего звонка (сек)
   billsec           Int       // Продолжительность разговора (сек)
-  callstatus        String?   // BUSY, ANSWERED, NO ANSWER
+  callstatus        String    // BUSY, ANSWERED, NO ANSWER
   date              DateTime  // Дата и время звонка (UTC)
-  region            String?   // Регион звонящего
+  region            String    // Регион звонящего
   call_number       Int       // Какой по счету звонок с этого номера
-  audio             String?   // Ссылка на запись разговора
+  audio             String    // Ссылка на запись разговора
 
   source            String    @default("webhook") // webhook или csv (после merge)
   created_at        DateTime  @default(now())

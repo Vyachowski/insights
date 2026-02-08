@@ -1,0 +1,18 @@
+import * as z from 'zod';
+import type { Prisma } from '../../../../server/generated/prisma/client';
+import { SiteCreateNestedManyWithoutCityInputObjectSchema as SiteCreateNestedManyWithoutCityInputObjectSchema } from './SiteCreateNestedManyWithoutCityInput.schema';
+import { RevenueCreateNestedManyWithoutCityInputObjectSchema as RevenueCreateNestedManyWithoutCityInputObjectSchema } from './RevenueCreateNestedManyWithoutCityInput.schema';
+import { ExpenseCreateNestedManyWithoutCityInputObjectSchema as ExpenseCreateNestedManyWithoutCityInputObjectSchema } from './ExpenseCreateNestedManyWithoutCityInput.schema'
+
+const makeSchema = () => z.object({
+  code: z.string(),
+  slug: z.string(),
+  name: z.string(),
+  population: z.number().int(),
+  createdAt: z.coerce.date().optional(),
+  sites: z.lazy(() => SiteCreateNestedManyWithoutCityInputObjectSchema).optional(),
+  revenues: z.lazy(() => RevenueCreateNestedManyWithoutCityInputObjectSchema).optional(),
+  expenses: z.lazy(() => ExpenseCreateNestedManyWithoutCityInputObjectSchema).optional()
+}).strict();
+export const CityCreateInputObjectSchema: z.ZodType<Prisma.CityCreateInput> = makeSchema() as unknown as z.ZodType<Prisma.CityCreateInput>;
+export const CityCreateInputObjectZodSchema = makeSchema();

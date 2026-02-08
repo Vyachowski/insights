@@ -6,12 +6,11 @@ import { Injectable } from '@nestjs/common';
 export class CallsService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  findAll({ start_date, end_date }: AnalyticsQueryDto) {
+  findAll({ site_id, start_date, end_date }: AnalyticsQueryDto) {
     return this.prismaService.call.findMany({
       where: {
-        // TODO: Change calls binding to site_id
-        // city_id: site_id,
-        date_time: {
+        site_id,
+        date: {
           gte: start_date ? new Date(start_date) : undefined,
           lte: end_date ? new Date(end_date) : undefined,
         },

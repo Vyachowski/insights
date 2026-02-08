@@ -1,0 +1,15 @@
+import type { Prisma } from '../../../server/generated/prisma/client';
+import * as z from 'zod';
+import { SiteMetricWhereInputObjectSchema as SiteMetricWhereInputObjectSchema } from './objects/SiteMetricWhereInput.schema';
+import { SiteMetricOrderByWithAggregationInputObjectSchema as SiteMetricOrderByWithAggregationInputObjectSchema } from './objects/SiteMetricOrderByWithAggregationInput.schema';
+import { SiteMetricScalarWhereWithAggregatesInputObjectSchema as SiteMetricScalarWhereWithAggregatesInputObjectSchema } from './objects/SiteMetricScalarWhereWithAggregatesInput.schema';
+import { SiteMetricScalarFieldEnumSchema } from './enums/SiteMetricScalarFieldEnum.schema';
+import { SiteMetricCountAggregateInputObjectSchema as SiteMetricCountAggregateInputObjectSchema } from './objects/SiteMetricCountAggregateInput.schema';
+import { SiteMetricMinAggregateInputObjectSchema as SiteMetricMinAggregateInputObjectSchema } from './objects/SiteMetricMinAggregateInput.schema';
+import { SiteMetricMaxAggregateInputObjectSchema as SiteMetricMaxAggregateInputObjectSchema } from './objects/SiteMetricMaxAggregateInput.schema';
+import { SiteMetricAvgAggregateInputObjectSchema as SiteMetricAvgAggregateInputObjectSchema } from './objects/SiteMetricAvgAggregateInput.schema';
+import { SiteMetricSumAggregateInputObjectSchema as SiteMetricSumAggregateInputObjectSchema } from './objects/SiteMetricSumAggregateInput.schema';
+
+export const SiteMetricGroupBySchema: z.ZodType<Prisma.SiteMetricGroupByArgs> = z.object({ where: SiteMetricWhereInputObjectSchema.optional(), orderBy: z.union([SiteMetricOrderByWithAggregationInputObjectSchema, SiteMetricOrderByWithAggregationInputObjectSchema.array()]).optional(), having: SiteMetricScalarWhereWithAggregatesInputObjectSchema.optional(), take: z.number().optional(), skip: z.number().optional(), by: z.array(SiteMetricScalarFieldEnumSchema), _count: z.union([ z.literal(true), SiteMetricCountAggregateInputObjectSchema ]).optional(), _min: SiteMetricMinAggregateInputObjectSchema.optional(), _max: SiteMetricMaxAggregateInputObjectSchema.optional(), _avg: SiteMetricAvgAggregateInputObjectSchema.optional(), _sum: SiteMetricSumAggregateInputObjectSchema.optional() }).strict() as unknown as z.ZodType<Prisma.SiteMetricGroupByArgs>;
+
+export const SiteMetricGroupByZodSchema = z.object({ where: SiteMetricWhereInputObjectSchema.optional(), orderBy: z.union([SiteMetricOrderByWithAggregationInputObjectSchema, SiteMetricOrderByWithAggregationInputObjectSchema.array()]).optional(), having: SiteMetricScalarWhereWithAggregatesInputObjectSchema.optional(), take: z.number().optional(), skip: z.number().optional(), by: z.array(SiteMetricScalarFieldEnumSchema), _count: z.union([ z.literal(true), SiteMetricCountAggregateInputObjectSchema ]).optional(), _min: SiteMetricMinAggregateInputObjectSchema.optional(), _max: SiteMetricMaxAggregateInputObjectSchema.optional(), _avg: SiteMetricAvgAggregateInputObjectSchema.optional(), _sum: SiteMetricSumAggregateInputObjectSchema.optional() }).strict();

@@ -10,6 +10,7 @@ import * as argon2 from 'argon2';
 
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from 'generated/prisma/client';
+import { RoleSchema } from '@shared/schema/schemas';
 
 const pool = new PrismaPg({ connectionString: process.env.DB_URL });
 const prisma = new PrismaClient({ adapter: pool });
@@ -41,7 +42,7 @@ export async function seedCalls(callsPath: string): Promise<void> {
   const callsData = parseCSV(callsPath);
   const validatedCallsData = validateCallsData(callsData);
 
-  await prisma.call.createMany({
+  await prisma.callImport.createMany({
     data: validatedCallsData,
     skipDuplicates: true,
   });
@@ -118,9 +119,8 @@ export async function seedUsers(): Promise<void> {
       data: {
         email: adminEmail,
         password: hashedAdminPassword,
-        isAdmin: true,
-        firstName: 'Admin',
-        isActive: true,
+        role: RoleSchema.enum.ADMIN,
+        firstName: 'Вячеслав',
       },
     });
     console.log(`✅ Admin user created with email: ${adminEmail}`);
@@ -136,9 +136,7 @@ export async function seedUsers(): Promise<void> {
       data: {
         email: userEmail,
         password: hashedUserPassword,
-        isAdmin: false,
-        firstName: 'User',
-        isActive: true,
+        firstName: 'Сергей',
       },
     });
     console.log(`✅ Regular user created with email: ${userEmail}`);

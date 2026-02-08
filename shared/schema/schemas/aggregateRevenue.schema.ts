@@ -1,0 +1,14 @@
+import type { Prisma } from '../../../server/generated/prisma/client';
+import * as z from 'zod';
+import { RevenueOrderByWithRelationInputObjectSchema as RevenueOrderByWithRelationInputObjectSchema } from './objects/RevenueOrderByWithRelationInput.schema';
+import { RevenueWhereInputObjectSchema as RevenueWhereInputObjectSchema } from './objects/RevenueWhereInput.schema';
+import { RevenueWhereUniqueInputObjectSchema as RevenueWhereUniqueInputObjectSchema } from './objects/RevenueWhereUniqueInput.schema';
+import { RevenueCountAggregateInputObjectSchema as RevenueCountAggregateInputObjectSchema } from './objects/RevenueCountAggregateInput.schema';
+import { RevenueMinAggregateInputObjectSchema as RevenueMinAggregateInputObjectSchema } from './objects/RevenueMinAggregateInput.schema';
+import { RevenueMaxAggregateInputObjectSchema as RevenueMaxAggregateInputObjectSchema } from './objects/RevenueMaxAggregateInput.schema';
+import { RevenueAvgAggregateInputObjectSchema as RevenueAvgAggregateInputObjectSchema } from './objects/RevenueAvgAggregateInput.schema';
+import { RevenueSumAggregateInputObjectSchema as RevenueSumAggregateInputObjectSchema } from './objects/RevenueSumAggregateInput.schema';
+
+export const RevenueAggregateSchema: z.ZodType<Prisma.RevenueAggregateArgs> = z.object({ orderBy: z.union([RevenueOrderByWithRelationInputObjectSchema, RevenueOrderByWithRelationInputObjectSchema.array()]).optional(), where: RevenueWhereInputObjectSchema.optional(), cursor: RevenueWhereUniqueInputObjectSchema.optional(), take: z.number().optional(), skip: z.number().optional(), _count: z.union([ z.literal(true), RevenueCountAggregateInputObjectSchema ]).optional(), _min: RevenueMinAggregateInputObjectSchema.optional(), _max: RevenueMaxAggregateInputObjectSchema.optional(), _avg: RevenueAvgAggregateInputObjectSchema.optional(), _sum: RevenueSumAggregateInputObjectSchema.optional() }).strict() as unknown as z.ZodType<Prisma.RevenueAggregateArgs>;
+
+export const RevenueAggregateZodSchema = z.object({ orderBy: z.union([RevenueOrderByWithRelationInputObjectSchema, RevenueOrderByWithRelationInputObjectSchema.array()]).optional(), where: RevenueWhereInputObjectSchema.optional(), cursor: RevenueWhereUniqueInputObjectSchema.optional(), take: z.number().optional(), skip: z.number().optional(), _count: z.union([ z.literal(true), RevenueCountAggregateInputObjectSchema ]).optional(), _min: RevenueMinAggregateInputObjectSchema.optional(), _max: RevenueMaxAggregateInputObjectSchema.optional(), _avg: RevenueAvgAggregateInputObjectSchema.optional(), _sum: RevenueSumAggregateInputObjectSchema.optional() }).strict();

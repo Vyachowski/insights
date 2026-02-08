@@ -1,3 +1,4 @@
+import { CallImportInputSchema } from '@shared/schema/schemas';
 import * as z from 'zod';
 
 // Schemas
@@ -23,21 +24,21 @@ const Site = z.object({
 
 type Site = z.infer<typeof Site>;
 
-const Call = z.object({
-  city_id: z.coerce.number().positive().min(1),
-  date_time: z.coerce.date(),
-  caller_number: z.string().min(1),
-  region: z.string().min(1),
-  call_order: z.coerce.number().int().positive(),
-  class: z.string().nullable(),
-  number_name: z.string().nullable(),
-  project: z.string().min(1),
-  duration_in_sec: z.coerce.number().int().nonnegative().nullable(),
-  comment: z.string().nullable(),
-  redirect_number: z.string().nullable(),
-});
+// const Call = z.object({
+//   city_id: z.coerce.number().positive().min(1),
+//   date_time: z.coerce.date(),
+//   caller_number: z.string().min(1),
+//   region: z.string().min(1),
+//   call_order: z.coerce.number().int().positive(),
+//   class: z.string().nullable(),
+//   number_name: z.string().nullable(),
+//   project: z.string().min(1),
+//   duration_in_sec: z.coerce.number().int().nonnegative().nullable(),
+//   comment: z.string().nullable(),
+//   redirect_number: z.string().nullable(),
+// });
 
-type Call = z.infer<typeof Call>;
+// type Call = z.infer<typeof Call>;
 
 const Revenue = z.object({
   city_id: z.preprocess((val) => {
@@ -106,7 +107,7 @@ export const validateCallsData = (
     throw new Error('Нет данных звонков для валидации.');
   }
 
-  return callsData.map((call) => Call.parse(call));
+  return callsData.map((call) => CallImportInputSchema.parse(call));
 };
 
 export const validateRevenuesData = (

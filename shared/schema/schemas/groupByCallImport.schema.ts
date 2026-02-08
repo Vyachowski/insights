@@ -1,0 +1,15 @@
+import type { Prisma } from '../../../server/generated/prisma/client';
+import * as z from 'zod';
+import { CallImportWhereInputObjectSchema as CallImportWhereInputObjectSchema } from './objects/CallImportWhereInput.schema';
+import { CallImportOrderByWithAggregationInputObjectSchema as CallImportOrderByWithAggregationInputObjectSchema } from './objects/CallImportOrderByWithAggregationInput.schema';
+import { CallImportScalarWhereWithAggregatesInputObjectSchema as CallImportScalarWhereWithAggregatesInputObjectSchema } from './objects/CallImportScalarWhereWithAggregatesInput.schema';
+import { CallImportScalarFieldEnumSchema } from './enums/CallImportScalarFieldEnum.schema';
+import { CallImportCountAggregateInputObjectSchema as CallImportCountAggregateInputObjectSchema } from './objects/CallImportCountAggregateInput.schema';
+import { CallImportMinAggregateInputObjectSchema as CallImportMinAggregateInputObjectSchema } from './objects/CallImportMinAggregateInput.schema';
+import { CallImportMaxAggregateInputObjectSchema as CallImportMaxAggregateInputObjectSchema } from './objects/CallImportMaxAggregateInput.schema';
+import { CallImportAvgAggregateInputObjectSchema as CallImportAvgAggregateInputObjectSchema } from './objects/CallImportAvgAggregateInput.schema';
+import { CallImportSumAggregateInputObjectSchema as CallImportSumAggregateInputObjectSchema } from './objects/CallImportSumAggregateInput.schema';
+
+export const CallImportGroupBySchema: z.ZodType<Prisma.CallImportGroupByArgs> = z.object({ where: CallImportWhereInputObjectSchema.optional(), orderBy: z.union([CallImportOrderByWithAggregationInputObjectSchema, CallImportOrderByWithAggregationInputObjectSchema.array()]).optional(), having: CallImportScalarWhereWithAggregatesInputObjectSchema.optional(), take: z.number().optional(), skip: z.number().optional(), by: z.array(CallImportScalarFieldEnumSchema), _count: z.union([ z.literal(true), CallImportCountAggregateInputObjectSchema ]).optional(), _min: CallImportMinAggregateInputObjectSchema.optional(), _max: CallImportMaxAggregateInputObjectSchema.optional(), _avg: CallImportAvgAggregateInputObjectSchema.optional(), _sum: CallImportSumAggregateInputObjectSchema.optional() }).strict() as unknown as z.ZodType<Prisma.CallImportGroupByArgs>;
+
+export const CallImportGroupByZodSchema = z.object({ where: CallImportWhereInputObjectSchema.optional(), orderBy: z.union([CallImportOrderByWithAggregationInputObjectSchema, CallImportOrderByWithAggregationInputObjectSchema.array()]).optional(), having: CallImportScalarWhereWithAggregatesInputObjectSchema.optional(), take: z.number().optional(), skip: z.number().optional(), by: z.array(CallImportScalarFieldEnumSchema), _count: z.union([ z.literal(true), CallImportCountAggregateInputObjectSchema ]).optional(), _min: CallImportMinAggregateInputObjectSchema.optional(), _max: CallImportMaxAggregateInputObjectSchema.optional(), _avg: CallImportAvgAggregateInputObjectSchema.optional(), _sum: CallImportSumAggregateInputObjectSchema.optional() }).strict();

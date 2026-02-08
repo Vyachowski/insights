@@ -1,0 +1,14 @@
+import type { Prisma } from '../../../server/generated/prisma/client';
+import * as z from 'zod';
+import { ExpenseOrderByWithRelationInputObjectSchema as ExpenseOrderByWithRelationInputObjectSchema } from './objects/ExpenseOrderByWithRelationInput.schema';
+import { ExpenseWhereInputObjectSchema as ExpenseWhereInputObjectSchema } from './objects/ExpenseWhereInput.schema';
+import { ExpenseWhereUniqueInputObjectSchema as ExpenseWhereUniqueInputObjectSchema } from './objects/ExpenseWhereUniqueInput.schema';
+import { ExpenseCountAggregateInputObjectSchema as ExpenseCountAggregateInputObjectSchema } from './objects/ExpenseCountAggregateInput.schema';
+import { ExpenseMinAggregateInputObjectSchema as ExpenseMinAggregateInputObjectSchema } from './objects/ExpenseMinAggregateInput.schema';
+import { ExpenseMaxAggregateInputObjectSchema as ExpenseMaxAggregateInputObjectSchema } from './objects/ExpenseMaxAggregateInput.schema';
+import { ExpenseAvgAggregateInputObjectSchema as ExpenseAvgAggregateInputObjectSchema } from './objects/ExpenseAvgAggregateInput.schema';
+import { ExpenseSumAggregateInputObjectSchema as ExpenseSumAggregateInputObjectSchema } from './objects/ExpenseSumAggregateInput.schema';
+
+export const ExpenseAggregateSchema: z.ZodType<Prisma.ExpenseAggregateArgs> = z.object({ orderBy: z.union([ExpenseOrderByWithRelationInputObjectSchema, ExpenseOrderByWithRelationInputObjectSchema.array()]).optional(), where: ExpenseWhereInputObjectSchema.optional(), cursor: ExpenseWhereUniqueInputObjectSchema.optional(), take: z.number().optional(), skip: z.number().optional(), _count: z.union([ z.literal(true), ExpenseCountAggregateInputObjectSchema ]).optional(), _min: ExpenseMinAggregateInputObjectSchema.optional(), _max: ExpenseMaxAggregateInputObjectSchema.optional(), _avg: ExpenseAvgAggregateInputObjectSchema.optional(), _sum: ExpenseSumAggregateInputObjectSchema.optional() }).strict() as unknown as z.ZodType<Prisma.ExpenseAggregateArgs>;
+
+export const ExpenseAggregateZodSchema = z.object({ orderBy: z.union([ExpenseOrderByWithRelationInputObjectSchema, ExpenseOrderByWithRelationInputObjectSchema.array()]).optional(), where: ExpenseWhereInputObjectSchema.optional(), cursor: ExpenseWhereUniqueInputObjectSchema.optional(), take: z.number().optional(), skip: z.number().optional(), _count: z.union([ z.literal(true), ExpenseCountAggregateInputObjectSchema ]).optional(), _min: ExpenseMinAggregateInputObjectSchema.optional(), _max: ExpenseMaxAggregateInputObjectSchema.optional(), _avg: ExpenseAvgAggregateInputObjectSchema.optional(), _sum: ExpenseSumAggregateInputObjectSchema.optional() }).strict();

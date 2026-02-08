@@ -3,7 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 
 import { PrismaService } from 'src/database/prisma.service';
 import * as argon2 from 'argon2';
-import { User } from 'generated/prisma/client';
+import { User, UserStatus } from 'generated/prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -16,7 +16,7 @@ export class AuthService {
     const payload = {
       email: user.email,
       sub: user.id,
-      isAdmin: user.isAdmin,
+      role: user.role,
     };
 
     return {
@@ -27,7 +27,7 @@ export class AuthService {
   async validateUser(email: string, password: string) {
     const user = await this.prismaService.user.findUnique({ where: { email } });
 
-    if (!user || !user.isActive) {
+    if (!user || user.status !== UserStatus.ACTIVE) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
