@@ -1,5 +1,6 @@
 import fs from "fs/promises";
 import config from "../config/config";
+import { createResultMessage } from "./utils/create-result-mesage";
 
 interface Message {
   id: string;
@@ -39,6 +40,8 @@ export async function createRevenueCSV() {
 
   await fs.writeFile(outputFilePath, csvContent, "utf-8");
 
-  console.log(`✓ Конвертировано ${csvData.length} записей`);
-  console.log(`✓ CSV сохранён в ${outputFilePath}`);
+  return {
+    data: rows,
+    message: createResultMessage("Revenue", rows.length, outputFilePath),
+  };
 }

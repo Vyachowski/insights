@@ -28,15 +28,21 @@ async function app(logger = console.log) {
 
   const cities = await createCitiesCSV();
   logger(cities.message, breaker);
+
   const sites = await createSitesCSV();
   logger(sites.message, breaker);
+
   const calls = await createCallsCSV(cities.data);
   logger(calls.message, breaker);
 
-  // TODO: RESUME HERE!!!
-  await createSiteMetricsCSV(sites.data);
-  await createRevenueCSV();
-  await createExpensesCSV();
+  const metrics = await createSiteMetricsCSV(sites.data);
+  logger(metrics.message, breaker);
+
+  const revenue = await createRevenueCSV();
+  logger(revenue.message, breaker);
+
+  const expenses = await createExpensesCSV();
+  logger(expenses.message, breaker);
 }
 
 await app();

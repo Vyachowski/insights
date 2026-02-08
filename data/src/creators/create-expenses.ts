@@ -1,6 +1,6 @@
 import fs from "fs/promises";
-import path from "path";
 import config from "../config/config";
+import { createResultMessage } from "./utils/create-result-mesage";
 
 enum ExpenseType {
   Hosting = "hosting",
@@ -42,9 +42,6 @@ const hostingAmount = (date: Date) =>
 export async function createExpensesCSV() {
   const filePath = config.paths.output.expenses;
 
-  await fs.mkdir(path.dirname(filePath), { recursive: true });
-  await fs.rm(filePath, { force: true });
-
   const cityIds = await readCityIds();
 
   const months = getMonths(
@@ -71,4 +68,9 @@ export async function createExpensesCSV() {
   }
 
   await fs.writeFile(filePath, lines.join("\n"));
+
+  return {
+    data: lines,
+    message: createResultMessage("Expenses", lines.length, filePath),
+  };
 }
