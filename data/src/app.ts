@@ -35,7 +35,7 @@ async function app(logger = console.log) {
   const calls = await createCallsCSV(cities.data);
   logger(calls.message, breaker);
 
-  const metrics = await createSiteMetricsCSV(sites.data, { source: "backup" });
+  const metrics = await createSiteMetricsCSV(sites.data);
   logger(metrics.message, breaker);
 
   const revenue = await createRevenueCSV();
