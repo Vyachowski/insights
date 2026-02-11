@@ -1,6 +1,12 @@
 import config from './config/config';
 import { checkDatabaseConnection, checkFilesExistence } from './utils/checkers';
-import { seedCalls, seedCities, seedSites, seedUsers } from './utils/seeders';
+import {
+  seedCalls,
+  seedCities,
+  seedRevenue,
+  seedSites,
+  seedUsers,
+} from './utils/seeders';
 
 const paths = config.paths;
 
@@ -16,7 +22,7 @@ const main = async (
   options = { logger: console.log },
 ) => {
   // const { cities, sites, calls, revenue, siteMetrics, expenses } = paths;
-  const { cities, sites, calls } = paths;
+  const { cities, sites, calls, revenue } = paths;
   const logger = options.logger;
 
   // SECTION: Checks
@@ -39,8 +45,8 @@ const main = async (
   logger('✅ All sites succesfully imported to database.');
   await seedCalls(calls);
   logger('✅ All calls succesfully imported to database.');
-  // await seedRevenue(revenue);
-  // logger('✅ All revenue succesfully imported to database.');
+  await seedRevenue(revenue);
+  logger('✅ All revenue succesfully imported to database.');
   // await seedSiteMetrics(siteMetrics);
   // logger('✅ All site metrics succesfully imported to database.');
   // await seedExpenses(expenses);

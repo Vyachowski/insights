@@ -14,6 +14,7 @@ import { RoleSchema } from '@shared/schema/schemas';
 import {
   normalizeCallImportData,
   normalizeCities,
+  normalizeRevenue,
   normalizeSites,
 } from './normalizers';
 
@@ -37,25 +38,19 @@ export async function seedSites(sitesPath: string): Promise<void> {
 }
 
 export async function seedCalls(callsPath: string): Promise<void> {
-  const parsedCallsData = parseCSV(callsPath);
-  const normalizedCalls = normalizeCallImportData(parsedCallsData);
-  const validatedCallsData = validateCallsData(normalizedCalls);
+  const callsImport = parseCSV(callsPath);
+  const normalizedCalls = normalizeCallImportData(callsImport);
+  const validatedCalls = validateCallsData(normalizedCalls);
 
-  await prisma.callImport.createMany(validatedCallsData);
+  await prisma.callImport.createMany(validatedCalls);
 }
 
 export async function seedRevenue(revenuePath: string): Promise<void> {
-  const revenueData = parseCSV(revenuePath);
-  const validatedRevenueData = validateRevenuesData(revenueData);
+  const revenueImport = parseCSV(revenuePath);
+  const normalizedRevenue = normalizeRevenue(revenueImport);
+  const validatedRevenue = validateRevenuesData(normalizedRevenue);
 
-  await prisma.revenue.createMany({
-    data: validatedRevenueData.map(({ city_id, date, amount }) => ({
-      city_id: city_id ? city_id : null,
-      date: new Date(date),
-      amount: amount,
-    })),
-    skipDuplicates: true,
-  });
+  await prisma.revenue.createMany(validatedRevenue);
 }
 
 export async function seedSiteMetrics(siteMetricsPath: string): Promise<void> {
@@ -75,19 +70,15 @@ export async function seedSiteMetrics(siteMetricsPath: string): Promise<void> {
   }
 }
 
-export async function seedExpenses(expensesPath: string): Promise<void> {
-  const expensesData = parseCSV(expensesPath);
-  const validatedExpensesData = validateRevenuesData(expensesData);
+// export async function seedExpenses(expensesPath: string): Promise<void> {
+//   const expensesData = parseCSV(expensesPath);
+//   const validatedExpensesData = validateRevenuesData(expensesData);
 
-  await prisma.revenue.createMany({
-    data: validatedExpensesData.map(({ city_id, date, amount }) => ({
-      city_id: city_id ? city_id : null,
-      date: new Date(date),
-      amount,
-    })),
-    skipDuplicates: true,
-  });
-}
+//   await prisma.expense.createMany({
+//     data: validatedExpensesData,
+//     skipDuplicates: true,
+//   });
+// }
 
 export async function seedUsers(): Promise<void> {
   const {

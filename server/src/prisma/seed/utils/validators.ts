@@ -1,33 +1,13 @@
 import {
   CallImportCreateManyZodSchema,
   CityCreateManySchema,
+  ExpenseCreateManyZodSchema,
+  RevenueCreateManyZodSchema,
   SiteCreateManySchema,
 } from '@shared/schema/schemas';
 import * as z from 'zod';
 
 // Schemas
-
-const Revenue = z.object({
-  city_id: z.preprocess((val) => {
-    if (val === '' || val == null) return null;
-    return Number(val);
-  }, z.number().nullable()),
-  date: z.coerce.date(),
-  amount: z.coerce.number().positive(),
-});
-
-type Revenue = z.infer<typeof Revenue>;
-
-const Expense = z.object({
-  city_id: z.coerce.number().int().positive().nullable(),
-  date: z.coerce.date(),
-  amount: z.coerce.number().positive(),
-  type: z.string().min(1),
-  comment: z.string().optional(),
-});
-
-type Expense = z.infer<typeof Expense>;
-
 const SiteMetric = z.object({
   site_id: z.coerce.number().int().positive(),
   date: z.string().refine((val) => !isNaN(Date.parse(val)), {
@@ -85,24 +65,40 @@ export const validateCallsData = (
 };
 
 export const validateRevenuesData = (
-  revenuesData: Record<string, string | number>[],
+  revenuesData: Record<string, string | null | Date | number>[],
 ) => {
   if (revenuesData.length < 1) {
     throw new Error('Нет данных доходов для валидации.');
   }
 
-  return revenuesData.map((revenue) => Revenue.parse(revenue));
+  return RevenueCreateManyZodSchema.parse({
+    data: revenuesData,
+    skipDuplicates: true,
+  });
 };
 
 export const validateExpensesData = (
-  expensesData: { [k: string]: string | undefined }[],
+  expensesData: Record<string, string | number | Date>[],
 ) => {
   if (expensesData.length < 1) {
-    throw new Error('Нет данных расходов для валидации.');
+    throw new Error('Нет данных доходов для валидации.');
   }
 
-  return expensesData.map((expense) => Expense.parse(expense));
+  return ExpenseCreateManyZodSchema.parse({
+    data: expensesData,
+    skipDuplicates: true,
+  });
 };
+
+// export const validateExpensesData = (
+//   expensesData: { [k: string]: string | undefined }[],
+// ) => {
+//   if (expensesData.length < 1) {
+//     throw new Error('Нет данных расходов для валидации.');
+//   }
+
+//   return expensesData.map((expense) => Expense.parse(expense));
+// };
 
 export function validateSiteMetricsData(
   siteMetricData: { [k: string]: string | undefined }[],
