@@ -4,26 +4,26 @@ import {
   validateCitiesData,
   validateExpensesData,
   validateRevenuesData,
-  validateSiteMetricsData,
+  validateSiteMetrics,
   validateSitesData,
 } from './validators';
-import * as argon2 from 'argon2';
 
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from 'generated/prisma/client';
-import { RoleSchema } from '@shared/schema/schemas';
 import {
   normalizeCallImportData,
   normalizeCities,
   normalizeExpenses,
   normalizeRevenue,
+  normalizeSiteMetrics,
   normalizeSites,
 } from './normalizers';
+import { createUsers } from './creators';
 
 const pool = new PrismaPg({ connectionString: process.env.DB_URL });
 const prisma = new PrismaClient({ adapter: pool });
 
-export async function seedCities(citiesPath: string): Promise<void> {
+export async function seedCities(citiesPath: string) {
   const citiesImport = parseCSV(citiesPath);
   const normalizedCities = normalizeCities(citiesImport);
   const validatedCities = validateCitiesData(normalizedCities);
@@ -31,7 +31,7 @@ export async function seedCities(citiesPath: string): Promise<void> {
   await prisma.city.createMany(validatedCities);
 }
 
-export async function seedSites(sitesPath: string): Promise<void> {
+export async function seedSites(sitesPath: string) {
   const sitesImport = parseCSV(sitesPath);
   const normalizedSites = normalizeSites(sitesImport);
   const validatedSites = validateSitesData(normalizedSites);
@@ -39,7 +39,7 @@ export async function seedSites(sitesPath: string): Promise<void> {
   await prisma.site.createMany(validatedSites);
 }
 
-export async function seedCalls(callsPath: string): Promise<void> {
+export async function seedCalls(callsPath: string) {
   const callsImport = parseCSV(callsPath);
   const normalizedCalls = normalizeCallImportData(callsImport);
   const validatedCalls = validateCallsData(normalizedCalls);
@@ -47,7 +47,7 @@ export async function seedCalls(callsPath: string): Promise<void> {
   await prisma.callImport.createMany(validatedCalls);
 }
 
-export async function seedRevenue(revenuePath: string): Promise<void> {
+export async function seedRevenue(revenuePath: string) {
   const revenueImport = parseCSV(revenuePath);
   const normalizedRevenue = normalizeRevenue(revenueImport);
   const validatedRevenue = validateRevenuesData(normalizedRevenue);
@@ -55,7 +55,7 @@ export async function seedRevenue(revenuePath: string): Promise<void> {
   await prisma.revenue.createMany(validatedRevenue);
 }
 
-export async function seedExpenses(expensesPath: string): Promise<void> {
+export async function seedExpenses(expensesPath: string) {
   const expensesData = parseCSV(expensesPath);
   const normalizedExpenses = normalizeExpenses(expensesData);
   const validatedExpensesData = validateExpensesData(normalizedExpenses);
@@ -63,81 +63,18 @@ export async function seedExpenses(expensesPath: string): Promise<void> {
   await prisma.expense.createMany(validatedExpensesData);
 }
 
-export async function seedSiteMetrics(siteMetricsPath: string): Promise<void> {
+export async function seedSiteMetrics(siteMetricsPath: string) {
   const siteMetricsData = parseCSV(siteMetricsPath);
-  const validatedMetricsData = validateSiteMetricsData(siteMetricsData);
+  const normalizedSiteMetrics = normalizeSiteMetrics(siteMetricsData);
+  const validatedSiteMetrics = validateSiteMetrics(normalizedSiteMetrics);
 
-  const BATCH_SIZE = 1000;
-  const totalMetrics = validatedMetricsData.length;
-
-  for (let i = 0; i < totalMetrics; i += BATCH_SIZE) {
-    const batch = validatedMetricsData.slice(i, i + BATCH_SIZE);
-
-    await prisma.siteMetric.createMany({
-      data: batch,
-      skipDuplicates: true,
-    });
-  }
+  await prisma.siteMetric.createMany(validatedSiteMetrics);
 }
 
-export async function seedUsers(): Promise<void> {
-  const {
-    ADMIN_EMAIL: adminEmail,
-    ADMIN_PASSWORD: adminPassword,
-    ADMIN_NAME: adminName,
-    ADMIN_LASTNAME: adminLastname,
-    USER_EMAIL: userEmail,
-    USER_PASSWORD: userPassword,
-    USER_NAME: userName,
-    USER_LASTNAME: userLastname,
-  } = process.env;
+export async function seedUsers() {
+  const createdUsers = await createUsers();
 
-  if (!adminEmail || !adminPassword || !userEmail || !userPassword) {
-    throw new Error(
-      '❌ ADMIN_EMAIL, ADMIN_PASSWORD, USER_EMAIL and USER_PASSWORD must be set in environment variables',
-    );
-  }
-
-  const existingAdmin = await prisma.user.findUnique({
-    where: { email: adminEmail },
+  await prisma.user.createMany({
+    data: createdUsers,
   });
-
-  const existingUser = await prisma.user.findUnique({
-    where: { email: userEmail },
-  });
-
-  if (!existingAdmin) {
-    const hashedAdminPassword = await argon2.hash(adminPassword);
-    await prisma.user.create({
-      data: {
-        email: adminEmail,
-        password: hashedAdminPassword,
-        role: RoleSchema.enum.ADMIN,
-        firstName: adminName,
-        lastName: adminLastname,
-      },
-    });
-    console.log(`✅ Admin user created with email: ${adminEmail}`);
-  } else {
-    console.log(
-      `ℹ️ Admin user with email ${adminEmail} already exists. Skipping.`,
-    );
-  }
-
-  if (!existingUser) {
-    const hashedUserPassword = await argon2.hash(userPassword);
-    await prisma.user.create({
-      data: {
-        email: userEmail,
-        password: hashedUserPassword,
-        firstName: userName,
-        lastName: userLastname,
-      },
-    });
-    console.log(`✅ Regular user created with email: ${userEmail}`);
-  } else {
-    console.log(
-      `ℹ️ Regular user with email ${userEmail} already exists. Skipping.`,
-    );
-  }
 }

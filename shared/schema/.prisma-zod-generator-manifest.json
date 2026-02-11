@@ -1,7 +1,7 @@
 {
   "version": "1.0",
   "generatorVersion": "0.0.1",
-  "generatedAt": "2026-02-11T12:45:41.985Z",
+  "generatedAt": "2026-02-11T13:18:04.828Z",
   "outputPath": "/Users/slava/Projects/ses-data/shared/schema",
   "files": [
     "schemas/enums/TransactionIsolationLevel.schema.ts",

@@ -42,3 +42,22 @@ export function normalizeExpenses(expensesImport: CSVImport) {
     amount: Number(exp.amount),
   }));
 }
+
+export function normalizeSiteMetrics(siteMetricsImport: CSVImport) {
+  return siteMetricsImport.map((metrics) => ({
+    ...metrics,
+    site_id: Number(metrics.site_id),
+    yandex_users: Number(metrics.yandex_users),
+    google_users: Number(metrics.google_users),
+    other_users: Number(metrics.other_users),
+    visit_duration_yandex_in_sec: Number(metrics.visit_duration_yandex_in_sec),
+    visit_duration_google_in_sec: Number(metrics.visit_duration_google_in_sec),
+    visit_duration_other_in_sec: Number(metrics.visit_duration_other_in_sec),
+    bounce_yandex: Number(metrics.bounce_yandex),
+    bounce_google: Number(metrics.bounce_google),
+    bounce_other: Number(metrics.bounce_other),
+    leads_yandex: Number(metrics.leads_yandex),
+    leads_google: Number(metrics.leads_google),
+    leads_other: Number(metrics.leads_other),
+  }));
+}
