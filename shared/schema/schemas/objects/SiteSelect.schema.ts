@@ -10,6 +10,7 @@ const makeSchema = () => z.object({
   id: z.boolean().optional(),
   city_id: z.boolean().optional(),
   name: z.boolean().optional(),
+  group: z.boolean().optional(),
   url: z.boolean().optional(),
   yandex_counter_id: z.boolean().optional(),
   google_counter_id: z.boolean().optional(),

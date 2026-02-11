@@ -11,32 +11,29 @@ import * as argon2 from 'argon2';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from 'generated/prisma/client';
 import { RoleSchema } from '@shared/schema/schemas';
-import { normalizeCallImportData } from './normalizers';
+import {
+  normalizeCallImportData,
+  normalizeCities,
+  normalizeSites,
+} from './normalizers';
 
 const pool = new PrismaPg({ connectionString: process.env.DB_URL });
 const prisma = new PrismaClient({ adapter: pool });
 
 export async function seedCities(citiesPath: string): Promise<void> {
-  const citiesData = parseCSV(citiesPath);
-  const validatedCitiesData = validateCitiesData(citiesData);
+  const citiesImport = parseCSV(citiesPath);
+  const normalizedCities = normalizeCities(citiesImport);
+  const validatedCities = validateCitiesData(normalizedCities);
 
-  for (const city of validatedCitiesData) {
-    await prisma.city.upsert({
-      where: { id: city.id },
-      update: city,
-      create: city,
-    });
-  }
+  await prisma.city.createMany(validatedCities);
 }
 
 export async function seedSites(sitesPath: string): Promise<void> {
-  const sitesData = parseCSV(sitesPath);
-  const validatedSitesData = validateSitesData(sitesData);
+  const sitesImport = parseCSV(sitesPath);
+  const normalizedSites = normalizeSites(sitesImport);
+  const validatedSites = validateSitesData(normalizedSites);
 
-  await prisma.site.createMany({
-    data: validatedSitesData,
-    skipDuplicates: true,
-  });
+  await prisma.site.createMany(validatedSites);
 }
 
 export async function seedCalls(callsPath: string): Promise<void> {

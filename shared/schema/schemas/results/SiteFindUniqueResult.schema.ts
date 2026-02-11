@@ -2,7 +2,8 @@ import * as z from 'zod';
 export const SiteFindUniqueResultSchema = z.nullable(z.object({
   id: z.number().int(),
   city_id: z.number().int(),
-  name: z.string(),
+  name: z.string().optional(),
+  group: z.string().optional(),
   url: z.string(),
   yandex_counter_id: z.string(),
   google_counter_id: z.string().optional(),

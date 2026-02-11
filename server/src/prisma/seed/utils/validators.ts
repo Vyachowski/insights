@@ -1,28 +1,11 @@
-import { CallImportCreateManyZodSchema } from '@shared/schema/schemas';
+import {
+  CallImportCreateManyZodSchema,
+  CityCreateManySchema,
+  SiteCreateManySchema,
+} from '@shared/schema/schemas';
 import * as z from 'zod';
 
 // Schemas
-const City = z.object({
-  id: z.coerce.number().positive(),
-  code: z.string().min(1),
-  slug: z.string().min(1),
-  name: z.string().min(1),
-  population: z.coerce.number().positive(),
-});
-
-type City = z.infer<typeof City>;
-
-const Site = z.object({
-  city_id: z.coerce.number().positive().min(1),
-  name: z.string().min(1),
-  url: z.string().min(1),
-  yandex_counter_id: z.string(),
-  google_counter_id: z.string(),
-  yandex_tag_manager_id: z.string(),
-  google_tag_manager_id: z.string(),
-});
-
-type Site = z.infer<typeof Site>;
 
 const Revenue = z.object({
   city_id: z.preprocess((val) => {
@@ -66,29 +49,30 @@ const SiteMetric = z.object({
 
 type SiteMetric = z.infer<typeof SiteMetric>;
 
-// Validators
 export const validateCitiesData = (
-  citiesData: { [k: string]: string | undefined }[],
-) => {
-  if (citiesData.length < 1)
-    throw new Error('Нет данных города для валидации.');
-
-  return citiesData.map((city) => City.parse(city));
-};
-
-export const validateSitesData = (
-  sitesData: { [k: string]: string | undefined }[],
+  sitesData: Record<string, string | number>[],
 ) => {
   if (sitesData.length < 1) throw new Error('Нет данных сайта для валидации.');
 
-  return sitesData.map((site) => Site.parse(site));
+  return CityCreateManySchema.parse({
+    data: sitesData,
+    skipDuplicates: true,
+  });
 };
 
-// === Calls Import
+export const validateSitesData = (
+  sitesData: Record<string, string | number>[],
+) => {
+  if (sitesData.length < 1) throw new Error('Нет данных сайта для валидации.');
+
+  return SiteCreateManySchema.parse({
+    data: sitesData,
+    skipDuplicates: true,
+  });
+};
+
 export const validateCallsData = (
-  callsData: {
-    [k: string]: string | number;
-  }[],
+  callsData: Record<string, string | number>[],
 ) => {
   if (callsData.length < 1) {
     throw new Error('Нет данных звонков для валидации.');
@@ -101,7 +85,7 @@ export const validateCallsData = (
 };
 
 export const validateRevenuesData = (
-  revenuesData: { [k: string]: string | undefined }[],
+  revenuesData: Record<string, string | number>[],
 ) => {
   if (revenuesData.length < 1) {
     throw new Error('Нет данных доходов для валидации.');

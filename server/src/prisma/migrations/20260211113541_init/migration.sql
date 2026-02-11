@@ -36,7 +36,8 @@ CREATE TABLE "City" (
 CREATE TABLE "Site" (
     "id" SERIAL NOT NULL,
     "city_id" INTEGER NOT NULL,
-    "name" TEXT NOT NULL,
+    "name" TEXT,
+    "group" TEXT,
     "url" TEXT NOT NULL,
     "yandex_counter_id" TEXT NOT NULL,
     "google_counter_id" TEXT,

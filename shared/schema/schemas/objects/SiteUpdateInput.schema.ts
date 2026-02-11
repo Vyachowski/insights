@@ -1,7 +1,7 @@
 import * as z from 'zod';
 import type { Prisma } from '../../../../server/generated/prisma/client';
-import { StringFieldUpdateOperationsInputObjectSchema as StringFieldUpdateOperationsInputObjectSchema } from './StringFieldUpdateOperationsInput.schema';
 import { NullableStringFieldUpdateOperationsInputObjectSchema as NullableStringFieldUpdateOperationsInputObjectSchema } from './NullableStringFieldUpdateOperationsInput.schema';
+import { StringFieldUpdateOperationsInputObjectSchema as StringFieldUpdateOperationsInputObjectSchema } from './StringFieldUpdateOperationsInput.schema';
 import { DateTimeFieldUpdateOperationsInputObjectSchema as DateTimeFieldUpdateOperationsInputObjectSchema } from './DateTimeFieldUpdateOperationsInput.schema';
 import { CityUpdateOneRequiredWithoutSitesNestedInputObjectSchema as CityUpdateOneRequiredWithoutSitesNestedInputObjectSchema } from './CityUpdateOneRequiredWithoutSitesNestedInput.schema';
 import { CallUpdateManyWithoutSiteNestedInputObjectSchema as CallUpdateManyWithoutSiteNestedInputObjectSchema } from './CallUpdateManyWithoutSiteNestedInput.schema';
@@ -9,7 +9,8 @@ import { CallImportUpdateManyWithoutSiteNestedInputObjectSchema as CallImportUpd
 import { SiteMetricUpdateManyWithoutSiteNestedInputObjectSchema as SiteMetricUpdateManyWithoutSiteNestedInputObjectSchema } from './SiteMetricUpdateManyWithoutSiteNestedInput.schema'
 
 const makeSchema = () => z.object({
-  name: z.union([z.string(), z.lazy(() => StringFieldUpdateOperationsInputObjectSchema)]).optional(),
+  name: z.union([z.string(), z.lazy(() => NullableStringFieldUpdateOperationsInputObjectSchema)]).optional().nullable(),
+  group: z.union([z.string(), z.lazy(() => NullableStringFieldUpdateOperationsInputObjectSchema)]).optional().nullable(),
   url: z.union([z.string(), z.lazy(() => StringFieldUpdateOperationsInputObjectSchema)]).optional(),
   yandex_counter_id: z.union([z.string(), z.lazy(() => StringFieldUpdateOperationsInputObjectSchema)]).optional(),
   google_counter_id: z.union([z.string(), z.lazy(() => NullableStringFieldUpdateOperationsInputObjectSchema)]).optional().nullable(),

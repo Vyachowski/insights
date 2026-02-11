@@ -1,8 +1,8 @@
 import * as z from 'zod';
 import type { Prisma } from '../../../../server/generated/prisma/client';
 import { IntFilterObjectSchema as IntFilterObjectSchema } from './IntFilter.schema';
-import { StringFilterObjectSchema as StringFilterObjectSchema } from './StringFilter.schema';
 import { StringNullableFilterObjectSchema as StringNullableFilterObjectSchema } from './StringNullableFilter.schema';
+import { StringFilterObjectSchema as StringFilterObjectSchema } from './StringFilter.schema';
 import { DateTimeFilterObjectSchema as DateTimeFilterObjectSchema } from './DateTimeFilter.schema';
 import { CityScalarRelationFilterObjectSchema as CityScalarRelationFilterObjectSchema } from './CityScalarRelationFilter.schema';
 import { CityWhereInputObjectSchema as CityWhereInputObjectSchema } from './CityWhereInput.schema';
@@ -16,7 +16,8 @@ const sitewhereinputSchema = z.object({
   NOT: z.union([z.lazy(() => SiteWhereInputObjectSchema), z.lazy(() => SiteWhereInputObjectSchema).array()]).optional(),
   id: z.union([z.lazy(() => IntFilterObjectSchema), z.number().int()]).optional(),
   city_id: z.union([z.lazy(() => IntFilterObjectSchema), z.number().int()]).optional(),
-  name: z.union([z.lazy(() => StringFilterObjectSchema), z.string()]).optional(),
+  name: z.union([z.lazy(() => StringNullableFilterObjectSchema), z.string()]).optional().nullable(),
+  group: z.union([z.lazy(() => StringNullableFilterObjectSchema), z.string()]).optional().nullable(),
   url: z.union([z.lazy(() => StringFilterObjectSchema), z.string()]).optional(),
   yandex_counter_id: z.union([z.lazy(() => StringFilterObjectSchema), z.string()]).optional(),
   google_counter_id: z.union([z.lazy(() => StringNullableFilterObjectSchema), z.string()]).optional().nullable(),

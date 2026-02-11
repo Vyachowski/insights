@@ -5,7 +5,8 @@ import type { Prisma } from '../../../../server/generated/prisma/client';
 const makeSchema = () => z.object({
   id: z.number().int().optional(),
   city_id: z.number().int(),
-  name: z.string(),
+  name: z.string().optional().nullable(),
+  group: z.string().optional().nullable(),
   url: z.string(),
   yandex_counter_id: z.string(),
   google_counter_id: z.string().optional().nullable(),

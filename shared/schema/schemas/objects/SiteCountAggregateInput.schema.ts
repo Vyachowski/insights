@@ -6,6 +6,7 @@ const makeSchema = () => z.object({
   id: z.literal(true).optional(),
   city_id: z.literal(true).optional(),
   name: z.literal(true).optional(),
+  group: z.literal(true).optional(),
   url: z.literal(true).optional(),
   yandex_counter_id: z.literal(true).optional(),
   google_counter_id: z.literal(true).optional(),

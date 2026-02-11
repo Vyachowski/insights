@@ -3,7 +3,8 @@ import * as z from 'zod';
 export const SiteModelSchema = z.object({
     id: z.number().int(),
     city_id: z.number().int(),
-    name: z.string(),
+    name: z.string().nullable(),
+    group: z.string().nullable(),
     url: z.string(),
     yandex_counter_id: z.string(),
     google_counter_id: z.string().nullable(),

@@ -11,7 +11,8 @@ import { SiteSumOrderByAggregateInputObjectSchema as SiteSumOrderByAggregateInpu
 const makeSchema = () => z.object({
   id: SortOrderSchema.optional(),
   city_id: SortOrderSchema.optional(),
-  name: SortOrderSchema.optional(),
+  name: z.union([SortOrderSchema, z.lazy(() => SortOrderInputObjectSchema)]).optional(),
+  group: z.union([SortOrderSchema, z.lazy(() => SortOrderInputObjectSchema)]).optional(),
   url: SortOrderSchema.optional(),
   yandex_counter_id: SortOrderSchema.optional(),
   google_counter_id: z.union([SortOrderSchema, z.lazy(() => SortOrderInputObjectSchema)]).optional(),

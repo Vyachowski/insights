@@ -5,7 +5,8 @@ import { CallCreateNestedManyWithoutSiteInputObjectSchema as CallCreateNestedMan
 import { CallImportCreateNestedManyWithoutSiteInputObjectSchema as CallImportCreateNestedManyWithoutSiteInputObjectSchema } from './CallImportCreateNestedManyWithoutSiteInput.schema'
 
 const makeSchema = () => z.object({
-  name: z.string(),
+  name: z.string().optional().nullable(),
+  group: z.string().optional().nullable(),
   url: z.string(),
   yandex_counter_id: z.string(),
   google_counter_id: z.string().optional().nullable(),
