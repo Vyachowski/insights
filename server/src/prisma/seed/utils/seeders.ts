@@ -42,10 +42,7 @@ export async function seedCalls(callsPath: string): Promise<void> {
   const callsData = parseCSV(callsPath);
   const validatedCallsData = validateCallsData(callsData);
 
-  await prisma.callImport.createMany({
-    data: validatedCallsData,
-    skipDuplicates: true,
-  });
+  await prisma.callImport.createMany(validatedCallsData);
 }
 
 export async function seedRevenue(revenuePath: string): Promise<void> {

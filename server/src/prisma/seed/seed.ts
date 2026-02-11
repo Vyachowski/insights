@@ -39,19 +39,19 @@ const main = async (
   logger('⏳ Seeding data...');
 
   await seedUsers();
-  logger('✅ Admin user succesfully created.');
+  logger('✅ Admin and User succesfully created.');
   await seedCities(cities);
   logger('✅ All cities succesfully imported to database.');
   await seedSites(sites);
   logger('✅ All sites succesfully imported to database.');
   await seedCalls(calls);
   logger('✅ All calls succesfully imported to database.');
-  await seedRevenue(revenue);
-  logger('✅ All revenue succesfully imported to database.');
-  await seedSiteMetrics(siteMetrics);
-  logger('✅ All site metrics succesfully imported to database.');
-  await seedExpenses(expenses);
-  logger('✅ All expenses succesfully imported to database.');
+  // await seedRevenue(revenue);
+  // logger('✅ All revenue succesfully imported to database.');
+  // await seedSiteMetrics(siteMetrics);
+  // logger('✅ All site metrics succesfully imported to database.');
+  // await seedExpenses(expenses);
+  // logger('✅ All expenses succesfully imported to database.');
 };
 
 main(paths).catch((e) => {

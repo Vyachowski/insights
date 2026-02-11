@@ -1,16 +1,22 @@
+-- CreateEnum
+CREATE TYPE "Role" AS ENUM ('USER', 'ADMIN');
+
+-- CreateEnum
+CREATE TYPE "UserStatus" AS ENUM ('ACTIVE', 'DEACTIVATED');
+
 -- CreateTable
-CREATE TABLE "users" (
+CREATE TABLE "User" (
     "id" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "password" TEXT NOT NULL,
-    "isAdmin" BOOLEAN NOT NULL DEFAULT false,
+    "role" "Role" NOT NULL DEFAULT 'USER',
     "firstName" TEXT,
     "lastName" TEXT,
-    "isActive" BOOLEAN NOT NULL DEFAULT true,
+    "status" "UserStatus" NOT NULL DEFAULT 'ACTIVE',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "users_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -64,19 +70,46 @@ CREATE TABLE "SiteMetric" (
 );
 
 -- CreateTable
-CREATE TABLE "Call" (
+CREATE TABLE "CallImport" (
     "id" SERIAL NOT NULL,
-    "city_id" INTEGER NOT NULL,
-    "date_time" TIMESTAMP(3) NOT NULL,
-    "caller_number" TEXT NOT NULL,
-    "region" TEXT NOT NULL,
-    "call_order" INTEGER NOT NULL,
+    "site_id" INTEGER NOT NULL,
+    "date" TIMESTAMP(3) NOT NULL,
+    "src" TEXT NOT NULL,
+    "region" TEXT,
+    "call_number" INTEGER NOT NULL,
     "class" TEXT,
-    "number_name" TEXT,
-    "project" TEXT NOT NULL,
-    "duration_in_sec" INTEGER,
+    "project_title" TEXT NOT NULL,
+    "adv_channel_name" TEXT NOT NULL,
+    "billsec" INTEGER NOT NULL,
     "comment" TEXT,
     "redirect_number" TEXT,
+    "source" TEXT NOT NULL DEFAULT 'csv',
+    "imported_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "CallImport_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Call" (
+    "id" SERIAL NOT NULL,
+    "site_id" INTEGER NOT NULL,
+    "gudok_id" INTEGER NOT NULL,
+    "project_id" INTEGER NOT NULL,
+    "project_title" TEXT NOT NULL,
+    "dst" TEXT NOT NULL,
+    "adv_channel_id" TEXT NOT NULL,
+    "adv_channel_name" TEXT NOT NULL,
+    "src" TEXT NOT NULL,
+    "duration" INTEGER NOT NULL,
+    "billsec" INTEGER NOT NULL,
+    "callstatus" TEXT NOT NULL,
+    "date" TIMESTAMP(3) NOT NULL,
+    "region" TEXT NOT NULL,
+    "call_number" INTEGER NOT NULL,
+    "audio" TEXT NOT NULL,
+    "source" TEXT NOT NULL DEFAULT 'webhook',
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "Call_pkey" PRIMARY KEY ("id")
 );
@@ -108,10 +141,10 @@ CREATE TABLE "Expense" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
+CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- CreateIndex
-CREATE INDEX "users_email_idx" ON "users"("email");
+CREATE INDEX "User_email_idx" ON "User"("email");
 
 -- CreateIndex
 CREATE INDEX "Site_city_id_idx" ON "Site"("city_id");
@@ -123,10 +156,13 @@ CREATE INDEX "SiteMetric_date_idx" ON "SiteMetric"("date");
 CREATE UNIQUE INDEX "SiteMetric_site_id_date_key" ON "SiteMetric"("site_id", "date");
 
 -- CreateIndex
-CREATE INDEX "Call_city_id_idx" ON "Call"("city_id");
+CREATE INDEX "CallImport_site_id_idx" ON "CallImport"("site_id");
 
 -- CreateIndex
-CREATE INDEX "Call_date_time_idx" ON "Call"("date_time");
+CREATE UNIQUE INDEX "Call_gudok_id_key" ON "Call"("gudok_id");
+
+-- CreateIndex
+CREATE INDEX "Call_site_id_idx" ON "Call"("site_id");
 
 -- CreateIndex
 CREATE INDEX "Revenue_date_idx" ON "Revenue"("date");
@@ -141,7 +177,10 @@ ALTER TABLE "Site" ADD CONSTRAINT "Site_city_id_fkey" FOREIGN KEY ("city_id") RE
 ALTER TABLE "SiteMetric" ADD CONSTRAINT "SiteMetric_site_id_fkey" FOREIGN KEY ("site_id") REFERENCES "Site"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Call" ADD CONSTRAINT "Call_city_id_fkey" FOREIGN KEY ("city_id") REFERENCES "City"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "CallImport" ADD CONSTRAINT "CallImport_site_id_fkey" FOREIGN KEY ("site_id") REFERENCES "Site"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Call" ADD CONSTRAINT "Call_site_id_fkey" FOREIGN KEY ("site_id") REFERENCES "Site"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Revenue" ADD CONSTRAINT "Revenue_city_id_fkey" FOREIGN KEY ("city_id") REFERENCES "City"("id") ON DELETE CASCADE ON UPDATE CASCADE;

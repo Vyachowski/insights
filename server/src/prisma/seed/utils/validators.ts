@@ -1,4 +1,4 @@
-import { CallImportInputSchema } from '@shared/schema/schemas';
+import { CallImportCreateManyZodSchema } from '@shared/schema/schemas';
 import * as z from 'zod';
 
 // Schemas
@@ -100,6 +100,18 @@ export const validateSitesData = (
   return sitesData.map((site) => Site.parse(site));
 };
 
+// === Calls Import
+function normalizeCallImportData(
+  callsImportData: { [k: string]: string | undefined }[],
+) {
+  return callsImportData.map((call) => ({
+    ...call,
+    site_id: Number(call.site_id),
+    call_number: Number(call.call_number),
+    billsec: Number(call.billsec),
+  }));
+}
+
 export const validateCallsData = (
   callsData: { [k: string]: string | undefined }[],
 ) => {
@@ -107,7 +119,12 @@ export const validateCallsData = (
     throw new Error('Нет данных звонков для валидации.');
   }
 
-  return callsData.map((call) => CallImportInputSchema.parse(call));
+  const normalizedCalls = normalizeCallImportData(callsData);
+
+  return CallImportCreateManyZodSchema.parse({
+    data: normalizedCalls,
+    skipDuplicates: true,
+  });
 };
 
 export const validateRevenuesData = (
