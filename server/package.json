@@ -18,12 +18,12 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "prisma:init": "prisma migrate dev --name init",
     "prisma:seed": "prisma db seed",
     "prisma:reset": "npx prisma migrate reset --force && prisma db seed",
-    "db:container:create": "tsx src/scripts/db/create-postgres-container.ts",
-    "db:container:remove": "tsx src/scripts/db/remove-postgres-container.ts",
-    "db:reset:hard": "colima start && npm run db:container:remove && npm run db:container:create && npm run prisma:reset"
+    "prisma:wipe": "if [ \"$CONFIRM\" != \"YES\" ]; then echo '❌ CONFIRM=YES required'; exit 1; fi && rm -rf prisma/migrations && prisma migrate dev --name init && prisma db seed",
+    "container:reset": "tsx src/scripts/db/remove-postgres-container.ts && tsx src/scripts/db/create-postgres-container.ts",
+    "db:reset": "colima start && npm run container:reset && npm run prisma:reset",
+    "db:wipe": "if [ \"$CONFIRM\" != \"YES\" ]; then echo '❌ CONFIRM=YES required'; exit 1; fi && colima start && npm run container:reset && npm run prisma:wipe"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
