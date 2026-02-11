@@ -11,7 +11,7 @@ async function readCityIds(): Promise<number[]> {
   const content = await fs.readFile(config.paths.output.cities, "utf-8");
 
   const [, ...lines] = content.split("\n");
-  console.log(lines);
+
   return lines
     .filter((line) => line.trim() !== "")
     .map((line) => line.split(",")[0])
