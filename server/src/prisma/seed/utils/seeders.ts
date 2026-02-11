@@ -2,6 +2,7 @@ import { parseCSV } from './parsers';
 import {
   validateCallsData,
   validateCitiesData,
+  validateExpensesData,
   validateRevenuesData,
   validateSiteMetricsData,
   validateSitesData,
@@ -14,6 +15,7 @@ import { RoleSchema } from '@shared/schema/schemas';
 import {
   normalizeCallImportData,
   normalizeCities,
+  normalizeExpenses,
   normalizeRevenue,
   normalizeSites,
 } from './normalizers';
@@ -53,6 +55,14 @@ export async function seedRevenue(revenuePath: string): Promise<void> {
   await prisma.revenue.createMany(validatedRevenue);
 }
 
+export async function seedExpenses(expensesPath: string): Promise<void> {
+  const expensesData = parseCSV(expensesPath);
+  const normalizedExpenses = normalizeExpenses(expensesData);
+  const validatedExpensesData = validateExpensesData(normalizedExpenses);
+
+  await prisma.expense.createMany(validatedExpensesData);
+}
+
 export async function seedSiteMetrics(siteMetricsPath: string): Promise<void> {
   const siteMetricsData = parseCSV(siteMetricsPath);
   const validatedMetricsData = validateSiteMetricsData(siteMetricsData);
@@ -69,16 +79,6 @@ export async function seedSiteMetrics(siteMetricsPath: string): Promise<void> {
     });
   }
 }
-
-// export async function seedExpenses(expensesPath: string): Promise<void> {
-//   const expensesData = parseCSV(expensesPath);
-//   const validatedExpensesData = validateRevenuesData(expensesData);
-
-//   await prisma.expense.createMany({
-//     data: validatedExpensesData,
-//     skipDuplicates: true,
-//   });
-// }
 
 export async function seedUsers(): Promise<void> {
   const {

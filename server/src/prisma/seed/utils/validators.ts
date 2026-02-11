@@ -78,7 +78,7 @@ export const validateRevenuesData = (
 };
 
 export const validateExpensesData = (
-  expensesData: Record<string, string | number | Date>[],
+  expensesData: Record<string, string | number | Date | null>[],
 ) => {
   if (expensesData.length < 1) {
     throw new Error('Нет данных доходов для валидации.');

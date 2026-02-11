@@ -33,3 +33,12 @@ export function normalizeRevenue(revenueImport: CSVImport) {
     amount: Number(rev.amount),
   }));
 }
+
+export function normalizeExpenses(expensesImport: CSVImport) {
+  return expensesImport.map((exp) => ({
+    ...exp,
+    date: new Date(exp.date),
+    city_id: exp.city_id ? Number(exp.city_id) : null,
+    amount: Number(exp.amount),
+  }));
+}

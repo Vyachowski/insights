@@ -6,6 +6,7 @@ import {
   seedRevenue,
   seedSites,
   seedUsers,
+  seedExpenses,
 } from './utils/seeders';
 
 const paths = config.paths;
@@ -22,7 +23,7 @@ const main = async (
   options = { logger: console.log },
 ) => {
   // const { cities, sites, calls, revenue, siteMetrics, expenses } = paths;
-  const { cities, sites, calls, revenue } = paths;
+  const { cities, sites, calls, revenue, expenses } = paths;
   const logger = options.logger;
 
   // SECTION: Checks
@@ -47,10 +48,10 @@ const main = async (
   logger('✅ All calls succesfully imported to database.');
   await seedRevenue(revenue);
   logger('✅ All revenue succesfully imported to database.');
+  await seedExpenses(expenses);
+  logger('✅ All expenses succesfully imported to database.');
   // await seedSiteMetrics(siteMetrics);
   // logger('✅ All site metrics succesfully imported to database.');
-  // await seedExpenses(expenses);
-  // logger('✅ All expenses succesfully imported to database.');
 };
 
 main(paths).catch((e) => {
