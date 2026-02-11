@@ -90,10 +90,16 @@ export async function seedExpenses(expensesPath: string): Promise<void> {
 }
 
 export async function seedUsers(): Promise<void> {
-  const adminEmail = process.env.ADMIN_EMAIL;
-  const adminPassword = process.env.ADMIN_PASSWORD;
-  const userEmail = process.env.USER_EMAIL;
-  const userPassword = process.env.USER_PASSWORD;
+  const {
+    ADMIN_EMAIL: adminEmail,
+    ADMIN_PASSWORD: adminPassword,
+    ADMIN_NAME: adminName,
+    ADMIN_LASTNAME: adminLastname,
+    USER_EMAIL: userEmail,
+    USER_PASSWORD: userPassword,
+    USER_NAME: userName,
+    USER_LASTNAME: userLastname,
+  } = process.env;
 
   if (!adminEmail || !adminPassword || !userEmail || !userPassword) {
     throw new Error(
@@ -116,7 +122,8 @@ export async function seedUsers(): Promise<void> {
         email: adminEmail,
         password: hashedAdminPassword,
         role: RoleSchema.enum.ADMIN,
-        firstName: 'Вячеслав',
+        firstName: adminName,
+        lastName: adminLastname,
       },
     });
     console.log(`✅ Admin user created with email: ${adminEmail}`);
@@ -132,7 +139,8 @@ export async function seedUsers(): Promise<void> {
       data: {
         email: userEmail,
         password: hashedUserPassword,
-        firstName: 'Сергей',
+        firstName: userName,
+        lastName: userLastname,
       },
     });
     console.log(`✅ Regular user created with email: ${userEmail}`);
