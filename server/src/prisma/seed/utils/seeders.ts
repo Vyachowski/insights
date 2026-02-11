@@ -11,6 +11,7 @@ import * as argon2 from 'argon2';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from 'generated/prisma/client';
 import { RoleSchema } from '@shared/schema/schemas';
+import { normalizeCallImportData } from './normalizers';
 
 const pool = new PrismaPg({ connectionString: process.env.DB_URL });
 const prisma = new PrismaClient({ adapter: pool });
@@ -39,8 +40,9 @@ export async function seedSites(sitesPath: string): Promise<void> {
 }
 
 export async function seedCalls(callsPath: string): Promise<void> {
-  const callsData = parseCSV(callsPath);
-  const validatedCallsData = validateCallsData(callsData);
+  const parsedCallsData = parseCSV(callsPath);
+  const normalizedCalls = normalizeCallImportData(parsedCallsData);
+  const validatedCallsData = validateCallsData(normalizedCalls);
 
   await prisma.callImport.createMany(validatedCallsData);
 }

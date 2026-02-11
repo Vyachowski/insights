@@ -2,6 +2,7 @@ import config from './config/config';
 import { checkDatabaseConnection, checkFilesExistence } from './utils/checkers';
 import {
   seedCalls,
+  seedCallsImport,
   seedCities,
   seedExpenses,
   seedRevenue,

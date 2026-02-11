@@ -24,22 +24,6 @@ const Site = z.object({
 
 type Site = z.infer<typeof Site>;
 
-// const Call = z.object({
-//   city_id: z.coerce.number().positive().min(1),
-//   date_time: z.coerce.date(),
-//   caller_number: z.string().min(1),
-//   region: z.string().min(1),
-//   call_order: z.coerce.number().int().positive(),
-//   class: z.string().nullable(),
-//   number_name: z.string().nullable(),
-//   project: z.string().min(1),
-//   duration_in_sec: z.coerce.number().int().nonnegative().nullable(),
-//   comment: z.string().nullable(),
-//   redirect_number: z.string().nullable(),
-// });
-
-// type Call = z.infer<typeof Call>;
-
 const Revenue = z.object({
   city_id: z.preprocess((val) => {
     if (val === '' || val == null) return null;
@@ -101,28 +85,17 @@ export const validateSitesData = (
 };
 
 // === Calls Import
-function normalizeCallImportData(
-  callsImportData: { [k: string]: string | undefined }[],
-) {
-  return callsImportData.map((call) => ({
-    ...call,
-    site_id: Number(call.site_id),
-    call_number: Number(call.call_number),
-    billsec: Number(call.billsec),
-  }));
-}
-
 export const validateCallsData = (
-  callsData: { [k: string]: string | undefined }[],
+  callsData: {
+    [k: string]: string | number;
+  }[],
 ) => {
   if (callsData.length < 1) {
     throw new Error('Нет данных звонков для валидации.');
   }
 
-  const normalizedCalls = normalizeCallImportData(callsData);
-
   return CallImportCreateManyZodSchema.parse({
-    data: normalizedCalls,
+    data: callsData,
     skipDuplicates: true,
   });
 };
