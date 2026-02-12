@@ -46,7 +46,7 @@ export class FinancialService {
       ],
     };
     const lastWeekSummary = await this.getLastFullWeekSummary();
-    const monthlyComparison = this.getMonthlyComparison();
+    const monthlyComparison = await this.getMonthlyComparison();
     // const yearlyTrend = this.getYearlyTrend();
     // const citiesProfit = this.getCitiesProfit();
     // const businessHealth = this.getBusinessHealth();
@@ -82,12 +82,48 @@ export class FinancialService {
     };
   }
 
-  private getMonthlyComparison(): MonthlyComparisonDto {
+  private async getMonthlyComparison(): Promise<MonthlyComparisonDto> {
+    const dateService = new WeekDateService();
+
+    const currentMonth = dateService.getCurrentMonth();
+    const lastYearSameMonth = dateService.getLastYearSameMonth();
+
+    const currentMonthRevenue = await this.revenueService.getRevenueForPeriod(
+      currentMonth.start,
+      currentMonth.end,
+    );
+    const currentMonthExpenses =
+      await this.expensesService.getExpensesForPeriod(
+        currentMonth.start,
+        currentMonth.end,
+      );
+    const currentMonthProfit = currentMonthRevenue - currentMonthExpenses;
+
+    const lastYearRevenue = await this.revenueService.getRevenueForPeriod(
+      lastYearSameMonth.start,
+      lastYearSameMonth.end,
+    );
+    const lastYearExpenses = await this.expensesService.getExpensesForPeriod(
+      lastYearSameMonth.start,
+      lastYearSameMonth.end,
+    );
+    const lastYearProfit = lastYearRevenue - lastYearExpenses;
+
+    const difference = currentMonthProfit - lastYearProfit;
+    const percentage =
+      lastYearProfit !== 0 ? (difference / lastYearProfit) * 100 : 0;
+
     return {
-      currentMonth: { month: '2026-02', profit: 140000 },
-      lastYearSameMonth: { month: '2025-02', profit: 110000 },
-      difference: 30000,
-      percentage: 27,
+      currentMonth: {
+        month: currentMonth.start.toISOString(),
+        profit: currentMonthProfit,
+      },
+      lastYearSameMonth: {
+        month: lastYearSameMonth.start.toISOString(),
+        profit: lastYearProfit,
+      },
+      difference,
+      percentage: Number(percentage.toFixed(1)),
     };
   }
 
