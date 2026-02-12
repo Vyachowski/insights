@@ -1,5 +1,6 @@
 import {
   IsArray,
+  // IsBoolean,
   IsInt,
   IsISO8601,
   IsNumber,
@@ -8,7 +9,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
-export class WeeklySummaryDto {
+export class LastWeekSummaryDto {
   @IsISO8601()
   readonly weekStart: string;
 
@@ -87,10 +88,24 @@ export class CitiesProfitDto {
   readonly cities: CityProfitDto[];
 }
 
+// export class BusinessHealthDto {
+//   @IsBoolean()
+//   readonly isGrowing: boolean;
+
+//   @IsNumber()
+//   readonly growthPercent: number;
+
+//   @IsNumber()
+//   readonly avgCurrent: number;
+
+//   @IsNumber()
+//   readonly avgPrevious: number;
+// }
+
 export class ResponseFinancialDto {
   @ValidateNested()
-  @Type(() => WeeklySummaryDto)
-  readonly weeklySummary: WeeklySummaryDto;
+  @Type(() => LastWeekSummaryDto)
+  readonly lastWeekSummary: LastWeekSummaryDto;
 
   @ValidateNested()
   @Type(() => MonthlyComparisonDto)
@@ -103,4 +118,8 @@ export class ResponseFinancialDto {
   @ValidateNested()
   @Type(() => CitiesProfitDto)
   readonly citiesProfit: CitiesProfitDto;
+
+  // @ValidateNested()
+  // @Type(() => BusinessHealthDto)
+  // readonly businessHealth: BusinessHealthDto;
 }

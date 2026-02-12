@@ -1,30 +1,23 @@
 import { Injectable } from '@nestjs/common';
 import {
   ResponseFinancialDto,
-  WeeklySummaryDto,
   MonthlyComparisonDto,
   YearlyTrendDto,
   CitiesProfitDto,
+  LastWeekSummaryDto,
 } from './dto/response-financial.dto';
+import { WeekDateService } from '@/lib';
+import { RevenueService } from '@/revenue/revenue.service';
+import { ExpensesService } from '@/expenses/expenses.service';
 
 @Injectable()
 export class FinancialService {
-  getDashboard(): ResponseFinancialDto {
-    const weeklySummary: WeeklySummaryDto = {
-      weekStart: '2026-02-03',
-      weekEnd: '2026-02-09',
-      revenue: 120000,
-      expenses: 85000,
-      profit: 35000,
-    };
+  constructor(
+    private revenueService: RevenueService,
+    private expensesService: ExpensesService,
+  ) {}
 
-    const monthlyComparison: MonthlyComparisonDto = {
-      currentMonth: { month: '2026-02', profit: 140000 },
-      lastYearSameMonth: { month: '2025-02', profit: 110000 },
-      difference: 30000,
-      percentage: 27,
-    };
-
+  async getDashboard(): Promise<ResponseFinancialDto> {
     const yearlyTrend: YearlyTrendDto = {
       currentYear: [
         { week: 1, profit: 28000 },
@@ -52,18 +45,54 @@ export class FinancialService {
         { city: 'Екатеринбург', profit: 12000 },
       ],
     };
+    const lastWeekSummary = await this.getLastFullWeekSummary();
+    const monthlyComparison = this.getMonthlyComparison();
+    // const yearlyTrend = this.getYearlyTrend();
+    // const citiesProfit = this.getCitiesProfit();
+    // const businessHealth = this.getBusinessHealth();
 
     return {
-      weeklySummary,
+      lastWeekSummary,
       monthlyComparison,
       yearlyTrend,
       citiesProfit,
+      // businessHealth,
     };
   }
 
-  private getWeeklySummary() {}
-  private getMonthlyComparison() {}
+  private async getLastFullWeekSummary(): Promise<LastWeekSummaryDto> {
+    const lastWeekPeriod = new WeekDateService().getLastWeek();
+    const revenue = await this.revenueService.getRevenueForPeriod(
+      lastWeekPeriod.start,
+      lastWeekPeriod.end,
+    );
+
+    const expenses = await this.expensesService.getExpensesForPeriod(
+      lastWeekPeriod.start,
+      lastWeekPeriod.end,
+    );
+    const profit = revenue - expenses;
+
+    return {
+      weekStart: lastWeekPeriod.start.toISOString(),
+      weekEnd: lastWeekPeriod.end.toISOString(),
+      revenue,
+      expenses,
+      profit,
+    };
+  }
+
+  private getMonthlyComparison(): MonthlyComparisonDto {
+    return {
+      currentMonth: { month: '2026-02', profit: 140000 },
+      lastYearSameMonth: { month: '2025-02', profit: 110000 },
+      difference: 30000,
+      percentage: 27,
+    };
+  }
+
   private getYearlyTrend() {}
+
   private getCitiesProfit() {}
   private getBusinessHealth() {}
 }
