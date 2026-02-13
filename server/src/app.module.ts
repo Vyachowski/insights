@@ -14,6 +14,7 @@ import { RevenueModule } from './revenue/revenue.module';
 import { ExpensesModule } from './expenses/expenses.module';
 import { CallsModule } from './calls/calls.module';
 import { FinancialModule } from './financial/financial.module';
+import { ProfitModule } from './profit/profit.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { FinancialModule } from './financial/financial.module';
     ExpensesModule,
     CallsModule,
     FinancialModule,
+    ProfitModule,
   ],
   controllers: [AppController],
   providers: [AppService],
