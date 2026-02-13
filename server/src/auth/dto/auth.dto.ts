@@ -11,5 +11,5 @@ export class LoginRequestDto implements LoginRequest {
 }
 
 export class LoginResponseDto implements LoginResponse {
-  accessToken: string;
+  access_token: string;
 }

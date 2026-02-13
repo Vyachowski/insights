@@ -7,6 +7,7 @@ const envSchema = z.object({
   DB_URL: z.url(),
   JWT_SECRET: z.string(),
   JWT_EXPIRATION: z.string(),
+  JWT_MAX_AGE: z.coerce.number().int().positive().min(1000),
 });
 
 export type EnvConfig = z.infer<typeof envSchema>;
