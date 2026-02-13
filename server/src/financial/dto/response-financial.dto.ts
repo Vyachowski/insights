@@ -1,5 +1,6 @@
 import {
   IsArray,
+  IsBoolean,
   // IsBoolean,
   IsInt,
   IsISO8601,
@@ -88,19 +89,19 @@ export class YearlyCityProfitDto {
   readonly cities: CityProfitDto[];
 }
 
-// export class BusinessHealthDto {
-//   @IsBoolean()
-//   readonly isGrowing: boolean;
+export class BusinessHealthDto {
+  @IsBoolean()
+  readonly isGrowing: boolean;
 
-//   @IsNumber()
-//   readonly growthPercent: number;
+  @IsNumber()
+  readonly growthPercent: number;
 
-//   @IsNumber()
-//   readonly avgCurrent: number;
+  @IsNumber()
+  readonly avgCurrent: number;
 
-//   @IsNumber()
-//   readonly avgPrevious: number;
-// }
+  @IsNumber()
+  readonly avgPrevious: number;
+}
 
 export class ResponseFinancialDto {
   @ValidateNested()
@@ -119,7 +120,7 @@ export class ResponseFinancialDto {
   @Type(() => YearlyCityProfitDto)
   readonly citiesProfit: YearlyCityProfitDto[];
 
-  // @ValidateNested()
-  // @Type(() => BusinessHealthDto)
-  // readonly businessHealth: BusinessHealthDto;
+  @ValidateNested()
+  @Type(() => BusinessHealthDto)
+  readonly businessHealth: BusinessHealthDto;
 }

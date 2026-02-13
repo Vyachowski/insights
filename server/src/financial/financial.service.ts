@@ -25,14 +25,14 @@ export class FinancialService {
     const monthlyComparison = await this.getMonthlyComparison();
     const yearlyTrend = await this.getYearlyTrend();
     const citiesProfit = await this.getCitiesProfit();
-    // const businessHealth = this.getBusinessHealth();
+    const businessHealth = await this.getBusinessHealth();
 
     return {
       lastWeekSummary,
       monthlyComparison,
       yearlyTrend,
       citiesProfit,
-      // businessHealth,
+      businessHealth,
     };
   }
 
@@ -190,7 +190,7 @@ export class FinancialService {
 
     return {
       isGrowing: growthPercent > 0,
-      growthPercent: Number(Math.abs(growthPercent).toFixed(1)),
+      growthPercent: Number(growthPercent.toFixed(1)),
       avgCurrent: Math.round(avgCurrent),
       avgPrevious: Math.round(avgPrevious),
     };
@@ -324,7 +324,7 @@ export class FinancialService {
   ) {
     return profitSharesByCity.map((cityProfit) => ({
       city: cityProfit.city,
-      profit: totalProfit * cityProfit.leadsShare,
+      profit: Math.floor(totalProfit * cityProfit.leadsShare),
     }));
   }
 }
