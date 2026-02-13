@@ -11,7 +11,7 @@ import { RevenueScalarFieldEnumSchema } from './enums/RevenueScalarFieldEnum.sch
 
 export const RevenueFindFirstSelectSchema: z.ZodType<Prisma.RevenueSelect> = z.object({
     id: z.boolean().optional(),
-    city_id: z.boolean().optional(),
+    cityId: z.boolean().optional(),
     date: z.boolean().optional(),
     amount: z.boolean().optional(),
     createdAt: z.boolean().optional(),
@@ -21,7 +21,7 @@ export const RevenueFindFirstSelectSchema: z.ZodType<Prisma.RevenueSelect> = z.o
 
 export const RevenueFindFirstSelectZodSchema = z.object({
     id: z.boolean().optional(),
-    city_id: z.boolean().optional(),
+    cityId: z.boolean().optional(),
     date: z.boolean().optional(),
     amount: z.boolean().optional(),
     createdAt: z.boolean().optional(),

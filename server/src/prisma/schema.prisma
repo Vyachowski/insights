@@ -30,13 +30,14 @@ model User {
   email     String   @unique
   password  String
   role      Role     @default(USER)
-  firstName String?
-  lastName  String?
+  firstName String?  @map("first_name")
+  lastName  String?  @map("last_name")
   status    UserStatus  @default(ACTIVE)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
   
   @@index([email])
+  @@map("users")
 }
 
 model City {
@@ -45,129 +46,138 @@ model City {
   slug          String
   name          String
   population    Int
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
 
   sites         Site[]
   revenues      Revenue[]
   expenses      Expense[]
+  
+  @@map("cities")
 }
 
 model Site {
   id                    Int          @id @default(autoincrement())
-  city_id               Int
+  cityId                Int          @map("city_id")
   name                  String?
   group                 String?
   url                   String
-  yandex_counter_id     String
-  google_counter_id     String?
-  yandex_tag_manager_id String?
-  google_tag_manager_id String?
-  createdAt             DateTime     @default(now())
-  updatedAt             DateTime     @updatedAt
+  yandexCounterId       String       @map("yandex_counter_id")
+  googleCounterId       String?      @map("google_counter_id")
+  yandexTagManagerId    String?      @map("yandex_tag_manager_id")
+  googleTagManagerId    String?      @map("google_tag_manager_id")
+  createdAt             DateTime     @default(now()) @map("created_at")
+  updatedAt             DateTime     @updatedAt @map("updated_at")
 
-  city                  City         @relation(fields: [city_id], references: [id], onDelete: Cascade)
+  city                  City         @relation(fields: [cityId], references: [id], onDelete: Cascade)
   calls                 Call[]
   callsImport           CallImport[]
   metrics               SiteMetric[]
 
-  @@index([city_id])
+  @@index([cityId])
+  @@map("sites")
 }
 
 model SiteMetric {
-  id                           Int      @id @default(autoincrement())
-  site_id                      Int
-  date                         DateTime @db.Date
-  yandex_users                 Int      @default(0)
-  google_users                 Int      @default(0)
-  other_users                  Int      @default(0)
-  visit_duration_yandex_in_sec Float    @default(0)
-  visit_duration_google_in_sec Float    @default(0)
-  visit_duration_other_in_sec  Float    @default(0)
-  bounce_yandex                Float    @default(0)
-  bounce_google                Float    @default(0)
-  bounce_other                 Float    @default(0)
-  leads_yandex                 Int      @default(0)
-  leads_google                 Int      @default(0)
-  leads_other                  Int      @default(0)
-  site                         Site     @relation(fields: [site_id], references: [id], onDelete: Cascade)
+  id                         Int      @id @default(autoincrement())
+  siteId                     Int      @map("site_id")
+  date                       DateTime @db.Date
+  yandexUsers                Int      @default(0) @map("yandex_users")
+  googleUsers                Int      @default(0) @map("google_users")
+  otherUsers                 Int      @default(0) @map("other_users")
+  visitDurationYandexInSec   Float    @default(0) @map("visit_duration_yandex_in_sec")
+  visitDurationGoogleInSec   Float    @default(0) @map("visit_duration_google_in_sec")
+  visitDurationOtherInSec    Float    @default(0) @map("visit_duration_other_in_sec")
+  bounceYandex               Float    @default(0) @map("bounce_yandex")
+  bounceGoogle               Float    @default(0) @map("bounce_google")
+  bounceOther                Float    @default(0) @map("bounce_other")
+  leadsYandex                Int      @default(0) @map("leads_yandex")
+  leadsGoogle                Int      @default(0) @map("leads_google")
+  leadsOther                 Int      @default(0) @map("leads_other")
+  
+  site                       Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
 
-  @@unique([site_id, date])
+  @@unique([siteId, date])
   @@index([date])
+  @@map("site_metrics")
 }
 
 model CallImport {
   id                Int       @id @default(autoincrement())
-  site_id           Int
-  date              DateTime  // Дата и время звонка
-  src               String    // Номер звонящего (Кто звонил)
-  region            String?   // Регион звонящего (Откуда)
-  call_number       Int       // Порядковый номер звонка (№)
-  class             String?   // Класс звонка (Класс) - например "Лид"
-  project_title     String    // Название проекта (Проект)
-  adv_channel_name  String    // Название канала (Куда звонил)
-  billsec           Int       // Длительность разговора в секундах (Запись)
-  comment           String?   // Комментарий
-  redirect_number   String?   // Номер переадресации (Вызов завершен)
-  source            String    @default("csv") // Источник данных
-  imported_at       DateTime  @default(now()) // Время импорта
+  siteId            Int       @map("site_id")
+  date              DateTime
+  src               String
+  region            String?
+  callNumber        Int       @map("call_number")
+  class             String?
+  projectTitle      String    @map("project_title")
+  advChannelName    String    @map("adv_channel_name")
+  billsec           Int
+  comment           String?
+  redirectNumber    String?   @map("redirect_number")
+  source            String    @default("csv")
+  importedAt        DateTime  @default(now()) @map("imported_at")
   
-  site              Site      @relation(fields: [site_id], references: [id], onDelete: Cascade)
+  site              Site      @relation(fields: [siteId], references: [id], onDelete: Cascade)
   
-  @@index([site_id])
+  @@index([siteId])
+  @@map("call_imports")
 }
 
 model Call {
   id                Int       @id @default(autoincrement())
-  site_id           Int  
-  gudok_id          Int       @unique // ID звонка в Гудок (null для CSV данных)
-  project_id        Int       // ID проекта в Гудок
-  project_title     String    // Название проекта
-  dst               String    // Гудок-номер (виртуальный номер)
-  adv_channel_id    String    // ID Гудок-номера
-  adv_channel_name  String    // Название Гудок-номера
-  src               String    // Номер звонящего
-  duration          Int       // Продолжительность всего звонка (сек)
-  billsec           Int       // Продолжительность разговора (сек)
-  callstatus        String    // BUSY, ANSWERED, NO ANSWER
-  date              DateTime  // Дата и время звонка (UTC)
-  region            String    // Регион звонящего
-  call_number       Int       // Какой по счету звонок с этого номера
-  audio             String    // Ссылка на запись разговора
+  siteId            Int       @map("site_id")
+  gudokId           Int       @unique @map("gudok_id")           // ID звонка в Гудок (null для CSV данных)
+  projectId         Int       @map("project_id")                 // ID проекта в Гудок
+  projectTitle      String    @map("project_title")              // Название проекта
+  dst               String                                       // Гудок-номер (виртуальный номер)
+  advChannelId      String    @map("adv_channel_id")             // ID Гудок-номера
+  advChannelName    String    @map("adv_channel_name")           // Название Гудок-номера
+  src               String                                       // Номер звонящего
+  duration          Int                                          // Продолжительность всего звонка (сек)
+  billsec           Int                                          // Продолжительность разговора (сек)
+  callstatus        String                                       // BUSY, ANSWERED, NO ANSWER
+  date              DateTime                                     // Дата и время звонка (UTC)
+  region            String                                       // Регион звонящего
+  callNumber        Int       @map("call_number")                // Какой по счету звонок с этого номера
+  audio             String                                       // Ссылка на запись разговора
 
-  source            String    @default("webhook") // webhook или csv (после merge)
-  created_at        DateTime  @default(now())
-  updated_at        DateTime  @updatedAt
+  source            String    @default("webhook")                // webhook или csv (после merge)
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
   
-  site              Site      @relation(fields: [site_id], references: [id], onDelete: Cascade)
+  site              Site      @relation(fields: [siteId], references: [id], onDelete: Cascade)
   
-  @@index([site_id])
+  @@index([siteId])
+   @@map("calls")
 }
 
 model Revenue {
   id            Int      @id @default(autoincrement())
-  city_id       Int?
+  cityId        Int?     @map("city_id")
   date          DateTime @db.Date
   amount        Decimal  @db.Decimal(12, 2)
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
 
-  city          City?     @relation(fields: [city_id], references: [id], onDelete: Cascade)
+  city          City?    @relation(fields: [cityId], references: [id], onDelete: Cascade)
   
   @@index([date])
+  @@map("revenues")
 }
 
 model Expense {
   id        Int      @id @default(autoincrement())
-  city_id   Int?
+  cityId    Int?     @map("city_id")
   date      DateTime @db.Date
   amount    Decimal  @db.Decimal(12, 2)
   type      String
   comment   String?
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-  city      City?     @relation(fields: [city_id], references: [id], onDelete: Cascade)
+  city      City?    @relation(fields: [cityId], references: [id], onDelete: Cascade)
   
   @@index([date])
+  @@map("expenses")
 }

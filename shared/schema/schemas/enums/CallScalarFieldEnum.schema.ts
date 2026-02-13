@@ -1,5 +1,5 @@
 import * as z from 'zod';
 
-export const CallScalarFieldEnumSchema = z.enum(['id', 'site_id', 'gudok_id', 'project_id', 'project_title', 'dst', 'adv_channel_id', 'adv_channel_name', 'src', 'duration', 'billsec', 'callstatus', 'date', 'region', 'call_number', 'audio', 'source', 'created_at', 'updated_at'])
+export const CallScalarFieldEnumSchema = z.enum(['id', 'siteId', 'gudokId', 'projectId', 'projectTitle', 'dst', 'advChannelId', 'advChannelName', 'src', 'duration', 'billsec', 'callstatus', 'date', 'region', 'callNumber', 'audio', 'source', 'createdAt', 'updatedAt'])
 
 export type CallScalarFieldEnum = z.infer<typeof CallScalarFieldEnumSchema>;

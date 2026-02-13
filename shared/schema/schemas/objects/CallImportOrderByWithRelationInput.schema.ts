@@ -6,19 +6,19 @@ import { SiteOrderByWithRelationInputObjectSchema as SiteOrderByWithRelationInpu
 
 const makeSchema = () => z.object({
   id: SortOrderSchema.optional(),
-  site_id: SortOrderSchema.optional(),
+  siteId: SortOrderSchema.optional(),
   date: SortOrderSchema.optional(),
   src: SortOrderSchema.optional(),
   region: z.union([SortOrderSchema, z.lazy(() => SortOrderInputObjectSchema)]).optional(),
-  call_number: SortOrderSchema.optional(),
+  callNumber: SortOrderSchema.optional(),
   class: z.union([SortOrderSchema, z.lazy(() => SortOrderInputObjectSchema)]).optional(),
-  project_title: SortOrderSchema.optional(),
-  adv_channel_name: SortOrderSchema.optional(),
+  projectTitle: SortOrderSchema.optional(),
+  advChannelName: SortOrderSchema.optional(),
   billsec: SortOrderSchema.optional(),
   comment: z.union([SortOrderSchema, z.lazy(() => SortOrderInputObjectSchema)]).optional(),
-  redirect_number: z.union([SortOrderSchema, z.lazy(() => SortOrderInputObjectSchema)]).optional(),
+  redirectNumber: z.union([SortOrderSchema, z.lazy(() => SortOrderInputObjectSchema)]).optional(),
   source: SortOrderSchema.optional(),
-  imported_at: SortOrderSchema.optional(),
+  importedAt: SortOrderSchema.optional(),
   site: z.lazy(() => SiteOrderByWithRelationInputObjectSchema).optional()
 }).strict();
 export const CallImportOrderByWithRelationInputObjectSchema: z.ZodType<Prisma.CallImportOrderByWithRelationInput> = makeSchema() as unknown as z.ZodType<Prisma.CallImportOrderByWithRelationInput>;

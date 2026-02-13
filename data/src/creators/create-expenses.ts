@@ -51,7 +51,7 @@ export async function createExpensesCSV() {
   );
 
   const lines: string[] = [];
-  lines.push("date,type,city_id,amount");
+  lines.push("date,type,cityId,amount");
 
   for (const month of months) {
     // первый день месяца явно

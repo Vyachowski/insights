@@ -9,23 +9,23 @@ export const CallRawSchema = z.object({
   // id: number (handled by DB)
 
   // Foreign key to sites table
-  site_id: z.number().positive(),
+  siteId: z.number().positive(),
 
   // Call data from Gudok API structure
   date: z.string(), // ISO 8601 format
   src: z.string().min(1), // caller number (Кто звонил)
   region: z.string().nullable(), // caller region (Откуда)
-  call_number: z.number().int().positive(), // call order (№)
+  callNumber: z.number().int().positive(), // call order (№)
   class: z.string().nullable(), // call class (Класс) - e.g., "Лид"
-  project_title: z.string().min(1), // project name (Проект)
-  adv_channel_name: z.string().min(1), // channel name (Куда звонил)
+  projectTitle: z.string().min(1), // project name (Проект)
+  advChannelName: z.string().min(1), // channel name (Куда звонил)
   billsec: z.number().int().min(0), // call duration in seconds (Запись)
   comment: z.string().nullable(), // comment (Комментарий)
-  redirect_number: z.string().nullable(), // redirect number (Вызов завершен)
+  redirectNumber: z.string().nullable(), // redirect number (Вызов завершен)
 
   // Metadata
   source: z.literal("csv"),
-  imported_at: z.string(), // ISO 8601 format
+  importedAt: z.string(), // ISO 8601 format
 });
 
 export type CallRaw = z.infer<typeof CallRawSchema>;

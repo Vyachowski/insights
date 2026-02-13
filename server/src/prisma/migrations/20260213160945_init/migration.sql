@@ -5,35 +5,35 @@ CREATE TYPE "Role" AS ENUM ('USER', 'ADMIN');
 CREATE TYPE "UserStatus" AS ENUM ('ACTIVE', 'DEACTIVATED');
 
 -- CreateTable
-CREATE TABLE "User" (
+CREATE TABLE "users" (
     "id" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "password" TEXT NOT NULL,
     "role" "Role" NOT NULL DEFAULT 'USER',
-    "firstName" TEXT,
-    "lastName" TEXT,
+    "first_name" TEXT,
+    "last_name" TEXT,
     "status" "UserStatus" NOT NULL DEFAULT 'ACTIVE',
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "users_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "City" (
+CREATE TABLE "cities" (
     "id" SERIAL NOT NULL,
     "code" TEXT NOT NULL,
     "slug" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "population" INTEGER NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "City_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "cities_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "Site" (
+CREATE TABLE "sites" (
     "id" SERIAL NOT NULL,
     "city_id" INTEGER NOT NULL,
     "name" TEXT,
@@ -43,14 +43,14 @@ CREATE TABLE "Site" (
     "google_counter_id" TEXT,
     "yandex_tag_manager_id" TEXT,
     "google_tag_manager_id" TEXT,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "Site_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "sites_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "SiteMetric" (
+CREATE TABLE "site_metrics" (
     "id" SERIAL NOT NULL,
     "site_id" INTEGER NOT NULL,
     "date" DATE NOT NULL,
@@ -67,11 +67,11 @@ CREATE TABLE "SiteMetric" (
     "leads_google" INTEGER NOT NULL DEFAULT 0,
     "leads_other" INTEGER NOT NULL DEFAULT 0,
 
-    CONSTRAINT "SiteMetric_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "site_metrics_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "CallImport" (
+CREATE TABLE "call_imports" (
     "id" SERIAL NOT NULL,
     "site_id" INTEGER NOT NULL,
     "date" TIMESTAMP(3) NOT NULL,
@@ -87,11 +87,11 @@ CREATE TABLE "CallImport" (
     "source" TEXT NOT NULL DEFAULT 'csv',
     "imported_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT "CallImport_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "call_imports_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "Call" (
+CREATE TABLE "calls" (
     "id" SERIAL NOT NULL,
     "site_id" INTEGER NOT NULL,
     "gudok_id" INTEGER NOT NULL,
@@ -112,79 +112,79 @@ CREATE TABLE "Call" (
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "Call_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "calls_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "Revenue" (
+CREATE TABLE "revenues" (
     "id" SERIAL NOT NULL,
     "city_id" INTEGER,
     "date" DATE NOT NULL,
     "amount" DECIMAL(12,2) NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "Revenue_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "revenues_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "Expense" (
+CREATE TABLE "expenses" (
     "id" SERIAL NOT NULL,
     "city_id" INTEGER,
     "date" DATE NOT NULL,
     "amount" DECIMAL(12,2) NOT NULL,
     "type" TEXT NOT NULL,
     "comment" TEXT,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "Expense_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "expenses_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
 -- CreateIndex
-CREATE INDEX "User_email_idx" ON "User"("email");
+CREATE INDEX "users_email_idx" ON "users"("email");
 
 -- CreateIndex
-CREATE INDEX "Site_city_id_idx" ON "Site"("city_id");
+CREATE INDEX "sites_city_id_idx" ON "sites"("city_id");
 
 -- CreateIndex
-CREATE INDEX "SiteMetric_date_idx" ON "SiteMetric"("date");
+CREATE INDEX "site_metrics_date_idx" ON "site_metrics"("date");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "SiteMetric_site_id_date_key" ON "SiteMetric"("site_id", "date");
+CREATE UNIQUE INDEX "site_metrics_site_id_date_key" ON "site_metrics"("site_id", "date");
 
 -- CreateIndex
-CREATE INDEX "CallImport_site_id_idx" ON "CallImport"("site_id");
+CREATE INDEX "call_imports_site_id_idx" ON "call_imports"("site_id");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Call_gudok_id_key" ON "Call"("gudok_id");
+CREATE UNIQUE INDEX "calls_gudok_id_key" ON "calls"("gudok_id");
 
 -- CreateIndex
-CREATE INDEX "Call_site_id_idx" ON "Call"("site_id");
+CREATE INDEX "calls_site_id_idx" ON "calls"("site_id");
 
 -- CreateIndex
-CREATE INDEX "Revenue_date_idx" ON "Revenue"("date");
+CREATE INDEX "revenues_date_idx" ON "revenues"("date");
 
 -- CreateIndex
-CREATE INDEX "Expense_date_idx" ON "Expense"("date");
+CREATE INDEX "expenses_date_idx" ON "expenses"("date");
 
 -- AddForeignKey
-ALTER TABLE "Site" ADD CONSTRAINT "Site_city_id_fkey" FOREIGN KEY ("city_id") REFERENCES "City"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "sites" ADD CONSTRAINT "sites_city_id_fkey" FOREIGN KEY ("city_id") REFERENCES "cities"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "SiteMetric" ADD CONSTRAINT "SiteMetric_site_id_fkey" FOREIGN KEY ("site_id") REFERENCES "Site"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "site_metrics" ADD CONSTRAINT "site_metrics_site_id_fkey" FOREIGN KEY ("site_id") REFERENCES "sites"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "CallImport" ADD CONSTRAINT "CallImport_site_id_fkey" FOREIGN KEY ("site_id") REFERENCES "Site"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "call_imports" ADD CONSTRAINT "call_imports_site_id_fkey" FOREIGN KEY ("site_id") REFERENCES "sites"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Call" ADD CONSTRAINT "Call_site_id_fkey" FOREIGN KEY ("site_id") REFERENCES "Site"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "calls" ADD CONSTRAINT "calls_site_id_fkey" FOREIGN KEY ("site_id") REFERENCES "sites"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Revenue" ADD CONSTRAINT "Revenue_city_id_fkey" FOREIGN KEY ("city_id") REFERENCES "City"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "revenues" ADD CONSTRAINT "revenues_city_id_fkey" FOREIGN KEY ("city_id") REFERENCES "cities"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Expense" ADD CONSTRAINT "Expense_city_id_fkey" FOREIGN KEY ("city_id") REFERENCES "City"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "expenses" ADD CONSTRAINT "expenses_city_id_fkey" FOREIGN KEY ("city_id") REFERENCES "cities"("id") ON DELETE CASCADE ON UPDATE CASCADE;

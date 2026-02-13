@@ -35,18 +35,18 @@ export function mapCSVRowToCallRaw(
   const billsec = convertDurationToSeconds(row["Запись"] || "") ?? 0;
 
   return {
-    site_id: siteId,
+    siteId: siteId,
     date: dateTime.toISOString(),
     src: row["Кто звонил"],
     region: row["Откуда"] || null,
-    call_number: callNumber,
+    callNumber: callNumber,
     class: row["Класс"] || null,
-    project_title: row["Проект"],
-    adv_channel_name: row["Куда звонил"],
+    projectTitle: row["Проект"],
+    advChannelName: row["Куда звонил"],
     billsec,
     comment: row["Комментарий"] || null,
-    redirect_number: row["Вызов завершен"] || null,
+    redirectNumber: row["Вызов завершен"] || null,
     source: "csv" as const,
-    imported_at: importedAt.toISOString(),
+    importedAt: importedAt.toISOString(),
   };
 }

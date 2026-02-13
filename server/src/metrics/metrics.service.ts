@@ -6,13 +6,13 @@ import { Injectable } from '@nestjs/common';
 export class MetricsService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  findAll({ site_id, start_date, end_date }: AnalyticsQueryDto) {
+  findAll({ siteId, startDate, endDate }: AnalyticsQueryDto) {
     return this.prismaService.siteMetric.findMany({
       where: {
-        site_id,
+        siteId,
         date: {
-          gte: start_date ? new Date(start_date) : undefined,
-          lte: end_date ? new Date(end_date) : undefined,
+          gte: startDate ? new Date(startDate) : undefined,
+          lte: endDate ? new Date(endDate) : undefined,
         },
       },
     });

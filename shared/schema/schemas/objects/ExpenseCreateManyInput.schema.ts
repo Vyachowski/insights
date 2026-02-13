@@ -5,7 +5,7 @@ import { Prisma } from '../../../../server/generated/prisma/client';
 import { DecimalJSLikeSchema, isValidDecimalInput } from '../../helpers/decimal-helpers';
 const makeSchema = () => z.object({
   id: z.number().int().optional(),
-  city_id: z.number().int().optional().nullable(),
+  cityId: z.number().int().optional().nullable(),
   date: z.coerce.date(),
   amount: z.union([
   z.number(),

@@ -1,7 +1,7 @@
 import * as z from 'zod';
 export const RevenueFindFirstResultSchema = z.nullable(z.object({
   id: z.number().int(),
-  city_id: z.number().int().optional(),
+  cityId: z.number().int().optional(),
   date: z.date(),
   amount: z.number(),
   createdAt: z.date(),

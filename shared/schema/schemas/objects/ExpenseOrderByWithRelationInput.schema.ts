@@ -6,7 +6,7 @@ import { CityOrderByWithRelationInputObjectSchema as CityOrderByWithRelationInpu
 
 const makeSchema = () => z.object({
   id: SortOrderSchema.optional(),
-  city_id: z.union([SortOrderSchema, z.lazy(() => SortOrderInputObjectSchema)]).optional(),
+  cityId: z.union([SortOrderSchema, z.lazy(() => SortOrderInputObjectSchema)]).optional(),
   date: SortOrderSchema.optional(),
   amount: SortOrderSchema.optional(),
   type: SortOrderSchema.optional(),

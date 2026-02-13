@@ -4,20 +4,20 @@ import { SiteArgsObjectSchema as SiteArgsObjectSchema } from './SiteArgs.schema'
 
 const makeSchema = () => z.object({
   id: z.boolean().optional(),
-  site_id: z.boolean().optional(),
+  siteId: z.boolean().optional(),
   date: z.boolean().optional(),
-  yandex_users: z.boolean().optional(),
-  google_users: z.boolean().optional(),
-  other_users: z.boolean().optional(),
-  visit_duration_yandex_in_sec: z.boolean().optional(),
-  visit_duration_google_in_sec: z.boolean().optional(),
-  visit_duration_other_in_sec: z.boolean().optional(),
-  bounce_yandex: z.boolean().optional(),
-  bounce_google: z.boolean().optional(),
-  bounce_other: z.boolean().optional(),
-  leads_yandex: z.boolean().optional(),
-  leads_google: z.boolean().optional(),
-  leads_other: z.boolean().optional(),
+  yandexUsers: z.boolean().optional(),
+  googleUsers: z.boolean().optional(),
+  otherUsers: z.boolean().optional(),
+  visitDurationYandexInSec: z.boolean().optional(),
+  visitDurationGoogleInSec: z.boolean().optional(),
+  visitDurationOtherInSec: z.boolean().optional(),
+  bounceYandex: z.boolean().optional(),
+  bounceGoogle: z.boolean().optional(),
+  bounceOther: z.boolean().optional(),
+  leadsYandex: z.boolean().optional(),
+  leadsGoogle: z.boolean().optional(),
+  leadsOther: z.boolean().optional(),
   site: z.union([z.boolean(), z.lazy(() => SiteArgsObjectSchema)]).optional()
 }).strict();
 export const SiteMetricSelectObjectSchema: z.ZodType<Prisma.SiteMetricSelect> = makeSchema() as unknown as z.ZodType<Prisma.SiteMetricSelect>;

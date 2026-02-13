@@ -2,7 +2,7 @@ import * as z from 'zod';
 // prettier-ignore
 export const RevenueInputSchema = z.object({
     id: z.number().int(),
-    city_id: z.number().int().optional().nullable(),
+    cityId: z.number().int().optional().nullable(),
     date: z.date(),
     amount: z.number(),
     createdAt: z.date(),

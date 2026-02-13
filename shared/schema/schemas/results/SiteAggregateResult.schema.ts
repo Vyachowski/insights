@@ -1,14 +1,14 @@
 import * as z from 'zod';
 export const SiteAggregateResultSchema = z.object({  _count: z.object({
     id: z.number(),
-    city_id: z.number(),
+    cityId: z.number(),
     name: z.number(),
     group: z.number(),
     url: z.number(),
-    yandex_counter_id: z.number(),
-    google_counter_id: z.number(),
-    yandex_tag_manager_id: z.number(),
-    google_tag_manager_id: z.number(),
+    yandexCounterId: z.number(),
+    googleCounterId: z.number(),
+    yandexTagManagerId: z.number(),
+    googleTagManagerId: z.number(),
     createdAt: z.number(),
     updatedAt: z.number(),
     city: z.number(),
@@ -18,35 +18,35 @@ export const SiteAggregateResultSchema = z.object({  _count: z.object({
   }).optional(),
   _sum: z.object({
     id: z.number().nullable(),
-    city_id: z.number().nullable()
+    cityId: z.number().nullable()
   }).nullable().optional(),
   _avg: z.object({
     id: z.number().nullable(),
-    city_id: z.number().nullable()
+    cityId: z.number().nullable()
   }).nullable().optional(),
   _min: z.object({
     id: z.number().int().nullable(),
-    city_id: z.number().int().nullable(),
+    cityId: z.number().int().nullable(),
     name: z.string().nullable(),
     group: z.string().nullable(),
     url: z.string().nullable(),
-    yandex_counter_id: z.string().nullable(),
-    google_counter_id: z.string().nullable(),
-    yandex_tag_manager_id: z.string().nullable(),
-    google_tag_manager_id: z.string().nullable(),
+    yandexCounterId: z.string().nullable(),
+    googleCounterId: z.string().nullable(),
+    yandexTagManagerId: z.string().nullable(),
+    googleTagManagerId: z.string().nullable(),
     createdAt: z.date().nullable(),
     updatedAt: z.date().nullable()
   }).nullable().optional(),
   _max: z.object({
     id: z.number().int().nullable(),
-    city_id: z.number().int().nullable(),
+    cityId: z.number().int().nullable(),
     name: z.string().nullable(),
     group: z.string().nullable(),
     url: z.string().nullable(),
-    yandex_counter_id: z.string().nullable(),
-    google_counter_id: z.string().nullable(),
-    yandex_tag_manager_id: z.string().nullable(),
-    google_tag_manager_id: z.string().nullable(),
+    yandexCounterId: z.string().nullable(),
+    googleCounterId: z.string().nullable(),
+    yandexTagManagerId: z.string().nullable(),
+    googleTagManagerId: z.string().nullable(),
     createdAt: z.date().nullable(),
     updatedAt: z.date().nullable()
   }).nullable().optional()});

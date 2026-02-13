@@ -4,18 +4,18 @@ import type { Prisma } from '../../../../server/generated/prisma/client';
 
 const makeSchema = () => z.object({
   date: z.coerce.date(),
-  yandex_users: z.number().int().optional(),
-  google_users: z.number().int().optional(),
-  other_users: z.number().int().optional(),
-  visit_duration_yandex_in_sec: z.number().optional(),
-  visit_duration_google_in_sec: z.number().optional(),
-  visit_duration_other_in_sec: z.number().optional(),
-  bounce_yandex: z.number().optional(),
-  bounce_google: z.number().optional(),
-  bounce_other: z.number().optional(),
-  leads_yandex: z.number().int().optional(),
-  leads_google: z.number().int().optional(),
-  leads_other: z.number().int().optional()
+  yandexUsers: z.number().int().optional(),
+  googleUsers: z.number().int().optional(),
+  otherUsers: z.number().int().optional(),
+  visitDurationYandexInSec: z.number().optional(),
+  visitDurationGoogleInSec: z.number().optional(),
+  visitDurationOtherInSec: z.number().optional(),
+  bounceYandex: z.number().optional(),
+  bounceGoogle: z.number().optional(),
+  bounceOther: z.number().optional(),
+  leadsYandex: z.number().int().optional(),
+  leadsGoogle: z.number().int().optional(),
+  leadsOther: z.number().int().optional()
 }).strict();
 export const SiteMetricCreateWithoutSiteInputObjectSchema: z.ZodType<Prisma.SiteMetricCreateWithoutSiteInput> = makeSchema() as unknown as z.ZodType<Prisma.SiteMetricCreateWithoutSiteInput>;
 export const SiteMetricCreateWithoutSiteInputObjectZodSchema = makeSchema();

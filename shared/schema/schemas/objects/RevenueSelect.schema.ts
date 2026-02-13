@@ -4,7 +4,7 @@ import { CityArgsObjectSchema as CityArgsObjectSchema } from './CityArgs.schema'
 
 const makeSchema = () => z.object({
   id: z.boolean().optional(),
-  city_id: z.boolean().optional(),
+  cityId: z.boolean().optional(),
   date: z.boolean().optional(),
   amount: z.boolean().optional(),
   createdAt: z.boolean().optional(),

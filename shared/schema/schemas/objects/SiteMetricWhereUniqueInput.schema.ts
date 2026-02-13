@@ -1,10 +1,10 @@
 import * as z from 'zod';
 import type { Prisma } from '../../../../server/generated/prisma/client';
-import { SiteMetricSite_idDateCompoundUniqueInputObjectSchema as SiteMetricSite_idDateCompoundUniqueInputObjectSchema } from './SiteMetricSite_idDateCompoundUniqueInput.schema'
+import { SiteMetricSiteIdDateCompoundUniqueInputObjectSchema as SiteMetricSiteIdDateCompoundUniqueInputObjectSchema } from './SiteMetricSiteIdDateCompoundUniqueInput.schema'
 
 const makeSchema = () => z.object({
   id: z.number().int().optional(),
-  site_id_date: z.lazy(() => SiteMetricSite_idDateCompoundUniqueInputObjectSchema).optional()
+  siteId_date: z.lazy(() => SiteMetricSiteIdDateCompoundUniqueInputObjectSchema).optional()
 }).strict();
 export const SiteMetricWhereUniqueInputObjectSchema: z.ZodType<Prisma.SiteMetricWhereUniqueInput> = makeSchema() as unknown as z.ZodType<Prisma.SiteMetricWhereUniqueInput>;
 export const SiteMetricWhereUniqueInputObjectZodSchema = makeSchema();

@@ -6,16 +6,16 @@ export class AnalyticsQueryDto implements AnalyticsQuery {
   @IsOptional()
   @IsInt()
   @Type(() => Number)
-  city_id?: number;
+  cityId?: number;
 
   @IsOptional()
   @IsInt()
   @Type(() => Number)
-  site_id?: number;
+  siteId?: number;
 
   @IsDateString()
-  start_date: string;
+  startDate: string;
 
   @IsDateString()
-  end_date: string;
+  endDate: string;
 }

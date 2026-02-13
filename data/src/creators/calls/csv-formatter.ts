@@ -4,19 +4,19 @@ import type { CallRaw } from "./calls-raw-schema";
  * CSV column headers for calls_raw table
  */
 export const CALLS_RAW_CSV_HEADERS = [
-  "site_id",
+  "siteId",
   "date",
   "src",
   "region",
-  "call_number",
+  "callNumber",
   "class",
-  "project_title",
-  "adv_channel_name",
+  "projectTitle",
+  "advChannelName",
   "billsec",
   "comment",
-  "redirect_number",
+  "redirectNumber",
   "source",
-  "imported_at",
+  "importedAt",
 ] as const;
 
 /**
@@ -46,19 +46,19 @@ function escapeCSVValue(value: string | number | null): string {
  */
 export function formatCallRawAsCSV(call: CallRaw): string {
   const values = [
-    call.site_id,
+    call.siteId,
     call.date,
     call.src,
     call.region,
-    call.call_number,
+    call.callNumber,
     call.class,
-    call.project_title,
-    call.adv_channel_name,
+    call.projectTitle,
+    call.advChannelName,
     call.billsec,
     call.comment,
-    call.redirect_number,
+    call.redirectNumber,
     call.source,
-    call.imported_at,
+    call.importedAt,
   ];
 
   return values.map(escapeCSVValue).join(",");

@@ -237,9 +237,9 @@ export class FinancialService {
 
     const totalFormLeads = await this.prismaService.siteMetric.aggregate({
       _sum: {
-        leads_yandex: true,
-        leads_google: true,
-        leads_other: true,
+        leadsYandex: true,
+        leadsGoogle: true,
+        leadsOther: true,
       },
       where: {
         date: {
@@ -251,29 +251,29 @@ export class FinancialService {
 
     const totalCallLeads = await this.prismaService.callImport.aggregate({
       _sum: {
-        call_number: true,
+        callNumber: true,
       },
       where: {
         date: {
           gte: startDate,
           lte: endDate,
         },
-        call_number: 1,
+        callNumber: 1,
       },
     });
 
     const totalLeads =
-      Number(totalFormLeads._sum.leads_google) +
-      Number(totalFormLeads._sum.leads_yandex) +
-      Number(totalFormLeads._sum.leads_other) +
-      Number(totalCallLeads._sum.call_number);
+      Number(totalFormLeads._sum.leadsGoogle) +
+      Number(totalFormLeads._sum.leadsYandex) +
+      Number(totalFormLeads._sum.leadsOther) +
+      Number(totalCallLeads._sum.callNumber);
 
     const metrics = await this.prismaService.siteMetric.groupBy({
-      by: 'site_id',
+      by: 'siteId',
       _sum: {
-        leads_yandex: true,
-        leads_google: true,
-        leads_other: true,
+        leadsYandex: true,
+        leadsGoogle: true,
+        leadsOther: true,
       },
       where: {
         date: {
@@ -284,7 +284,7 @@ export class FinancialService {
     });
 
     const calls = await this.prismaService.callImport.groupBy({
-      by: 'site_id',
+      by: 'siteId',
       _count: {
         id: true,
       },
@@ -293,19 +293,20 @@ export class FinancialService {
           gte: startDate,
           lte: endDate,
         },
-        call_number: 1, // уникальные звонки
+        callNumber: 1, // уникальные звонки
       },
     });
 
     return acitveSites.map((site) => {
-      const siteMetrics = metrics.find((m) => m.site_id === site.id);
-      const siteCalls = calls.find((c) => c.site_id === site.id);
+      const siteMetrics = metrics.find((m) => m.siteId === site.id);
+      const siteCalls = calls.find((c) => c.siteId === site.id);
 
       const formLeads = Object.values(siteMetrics?._sum ?? {}).reduce(
         (acc, val) => Number(acc) + Number(val),
         0,
       );
-      const totalSiteLeads = (siteCalls?._count.id ?? 0) + Number(formLeads);
+      const callsLeads = siteCalls ? siteCalls._count.id : 0;
+      const totalSiteLeads = callsLeads + Number(formLeads);
       const leadsShare = Number((totalSiteLeads / totalLeads).toFixed(3));
 
       return {

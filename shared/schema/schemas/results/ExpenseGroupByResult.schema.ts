@@ -1,7 +1,7 @@
 import * as z from 'zod';
 export const ExpenseGroupByResultSchema = z.array(z.object({
   id: z.number().int(),
-  city_id: z.number().int(),
+  cityId: z.number().int(),
   date: z.date(),
   amount: z.number(),
   type: z.string(),
@@ -10,7 +10,7 @@ export const ExpenseGroupByResultSchema = z.array(z.object({
   updatedAt: z.date(),
   _count: z.object({
     id: z.number(),
-    city_id: z.number(),
+    cityId: z.number(),
     date: z.number(),
     amount: z.number(),
     type: z.number(),
@@ -21,17 +21,17 @@ export const ExpenseGroupByResultSchema = z.array(z.object({
   }).optional(),
   _sum: z.object({
     id: z.number().nullable(),
-    city_id: z.number().nullable(),
+    cityId: z.number().nullable(),
     amount: z.number().nullable()
   }).nullable().optional(),
   _avg: z.object({
     id: z.number().nullable(),
-    city_id: z.number().nullable(),
+    cityId: z.number().nullable(),
     amount: z.number().nullable()
   }).nullable().optional(),
   _min: z.object({
     id: z.number().int().nullable(),
-    city_id: z.number().int().nullable(),
+    cityId: z.number().int().nullable(),
     date: z.date().nullable(),
     amount: z.number().nullable(),
     type: z.string().nullable(),
@@ -41,7 +41,7 @@ export const ExpenseGroupByResultSchema = z.array(z.object({
   }).nullable().optional(),
   _max: z.object({
     id: z.number().int().nullable(),
-    city_id: z.number().int().nullable(),
+    cityId: z.number().int().nullable(),
     date: z.date().nullable(),
     amount: z.number().nullable(),
     type: z.string().nullable(),

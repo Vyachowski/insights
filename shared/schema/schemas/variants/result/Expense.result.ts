@@ -2,7 +2,7 @@ import * as z from 'zod';
 // prettier-ignore
 export const ExpenseResultSchema = z.object({
     id: z.number().int(),
-    city_id: z.number().int().nullable(),
+    cityId: z.number().int().nullable(),
     date: z.date(),
     amount: z.number(),
     type: z.string(),

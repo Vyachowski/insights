@@ -27,14 +27,14 @@ export async function createRevenueCSV() {
     const date = new Date(msg.date).toISOString().split("T")[0];
 
     return {
-      city_id: "",
+      cityId: "",
       date: date,
       amount: amount.toFixed(2),
     };
   });
 
-  const header = "city_id,date,amount";
-  const rows = csvData.map((row) => `${row.city_id},${row.date},${row.amount}`);
+  const header = "cityId,date,amount";
+  const rows = csvData.map((row) => `${row.cityId},${row.date},${row.amount}`);
 
   const csvContent = [header, ...rows].join("\n");
 

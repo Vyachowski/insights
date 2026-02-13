@@ -1,7 +1,7 @@
 import * as z from 'zod';
 export const RevenueAggregateResultSchema = z.object({  _count: z.object({
     id: z.number(),
-    city_id: z.number(),
+    cityId: z.number(),
     date: z.number(),
     amount: z.number(),
     createdAt: z.number(),
@@ -10,17 +10,17 @@ export const RevenueAggregateResultSchema = z.object({  _count: z.object({
   }).optional(),
   _sum: z.object({
     id: z.number().nullable(),
-    city_id: z.number().nullable(),
+    cityId: z.number().nullable(),
     amount: z.number().nullable()
   }).nullable().optional(),
   _avg: z.object({
     id: z.number().nullable(),
-    city_id: z.number().nullable(),
+    cityId: z.number().nullable(),
     amount: z.number().nullable()
   }).nullable().optional(),
   _min: z.object({
     id: z.number().int().nullable(),
-    city_id: z.number().int().nullable(),
+    cityId: z.number().int().nullable(),
     date: z.date().nullable(),
     amount: z.number().nullable(),
     createdAt: z.date().nullable(),
@@ -28,7 +28,7 @@ export const RevenueAggregateResultSchema = z.object({  _count: z.object({
   }).nullable().optional(),
   _max: z.object({
     id: z.number().int().nullable(),
-    city_id: z.number().int().nullable(),
+    cityId: z.number().int().nullable(),
     date: z.date().nullable(),
     amount: z.number().nullable(),
     createdAt: z.date().nullable(),

@@ -329,7 +329,7 @@ export * from './SiteMetricOrderByWithRelationInput.schema';
 export * from './SiteMetricScalarWhereInput.schema';
 export * from './SiteMetricScalarWhereWithAggregatesInput.schema';
 export * from './SiteMetricSelect.schema';
-export * from './SiteMetricSite_idDateCompoundUniqueInput.schema';
+export * from './SiteMetricSiteIdDateCompoundUniqueInput.schema';
 export * from './SiteMetricSumAggregateInput.schema';
 export * from './SiteMetricSumOrderByAggregateInput.schema';
 export * from './SiteMetricUncheckedCreateInput.schema';

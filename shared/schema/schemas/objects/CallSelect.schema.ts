@@ -4,24 +4,24 @@ import { SiteArgsObjectSchema as SiteArgsObjectSchema } from './SiteArgs.schema'
 
 const makeSchema = () => z.object({
   id: z.boolean().optional(),
-  site_id: z.boolean().optional(),
-  gudok_id: z.boolean().optional(),
-  project_id: z.boolean().optional(),
-  project_title: z.boolean().optional(),
+  siteId: z.boolean().optional(),
+  gudokId: z.boolean().optional(),
+  projectId: z.boolean().optional(),
+  projectTitle: z.boolean().optional(),
   dst: z.boolean().optional(),
-  adv_channel_id: z.boolean().optional(),
-  adv_channel_name: z.boolean().optional(),
+  advChannelId: z.boolean().optional(),
+  advChannelName: z.boolean().optional(),
   src: z.boolean().optional(),
   duration: z.boolean().optional(),
   billsec: z.boolean().optional(),
   callstatus: z.boolean().optional(),
   date: z.boolean().optional(),
   region: z.boolean().optional(),
-  call_number: z.boolean().optional(),
+  callNumber: z.boolean().optional(),
   audio: z.boolean().optional(),
   source: z.boolean().optional(),
-  created_at: z.boolean().optional(),
-  updated_at: z.boolean().optional(),
+  createdAt: z.boolean().optional(),
+  updatedAt: z.boolean().optional(),
   site: z.union([z.boolean(), z.lazy(() => SiteArgsObjectSchema)]).optional()
 }).strict();
 export const CallSelectObjectSchema: z.ZodType<Prisma.CallSelect> = makeSchema() as unknown as z.ZodType<Prisma.CallSelect>;

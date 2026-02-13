@@ -2,7 +2,7 @@ import * as z from 'zod';
 export const RevenueFindManyResultSchema = z.object({
   data: z.array(z.object({
   id: z.number().int(),
-  city_id: z.number().int().optional(),
+  cityId: z.number().int().optional(),
   date: z.date(),
   amount: z.number(),
   createdAt: z.date(),

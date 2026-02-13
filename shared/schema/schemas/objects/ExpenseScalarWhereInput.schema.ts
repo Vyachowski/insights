@@ -13,7 +13,7 @@ const expensescalarwhereinputSchema = z.object({
   OR: z.lazy(() => ExpenseScalarWhereInputObjectSchema).array().optional(),
   NOT: z.union([z.lazy(() => ExpenseScalarWhereInputObjectSchema), z.lazy(() => ExpenseScalarWhereInputObjectSchema).array()]).optional(),
   id: z.union([z.lazy(() => IntFilterObjectSchema), z.number().int()]).optional(),
-  city_id: z.union([z.lazy(() => IntNullableFilterObjectSchema), z.number().int()]).optional().nullable(),
+  cityId: z.union([z.lazy(() => IntNullableFilterObjectSchema), z.number().int()]).optional().nullable(),
   date: z.union([z.lazy(() => DateTimeFilterObjectSchema), z.coerce.date()]).optional(),
   amount: z.union([z.lazy(() => DecimalFilterObjectSchema), z.union([
   z.number(),

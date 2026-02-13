@@ -11,7 +11,7 @@ import { ExpenseScalarFieldEnumSchema } from './enums/ExpenseScalarFieldEnum.sch
 
 export const ExpenseFindFirstOrThrowSelectSchema: z.ZodType<Prisma.ExpenseSelect> = z.object({
     id: z.boolean().optional(),
-    city_id: z.boolean().optional(),
+    cityId: z.boolean().optional(),
     date: z.boolean().optional(),
     amount: z.boolean().optional(),
     type: z.boolean().optional(),
@@ -23,7 +23,7 @@ export const ExpenseFindFirstOrThrowSelectSchema: z.ZodType<Prisma.ExpenseSelect
 
 export const ExpenseFindFirstOrThrowSelectZodSchema = z.object({
     id: z.boolean().optional(),
-    city_id: z.boolean().optional(),
+    cityId: z.boolean().optional(),
     date: z.boolean().optional(),
     amount: z.boolean().optional(),
     type: z.boolean().optional(),
