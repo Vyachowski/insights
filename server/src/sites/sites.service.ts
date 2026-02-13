@@ -12,4 +12,22 @@ export class SitesService {
   async findOne(id: number) {
     return await this.prismaService.site.findUnique({ where: { id } });
   }
+
+  async getActiveSitesWithCities(startDate: Date, endDate: Date) {
+    return await this.prismaService.site.findMany({
+      where: {
+        callsImport: {
+          some: {
+            date: {
+              gte: startDate,
+              lte: endDate,
+            },
+          },
+        },
+      },
+      include: {
+        city: true,
+      },
+    });
+  }
 }

@@ -20,7 +20,7 @@ const makeSchema = () => z.object({
   updatedAt: z.boolean().optional(),
   city: z.union([z.boolean(), z.lazy(() => CityArgsObjectSchema)]).optional(),
   calls: z.union([z.boolean(), z.lazy(() => CallFindManySchema)]).optional(),
-  callsRaw: z.union([z.boolean(), z.lazy(() => CallImportFindManySchema)]).optional(),
+  callsImport: z.union([z.boolean(), z.lazy(() => CallImportFindManySchema)]).optional(),
   metrics: z.union([z.boolean(), z.lazy(() => SiteMetricFindManySchema)]).optional(),
   _count: z.union([z.boolean(), z.lazy(() => SiteCountOutputTypeArgsObjectSchema)]).optional()
 }).strict();

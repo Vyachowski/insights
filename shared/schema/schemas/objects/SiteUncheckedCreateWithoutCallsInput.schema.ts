@@ -15,7 +15,7 @@ const makeSchema = () => z.object({
   google_tag_manager_id: z.string().optional().nullable(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
-  callsRaw: z.lazy(() => CallImportUncheckedCreateNestedManyWithoutSiteInputObjectSchema).optional(),
+  callsImport: z.lazy(() => CallImportUncheckedCreateNestedManyWithoutSiteInputObjectSchema).optional(),
   metrics: z.lazy(() => SiteMetricUncheckedCreateNestedManyWithoutSiteInputObjectSchema).optional()
 }).strict();
 export const SiteUncheckedCreateWithoutCallsInputObjectSchema: z.ZodType<Prisma.SiteUncheckedCreateWithoutCallsInput> = makeSchema() as unknown as z.ZodType<Prisma.SiteUncheckedCreateWithoutCallsInput>;

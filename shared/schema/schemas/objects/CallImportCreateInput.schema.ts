@@ -1,6 +1,6 @@
 import * as z from 'zod';
 import type { Prisma } from '../../../../server/generated/prisma/client';
-import { SiteCreateNestedOneWithoutCallsRawInputObjectSchema as SiteCreateNestedOneWithoutCallsRawInputObjectSchema } from './SiteCreateNestedOneWithoutCallsRawInput.schema'
+import { SiteCreateNestedOneWithoutCallsImportInputObjectSchema as SiteCreateNestedOneWithoutCallsImportInputObjectSchema } from './SiteCreateNestedOneWithoutCallsImportInput.schema'
 
 const makeSchema = () => z.object({
   date: z.coerce.date(),
@@ -15,7 +15,7 @@ const makeSchema = () => z.object({
   redirect_number: z.string().optional().nullable(),
   source: z.string().optional(),
   imported_at: z.coerce.date().optional(),
-  site: z.lazy(() => SiteCreateNestedOneWithoutCallsRawInputObjectSchema)
+  site: z.lazy(() => SiteCreateNestedOneWithoutCallsImportInputObjectSchema)
 }).strict();
 export const CallImportCreateInputObjectSchema: z.ZodType<Prisma.CallImportCreateInput> = makeSchema() as unknown as z.ZodType<Prisma.CallImportCreateInput>;
 export const CallImportCreateInputObjectZodSchema = makeSchema();

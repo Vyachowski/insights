@@ -27,7 +27,7 @@ const sitewhereinputSchema = z.object({
   updatedAt: z.union([z.lazy(() => DateTimeFilterObjectSchema), z.coerce.date()]).optional(),
   city: z.union([z.lazy(() => CityScalarRelationFilterObjectSchema), z.lazy(() => CityWhereInputObjectSchema)]).optional(),
   calls: z.lazy(() => CallListRelationFilterObjectSchema).optional(),
-  callsRaw: z.lazy(() => CallImportListRelationFilterObjectSchema).optional(),
+  callsImport: z.lazy(() => CallImportListRelationFilterObjectSchema).optional(),
   metrics: z.lazy(() => SiteMetricListRelationFilterObjectSchema).optional()
 }).strict();
 export const SiteWhereInputObjectSchema: z.ZodType<Prisma.SiteWhereInput> = sitewhereinputSchema as unknown as z.ZodType<Prisma.SiteWhereInput>;

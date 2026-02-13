@@ -35,4 +35,24 @@ export class RevenueService {
       },
     });
   }
+
+  async getRevenueGroupedByCity(startDate: Date, endDate: Date) {
+    const result = await this.prismaService.revenue.groupBy({
+      by: 'city_id',
+      _sum: {
+        amount: true,
+      },
+      where: {
+        date: {
+          gte: startDate,
+          lte: endDate,
+        },
+      },
+    });
+    console.log(result);
+    return result.map((item) => ({
+      cityId: item.city_id ?? 0,
+      profit: item._sum.amount?.toNumber() ?? 0,
+    }));
+  }
 }

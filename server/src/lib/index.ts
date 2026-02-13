@@ -100,4 +100,19 @@ export class DateService {
       previousYear: previousYearWeeks,
     };
   }
+
+  getComparablePeriods() {
+    const now = new Date();
+
+    const currentStart = startOfYear(now);
+    const currentEnd = now;
+
+    const previousStart = subYears(currentStart, 1);
+    const previousEnd = subYears(currentEnd, 1);
+
+    return {
+      currentYear: { start: currentStart, end: currentEnd },
+      previousYear: { start: previousStart, end: previousEnd },
+    };
+  }
 }

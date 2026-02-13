@@ -4,7 +4,7 @@ import { DateTimeFieldUpdateOperationsInputObjectSchema as DateTimeFieldUpdateOp
 import { StringFieldUpdateOperationsInputObjectSchema as StringFieldUpdateOperationsInputObjectSchema } from './StringFieldUpdateOperationsInput.schema';
 import { NullableStringFieldUpdateOperationsInputObjectSchema as NullableStringFieldUpdateOperationsInputObjectSchema } from './NullableStringFieldUpdateOperationsInput.schema';
 import { IntFieldUpdateOperationsInputObjectSchema as IntFieldUpdateOperationsInputObjectSchema } from './IntFieldUpdateOperationsInput.schema';
-import { SiteUpdateOneRequiredWithoutCallsRawNestedInputObjectSchema as SiteUpdateOneRequiredWithoutCallsRawNestedInputObjectSchema } from './SiteUpdateOneRequiredWithoutCallsRawNestedInput.schema'
+import { SiteUpdateOneRequiredWithoutCallsImportNestedInputObjectSchema as SiteUpdateOneRequiredWithoutCallsImportNestedInputObjectSchema } from './SiteUpdateOneRequiredWithoutCallsImportNestedInput.schema'
 
 const makeSchema = () => z.object({
   date: z.union([z.coerce.date(), z.lazy(() => DateTimeFieldUpdateOperationsInputObjectSchema)]).optional(),
@@ -19,7 +19,7 @@ const makeSchema = () => z.object({
   redirect_number: z.union([z.string(), z.lazy(() => NullableStringFieldUpdateOperationsInputObjectSchema)]).optional().nullable(),
   source: z.union([z.string(), z.lazy(() => StringFieldUpdateOperationsInputObjectSchema)]).optional(),
   imported_at: z.union([z.coerce.date(), z.lazy(() => DateTimeFieldUpdateOperationsInputObjectSchema)]).optional(),
-  site: z.lazy(() => SiteUpdateOneRequiredWithoutCallsRawNestedInputObjectSchema).optional()
+  site: z.lazy(() => SiteUpdateOneRequiredWithoutCallsImportNestedInputObjectSchema).optional()
 }).strict();
 export const CallImportUpdateInputObjectSchema: z.ZodType<Prisma.CallImportUpdateInput> = makeSchema() as unknown as z.ZodType<Prisma.CallImportUpdateInput>;
 export const CallImportUpdateInputObjectZodSchema = makeSchema();

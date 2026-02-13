@@ -21,7 +21,7 @@ const makeSchema = () => z.object({
   updatedAt: SortOrderSchema.optional(),
   city: z.lazy(() => CityOrderByWithRelationInputObjectSchema).optional(),
   calls: z.lazy(() => CallOrderByRelationAggregateInputObjectSchema).optional(),
-  callsRaw: z.lazy(() => CallImportOrderByRelationAggregateInputObjectSchema).optional(),
+  callsImport: z.lazy(() => CallImportOrderByRelationAggregateInputObjectSchema).optional(),
   metrics: z.lazy(() => SiteMetricOrderByRelationAggregateInputObjectSchema).optional()
 }).strict();
 export const SiteOrderByWithRelationInputObjectSchema: z.ZodType<Prisma.SiteOrderByWithRelationInput> = makeSchema() as unknown as z.ZodType<Prisma.SiteOrderByWithRelationInput>;

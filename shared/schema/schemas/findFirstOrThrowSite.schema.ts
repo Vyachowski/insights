@@ -23,7 +23,7 @@ export const SiteFindFirstOrThrowSelectSchema: z.ZodType<Prisma.SiteSelect> = z.
     updatedAt: z.boolean().optional(),
     city: z.boolean().optional(),
     calls: z.boolean().optional(),
-    callsRaw: z.boolean().optional(),
+    callsImport: z.boolean().optional(),
     metrics: z.boolean().optional(),
     _count: z.boolean().optional()
   }).strict() as unknown as z.ZodType<Prisma.SiteSelect>;
@@ -42,7 +42,7 @@ export const SiteFindFirstOrThrowSelectZodSchema = z.object({
     updatedAt: z.boolean().optional(),
     city: z.boolean().optional(),
     calls: z.boolean().optional(),
-    callsRaw: z.boolean().optional(),
+    callsImport: z.boolean().optional(),
     metrics: z.boolean().optional(),
     _count: z.boolean().optional()
   }).strict();

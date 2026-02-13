@@ -19,7 +19,7 @@ const makeSchema = () => z.object({
   updatedAt: z.union([z.coerce.date(), z.lazy(() => DateTimeFieldUpdateOperationsInputObjectSchema)]).optional(),
   city: z.lazy(() => CityUpdateOneRequiredWithoutSitesNestedInputObjectSchema).optional(),
   calls: z.lazy(() => CallUpdateManyWithoutSiteNestedInputObjectSchema).optional(),
-  callsRaw: z.lazy(() => CallImportUpdateManyWithoutSiteNestedInputObjectSchema).optional()
+  callsImport: z.lazy(() => CallImportUpdateManyWithoutSiteNestedInputObjectSchema).optional()
 }).strict();
 export const SiteUpdateWithoutMetricsInputObjectSchema: z.ZodType<Prisma.SiteUpdateWithoutMetricsInput> = makeSchema() as unknown as z.ZodType<Prisma.SiteUpdateWithoutMetricsInput>;
 export const SiteUpdateWithoutMetricsInputObjectZodSchema = makeSchema();

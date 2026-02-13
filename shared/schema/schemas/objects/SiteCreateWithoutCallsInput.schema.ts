@@ -15,7 +15,7 @@ const makeSchema = () => z.object({
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
   city: z.lazy(() => CityCreateNestedOneWithoutSitesInputObjectSchema),
-  callsRaw: z.lazy(() => CallImportCreateNestedManyWithoutSiteInputObjectSchema).optional(),
+  callsImport: z.lazy(() => CallImportCreateNestedManyWithoutSiteInputObjectSchema).optional(),
   metrics: z.lazy(() => SiteMetricCreateNestedManyWithoutSiteInputObjectSchema).optional()
 }).strict();
 export const SiteCreateWithoutCallsInputObjectSchema: z.ZodType<Prisma.SiteCreateWithoutCallsInput> = makeSchema() as unknown as z.ZodType<Prisma.SiteCreateWithoutCallsInput>;

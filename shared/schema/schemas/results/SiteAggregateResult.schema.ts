@@ -13,7 +13,7 @@ export const SiteAggregateResultSchema = z.object({  _count: z.object({
     updatedAt: z.number(),
     city: z.number(),
     calls: z.number(),
-    callsRaw: z.number(),
+    callsImport: z.number(),
     metrics: z.number()
   }).optional(),
   _sum: z.object({

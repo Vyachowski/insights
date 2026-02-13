@@ -78,7 +78,7 @@ export class CityProfitDto {
   readonly profit: number;
 }
 
-export class CitiesProfitDto {
+export class YearlyCityProfitDto {
   @IsInt()
   readonly year: number;
 
@@ -116,8 +116,8 @@ export class ResponseFinancialDto {
   readonly yearlyTrend: YearlyTrendDto;
 
   @ValidateNested()
-  @Type(() => CitiesProfitDto)
-  readonly citiesProfit: CitiesProfitDto;
+  @Type(() => YearlyCityProfitDto)
+  readonly citiesProfit: YearlyCityProfitDto[];
 
   // @ValidateNested()
   // @Type(() => BusinessHealthDto)

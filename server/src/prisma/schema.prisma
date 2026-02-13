@@ -68,7 +68,7 @@ model Site {
 
   city                  City         @relation(fields: [city_id], references: [id], onDelete: Cascade)
   calls                 Call[]
-  callsRaw              CallImport[]
+  callsImport           CallImport[]
   metrics               SiteMetric[]
 
   @@index([city_id])

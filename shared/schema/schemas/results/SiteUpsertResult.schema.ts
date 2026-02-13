@@ -13,6 +13,6 @@ export const SiteUpsertResultSchema = z.object({
   updatedAt: z.date(),
   city: z.unknown(),
   calls: z.array(z.unknown()),
-  callsRaw: z.array(z.unknown()),
+  callsImport: z.array(z.unknown()),
   metrics: z.array(z.unknown())
 });

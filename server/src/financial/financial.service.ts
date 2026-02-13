@@ -3,52 +3,28 @@ import {
   ResponseFinancialDto,
   MonthlyComparisonDto,
   YearlyTrendDto,
-  CitiesProfitDto,
   LastWeekSummaryDto,
 } from './dto/response-financial.dto';
 import { DateService } from '@/lib';
 import { RevenueService } from '@/revenue/revenue.service';
 import { ExpensesService } from '@/expenses/expenses.service';
+import { SitesService } from '@/sites/sites.service';
+import { PrismaService } from '@/database/prisma.service';
 
 @Injectable()
 export class FinancialService {
   constructor(
     private revenueService: RevenueService,
     private expensesService: ExpensesService,
+    private sitesService: SitesService,
+    private prismaService: PrismaService,
   ) {}
 
   async getDashboard(): Promise<ResponseFinancialDto> {
-    // const yearlyTrend: YearlyTrendDto = {
-    //   currentYear: [
-    //     { week: 1, profit: 28000 },
-    //     { week: 2, profit: 31000 },
-    //     { week: 3, profit: 29000 },
-    //     { week: 4, profit: 33000 },
-    //     { week: 5, profit: 35000 },
-    //   ],
-    //   lastYear: [
-    //     { week: 1, profit: 22000 },
-    //     { week: 2, profit: 25000 },
-    //     { week: 3, profit: 23000 },
-    //     { week: 4, profit: 26000 },
-    //     { week: 5, profit: 28000 },
-    //   ],
-    // };
-
-    const citiesProfit: CitiesProfitDto = {
-      year: 2026,
-      cities: [
-        { city: 'Москва', profit: 45000 },
-        { city: 'Санкт-Петербург', profit: 32000 },
-        { city: 'Казань', profit: 18000 },
-        { city: 'Новосибирск', profit: 15000 },
-        { city: 'Екатеринбург', profit: 12000 },
-      ],
-    };
     const lastWeekSummary = await this.getLastFullWeekSummary();
     const monthlyComparison = await this.getMonthlyComparison();
     const yearlyTrend = await this.getYearlyTrend();
-    // const citiesProfit = this.getCitiesProfit();
+    const citiesProfit = await this.getCitiesProfit();
     // const businessHealth = this.getBusinessHealth();
 
     return {
@@ -162,7 +138,43 @@ export class FinancialService {
     };
   }
 
-  // private async getCitiesProfit(): Promise<CitiesProfitDto> {}
+  private async getCitiesProfit() {
+    const { currentYear, previousYear } =
+      new DateService().getComparablePeriods();
+    const { currentYearTotalProfit, previousYearTotalProfit } =
+      await this.getYearlyComparablePeriodsProfit();
+
+    const profitSharePreviousYear = await this.calculateProfitShareByCities(
+      previousYear.start,
+      previousYear.end,
+    );
+
+    const profitShareCurrentYear = await this.calculateProfitShareByCities(
+      currentYear.start,
+      currentYear.end,
+    );
+
+    const previousYearCitiesProfit = this.calucalteCitiesProfit(
+      previousYearTotalProfit,
+      profitSharePreviousYear,
+    );
+
+    const currentYearCitiesProfit = this.calucalteCitiesProfit(
+      currentYearTotalProfit,
+      profitShareCurrentYear,
+    );
+
+    return [
+      {
+        year: currentYear.start.getFullYear(),
+        cities: currentYearCitiesProfit,
+      },
+      {
+        year: previousYear.start.getFullYear(),
+        cities: previousYearCitiesProfit,
+      },
+    ];
+  }
 
   private async getBusinessHealth() {
     const yearlyTrend = await this.getYearlyTrend();
@@ -182,5 +194,137 @@ export class FinancialService {
       avgCurrent: Math.round(avgCurrent),
       avgPrevious: Math.round(avgPrevious),
     };
+  }
+
+  private async getYearlyComparablePeriodsProfit() {
+    const { currentYear, previousYear } =
+      new DateService().getComparablePeriods();
+
+    const currentYearTotalRevenue =
+      await this.revenueService.getRevenueForPeriod(
+        currentYear.start,
+        currentYear.end,
+      );
+    const currentYearTotalExpenses =
+      await this.expensesService.getExpensesForPeriod(
+        currentYear.start,
+        currentYear.end,
+      );
+    const previousYearTotalRevenue =
+      await this.revenueService.getRevenueForPeriod(
+        previousYear.start,
+        previousYear.end,
+      );
+    const previousYearTotalExpenses =
+      await this.expensesService.getExpensesForPeriod(
+        previousYear.start,
+        previousYear.end,
+      );
+
+    const currentYearTotalProfit =
+      currentYearTotalRevenue - currentYearTotalExpenses;
+    const previousYearTotalProfit =
+      previousYearTotalRevenue - previousYearTotalExpenses;
+
+    return { currentYearTotalProfit, previousYearTotalProfit };
+  }
+
+  private async calculateProfitShareByCities(startDate: Date, endDate: Date) {
+    const acitveSites = await this.sitesService.getActiveSitesWithCities(
+      startDate,
+      endDate,
+    );
+
+    const totalFormLeads = await this.prismaService.siteMetric.aggregate({
+      _sum: {
+        leads_yandex: true,
+        leads_google: true,
+        leads_other: true,
+      },
+      where: {
+        date: {
+          gte: startDate,
+          lte: endDate,
+        },
+      },
+    });
+
+    const totalCallLeads = await this.prismaService.callImport.aggregate({
+      _sum: {
+        call_number: true,
+      },
+      where: {
+        date: {
+          gte: startDate,
+          lte: endDate,
+        },
+        call_number: 1,
+      },
+    });
+
+    const totalLeads =
+      Number(totalFormLeads._sum.leads_google) +
+      Number(totalFormLeads._sum.leads_yandex) +
+      Number(totalFormLeads._sum.leads_other) +
+      Number(totalCallLeads._sum.call_number);
+
+    const metrics = await this.prismaService.siteMetric.groupBy({
+      by: 'site_id',
+      _sum: {
+        leads_yandex: true,
+        leads_google: true,
+        leads_other: true,
+      },
+      where: {
+        date: {
+          gte: startDate,
+          lte: endDate,
+        },
+      },
+    });
+
+    const calls = await this.prismaService.callImport.groupBy({
+      by: 'site_id',
+      _count: {
+        id: true,
+      },
+      where: {
+        date: {
+          gte: startDate,
+          lte: endDate,
+        },
+        call_number: 1, // уникальные звонки
+      },
+    });
+
+    return acitveSites.map((site) => {
+      const siteMetrics = metrics.find((m) => m.site_id === site.id);
+      const siteCalls = calls.find((c) => c.site_id === site.id);
+
+      const formLeads = Object.values(siteMetrics?._sum ?? {}).reduce(
+        (acc, val) => Number(acc) + Number(val),
+        0,
+      );
+      const totalSiteLeads = (siteCalls?._count.id ?? 0) + Number(formLeads);
+      const leadsShare = Number((totalSiteLeads / totalLeads).toFixed(3));
+
+      return {
+        city: site.city.name,
+        leadsShare,
+      };
+    });
+  }
+
+  private calucalteCitiesProfit(
+    totalProfit: number,
+    profitSharesByCity: {
+      city: string;
+      leadsShare: number;
+    }[],
+  ) {
+    return profitSharesByCity.map((cityProfit) => ({
+      city: cityProfit.city,
+      profit: totalProfit * cityProfit.leadsShare,
+    }));
   }
 }

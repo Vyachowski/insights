@@ -5,5 +5,5 @@ import { CallImportWhereInputObjectSchema as CallImportWhereInputObjectSchema } 
 const makeSchema = () => z.object({
   where: z.lazy(() => CallImportWhereInputObjectSchema).optional()
 }).strict();
-export const SiteCountOutputTypeCountCallsRawArgsObjectSchema = makeSchema();
-export const SiteCountOutputTypeCountCallsRawArgsObjectZodSchema = makeSchema();
+export const SiteCountOutputTypeCountCallsImportArgsObjectSchema = makeSchema();
+export const SiteCountOutputTypeCountCallsImportArgsObjectZodSchema = makeSchema();
