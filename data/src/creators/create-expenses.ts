@@ -43,7 +43,7 @@ const hostingAmount = (date: Date) =>
 export async function createExpensesCSV() {
   const filePath = config.paths.output.expenses;
 
-  const cityIds = await readCityIds();
+  const cityIds = (await readCityIds()).filter((id) => id >= 1 && id <= 19);
 
   const months = getMonths(
     new Date(config.IMPORT_START_DATE),
@@ -57,10 +57,7 @@ export async function createExpensesCSV() {
     // первый день месяца явно
     const date = `${month.getFullYear()}-${String(month.getMonth() + 1).padStart(2, "0")}-01`;
 
-    // hosting
     lines.push(`${date},${ExpenseType.Hosting},,${hostingAmount(month)}`);
-
-    // telephony
     for (const city_id of cityIds) {
       lines.push(
         `${date},${ExpenseType.Telephony},${city_id},${telephonyAmount(month)}`,
