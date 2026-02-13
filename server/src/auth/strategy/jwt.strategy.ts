@@ -2,6 +2,7 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { Role } from '@shared/schema/schemas';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -13,12 +14,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  // eslint-disable-next-line @typescript-eslint/require-await
-  async validate(payload: { email: string; sub: string; isAdmin: boolean }) {
+  validate(payload: { email: string; sub: string; role: Role }) {
     return {
       userId: payload.sub,
       email: payload.email,
-      isAdmin: payload.isAdmin,
+      role: payload.role,
     };
   }
 }
