@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { TrendingUp, TrendingDown } from 'lucide-react'
+import { useState, useEffect } from 'react'
 import {
   LineChart,
   Line,
@@ -9,68 +10,68 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-} from "recharts";
-import { TrendingUp, TrendingDown } from "lucide-react";
-import { formatNumber } from "../utils.ts";
+} from 'recharts'
+
 import {
   citiesData,
   monthlyComparison,
   weeklyData,
   yearlyTrendData,
-} from "../mock/index.ts";
-import MetricCard from "./MetricCard.tsx";
+} from '../mock/index.ts'
+import { formatNumber } from '../utils.ts'
+import MetricCard from './MetricCard.tsx'
 
 export default function FinancialDashboard() {
-  const [selectedYear, setSelectedYear] = useState(2026);
-  const [animatedProfit, setAnimatedProfit] = useState(0);
-  const [animatedRevenue, setAnimatedRevenue] = useState(0);
-  const [animatedExpenses, setAnimatedExpenses] = useState(0);
+  const [selectedYear, setSelectedYear] = useState(2026)
+  const [animatedProfit, setAnimatedProfit] = useState(0)
+  const [animatedRevenue, setAnimatedRevenue] = useState(0)
+  const [animatedExpenses, setAnimatedExpenses] = useState(0)
 
-  const barchartData = citiesData[selectedYear];
+  const barchartData = citiesData[selectedYear]
   // Расчет итогового вывода на основе годового тренда
   const calculateBusinessHealth = () => {
     const avgCurrent =
       yearlyTrendData.reduce((sum, item) => sum + item.current, 0) /
-      yearlyTrendData.length;
+      yearlyTrendData.length
     const avgPrevious =
       yearlyTrendData.reduce((sum, item) => sum + item.previous, 0) /
-      yearlyTrendData.length;
+      yearlyTrendData.length
     const growthPercent = Number(
       (((avgCurrent - avgPrevious) / avgPrevious) * 100).toFixed(1),
-    );
-    const isGrowing = growthPercent > 0;
+    )
+    const isGrowing = growthPercent > 0
 
     return {
       isGrowing,
       growthPercent: Math.abs(growthPercent),
       avgCurrent: Math.round(avgCurrent),
       avgPrevious: Math.round(avgPrevious),
-    };
-  };
+    }
+  }
 
-  const businessHealth = calculateBusinessHealth();
+  const businessHealth = calculateBusinessHealth()
 
   // Анимация счетчиков
   useEffect(() => {
-    const duration = 1500;
-    const steps = 60;
-    const stepDuration = duration / steps;
+    const duration = 1500
+    const steps = 60
+    const stepDuration = duration / steps
 
-    let currentStep = 0;
+    let currentStep = 0
     const interval = setInterval(() => {
-      currentStep++;
-      const progress = currentStep / steps;
-      const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+      currentStep++
+      const progress = currentStep / steps
+      const easeOutQuart = 1 - Math.pow(1 - progress, 4)
 
-      setAnimatedProfit(Math.floor(weeklyData.profit * easeOutQuart));
-      setAnimatedRevenue(Math.floor(weeklyData.revenue * easeOutQuart));
-      setAnimatedExpenses(Math.floor(weeklyData.expenses * easeOutQuart));
+      setAnimatedProfit(Math.floor(weeklyData.profit * easeOutQuart))
+      setAnimatedRevenue(Math.floor(weeklyData.revenue * easeOutQuart))
+      setAnimatedExpenses(Math.floor(weeklyData.expenses * easeOutQuart))
 
-      if (currentStep >= steps) clearInterval(interval);
-    }, stepDuration);
+      if (currentStep >= steps) clearInterval(interval)
+    }, stepDuration)
 
-    return () => clearInterval(interval);
-  }, []);
+    return () => clearInterval(interval)
+  }, [])
 
   return (
     <div className="max-w-7xl mx-auto space-y-8">
@@ -78,8 +79,8 @@ export default function FinancialDashboard() {
       <div
         className={`relative overflow-hidden rounded-3xl p-8 backdrop-blur-xl border-2 shadow-2xl animate-slide-up opacity-0 stagger-1 ${
           businessHealth.isGrowing
-            ? "bg-linear-to-br from-emerald-900/40 to-teal-900/40 border-emerald-500/50"
-            : "bg-linear-to-br from-red-900/40 to-orange-900/40 border-red-500/50"
+            ? 'bg-linear-to-br from-emerald-900/40 to-teal-900/40 border-emerald-500/50'
+            : 'bg-linear-to-br from-red-900/40 to-orange-900/40 border-red-500/50'
         }`}
       >
         <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/5 to-transparent -skew-x-12"></div>
@@ -88,7 +89,7 @@ export default function FinancialDashboard() {
           <div className="flex items-center gap-6">
             <div
               className={`p-4 rounded-2xl ${
-                businessHealth.isGrowing ? "bg-emerald-500/20" : "bg-red-500/20"
+                businessHealth.isGrowing ? 'bg-emerald-500/20' : 'bg-red-500/20'
               }`}
             >
               {businessHealth.isGrowing ? (
@@ -112,25 +113,25 @@ export default function FinancialDashboard() {
               </div>
               <div
                 className={`text-4xl font-bold mb-2 ${
-                  businessHealth.isGrowing ? "text-emerald-400" : "text-red-400"
+                  businessHealth.isGrowing ? 'text-emerald-400' : 'text-red-400'
                 }`}
               >
                 {businessHealth.isGrowing
-                  ? "📈 Бизнес растет"
-                  : "📉 Бизнес падает"}
+                  ? '📈 Бизнес растет'
+                  : '📉 Бизнес падает'}
               </div>
               <div className="text-slate-300 text-lg">
-                Средняя недельная прибыль{" "}
+                Средняя недельная прибыль{' '}
                 <span
                   className={`font-bold ${
                     businessHealth.isGrowing
-                      ? "text-emerald-400"
-                      : "text-red-400"
+                      ? 'text-emerald-400'
+                      : 'text-red-400'
                   }`}
                 >
-                  {businessHealth.isGrowing ? "+" : "−"}
+                  {businessHealth.isGrowing ? '+' : '−'}
                   {businessHealth.growthPercent}%
-                </span>{" "}
+                </span>{' '}
                 по сравнению с прошлым годом
               </div>
             </div>
@@ -159,7 +160,7 @@ export default function FinancialDashboard() {
 
         <div
           className={`absolute -bottom-10 -right-10 w-64 h-64 rounded-full blur-3xl opacity-20 ${
-            businessHealth.isGrowing ? "bg-emerald-500" : "bg-red-500"
+            businessHealth.isGrowing ? 'bg-emerald-500' : 'bg-red-500'
           }`}
         ></div>
       </div>
@@ -232,28 +233,28 @@ export default function FinancialDashboard() {
             <XAxis
               dataKey="week"
               stroke="#64748b"
-              style={{ fontSize: "12px", fontFamily: "JetBrains Mono" }}
+              style={{ fontSize: '12px', fontFamily: 'JetBrains Mono' }}
             />
             <YAxis
               stroke="#64748b"
-              style={{ fontSize: "12px", fontFamily: "JetBrains Mono" }}
-              tickFormatter={(value) => `${value / 1000}k`}
+              style={{ fontSize: '12px', fontFamily: 'JetBrains Mono' }}
+              tickFormatter={value => `${value / 1000}k`}
             />
             <Tooltip
               contentStyle={{
-                backgroundColor: "#1e293b",
-                border: "1px solid #334155",
-                borderRadius: "12px",
-                fontFamily: "Manrope",
+                backgroundColor: '#1e293b',
+                border: '1px solid #334155',
+                borderRadius: '12px',
+                fontFamily: 'Manrope',
               }}
-              labelStyle={{ color: "#94a3b8" }}
+              labelStyle={{ color: '#94a3b8' }}
             />
             <Line
               type="monotone"
               dataKey="previous"
               stroke="#475569"
               strokeWidth={3}
-              dot={{ fill: "#475569", r: 4 }}
+              dot={{ fill: '#475569', r: 4 }}
               name="Прошлый год"
             />
             <Line
@@ -261,7 +262,7 @@ export default function FinancialDashboard() {
               dataKey="current"
               stroke="#10b981"
               strokeWidth={4}
-              dot={{ fill: "#10b981", r: 5 }}
+              dot={{ fill: '#10b981', r: 5 }}
               fill="url(#currentGradient)"
               name="Текущий год"
             />
@@ -285,7 +286,7 @@ export default function FinancialDashboard() {
           <h2 className="text-2xl font-bold text-white">Прибыль по городам</h2>
           <select
             value={selectedYear}
-            onChange={(e) => setSelectedYear(Number(e.target.value))}
+            onChange={e => setSelectedYear(Number(e.target.value))}
             className="px-4 py-2 rounded-lg bg-slate-700/50 border border-slate-600 text-white font-medium hover:bg-slate-700 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500"
           >
             <option value={2026}>2026</option>
@@ -303,26 +304,26 @@ export default function FinancialDashboard() {
             <XAxis
               type="number"
               stroke="#64748b"
-              style={{ fontSize: "12px", fontFamily: "JetBrains Mono" }}
-              tickFormatter={(value) => `${value / 1000}k`}
+              style={{ fontSize: '12px', fontFamily: 'JetBrains Mono' }}
+              tickFormatter={value => `${value / 1000}k`}
             />
             <YAxis
               type="category"
               dataKey="city"
               stroke="#64748b"
               width={150}
-              style={{ fontSize: "13px", fontFamily: "Manrope" }}
+              style={{ fontSize: '13px', fontFamily: 'Manrope' }}
             />
             <Tooltip
               contentStyle={{
-                backgroundColor: "#1e293b",
-                border: "1px solid #334155",
-                borderRadius: "12px",
-                fontFamily: "Manrope",
+                backgroundColor: '#1e293b',
+                border: '1px solid #334155',
+                borderRadius: '12px',
+                fontFamily: 'Manrope',
               }}
-              formatter={(value) => [
+              formatter={value => [
                 `${formatNumber(Number(value))} ₽`,
-                "Прибыль",
+                'Прибыль',
               ]}
             />
             <Bar
@@ -341,5 +342,5 @@ export default function FinancialDashboard() {
         </ResponsiveContainer>
       </div>
     </div>
-  );
+  )
 }

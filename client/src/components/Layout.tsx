@@ -6,20 +6,20 @@ import {
   Settings,
   User,
   LogOut,
-} from "lucide-react";
-import React from "react";
-import { useState, type ReactNode } from "react";
+} from 'lucide-react'
+import React from 'react'
+import { useState, type ReactNode } from 'react'
 
 const menuItems = [
-  { id: "financial-health", label: "Финансовое здоровье", icon: DollarSign },
-  { id: "analytics", label: "Аналитика", icon: BarChart3 },
-  { id: "dashboard", label: "Обзор", icon: LayoutDashboard },
-  { id: "team", label: "Команда", icon: Users },
-  { id: "settings", label: "Настройки", icon: Settings },
-];
+  { id: 'financial-health', label: 'Финансовое здоровье', icon: DollarSign },
+  { id: 'analytics', label: 'Аналитика', icon: BarChart3 },
+  { id: 'dashboard', label: 'Обзор', icon: LayoutDashboard },
+  { id: 'team', label: 'Команда', icon: Users },
+  { id: 'settings', label: 'Настройки', icon: Settings },
+]
 
 export default function Layout({ children }: { children: ReactNode }) {
-  const [activeTab, setActiveTab] = useState("financial-health");
+  const [activeTab, setActiveTab] = useState('financial-health')
 
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 flex">
@@ -40,23 +40,23 @@ export default function Layout({ children }: { children: ReactNode }) {
 
         {/* Navigation */}
         <nav className="flex-1 p-4 space-y-1">
-          {menuItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = activeTab === item.id;
+          {menuItems.map(item => {
+            const Icon = item.icon
+            const isActive = activeTab === item.id
             return (
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${
                   isActive
-                    ? "bg-linear-to-r from-emerald-500/20 to-teal-500/20 text-emerald-400 shadow-lg shadow-emerald-500/10"
-                    : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
+                    ? 'bg-linear-to-r from-emerald-500/20 to-teal-500/20 text-emerald-400 shadow-lg shadow-emerald-500/10'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
                 }`}
               >
                 <Icon size={20} strokeWidth={2} />
                 <span className="font-medium">{item.label}</span>
               </button>
-            );
+            )
           })}
         </nav>
 
@@ -83,14 +83,14 @@ export default function Layout({ children }: { children: ReactNode }) {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-white">
-                {menuItems.find((item) => item.id === activeTab)?.label}
+                {menuItems.find(item => item.id === activeTab)?.label}
               </h1>
               <p className="text-slate-500 text-sm mt-1">
-                {new Date().toLocaleDateString("ru-RU", {
-                  weekday: "long",
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
+                {new Date().toLocaleDateString('ru-RU', {
+                  weekday: 'long',
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
                 })}
               </p>
             </div>
@@ -112,23 +112,23 @@ export default function Layout({ children }: { children: ReactNode }) {
 
         {/* Page Content */}
         <main className="flex-1 overflow-y-auto p-8">
-          {activeTab === "financial-health" ? (
+          {activeTab === 'financial-health' ? (
             children
           ) : (
             <div className="flex items-center justify-center h-full">
               <div className="text-center">
                 <div className="w-24 h-24 mx-auto mb-6 rounded-2xl bg-slate-800/50 flex items-center justify-center">
                   {React.createElement(
-                    menuItems.find((item) => item.id === activeTab)?.icon ||
+                    menuItems.find(item => item.id === activeTab)?.icon ||
                       DollarSign,
                     {
                       size: 48,
-                      className: "text-slate-600",
+                      className: 'text-slate-600',
                     },
                   )}
                 </div>
                 <h2 className="text-2xl font-bold text-slate-300 mb-2">
-                  {menuItems.find((item) => item.id === activeTab)?.label}
+                  {menuItems.find(item => item.id === activeTab)?.label}
                 </h2>
                 <p className="text-slate-500">Раздел в разработке</p>
               </div>
@@ -137,5 +137,5 @@ export default function Layout({ children }: { children: ReactNode }) {
         </main>
       </div>
     </div>
-  );
+  )
 }

@@ -1,5 +1,6 @@
-import { TrendingDown, TrendingUp } from "lucide-react";
-import { formatNumber } from "../utils.ts";
+import { TrendingDown, TrendingUp } from 'lucide-react'
+
+import { formatNumber } from '../utils.ts'
 
 export default function MetricCard({
   title,
@@ -28,8 +29,8 @@ export default function MetricCard({
             <div
               className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-semibold ${
                 isProfit
-                  ? "bg-emerald-500/20 text-emerald-400"
-                  : "bg-red-500/20 text-red-400"
+                  ? 'bg-emerald-500/20 text-emerald-400'
+                  : 'bg-red-500/20 text-red-400'
               }`}
             >
               {trend >= 0 ? (
@@ -44,5 +45,5 @@ export default function MetricCard({
       </div>
       <div className="absolute -bottom-8 -right-8 w-32 h-32 bg-gradient-radial from-emerald-500/10 to-transparent rounded-full blur-2xl"></div>
     </div>
-  );
+  )
 }
