@@ -1,12 +1,23 @@
-import Dashboard from './components/Dashboard'
-import Layout from './components/Layout'
+import { BrowserRouter } from 'react-router'
 
-function App() {
+import AppRouter from './components/AppRouter'
+import SplashScreen from './components/SplashScreen'
+import { useAppInit } from './hooks/useAppInit'
+
+export default function App() {
+  const { isReady, error } = useAppInit()
+
+  if (error) {
+    return <div>Error: {error}</div>
+  }
+
+  if (!isReady) {
+    return <SplashScreen />
+  }
+
   return (
-    <Layout>
-      <Dashboard />
-    </Layout>
+    <BrowserRouter>
+      <AppRouter />
+    </BrowserRouter>
   )
 }
-
-export default App

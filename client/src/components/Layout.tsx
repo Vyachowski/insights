@@ -2,13 +2,14 @@ import {
   DollarSign,
 } from 'lucide-react'
 import React from 'react'
-import { useState, type ReactNode } from 'react'
+import { useState } from 'react'
+import { Outlet } from 'react-router'
 
 import Header from './Header'
 import Sidebar from './Sidebar'
 import  { menuItems } from '../navigation'
 
-export default function Layout({ children }: { children: ReactNode }) {
+export default function Layout() {
   const [activeTabId, setActiveTabId] = useState<string>(menuItems[0].id)
 
   return (
@@ -20,7 +21,7 @@ export default function Layout({ children }: { children: ReactNode }) {
 
         <main className="flex-1 overflow-y-auto p-8">
           {activeTabId === menuItems[0].id ? (
-            children
+            <Outlet />
           ) : (
             <div className="flex items-center justify-center h-full">
               <div className="text-center">
