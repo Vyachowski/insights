@@ -16,6 +16,7 @@ export default function MetricCard({
   return (
     <div className="relative overflow-hidden rounded-2xl p-6 backdrop-blur-xl bg-linear-to-br from-slate-800/50 to-slate-900/50 border border-slate-700/50 shadow-2xl hover:shadow-emerald-500/10 transition-all duration-500 hover:scale-[1.02] group">
       <div className="absolute inset-0 bg-linear-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
       <div className="relative z-10">
         <div className="text-slate-400 text-sm font-medium mb-3 tracking-wider uppercase">
           {title}
@@ -43,6 +44,7 @@ export default function MetricCard({
           )}
         </div>
       </div>
+
       <div className="absolute -bottom-8 -right-8 w-32 h-32 bg-gradient-radial from-emerald-500/10 to-transparent rounded-full blur-2xl"></div>
     </div>
   )

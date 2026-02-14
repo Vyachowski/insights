@@ -12,14 +12,14 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 
+import MetricCard from './MetricCard'
 import {
   citiesData,
   monthlyComparison,
   weeklyData,
   yearlyTrendData,
-} from '../mock/index.ts'
-import { formatNumber } from '../utils/index.ts'
-import MetricCard from './MetricCard.tsx'
+} from '../mock/index'
+import { formatNumber } from '../utils/index'
 
 export default function FinancialDashboard() {
   const [selectedYear, setSelectedYear] = useState(2026)
@@ -28,6 +28,7 @@ export default function FinancialDashboard() {
   const [animatedExpenses, setAnimatedExpenses] = useState(0)
 
   const barchartData = citiesData[selectedYear]
+
   // Расчет итогового вывода на основе годового тренда
   const calculateBusinessHealth = () => {
     const avgCurrent =
