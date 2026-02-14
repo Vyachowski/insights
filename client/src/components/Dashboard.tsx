@@ -18,7 +18,7 @@ import {
   weeklyData,
   yearlyTrendData,
 } from '../mock/index.ts'
-import { formatNumber } from '../utils.ts'
+import { formatNumber } from '../utils/index.ts'
 import MetricCard from './MetricCard.tsx'
 
 export default function FinancialDashboard() {

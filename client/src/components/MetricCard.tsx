@@ -1,6 +1,6 @@
 import { TrendingDown, TrendingUp } from 'lucide-react'
 
-import { formatNumber } from '../utils.ts'
+import { formatNumber } from '../utils/index.ts'
 
 export default function MetricCard({
   title,
