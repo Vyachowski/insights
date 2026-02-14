@@ -1,4 +1,4 @@
-import { User, LogOut } from 'lucide-react'
+import { LogOut } from 'lucide-react'
 
 import { menuItems } from '../navigation'
 
@@ -22,9 +22,9 @@ export default function Header({ activeTabId }: { activeTabId: string }) {
 
         <div className="flex items-center gap-4">
           {/* User Avatar */}
-          <div className="w-10 h-10 rounded-full bg-linear-to-br from-emerald-500 to-teal-500 flex items-center justify-center cursor-pointer hover:shadow-lg hover:shadow-emerald-500/20 transition-all">
+          {/* <div className="w-10 h-10 rounded-full bg-linear-to-br from-emerald-500 to-teal-500 flex items-center justify-center cursor-pointer hover:shadow-lg hover:shadow-emerald-500/20 transition-all">
             <User size={20} className="text-white" />
-          </div>
+          </div> */}
 
           {/* Logout Button */}
           <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800 hover:bg-red-500/20 text-slate-300 hover:text-red-400 border border-slate-700 hover:border-red-500/50 transition-all duration-300">
