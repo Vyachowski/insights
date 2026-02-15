@@ -1,23 +1,18 @@
 import { useState } from 'react'
-import { Outlet, useLocation, useNavigate } from 'react-router'
+import { Outlet, useLocation } from 'react-router'
 
 import Header from '../components/Header'
 import Sidebar from '../components/Sidebar'
 import { menuItems } from '../navigation'
 
 export default function MainLayout() {
-  const navigate = useNavigate()
   const { pathname } = useLocation()
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen)
   const closeSidebar = () => setIsSidebarOpen(false)
-  const activePageId = pathname.split('/').at(1)
 
-  if (!activePageId) {
-    navigate(menuItems[0].id)
-    return null
-  }
+  const activePageId = pathname.split('/').at(1) || menuItems[0].id
 
   return (
     <div className="h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 flex">
