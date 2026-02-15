@@ -73,7 +73,7 @@ export default function Sidebar({
         {/* User Section */}
         <div className="p-4 border-t border-slate-800">
           <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-800/50">
-            <Avatar size={8}/>
+            <Avatar />
             <div className="flex-1 min-w-0">
               <p className="text-white text-sm font-medium truncate">
                 Иван Петров
