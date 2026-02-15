@@ -15,7 +15,7 @@ import {
 
 import Card from '../components/Card'
 import MetricCard from '../components/MetricCard'
-import useCountersAnimation from '../hooks/useCountersAnimation'
+import useProgressiveMetrics from '../hooks/useProgressiveMetrics'
 import { formatNumber } from '../lib/utils'
 import {
   citiesData,
@@ -48,7 +48,7 @@ const calculateBusinessHealth = () => {
 
 export default function FinancialPage() {
   const [selectedYear, setSelectedYear] = useState(2026)
-  const { animatedProfit, animatedRevenue, animatedExpenses } = useCountersAnimation(profit, revenue, expenses)
+  const { currentProfit, currentRevenue, currentExpenses } = useProgressiveMetrics(profit, revenue, expenses)
   const barchartData = citiesData[selectedYear]
 
   const businessHealth = calculateBusinessHealth()
@@ -148,13 +148,13 @@ export default function FinancialPage() {
       {/* Карточки метрик */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-slide-up opacity-0 stagger-2">
         <MetricCard
-          title="Прибыль неделя"
-          value={animatedProfit}
+          title="Прибыль недели"
+          value={currentProfit}
           trend={weeklyData.profitChange}
           isProfit={true}
         />
-        <MetricCard title="Выручка неделя" value={animatedRevenue} />
-        <MetricCard title="Расходы неделя" value={animatedExpenses} />
+        <MetricCard title="Выручка недели" value={currentRevenue} />
+        <MetricCard title="Расходы недели" value={currentExpenses} />
       </div>
 
       {/* Месячное сравнение */}
