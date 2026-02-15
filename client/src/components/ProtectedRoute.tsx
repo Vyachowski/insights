@@ -1,8 +1,9 @@
 import { Navigate, Outlet } from 'react-router'
 
+import { useAuth } from '@/hooks/useAuth'
+
 export default function ProtectedRoute() {
-  // TODO: Заменить на реальную проверку авторизации
-  const isAuthenticated = false // или useAuth(), useSelector(state => state.auth.isAuthenticated)
+  const { isAuthenticated } = useAuth()
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />

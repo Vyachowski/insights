@@ -2,30 +2,32 @@ import { useState } from 'react'
 
 import Button from '@/components/Button'
 import Input from '@/components/Input'
+import { useAuth } from '@/hooks/useAuth'
 
 export default function LoginForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
+  const { login, isLoading, error, clearError } = useAuth()
 
   const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault()
+    clearError()
 
-    setIsLoading(true)
-
-    // TODO: Заменить на реальный API запрос
-    // eslint-disable-next-line no-console
-    console.log('Login attempt:', { email, password })
-
-    // Имитация запроса
-    setTimeout(() => {
-      setIsLoading(false)
-      // TODO: обработка ответа, редирект и т.д.
-    }, 1500)
+    try {
+      await login({ email, password })
+    } catch (err) {
+      console.error('Login failed:', err)
+    }
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {error && (
+        <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/50 text-red-400 text-sm">
+          {error}
+        </div>
+      )}
+
       <Input
         type="email"
         label="Email"
