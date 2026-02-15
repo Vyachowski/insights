@@ -5,7 +5,7 @@ import { cn } from '../lib/utils'
 import type { ReactNode } from 'react'
 
 const cardVariants = cva(
-  'backdrop-blur-xl bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-slate-700/50 shadow-2xl',
+  'backdrop-blur-xl bg-linear-to-br from-slate-800/50 to-slate-900/50 border border-slate-700/50 shadow-2xl',
   {
     variants: {
       size: {
@@ -23,12 +23,15 @@ const cardVariants = cva(
 interface CardProps extends VariantProps<typeof cardVariants> {
   children: ReactNode
   className?: string
+  as?: 'article' | 'section' | 'div'
 }
 
-export default function Card({ children, className, size }: CardProps) {
+export default function Card({ children, className, size, as = 'article' }: CardProps) {
+  const Component = as
+
   return (
-    <div className={cn(cardVariants({ size }), className)}>
+    <Component className={cn(cardVariants({ size }), className)}>
       {children}
-    </div>
+    </Component>
   )
 }

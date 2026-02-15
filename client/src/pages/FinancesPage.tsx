@@ -13,15 +13,16 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 
+import Card from '../components/Card'
 import MetricCard from '../components/MetricCard'
 import useCountersAnimation from '../hooks/useCountersAnimation'
+import { formatNumber } from '../lib/utils'
 import {
   citiesData,
   monthlyComparison,
   weeklyData,
   yearlyTrendData,
 } from '../mock/index'
-import { formatNumber } from '../lib/utils'
 
 const { profit, revenue, expenses } = weeklyData
 
@@ -157,7 +158,7 @@ export default function FinancialPage() {
       </div>
 
       {/* Месячное сравнение */}
-      <div className="rounded-2xl p-8 backdrop-blur-xl bg-linear-to-br from-slate-800/50 to-slate-900/50 border border-slate-700/50 shadow-2xl animate-slide-up opacity-0 stagger-3">
+      <Card className='animate-slide-up opacity-0 stagger-3'>
         <h2 className="text-2xl font-bold text-white mb-6">
           Месячное сравнение прибыли
         </h2>
@@ -189,10 +190,10 @@ export default function FinancialPage() {
             </div>
           </div>
         </div>
-      </div>
+      </Card>
 
       {/* Годовой тренд */}
-      <div className="rounded-2xl p-8 backdrop-blur-xl bg-linear-to-br from-slate-800/50 to-slate-900/50 border border-slate-700/50 shadow-2xl animate-slide-up opacity-0 stagger-4">
+      <Card className='animate-slide-up opacity-0 stagger-4'>
         <h2 className="text-2xl font-bold text-white mb-6">
           Годовой тренд прибыли
         </h2>
@@ -257,10 +258,10 @@ export default function FinancialPage() {
             <span className="text-slate-400">Прошлый год</span>
           </div>
         </div>
-      </div>
+      </Card>
 
       {/* Прибыль по городам */}
-      <div className="rounded-2xl p-8 backdrop-blur-xl bg-linear-to-br from-slate-800/50 to-slate-900/50 border border-slate-700/50 shadow-2xl animate-slide-up opacity-0 stagger-5">
+      <Card className='animate-slide-up opacity-0 stagger-5'>
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-white">Прибыль по городам</h2>
           <select
@@ -319,7 +320,7 @@ export default function FinancialPage() {
             </defs>
           </BarChart>
         </ResponsiveContainer>
-      </div>
+      </Card>
     </div>
   )
 }
