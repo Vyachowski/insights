@@ -21,7 +21,7 @@ import {
   weeklyData,
   yearlyTrendData,
 } from '../mock/index'
-import { formatNumber } from '../utils/index'
+import { formatNumber } from '../lib/utils'
 
 const { profit, revenue, expenses } = weeklyData
 
