@@ -20,7 +20,7 @@ export default function MainLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 flex">
+    <div className="h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 flex">
       {/* Backdrop для мобильных - только когда sidebar открыт */}
       {isSidebarOpen && (
         <div
@@ -34,7 +34,7 @@ export default function MainLayout() {
         isSidebarOpen={isSidebarOpen}
       />
 
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <Header
           activeTabId={activePageId}
           onMenuClick={toggleSidebar}
