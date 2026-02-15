@@ -32,7 +32,9 @@ export class AuthController {
       maxAge: this.configService.get<number>('JWT_MAX_AGE'),
     });
 
-    return { message: 'Logged in successfully' };
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, createdAt, updatedAt, status, ...safeUser } = req.user;
+    return { data: safeUser, message: 'Logged in successfully' };
   }
 
   @UseGuards(JwtAuthGuard)
