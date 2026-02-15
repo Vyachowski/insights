@@ -1,8 +1,8 @@
 import { BrowserRouter } from 'react-router'
 
-import AppRouter from './components/AppRouter'
 import SplashScreen from './components/SplashScreen'
 import { useAppInit } from './hooks/useAppInit'
+import AppRouter from './router/AppRouter'
 
 export default function App() {
   const { isReady, error } = useAppInit()

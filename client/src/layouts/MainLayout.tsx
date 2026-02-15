@@ -1,16 +1,23 @@
 import { useState } from 'react'
-import { Outlet } from 'react-router'
+import { Outlet, useLocation, useNavigate } from 'react-router'
 
 import Header from '../components/Header'
 import Sidebar from '../components/Sidebar'
 import { menuItems } from '../navigation'
 
 export default function MainLayout() {
-  const [activeTabId, setActiveTabId] = useState<string>(menuItems[0].id)
+  const navigate = useNavigate()
+  const { pathname } = useLocation()
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen)
   const closeSidebar = () => setIsSidebarOpen(false)
+  const activePageId = pathname.split('/').at(1)
+
+  if (!activePageId) {
+    navigate(menuItems[0].id)
+    return null
+  }
 
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 flex">
@@ -23,25 +30,19 @@ export default function MainLayout() {
       )}
 
       <Sidebar
-        tabs={menuItems}
-        activeTabId={activeTabId}
-        setActiveTabId={id => {
-          setActiveTabId(id)
-          closeSidebar()
-        }}
         onClose={closeSidebar}
         isSidebarOpen={isSidebarOpen}
       />
 
       <div className="flex-1 flex flex-col min-w-0">
         <Header
-          activeTabId={activeTabId}
+          activeTabId={activePageId}
           onMenuClick={toggleSidebar}
           isSidebarOpen={isSidebarOpen}
         />
 
         <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
-          <Outlet context={[activeTabId, (id: string) => { setActiveTabId(id); closeSidebar()}]} />
+          <Outlet context={activePageId} />
         </main>
       </div>
     </div>

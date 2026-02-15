@@ -1,21 +1,15 @@
 import { X } from 'lucide-react'
+import { NavLink } from 'react-router'
 
 import Avatar from './Avatar'
-
-import type { MenuItems } from '../navigation'
+import { menuItems } from '../navigation'
 
 interface SidebarProps {
-  tabs: MenuItems
-  activeTabId: string
-  setActiveTabId: (id: string) => void
-  onClose?: () => void
+  onClose: () => void
   isSidebarOpen: boolean
 }
 
 export default function Sidebar({
-  tabs,
-  activeTabId,
-  setActiveTabId,
   onClose,
   isSidebarOpen,
 }: SidebarProps) {
@@ -53,23 +47,25 @@ export default function Sidebar({
 
         {/* Navigation */}
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-          {tabs.map(item => {
+          {menuItems.map(item => {
             const Icon = item.icon
-            const isActive = activeTabId === item.id
 
             return (
-              <button
+              <NavLink
                 key={item.id}
-                onClick={() => setActiveTabId(item.id)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${
-                  isActive
-                    ? 'bg-linear-to-r from-emerald-500/20 to-teal-500/20 text-emerald-400 shadow-lg shadow-emerald-500/10'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
-                }`}
+                to={item.id}
+                onClick={onClose}
+                className={({ isActive }) =>
+                  `w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${
+                    isActive
+                      ? 'bg-linear-to-r from-emerald-500/20 to-teal-500/20 text-emerald-400 shadow-lg shadow-emerald-500/10'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                  }`
+                }
               >
                 <Icon size={20} strokeWidth={2} />
                 <span className="font-medium">{item.label}</span>
-              </button>
+              </NavLink>
             )
           })}
         </nav>

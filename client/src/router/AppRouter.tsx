@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router'
+import { Routes, Route, Navigate } from 'react-router'
 
 import MainLayout from '../layouts/MainLayout'
 import { menuItems } from '../navigation'
@@ -14,9 +14,13 @@ export default function AppRouter() {
         <Route path="register" element={<Register />} />
       </Route> */}
       <Route path="/" element={<MainLayout />}>
-        <Route element={<FinancialPage />} index/>
+        <Route index element={<Navigate to={menuItems[0].id} replace />} />
         <Route path={menuItems[0].id} element={<FinancialPage />} />
-        <Route path ="*" element={<ErrorPage />} />
+        {/* <Route path={menuItems[1].id} element={<AnalyticsPage />} />
+        <Route path={menuItems[2].id} element={<DashboardPage />} />
+        <Route path={menuItems[3].id} element={<TeamPage />} />
+        <Route path={menuItems[4].id} element={<SettingsPage />} /> */}
+        <Route path="*" element={<ErrorPage />} />
       </Route>
     </Routes>
   )
