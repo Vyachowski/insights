@@ -50,7 +50,7 @@ export default function LoginForm() {
       <Button
         type="submit"
         size="lg"
-        className="w-full"
+        className="w-full cursor-pointer"
         isLoading={isLoading}
       >
         Войти
