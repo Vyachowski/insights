@@ -6,26 +6,28 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
-  // TODO: обнови под реальную структуру ответа сервера
-  user: {
+  data: {
     id: string
     email: string
-    name: string
+    firstName: string
+    lastName: string
+    role: string
   }
-  // Токены не нужны если используются HTTP-only cookies
+  message: string
 }
 
 export interface User {
   id: string
   email: string
-  name: string
-  role?: string
+  firstName: string
+  lastName: string
+  role: string
 }
 
 export const authApi = {
-  login: async (data: LoginRequest): Promise<LoginResponse> => {
-    const response = await axiosInstance.post<LoginResponse>('/auth/login', data)
-    return response.data
+  login: async (data: LoginRequest): Promise<User> => {
+    const { data: resData } = await axiosInstance.post<LoginResponse>('/auth/login', data)
+    return resData.data
   },
 
   logout: async (): Promise<void> => {
