@@ -1,6 +1,6 @@
 
 import { TrendingUp, TrendingDown } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import {
   LineChart,
   Line,
@@ -14,6 +14,7 @@ import {
 } from 'recharts'
 
 import MetricCard from '../components/MetricCard'
+import useCountersAnimation from '../hooks/useCountersAnimation'
 import {
   citiesData,
   monthlyComparison,
@@ -22,65 +23,34 @@ import {
 } from '../mock/index'
 import { formatNumber } from '../utils/index'
 
+const { profit, revenue, expenses } = weeklyData
+
+const calculateBusinessHealth = () => {
+  const avgCurrent =
+    yearlyTrendData.reduce((sum, item) => sum + item.current, 0) /
+      yearlyTrendData.length
+  const avgPrevious =
+    yearlyTrendData.reduce((sum, item) => sum + item.previous, 0) /
+      yearlyTrendData.length
+  const growthPercent = Number(
+    (((avgCurrent - avgPrevious) / avgPrevious) * 100).toFixed(1),
+  )
+  const isGrowing = growthPercent > 0
+
+  return {
+    isGrowing,
+    growthPercent: Math.abs(growthPercent),
+    avgCurrent: Math.round(avgCurrent),
+    avgPrevious: Math.round(avgPrevious),
+  }
+}
+
 export default function FinancialPage() {
   const [selectedYear, setSelectedYear] = useState(2026)
-  const [animatedProfit, setAnimatedProfit] = useState(0)
-  const [animatedRevenue, setAnimatedRevenue] = useState(0)
-  const [animatedExpenses, setAnimatedExpenses] = useState(0)
-
+  const { animatedProfit, animatedRevenue, animatedExpenses } = useCountersAnimation(profit, revenue, expenses)
   const barchartData = citiesData[selectedYear]
 
-  // Расчет итогового вывода на основе годового тренда
-  const calculateBusinessHealth = () => {
-    const avgCurrent =
-      yearlyTrendData.reduce((sum, item) => sum + item.current, 0) /
-      yearlyTrendData.length
-    const avgPrevious =
-      yearlyTrendData.reduce((sum, item) => sum + item.previous, 0) /
-      yearlyTrendData.length
-    const growthPercent = Number(
-      (((avgCurrent - avgPrevious) / avgPrevious) * 100).toFixed(1),
-    )
-    const isGrowing = growthPercent > 0
-
-    return {
-      isGrowing,
-      growthPercent: Math.abs(growthPercent),
-      avgCurrent: Math.round(avgCurrent),
-      avgPrevious: Math.round(avgPrevious),
-    }
-  }
-
   const businessHealth = calculateBusinessHealth()
-
-  // Анимация счетчиков
-  useEffect(() => {
-    function animateCounters() {
-      const duration = 1500
-      const steps = 60
-      const stepDuration = duration / steps
-
-      let currentStep = 0
-
-      const interval = setInterval(() => {
-        currentStep++
-        const progress = currentStep / steps
-        const easeOutQuart = 1 - Math.pow(1 - progress, 4)
-
-        setAnimatedProfit(Math.floor(weeklyData.profit * easeOutQuart))
-        setAnimatedRevenue(Math.floor(weeklyData.revenue * easeOutQuart))
-        setAnimatedExpenses(Math.floor(weeklyData.expenses * easeOutQuart))
-
-        if (currentStep >= steps) clearInterval(interval)
-      }, stepDuration)
-
-      return interval
-    }
-
-    const interval = animateCounters()
-
-    return () => clearInterval(interval)
-  }, [])
 
   return (
     <div className="max-w-7xl mx-auto space-y-8">
@@ -352,5 +322,4 @@ export default function FinancialPage() {
       </div>
     </div>
   )
-
 }
