@@ -3,7 +3,7 @@ import Logo from './Logo'
 export default function SplashScreen() {
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-4">
-      {/* Фоновые blur круги */}
+      {/* SECTION: Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-teal-500/5 rounded-full blur-3xl animate-pulse delay-700" />
@@ -12,7 +12,7 @@ export default function SplashScreen() {
       <div className="relative z-10 flex flex-col items-center gap-8">
         <Logo size={20} className="shadow-lg shadow-emerald-500/30 animate-pulse" textSize='4xl'/>
 
-        {/* Спиннер */}
+        {/* SECTION: Spinner */}
         <div className="relative">
           <svg
             className="animate-spin h-12 w-12 text-emerald-500"
@@ -36,7 +36,6 @@ export default function SplashScreen() {
           </svg>
         </div>
 
-        {/* Текст */}
         <p className="text-slate-400 text-lg animate-pulse">
           Загрузка приложения...
         </p>
