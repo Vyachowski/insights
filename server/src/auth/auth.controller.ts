@@ -1,12 +1,21 @@
 import type { Response } from 'express';
 
-import { Controller, Post, UseGuards, Request, Res } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  UseGuards,
+  Request,
+  Res,
+  Get,
+  NotFoundException,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginRequestDto } from './dto/auth.dto';
 import { LocalAuthGuard } from '../common/guards/local.auth.guard';
 import { User } from 'generated/prisma/client';
 import { ConfigService } from '@nestjs/config';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
+import { PrismaService } from '@/database/prisma.service';
 
 type RequestWithUser = LoginRequestDto & { user: User };
 
@@ -15,6 +24,7 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private configService: ConfigService,
+    private prismaService: PrismaService,
   ) {}
 
   @UseGuards(LocalAuthGuard)
@@ -47,5 +57,19 @@ export class AuthController {
     });
 
     return { message: 'Logged out' };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('me')
+  async getMe(@Request() req: LoginRequestDto & { user: { userId: string } }) {
+    const user = await this.prismaService.user.findUnique({
+      where: { id: req.user.userId },
+    });
+
+    if (!user) throw new NotFoundException('User was not found.');
+
+    const { password: _, ...userWithoutPassword } = user;
+
+    return userWithoutPassword;
   }
 }
