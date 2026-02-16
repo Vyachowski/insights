@@ -16,7 +16,6 @@ export default function MainLayout() {
 
   return (
     <div className="h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 flex">
-      {/* Backdrop для мобильных - только когда sidebar открыт */}
       {isSidebarOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-40 lg:hidden"
