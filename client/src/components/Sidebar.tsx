@@ -3,6 +3,7 @@ import { NavLink } from 'react-router'
 
 import Avatar from './Avatar'
 import { menuItems } from '../navigation'
+import Logo from './Logo'
 
 interface SidebarProps {
   onClose: () => void
@@ -24,9 +25,7 @@ export default function Sidebar({
       <aside className="w-64 h-full bg-slate-900/50 backdrop-blur-xl border-r border-slate-800 flex flex-col">
         <div className="p-6 border-b border-slate-800 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-linear-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
-              <span className="text-white text-xl font-bold">I</span>
-            </div>
+            <Logo size={10} className="flex rounded-xl" textSize='xl'/>
             <div>
               <h2 className="text-white font-bold text-lg">Insights</h2>
               <p className="text-slate-500 text-xs">Бизнес аналитика</p>

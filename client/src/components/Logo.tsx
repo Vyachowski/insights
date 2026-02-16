@@ -1,17 +1,15 @@
-import { DollarSign } from 'lucide-react'
+import { twMerge } from 'tailwind-merge'
 
-export default function Logo() {
+interface LogoProps {
+  size?: number
+  className?: string
+  textSize?: 'xl' | '3xl' | '4xl'
+}
+
+export default function Logo({ size = 16, className, textSize = '3xl' }: LogoProps) {
   return (
-    <div className="p-6 border-b border-slate-800">
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-linear-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
-          <DollarSign className="text-white" size={24} strokeWidth={2.5} />
-        </div>
-        <div>
-          <h2 className="text-white font-bold text-lg">Insights</h2>
-          <p className="text-slate-500 text-xs">Бизнес аналитика</p>
-        </div>
-      </div>
+    <div className={twMerge(`flex items-center justify-center w-${size} h-${size} rounded-2xl bg-linear-to-br from-emerald-500 to-teal-500`, className)}>
+      <span className={twMerge('text-white text-3xl font-bold', textSize)}>I</span>
     </div>
   )
 }

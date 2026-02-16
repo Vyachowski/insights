@@ -1,15 +1,14 @@
 import LoginForm from './_components/LoginForm'
 
 import Card from '@/components/Card'
+import Logo from '@/components/Logo'
 
 export default function LoginPage() {
   return (
     <div className="space-y-8">
 
       <div className="text-center space-y-3">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-linear-to-br from-emerald-500 to-teal-500 mb-4">
-          <span className="text-white text-3xl font-bold">I</span>
-        </div>
+        <Logo className='mx-auto mb-4'/>
         <h1 className="text-3xl font-bold text-white">
           Добро пожаловать
         </h1>

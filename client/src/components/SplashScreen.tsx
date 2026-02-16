@@ -1,3 +1,5 @@
+import Logo from './Logo'
+
 export default function SplashScreen() {
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-4">
@@ -7,12 +9,8 @@ export default function SplashScreen() {
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-teal-500/5 rounded-full blur-3xl animate-pulse delay-700" />
       </div>
 
-      {/* Центральный контент */}
       <div className="relative z-10 flex flex-col items-center gap-8">
-        {/* Лого */}
-        <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-linear-to-br from-emerald-500 to-teal-500 shadow-lg shadow-emerald-500/30 animate-pulse">
-          <span className="text-white text-4xl font-bold">I</span>
-        </div>
+        <Logo size={20} className="shadow-lg shadow-emerald-500/30 animate-pulse" textSize='4xl'/>
 
         {/* Спиннер */}
         <div className="relative">
