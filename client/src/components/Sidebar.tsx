@@ -1,9 +1,9 @@
 import { X } from 'lucide-react'
 import { NavLink } from 'react-router'
 
-import Avatar from './Avatar'
-import { menuItems } from '../navigation'
-import Logo from './Logo'
+import Avatar from '@/components/Avatar'
+import Logo from '@/components/Logo'
+import { menuItems } from '@/navigation'
 
 interface SidebarProps {
   onClose: () => void

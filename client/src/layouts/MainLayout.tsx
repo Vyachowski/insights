@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { Outlet, useLocation } from 'react-router'
 
-import Header from '../components/Header'
-import Sidebar from '../components/Sidebar'
-import { menuItems } from '../navigation'
+import Header from '@/components/Header'
+import Sidebar from '@/components/Sidebar'
+import { menuItems } from '@/navigation'
 
 export default function MainLayout() {
   const { pathname } = useLocation()
