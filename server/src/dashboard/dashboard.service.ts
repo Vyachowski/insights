@@ -4,14 +4,14 @@ import {
   MonthlyComparisonDto,
   YearlyTrendDto,
   LastWeekSummaryDto,
-} from './dto/response-financial.dto';
+} from './dto/response-dashboard.dto';
 import { DateService } from '@/lib';
 import { RevenueService } from '@/revenue/revenue.service';
 import { ExpensesService } from '@/expenses/expenses.service';
 import { ProfitService } from '@/profit/profit.service';
 
 @Injectable()
-export class FinancialService {
+export class DashboardService {
   constructor(
     private revenueService: RevenueService,
     private expensesService: ExpensesService,

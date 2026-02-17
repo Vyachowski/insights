@@ -13,7 +13,7 @@ import { MetricsModule } from './metrics/metrics.module';
 import { RevenueModule } from './revenue/revenue.module';
 import { ExpensesModule } from './expenses/expenses.module';
 import { CallsModule } from './calls/calls.module';
-import { FinancialModule } from './financial/financial.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 import { ProfitModule } from './profit/profit.module';
 
 @Module({
@@ -40,7 +40,7 @@ import { ProfitModule } from './profit/profit.module';
     RevenueModule,
     ExpensesModule,
     CallsModule,
-    FinancialModule,
+    DashboardModule,
     ProfitModule,
   ],
   controllers: [AppController],
