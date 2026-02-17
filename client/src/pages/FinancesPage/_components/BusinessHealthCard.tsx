@@ -3,10 +3,12 @@ import { TrendingUp, TrendingDown } from 'lucide-react'
 import { formatNumber } from '../../../lib/utils'
 
 export default function BusinessHealthCard({ metrics }: {
-  metrics: { isGrowing: boolean;
+  metrics: {
+    isGrowing: boolean;
     growthPercent: number;
     avgCurrent: number;
-    avgPrevious: number; }
+    avgPrevious: number;
+  }
 }) {
   return (
     <div

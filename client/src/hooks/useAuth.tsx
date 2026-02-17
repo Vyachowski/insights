@@ -11,7 +11,7 @@ import {
   selectAuthError,
 } from '@/store/selectors/authSelectors'
 import { clearError } from '@/store/slices/authSlice'
-import { fetchLogin, fetchLogout, fetchMe } from '@/store/thunks'
+import { fetchLogin, fetchLogout, fetchMe } from '@/store/thunks/authThunks'
 
 export function useAuth() {
   const dispatch = useAppDispatch()

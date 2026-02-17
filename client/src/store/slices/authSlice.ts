@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 
-import { fetchLogin, fetchLogout, fetchMe } from '../thunks'
+import { fetchLogin, fetchLogout, fetchMe } from '../thunks/authThunks'
 
 import type { User } from '../../api/auth'
 
