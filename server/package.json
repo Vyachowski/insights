@@ -22,8 +22,8 @@
     "prisma:reset": "npx prisma migrate reset --force && prisma db seed",
     "prisma:wipe": "if [ \"$CONFIRM\" != \"YES\" ]; then echo '❌ CONFIRM=YES required'; exit 1; fi && rm -rf prisma/migrations && prisma generate && prisma migrate dev --name init && prisma db seed",
     "container:reset": "tsx src/scripts/db/remove-postgres-container.ts && tsx src/scripts/db/create-postgres-container.ts",
-    "db:reset": "colima start && npm run container:reset && npm run prisma:reset",
-    "db:wipe": "if [ \"$CONFIRM\" != \"YES\" ]; then echo '❌ CONFIRM=YES required'; exit 1; fi && colima start && npm run container:reset && npm run prisma:wipe"
+    "db:reset": "npm run container:reset && npm run prisma:reset",
+    "db:wipe": "if [ \"$CONFIRM\" != \"YES\" ]; then echo '❌ CONFIRM=YES required'; exit 1; fi && npm run container:reset && npm run prisma:wipe"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
