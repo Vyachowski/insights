@@ -1,4 +1,4 @@
-import type { ResponseFinancialDto } from '../../../server/src/financial/dto/response-financial.dto'
+import type { ResponseFinancialDto } from '../../../server/src/dashboard/dto/response-dashboard.dto'
 
 import axiosInstance from '@/lib/axios'
 

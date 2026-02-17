@@ -7,8 +7,7 @@ import useProgressiveMetrics from '../../hooks/useProgressiveMetrics'
 import { useAppSelector } from '@/store/hooks'
 import { selectDashboardData } from '@/store/selectors/dashboardSelectors'
 
-export default function FinancialPage() {
-  // const businessHealth = calculateBusinessHealth()
+export default function DashboardPage() {
   const { businessHealth, lastWeekSummary, monthlyComparison, yearlyTrend, citiesProfit } = useAppSelector(selectDashboardData)
   const { currentProfit, currentRevenue, currentExpenses } = useProgressiveMetrics(lastWeekSummary && lastWeekSummary.profit || 0, lastWeekSummary && lastWeekSummary.revenue || 0, lastWeekSummary && lastWeekSummary.expenses || 0)
 
