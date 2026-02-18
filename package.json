@@ -1,7 +1,7 @@
 {
-  "name": "ses-dashboard",
+  "name": "insights",
   "version": "0.1.0",
-  "description": "A dashboard for key analytics values for cleaning business",
+  "description": "A business dashboard for key analytics values for business",
   "private": true,
   "workspaces": [
     "server",

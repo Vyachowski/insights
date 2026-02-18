@@ -1,5 +1,5 @@
 {
-  "name": "ses-dashboard-client",
+  "name": "insights-client",
   "private": true,
   "version": "0.0.1",
   "type": "module",
