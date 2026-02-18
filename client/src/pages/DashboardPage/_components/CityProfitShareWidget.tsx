@@ -11,6 +11,10 @@ export default function CityProfitShareWidget({ metrics }: { metrics: YearlyCity
 
   const [selectedYear, setSelectedYear] = useState(availableYears.at(0))
   const barchartData = useMemo(() => metrics.find(metric => metric.year === selectedYear), [metrics, selectedYear])
+  const sortedCitiesData = useMemo(() =>
+    barchartData?.cities?.slice().sort((city1, city2) => city2.profit - city1.profit),
+  [barchartData],
+  )
 
   return (
     <Card className='animate-slide-up opacity-0 stagger-5'>
@@ -27,8 +31,8 @@ export default function CityProfitShareWidget({ metrics }: { metrics: YearlyCity
         </select>
       </div>
 
-      <ResponsiveContainer width="100%" height={300}>
-        <BarChart data={barchartData?.cities} layout="vertical">
+      <ResponsiveContainer width="100%" height={500}>
+        <BarChart data={sortedCitiesData} layout="vertical">
           <CartesianGrid
             strokeDasharray="3 3"
             stroke="#334155"
@@ -50,10 +54,12 @@ export default function CityProfitShareWidget({ metrics }: { metrics: YearlyCity
           <Tooltip
             contentStyle={{
               backgroundColor: '#1e293b',
+              color: '#fff',
               border: '1px solid #334155',
               borderRadius: '12px',
               fontFamily: 'Manrope',
             }}
+            wrapperStyle={{ zIndex: 10 }}
             formatter={value => [
               `${formatNumber(Number(value))} ₽`,
               'Прибыль',
