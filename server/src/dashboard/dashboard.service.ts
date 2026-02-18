@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import {
-  ResponseFinancialDto,
+  DashboardResponseDto,
   MonthlyComparisonDto,
-  YearlyTrendDto,
   LastWeekSummaryDto,
+  YearlyProfitTrendPointDto,
 } from './dto/response-dashboard.dto';
 import { DateService } from '@/lib';
 import { RevenueService } from '@/revenue/revenue.service';
@@ -18,17 +18,17 @@ export class DashboardService {
     private profitService: ProfitService,
   ) {}
 
-  async getDashboard(): Promise<ResponseFinancialDto> {
+  async getDashboard(): Promise<DashboardResponseDto> {
     const lastWeekSummary = await this.getLastFullWeekSummary();
     const monthlyComparison = await this.getMonthlyComparison();
-    const yearlyTrend = await this.getYearlyTrend();
+    const yearlyProfitTrend = await this.getYearlyProfitTrend();
     const citiesProfit = await this.getCitiesProfit();
     const businessHealth = await this.getBusinessHealth();
 
     return {
       lastWeekSummary,
       monthlyComparison,
-      yearlyTrend,
+      yearlyProfitTrend,
       citiesProfit,
       businessHealth,
     };
@@ -101,16 +101,15 @@ export class DashboardService {
     };
   }
 
-  private async getYearlyTrend(): Promise<YearlyTrendDto> {
+  private async getYearlyProfitTrend(): Promise<YearlyProfitTrendPointDto[]> {
     const dateService = new DateService();
     const periods = dateService.getYearlyCompletedWeeks();
 
-    const currentYearData = [];
-    const lastYearData = [];
+    const result: YearlyProfitTrendPointDto[] = [];
 
     for (let i = 0; i < periods.currentYear.length; i++) {
       const current = periods.currentYear[i];
-      const last = periods.previousYear[i];
+      const previous = periods.previousYear[i];
 
       const currentProfit =
         (await this.revenueService.getRevenueForPeriod(
@@ -122,18 +121,24 @@ export class DashboardService {
           current.end,
         ));
 
-      const lastProfit =
-        (await this.revenueService.getRevenueForPeriod(last.start, last.end)) -
-        (await this.expensesService.getExpensesForPeriod(last.start, last.end));
+      const previousProfit =
+        (await this.revenueService.getRevenueForPeriod(
+          previous.start,
+          previous.end,
+        )) -
+        (await this.expensesService.getExpensesForPeriod(
+          previous.start,
+          previous.end,
+        ));
 
-      currentYearData.push({ week: i + 1, profit: currentProfit });
-      lastYearData.push({ week: i + 1, profit: lastProfit });
+      result.push({
+        week: i + 1,
+        current: currentProfit,
+        previous: previousProfit,
+      });
     }
 
-    return {
-      currentYear: currentYearData,
-      lastYear: lastYearData,
-    };
+    return result;
   }
 
   private async getCitiesProfit() {
@@ -177,14 +182,13 @@ export class DashboardService {
   }
 
   private async getBusinessHealth() {
-    const yearlyTrend = await this.getYearlyTrend();
+    const yearlyTrend = await this.getYearlyProfitTrend();
 
     const avgCurrent =
-      yearlyTrend.currentYear.reduce((sum, w) => sum + w.profit, 0) /
-      yearlyTrend.currentYear.length;
+      yearlyTrend.reduce((sum, w) => sum + w.current, 0) / yearlyTrend.length;
+
     const avgPrevious =
-      yearlyTrend.lastYear.reduce((sum, w) => sum + w.profit, 0) /
-      yearlyTrend.lastYear.length;
+      yearlyTrend.reduce((sum, w) => sum + w.previous, 0) / yearlyTrend.length;
 
     const growthPercent = ((avgCurrent - avgPrevious) / avgPrevious) * 100;
 
