@@ -1,7 +1,8 @@
 import { TrendingDown, TrendingUp } from 'lucide-react'
 
 import Card from './Card.tsx'
-import { formatNumber } from '../lib/utils.ts'
+
+import { formatNumber } from '@/lib/utils.ts'
 
 export default function MetricCard({
   title,
@@ -10,7 +11,7 @@ export default function MetricCard({
   isProfit,
 }: {
   title: string;
-  value: number;
+  value: number | null;
   trend?: number;
   isProfit?: boolean;
 }) {
@@ -24,8 +25,13 @@ export default function MetricCard({
         </div>
         <div className="flex items-end justify-between">
           <div className="text-4xl font-bold text-white tracking-tight">
-            {formatNumber(value)}
-            <span className="text-lg text-slate-500 ml-1">₽</span>
+            {value ? (
+              <>
+                {formatNumber(value)}
+                <span className="text-lg text-slate-500 ml-1">₽</span>
+              </>
+            ) : '—'}
+
           </div>
           {trend !== undefined && (
             <div

@@ -65,7 +65,7 @@ export default function BusinessHealthCard({ metrics }: {
                 }`}
               >
                 {metrics.isGrowing ? '+' : '−'}
-                {metrics.growthPercent}%
+                {Math.abs(metrics.growthPercent)}%
               </span>{' '}
               по сравнению с прошлым годом
             </div>
