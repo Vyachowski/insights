@@ -4,7 +4,6 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { selectAppError, selectIsAppReady } from '@/store/selectors/appSelectors'
 import { setAppError, setAppReady } from '@/store/slices/appSlice'
 import { fetchMe } from '@/store/thunks/authThunks'
-import { fetchDashboardSummary } from '@/store/thunks/dashboardThunks'
 
 export function useAppInit() {
   const dispatch = useAppDispatch()
@@ -16,7 +15,6 @@ export function useAppInit() {
     async function initApp() {
       try {
         await dispatch(fetchMe())
-        await dispatch(fetchDashboardSummary())
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error'
         dispatch(setAppError(message))

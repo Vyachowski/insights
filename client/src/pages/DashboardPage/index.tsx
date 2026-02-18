@@ -1,3 +1,5 @@
+import { useEffect } from 'react'
+
 import BusinessHealthWidget from './_components/BusinessHealthWidget'
 import CityProfitShareWidget from './_components/CityProfitShareWidget'
 import MonthlyProfitComparisonWidget from './_components/MonthlyProfitComparisonWidget'
@@ -5,12 +7,23 @@ import WeeklyFinancialMetricsWidget from './_components/WeeklyFinancialMetricsWi
 import YearlyProfitTrendChart from './_components/YearlyProfitTrendChart'
 
 import useProgressiveMetrics from '@/hooks/useProgressiveMetrics'
-import { useAppSelector } from '@/store/hooks'
+import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { selectDashboardData } from '@/store/selectors/dashboardSelectors'
+import { fetchDashboardSummary } from '@/store/thunks/dashboardThunks'
 
 export default function DashboardPage() {
+  const dispatch = useAppDispatch()
+
   const { businessHealth, lastWeekSummary, monthlyComparison, yearlyProfitTrend, citiesProfit } = useAppSelector(selectDashboardData)
   const currentFinances = useProgressiveMetrics(lastWeekSummary)
+
+  useEffect(() => {
+    async function initDashboard() {
+      await dispatch(fetchDashboardSummary())
+    }
+
+    initDashboard()
+  }, [dispatch])
 
   return (
     <div className="max-w-7xl mx-auto space-y-8">
