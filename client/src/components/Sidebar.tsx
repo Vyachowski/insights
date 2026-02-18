@@ -3,6 +3,8 @@ import { NavLink } from 'react-router'
 
 import Avatar from '@/components/Avatar'
 import Logo from '@/components/Logo'
+import { useAuth } from '@/hooks/useAuth'
+import { formatUserRole } from '@/lib/utils'
 import { menuItems } from '@/navigation'
 
 interface SidebarProps {
@@ -14,6 +16,8 @@ export default function Sidebar({
   onClose,
   isSidebarOpen,
 }: SidebarProps) {
+  const { user } = useAuth()
+
   return (
     <div
       className={`
@@ -75,9 +79,9 @@ export default function Sidebar({
             <Avatar />
             <div className="flex-1 min-w-0">
               <p className="text-white text-sm font-medium truncate">
-                Иван Петров
+                {`${user?.firstName} ${user?.lastName}`}
               </p>
-              <p className="text-slate-500 text-xs">Администратор</p>
+              <p className="text-slate-500 text-xs">{user?.role ? formatUserRole(user?.role) : '-'}</p>
             </div>
           </div>
         </div>

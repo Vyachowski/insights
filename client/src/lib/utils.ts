@@ -8,3 +8,7 @@ export function cn(...inputs: ClassValue[]) {
 
 export const formatNumber = (num: number) =>
   new Intl.NumberFormat('ru-RU').format(num)
+
+export function formatUserRole(role: string) {
+  return role === 'ADMIN' ? 'Администратор' : 'Пользователь'
+}
