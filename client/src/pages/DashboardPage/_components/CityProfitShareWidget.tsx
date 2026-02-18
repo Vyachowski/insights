@@ -22,7 +22,7 @@ export default function CityProfitShareWidget({ metrics }: { metrics: YearlyCity
           className="px-4 py-2 rounded-lg bg-slate-700/50 border border-slate-600 text-white font-medium hover:bg-slate-700 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500"
         >
           {availableYears.map(year => (
-            <option value={year}>{year}</option>
+            <option value={year} key={year}>{year}</option>
           ))}
         </select>
       </div>
