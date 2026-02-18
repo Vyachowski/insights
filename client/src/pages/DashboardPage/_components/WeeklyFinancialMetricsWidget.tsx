@@ -1,6 +1,6 @@
 import MetricCard from '../../../components/MetricCard'
 
-export default function KeyFinancialMetricsCardGroup({ metrics }: {
+export default function WeeklyFinancialMetricsWidget({ metrics }: {
   metrics: {
     profit: number | null;
     revenue: number | null;

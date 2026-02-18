@@ -4,7 +4,7 @@ type Metrics = {
   profit: number
   revenue: number
   expenses: number
-} | null
+} | undefined | null
 
 export default function useProgressiveMetrics(metrics: Metrics) {
   const [currentProfit, setCurrentProfit] = useState<number | null>(metrics?.profit ?? null)

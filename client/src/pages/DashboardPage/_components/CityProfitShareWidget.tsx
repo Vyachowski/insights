@@ -1,18 +1,16 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { ResponsiveContainer, CartesianGrid, XAxis, YAxis, Tooltip, Bar, BarChart } from 'recharts'
 
-import Card from '../../../components/Card'
-import { formatNumber } from '../../../lib/utils'
+import type { YearlyCityProfit } from '@contracts/dashboard.contract'
 
-interface CityProfitShareCardProps {
-  data: Record<number, {
-    city: string;
-    profit: number;
-  }[]> }
+import Card from '@/components/Card'
+import { formatNumber } from '@/lib/utils'
 
-export default function CityProfitShareCard({ data }: CityProfitShareCardProps) {
-  const [selectedYear, setSelectedYear] = useState(2026)
-  const barchartData = data[selectedYear]
+export default function CityProfitShareWidget({ metrics }: { metrics: YearlyCityProfit[] }) {
+  const availableYears = useMemo(() => metrics.map(metric => metric.year), [metrics])
+
+  const [selectedYear, setSelectedYear] = useState(availableYears.at(0))
+  const barchartData = useMemo(() => metrics.find(metric => metric.year === selectedYear), [metrics, selectedYear])
 
   return (
     <Card className='animate-slide-up opacity-0 stagger-5'>
@@ -23,13 +21,14 @@ export default function CityProfitShareCard({ data }: CityProfitShareCardProps) 
           onChange={e => setSelectedYear(Number(e.target.value))}
           className="px-4 py-2 rounded-lg bg-slate-700/50 border border-slate-600 text-white font-medium hover:bg-slate-700 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500"
         >
-          <option value={2026}>2026</option>
-          <option value={2025}>2025</option>
+          {availableYears.map(year => (
+            <option value={year}>{year}</option>
+          ))}
         </select>
       </div>
 
       <ResponsiveContainer width="100%" height={300}>
-        <BarChart data={barchartData} layout="vertical">
+        <BarChart data={barchartData?.cities} layout="vertical">
           <CartesianGrid
             strokeDasharray="3 3"
             stroke="#334155"

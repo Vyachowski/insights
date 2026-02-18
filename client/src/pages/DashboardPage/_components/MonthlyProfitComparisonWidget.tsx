@@ -4,8 +4,8 @@ import { formatNumber } from '../../../lib/utils'
 
 import Card from '@/components/Card'
 
-export default function MonthComparisonCard({ metrics }: {
-  metrics: {
+export default function MonthlyProfitComparisonWidget({ comparison }: {
+  comparison: {
     currentMonth: {
       month: string;
       profit: number;
@@ -18,7 +18,7 @@ export default function MonthComparisonCard({ metrics }: {
     percentage: number;
   }
 }) {
-  const { currentMonth, lastYearSameMonth, percentage } = metrics
+  const { currentMonth, lastYearSameMonth, percentage } = comparison
   const isPositive = percentage >= 0
 
   return (

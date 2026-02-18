@@ -1,14 +1,11 @@
 import { LineChart, ResponsiveContainer, CartesianGrid, XAxis, YAxis, Tooltip, Line } from 'recharts'
 
-import Card from '../../../components/Card'
+import type { YearlyProfitTrendPoint } from '@contracts/dashboard.contract'
 
-export default function YearlyTrendData({ data }: {
-  data: {
-    week: string;
-    current: number;
-    previous: number;
-  }[];
-}) {
+import Card from '@/components/Card'
+
+export default function YearlyProfitTrendChart({ data }: { data: YearlyProfitTrendPoint[] }) {
+
   return (
     <Card className='animate-slide-up opacity-0 stagger-4'>
       <h2 className="text-2xl font-bold text-white mb-6">
@@ -31,6 +28,7 @@ export default function YearlyTrendData({ data }: {
             dataKey="week"
             stroke="#64748b"
             style={{ fontSize: '12px', fontFamily: 'JetBrains Mono' }}
+            tickFormatter={value => `${value} нед.`}
           />
           <YAxis
             stroke="#64748b"

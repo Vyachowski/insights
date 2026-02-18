@@ -2,18 +2,23 @@ import { TrendingUp, TrendingDown } from 'lucide-react'
 
 import { formatNumber } from '../../../lib/utils'
 
-export default function BusinessHealthCard({ metrics }: {
-  metrics: {
+export default function BusinessHealthWidget({ summary }: {
+  summary: {
     isGrowing: boolean;
     growthPercent: number;
     avgCurrent: number;
     avgPrevious: number;
   }
 }) {
+  const { isGrowing,
+    growthPercent,
+    avgCurrent,
+    avgPrevious } = summary
+
   return (
     <div
       className={`relative overflow-hidden rounded-3xl p-8 backdrop-blur-xl border-2 shadow-2xl animate-slide-up opacity-0 stagger-1 ${
-        metrics.isGrowing
+        isGrowing
           ? 'bg-linear-to-br from-emerald-900/40 to-teal-900/40 border-emerald-500/50'
           : 'bg-linear-to-br from-red-900/40 to-orange-900/40 border-red-500/50'
       }`}
@@ -24,10 +29,10 @@ export default function BusinessHealthCard({ metrics }: {
         <div className="flex items-center gap-6">
           <div
             className={`p-4 rounded-2xl ${
-              metrics.isGrowing ? 'bg-emerald-500/20' : 'bg-red-500/20'
+              isGrowing ? 'bg-emerald-500/20' : 'bg-red-500/20'
             }`}
           >
-            {metrics.isGrowing ? (
+            {summary.isGrowing ? (
               <TrendingUp
                 size={48}
                 className="text-emerald-400"
@@ -48,10 +53,10 @@ export default function BusinessHealthCard({ metrics }: {
             </div>
             <div
               className={`text-4xl font-bold mb-2 ${
-                metrics.isGrowing ? 'text-emerald-400' : 'text-red-400'
+                isGrowing ? 'text-emerald-400' : 'text-red-400'
               }`}
             >
-              {metrics.isGrowing
+              {isGrowing
                 ? '📈 Бизнес растет'
                 : '📉 Бизнес падает'}
             </div>
@@ -59,13 +64,13 @@ export default function BusinessHealthCard({ metrics }: {
               Средняя недельная прибыль{' '}
               <span
                 className={`font-bold ${
-                  metrics.isGrowing
+                  isGrowing
                     ? 'text-emerald-400'
                     : 'text-red-400'
                 }`}
               >
-                {metrics.isGrowing ? '+' : '−'}
-                {Math.abs(metrics.growthPercent)}%
+                {isGrowing ? '+' : '−'}
+                {Math.abs(growthPercent)}%
               </span>{' '}
               по сравнению с прошлым годом
             </div>
@@ -80,13 +85,13 @@ export default function BusinessHealthCard({ metrics }: {
             <div className="flex items-center gap-4 justify-end">
               <span className="text-slate-400 text-sm">2026:</span>
               <span className="text-white font-bold text-2xl font-mono">
-                {formatNumber(metrics.avgCurrent)} ₽
+                {formatNumber(avgCurrent)} ₽
               </span>
             </div>
             <div className="flex items-center gap-4 justify-end">
               <span className="text-slate-500 text-sm">2025:</span>
               <span className="text-slate-400 font-semibold text-xl font-mono">
-                {formatNumber(metrics.avgPrevious)} ₽
+                {formatNumber(avgPrevious)} ₽
               </span>
             </div>
           </div>
@@ -95,7 +100,7 @@ export default function BusinessHealthCard({ metrics }: {
 
       <div
         className={`absolute -bottom-10 -right-10 w-64 h-64 rounded-full blur-3xl opacity-20 ${
-          metrics.isGrowing ? 'bg-emerald-500' : 'bg-red-500'
+          isGrowing ? 'bg-emerald-500' : 'bg-red-500'
         }`}
       ></div>
     </div>
