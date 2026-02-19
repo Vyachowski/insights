@@ -13,5 +13,5 @@ export async function createSiteMetricsCSV(sites: Site[], options: MetricsOption
   }
 
   const { metrics, errors } = await fetchSitesMetrics(sites, options);
-  return await writeSiteMetricsCSV(metrics, errors);
+  return await writeSiteMetricsCSV(metrics, errors, options);
 }

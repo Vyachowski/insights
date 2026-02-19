@@ -28,6 +28,7 @@ const paths = {
     sites: path.resolve(outputFolderPath, 'sites.csv'),
     calls: path.resolve(outputFolderPath, `${FILE_PREFIX}calls.csv`),
     revenue: path.resolve(outputFolderPath, `${FILE_PREFIX}revenue.csv`),
+    siteMetricsDir: path.resolve(outputFolderPath, "site-metrics"),
     siteMetrics: path.resolve(
       outputFolderPath,
       `${FILE_PREFIX}site-metrics.csv`,

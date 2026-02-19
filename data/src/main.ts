@@ -35,13 +35,14 @@ async function app(logger = console.log) {
   const calls = await createCallsCSV(cities.data);
   logger(calls.message, breaker);
 
-  // const metrics = await createSiteMetricsCSV(sites.data, { source: "backup" });
-  const metrics = await createSiteMetricsCSV(sites.data, {
-    source: "api",
-    startDate: new Date(config.IMPORT_START_DATE),
-    endDate: new Date(config.IMPORT_END_DATE),
-    years: [2025],
-  });
+  const metrics = await createSiteMetricsCSV(sites.data, { source: "backup" });
+  // FIXME: Fix this function to correctly process data
+  // const metrics = await createSiteMetricsCSV(sites.data, {
+  //   source: "api",
+  //   startDate: new Date(config.IMPORT_START_DATE),
+  //   endDate: new Date(config.IMPORT_END_DATE),
+  //   years: [2022],
+  // });
   logger(metrics.message, breaker);
 
   const revenue = await createRevenueCSV();

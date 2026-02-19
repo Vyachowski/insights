@@ -1,7 +1,8 @@
-import type { SiteMetric } from "@/types";
+import type { FetchSitesMetricsOptions, SiteMetric } from "@/types";
 import config from "@/config";
 import { createResultMessage } from "../../../utils/create-result-mesage";
 import { initializeCSVFile, appendMetricsToCSV } from "./modules/csv-writer";
+import path from "path";
 
 export interface SiteProcessingError {
   site_id: number;
@@ -13,8 +14,18 @@ export interface SiteProcessingError {
 export async function writeSiteMetricsCSV(
   metrics: Omit<SiteMetric, 'id'>[],
   errors: SiteProcessingError[],
+  options: FetchSitesMetricsOptions,
 ) {
-  const outputPath = config.paths.output.siteMetrics;
+  const minYear = Math.min(...options.years);
+  const maxYear = Math.max(...options.years);
+
+  const start = `${minYear}-01-01`;
+  const end = `${maxYear}-12-31`;
+
+  const outputPath = path.join(
+    config.paths.output.siteMetricsDir,
+    `${start}_${end}_site-metrics.csv`,
+  );
 
   await initializeCSVFile(outputPath);
 
