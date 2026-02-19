@@ -6,7 +6,8 @@
   "workspaces": [
     "server",
     "client",
-    "data"
+    "data",
+    "infrastructure"
   ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
