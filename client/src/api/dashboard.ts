@@ -1,12 +1,12 @@
-import type { ResponseFinancialDto } from '../../../server/src/dashboard/dto/response-dashboard.dto'
+import type { DashboardResponse } from '@contracts/dashboard.contract'
 
 import axiosInstance from '@/lib/axios'
 
 const endpoint = 'dashboard'
 
 export const dashboardApi = {
-  getDashboardSummary: async (): Promise<ResponseFinancialDto> => {
-    const { data } = await axiosInstance.get<ResponseFinancialDto>(`/${endpoint}/summary`)
+  getDashboardSummary: async (): Promise<DashboardResponse> => {
+    const { data } = await axiosInstance.get<DashboardResponse>(`/${endpoint}/summary`)
     return data
   },
 }
