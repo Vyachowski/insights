@@ -8,7 +8,7 @@ import { createSitesCSV } from "./creators/create-sites";
 import { createCallsCSV } from "./creators/calls/main";
 // import { createSiteMetricsCSV } from "./creators/site-metrics/main";
 import { createRevenueCSV } from "./creators/create-revenue";
-import { createExpensesCSV } from "./creators/create-expenses";
+import { createExpensesCSV } from "./creators/expenses/main";
 
 const breaker = "\n\n=======================\n";
 

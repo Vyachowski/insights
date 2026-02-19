@@ -1,6 +1,6 @@
 import axios from "axios";
 import type { AxiosInstance } from "axios";
-import { env } from "../../lib/env";
+import { env } from "../../../lib/env";
 
 export class YandexClient {
   private client: AxiosInstance;

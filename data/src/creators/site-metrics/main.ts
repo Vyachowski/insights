@@ -1,14 +1,15 @@
 import fs from "fs/promises";
 import config from "../../config/config";
 import { createResultMessage } from "../utils/create-result-mesage";
-import { YandexClient } from "./client";
-import { fetchGoalId } from "./fetch-goal-id";
-import { appendMetricsToCSV, initializeCSVFile } from "./csv-writer";
-import { splitDateRangeIntoChunks, formatDateRange } from "./date-chunkers";
-import { ErrorTracker } from "./error-tracker";
-import { fetchMetricsForPeriod } from "./metrics-fetcher";
-import type { MetricsSettings, SiteMetricRow } from "./site-metrics-schema";
+
 import type { Site } from "../../types";
+import { YandexClient } from "./modules/client";
+import { appendMetricsToCSV, initializeCSVFile } from "./modules/csv-writer";
+import { splitDateRangeIntoChunks, formatDateRange } from "./modules/date-chunkers";
+import { ErrorTracker } from "./modules/error-tracker";
+import { fetchGoalId } from "./modules/fetch-goal-id";
+import { fetchMetricsForPeriod } from "./modules/metrics-fetcher";
+import type { MetricsSettings, SiteMetricRow } from "./modules/site-metrics-schema";
 
 /**
  * Settings for metrics extraction
@@ -40,11 +41,11 @@ async function processSite(
 
   try {
     // Step 1: Get goal ID
-    if (!site.yandex_counter_id) {
+    if (!site.yandexCounterId) {
       throw new Error("No Yandex counter ID for this site");
     }
 
-    const goalId = await fetchGoalId(yandexClient, site.yandex_counter_id);
+    const goalId = await fetchGoalId(yandexClient, site.yandexCounterId);
 
     if (!goalId) {
       console.log("  ⚠️  Goal 'Заявка' not found - skipping site");
@@ -71,7 +72,7 @@ async function processSite(
       try {
         const metrics = await fetchMetricsForPeriod(
           yandexClient,
-          site.yandex_counter_id,
+          site.yandexCounterId,
           goalId,
           chunk.start,
           chunk.end,

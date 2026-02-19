@@ -1,4 +1,4 @@
-import type { CallRaw } from "./calls-raw-schema";
+import type { CallRaw } from "./modules/calls-raw-schema";
 
 /**
  * CSV column headers for calls_raw table

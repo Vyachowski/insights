@@ -1,4 +1,4 @@
-import type { Site } from "../../types";
+import type { Site } from "../../../types";
 import type { SiteProcessingError } from "./site-metrics-schema";
 
 /**
