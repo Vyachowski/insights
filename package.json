@@ -11,7 +11,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start:data": "npm run start --workspace data",
-    "start:dev:server": "npm run start --workspace server"
+    "start:server": "npm run start:prod --workspace server",
+    "dev:server": "npm run start:dev --workspace server"
   },
   "author": "Slava Haikin",
   "license": "ISC"
