@@ -22,8 +22,8 @@ const paths = {
     revenue: path.resolve(inputFolderPath, `${FILE_PREFIX}revenue.json`),
     revenueFolder: path.resolve(inputFolderPath, `${FILE_PREFIX}revenue-tg`),
     siteMetricsBackup: path.resolve(
-      outputFolderPath,
-      `archive/2021-05-01_2025-12-31_site-metrics.csv`,
+      inputFolderPath,
+      `2021-05-01_2025-12-31_site-metrics.csv`,
     ),
   },
   output: {
