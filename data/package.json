@@ -2,10 +2,10 @@
   "name": "insights-data",
   "version": "1.0.0",
   "description": "",
-  "main": "src/app.js",
+  "main": "src/main.ts",
   "type": "module",
   "scripts": {
-    "start": "tsx src/app.ts",
+    "start": "tsx src/main.ts",
     "env:import": "infisical export > .env",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
