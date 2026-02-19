@@ -10,6 +10,9 @@ const FILE_SEPARATOR = "_";
 
 const FILE_PREFIX = `${IMPORT_START_DATE}${FILE_SEPARATOR}${IMPORT_END_DATE}${FILE_SEPARATOR}`;
 
+// FIXME: Delete this when it will be unnecessary
+// const oldSiteMetricsBackupPath = `archive/${FILE_PREFIX}site-metrics.csv`;
+
 const BATCH_SIZE = "month";
 const paths = {
   input: {
@@ -20,7 +23,7 @@ const paths = {
     revenueFolder: path.resolve(inputFolderPath, `${FILE_PREFIX}revenue-tg`),
     siteMetricsBackup: path.resolve(
       outputFolderPath,
-      `archive/${FILE_PREFIX}site-metrics.csv`,
+      `archive/2021-05-01_2025-12-31_site-metrics.csv`,
     ),
   },
   output: {
