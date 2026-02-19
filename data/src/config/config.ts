@@ -5,7 +5,7 @@ const inputFolderPath = join(appRootPath.path, "data", "input");
 const outputFolderPath = join(appRootPath.path, "shared", "seed-data");
 
 const IMPORT_START_DATE = "2021-05-01";
-const IMPORT_END_DATE = "2025-12-31";
+const IMPORT_END_DATE = "2026-02-15";
 const FILE_SEPARATOR = "_";
 
 const FILE_PREFIX = `${IMPORT_START_DATE}${FILE_SEPARATOR}${IMPORT_END_DATE}${FILE_SEPARATOR}`;
@@ -13,8 +13,8 @@ const FILE_PREFIX = `${IMPORT_START_DATE}${FILE_SEPARATOR}${IMPORT_END_DATE}${FI
 const BATCH_SIZE = "month";
 const paths = {
   input: {
-    cities: path.resolve(inputFolderPath, `${FILE_PREFIX}cities.csv`),
-    sites: path.resolve(inputFolderPath, `${FILE_PREFIX}sites.csv`),
+    cities: path.resolve(inputFolderPath, 'cities.csv'),
+    sites: path.resolve(inputFolderPath, 'sites.csv'),
     calls: path.resolve(inputFolderPath, `${FILE_PREFIX}calls.csv`),
     revenue: path.resolve(inputFolderPath, `${FILE_PREFIX}revenue.json`),
     revenueFolder: path.resolve(inputFolderPath, `${FILE_PREFIX}revenue-tg`),
@@ -24,8 +24,8 @@ const paths = {
     ),
   },
   output: {
-    cities: path.resolve(outputFolderPath, `${FILE_PREFIX}cities.csv`),
-    sites: path.resolve(outputFolderPath, `${FILE_PREFIX}sites.csv`),
+    cities: path.resolve(outputFolderPath, 'cities.csv'),
+    sites: path.resolve(outputFolderPath, 'sites.csv'),
     calls: path.resolve(outputFolderPath, `${FILE_PREFIX}calls.csv`),
     revenue: path.resolve(outputFolderPath, `${FILE_PREFIX}revenue.csv`),
     siteMetrics: path.resolve(
