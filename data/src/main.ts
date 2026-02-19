@@ -1,12 +1,12 @@
 import path from "path";
 import fs from "fs/promises";
 
-import config from "./config/config";
+import config from "./config";
 import { createCitiesCSV } from "./creators/create-cities";
 
 import { createSitesCSV } from "./creators/create-sites";
 import { createCallsCSV } from "./creators/calls/main";
-// import { createSiteMetricsCSV } from "./creators/site-metrics/main";
+import { createSiteMetricsCSV } from "./creators/site-metrics/main";
 import { createRevenueCSV } from "./creators/create-revenue";
 import { createExpensesCSV } from "./creators/expenses/main";
 
@@ -35,9 +35,14 @@ async function app(logger = console.log) {
   const calls = await createCallsCSV(cities.data);
   logger(calls.message, breaker);
 
-  // FIXME: Rewrite metrics function
   // const metrics = await createSiteMetricsCSV(sites.data, { source: "backup" });
-  // logger(metrics.message, breaker);
+  const metrics = await createSiteMetricsCSV(sites.data, {
+    source: "api",
+    startDate: new Date(config.IMPORT_START_DATE),
+    endDate: new Date(config.IMPORT_END_DATE),
+    years: [2025],
+  });
+  logger(metrics.message, breaker);
 
   const revenue = await createRevenueCSV();
   logger(revenue.message, breaker);

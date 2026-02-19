@@ -1,5 +1,5 @@
 import fs from "fs/promises";
-import config from "../config/config";
+import config from "../config";
 import { parseCSV } from "./utils/parsers";
 import { createResultMessage } from "./utils/create-result-mesage";
 import { validateSitesData } from "./utils/validators";

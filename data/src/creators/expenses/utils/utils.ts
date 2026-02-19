@@ -1,5 +1,5 @@
 import fs from 'fs/promises'
-import config from '../../../config/config';
+import config from '../../../config';
 
 export async function readCityIds(): Promise<number[]> {
   const content = await fs.readFile(config.paths.output.cities, "utf-8");

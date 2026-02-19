@@ -1,6 +1,6 @@
 import fs from "fs/promises";
 import path from "path";
-import config from "../../config/config";
+import config from "../../config";
 import type { CSVCallRow } from "./modules/calls-raw-schema";
 
 import { parseCSV } from "../utils/parsers";

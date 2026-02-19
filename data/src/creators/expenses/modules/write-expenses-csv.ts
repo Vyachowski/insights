@@ -1,5 +1,5 @@
 import fs from 'fs/promises'
-import config from "../../../config/config";
+import config from "../../../config";
 import { createResultMessage } from "../../utils/create-result-mesage";
 
 export async function writeExpensesCSV(lines: string[]) {

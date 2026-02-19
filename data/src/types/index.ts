@@ -6,7 +6,7 @@ import type {
   RevenueSchema,
   ExpenseSchema,
   SiteMetricSchema,
-} from "../schemas";
+} from "@shared/schema/schemas";
 
 export type City = z.infer<typeof CitySchema>;
 export type Site = z.infer<typeof SiteSchema>;
@@ -14,3 +14,10 @@ export type Call = z.infer<typeof CallSchema>;
 export type Revenue = z.infer<typeof RevenueSchema>;
 export type Expense = z.infer<typeof ExpenseSchema>;
 export type SiteMetric = z.infer<typeof SiteMetricSchema>;
+
+export type SiteMetricRow = Omit<SiteMetric, "id" | "siteId">;
+export interface FetchSitesMetricsOptions {
+  startDate: Date;
+  endDate: Date;
+  years: number[];
+}
