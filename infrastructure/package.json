@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "dev:up": "docker compose --env-file ../.env -f docker-compose.dev.yml up -d",
-    "dev:down": "docker compose --env-file ../.env -f docker-compose.dev.yml down",
-    "dev:reset": "docker compose --env-file ../.env -f docker-compose.dev.yml down -v",
-    "dev:logs": "docker compose --env-file ../.env -f docker-compose.dev.yml logs -f"
+    "dev:up": "docker compose --env-file ../.env.dev -f docker-compose.dev.yml up -d",
+    "dev:down": "docker compose --env-file ../.env.dev -f docker-compose.dev.yml down",
+    "dev:reset": "docker compose --env-file ../.env.dev -f docker-compose.dev.yml down -v",
+    "dev:logs": "docker compose --env-file ../.env.dev -f docker-compose.dev.yml logs -f"
   },
   "keywords": [],
   "author": "",

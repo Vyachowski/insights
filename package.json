@@ -14,10 +14,10 @@
     "start:data": "npm run start --workspace data",
     "start:server": "npm run start:prod --workspace server",
     "dev:server": "npm run start:dev --workspace server",
-    "infra:up": "npm run dev:up --workspace infrastructure",
-    "infra:down": "npm run dev:down --workspace infrastructure",
-    "infra:reset": "npm run dev:reset --workspace infrastructure",
-    "infra:logs": "npm run dev:logs --workspace infrastructure"
+    "infra:dev:up": "npm run dev:up --workspace infrastructure",
+    "infra:dev:down": "npm run dev:down --workspace infrastructure",
+    "infra:dev:reset": "npm run dev:reset --workspace infrastructure",
+    "infra:dev:logs": "npm run dev:logs --workspace infrastructure"
   },
   "author": "Slava Haikin",
   "license": "UNLICENSED"
