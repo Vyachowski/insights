@@ -3,9 +3,12 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev:up": "docker compose --env-file ../.env -f docker-compose.dev.yml up -d",
+    "dev:down": "docker compose --env-file ../.env -f docker-compose.dev.yml down",
+    "dev:reset": "docker compose --env-file ../.env -f docker-compose.dev.yml down -v",
+    "dev:logs": "docker compose --env-file ../.env -f docker-compose.dev.yml logs -f"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "UNLICENSED"
 }
