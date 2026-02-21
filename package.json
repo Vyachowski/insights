@@ -11,9 +11,16 @@
   ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "concurrently \"npm run server:dev\" \"npm run client:dev\"",
+    "start": "",
+
     "data": "npm run start --workspace data",
+
+    "client:dev": "npm run dev --workspace client",
+
     "server": "npm run start:prod --workspace server",
-    "server:dev": "npm run start:dev --workspace server",
+    "server:dev": "concurrently \"npm run prisma:generate:watch --workspace server\" \"npm run start:dev --workspace server\"",
+
     "infra:dev:up": "npm run dev:up --workspace infrastructure",
     "infra:dev:down": "npm run dev:down --workspace infrastructure",
     "infra:dev:reset": "npm run dev:reset --workspace infrastructure",
