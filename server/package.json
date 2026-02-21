@@ -16,11 +16,7 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "prisma:seed": "prisma db seed",
-    "prisma:reset": "npx prisma migrate reset --force && prisma db seed",
-    "prisma:wipe": "if [ \"$CONFIRM\" != \"YES\" ]; then echo '❌ CONFIRM=YES required'; exit 1; fi && rm -rf prisma/migrations && prisma generate && prisma migrate dev --name init && prisma db seed",
-    "container:reset": "tsx src/scripts/db/remove-postgres-container.ts && tsx src/scripts/db/create-postgres-container.ts",
-    "db:reset": "npm run container:reset && npm run prisma:reset",
-    "db:wipe": "if [ \"$CONFIRM\" != \"YES\" ]; then echo '❌ CONFIRM=YES required'; exit 1; fi && npm run container:reset && npm run prisma:wipe"
+    "prisma:reset": "npx prisma migrate reset --force && prisma db seed"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
