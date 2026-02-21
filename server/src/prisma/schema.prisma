@@ -2,7 +2,6 @@ generator client {
   moduleFormat = "cjs"
   provider = "prisma-client"
   output   = "../../generated/prisma"
-  
 }
 
 generator zod {
@@ -35,7 +34,7 @@ model User {
   status    UserStatus  @default(ACTIVE)
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
-  
+
   @@index([email])
   @@map("users")
 }
@@ -52,7 +51,7 @@ model City {
   sites         Site[]
   revenues      Revenue[]
   expenses      Expense[]
-  
+
   @@map("cities")
 }
 
@@ -94,7 +93,7 @@ model SiteMetric {
   leadsYandex                Int      @default(0) @map("leads_yandex")
   leadsGoogle                Int      @default(0) @map("leads_google")
   leadsOther                 Int      @default(0) @map("leads_other")
-  
+
   site                       Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
 
   @@unique([siteId, date])
@@ -117,9 +116,9 @@ model CallImport {
   redirectNumber    String?   @map("redirect_number")
   source            String    @default("csv")
   importedAt        DateTime  @default(now()) @map("imported_at")
-  
+
   site              Site      @relation(fields: [siteId], references: [id], onDelete: Cascade)
-  
+
   @@index([siteId])
   @@map("call_imports")
 }
@@ -145,9 +144,9 @@ model Call {
   source            String    @default("webhook")                // webhook или csv (после merge)
   createdAt         DateTime  @default(now()) @map("created_at")
   updatedAt         DateTime  @updatedAt @map("updated_at")
-  
+
   site              Site      @relation(fields: [siteId], references: [id], onDelete: Cascade)
-  
+
   @@index([siteId])
    @@map("calls")
 }
@@ -161,7 +160,7 @@ model Revenue {
   updatedAt     DateTime @updatedAt @map("updated_at")
 
   city          City?    @relation(fields: [cityId], references: [id], onDelete: Cascade)
-  
+
   @@index([date])
   @@map("revenues")
 }
@@ -177,7 +176,7 @@ model Expense {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   city      City?    @relation(fields: [cityId], references: [id], onDelete: Cascade)
-  
+
   @@index([date])
   @@map("expenses")
 }
