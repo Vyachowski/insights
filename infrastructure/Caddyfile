@@ -1,0 +1,11 @@
+insights.vypro.ru {
+    handle /api/* {
+        reverse_proxy localhost:3000
+    }
+
+    handle {
+        root * /var/www/insights/dist
+        try_files {path} /index.html
+        file_server
+    }
+}
