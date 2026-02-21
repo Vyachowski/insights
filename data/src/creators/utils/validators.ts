@@ -6,11 +6,13 @@ import {
   ExpenseSchema,
   SiteMetricSchema,
 } from "../../schemas";
+// FIXME: Add common schemas
+
 import type { City, Site, SiteMetric } from "../../types";
 
 export const validateCitiesData = (
   citiesData: { [k: string]: string | undefined }[],
-): City[] => {
+): Omit<City, 'createdAt' | 'updatedAt'>[] => {
   if (citiesData.length < 1)
     throw new Error("Нет данных города для валидации.");
 
@@ -19,7 +21,7 @@ export const validateCitiesData = (
 
 export const validateSitesData = (
   sitesData: { [k: string]: string | undefined }[],
-): Site[] => {
+): Omit<Site, 'createdAt' | 'updatedAt'>[] => {
   if (sitesData.length < 1) throw new Error("Нет данных сайта для валидации.");
 
   return sitesData.map((site) => SiteSchema.parse(site));
@@ -57,8 +59,8 @@ export const validateExpensesData = (
 
 export function validateSiteMetricsData(
   siteMetricData: { [k: string]: string | undefined }[],
-): SiteMetric[] {
-  const validated: SiteMetric[] = [];
+): Omit<SiteMetric, 'id'>[] {
+  const validated: Omit<SiteMetric, 'id'>[] = [];
   const errors: any[] = [];
 
   for (let i = 0; i < siteMetricData.length; i++) {

@@ -8,12 +8,12 @@ import {
 } from '@shared/schema/schemas';
 
 export function validateCitiesData(
-  sitesData: Record<string, string | number>[],
+  citiesData: Record<string, string | number>[],
 ) {
-  if (sitesData.length < 1) throw new Error('Нет данных сайта для валидации.');
+  if (citiesData.length < 1) throw new Error('Нет данных сайта для валидации.');
 
   return CityCreateManySchema.parse({
-    data: sitesData,
+    data: citiesData,
     skipDuplicates: true,
   });
 }

@@ -1,5 +1,5 @@
 import fs from "fs/promises";
-import { createResultMessage } from "./utils/create-result-mesage";
+import { createResultMessage } from "../utils/create-result-mesage";
 
 interface Message {
   id: string;
