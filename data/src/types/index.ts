@@ -21,3 +21,37 @@ export interface FetchSitesMetricsOptions {
   endDate: Date;
   years: number[];
 }
+
+export interface InputPaths {
+  cities: string;
+  sites: string;
+  calls: string;
+  revenue: string;
+  revenueFolder: string;
+  siteMetrics: string;
+}
+
+export interface OutputPaths {
+  cities: string;
+  sites: string;
+  calls: string;
+  revenue: string;
+  siteMetricsDir: string;
+  siteMetrics: string;
+  expenses: string;
+}
+
+export interface RunOptions {
+  logger?: (...args: unknown[]) => void;
+  breaker?: string;
+  cleanerFunc: (dir: string) => Promise<void>;
+}
+
+export interface RunParams {
+  inputPaths: Readonly<InputPaths>;
+  outputPaths: Readonly<OutputPaths>;
+  outputDir: string;
+  startDate: string,
+  endDate: string,
+  options: RunOptions;
+}

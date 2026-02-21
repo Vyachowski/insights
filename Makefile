@@ -1,7 +1,7 @@
 .PHONY: data server
 
 data:
-	npm run start:data
+	npm run data
 server-dev:
 	npm run start:server
 infra-dev:

@@ -1,5 +1,4 @@
 import fs from "fs/promises";
-import config from "../config";
 import { parseCSV } from "./utils/parsers";
 import { createResultMessage } from "./utils/create-result-mesage";
 import { validateSitesData } from "./utils/validators";
@@ -10,16 +9,13 @@ async function getAllSites(path: string): Promise<Site[]> {
   return validateSitesData(rows);
 }
 
-export async function createSitesCSV() {
-  const importFilePath = config.paths.input.sites;
-  const outputFilePath = config.paths.output.sites;
+export async function createSitesCSV({ inputPath, outputPath }: { inputPath: string, outputPath: string }) {
+  const result = await getAllSites(inputPath);
 
-  const result = await getAllSites(importFilePath);
-
-  await fs.copyFile(importFilePath, outputFilePath);
+  await fs.copyFile(inputPath, outputPath);
 
   return {
-    message: createResultMessage("Sites", result.length, outputFilePath),
+    message: createResultMessage("Sites", result.length, outputPath),
     data: result,
   };
 }

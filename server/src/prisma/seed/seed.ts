@@ -1,4 +1,3 @@
-import config from './config/config';
 import { checkDatabaseConnection, checkFilesExistence } from './utils/checkers';
 import {
   seedCalls,
@@ -9,8 +8,6 @@ import {
   seedExpenses,
   seedSiteMetrics,
 } from './utils/seeders';
-
-const paths = config.paths;
 
 const main = async (
   {

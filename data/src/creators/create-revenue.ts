@@ -1,5 +1,4 @@
 import fs from "fs/promises";
-import config from "../config";
 import { createResultMessage } from "./utils/create-result-mesage";
 
 interface Message {
@@ -13,11 +12,8 @@ interface Message {
 }
 
 // NOTE: Simplified version - transforms JSON to CSV
-export async function createRevenueCSV() {
-  const inputFilePath = config.paths.input.revenue;
-  const outputFilePath = config.paths.output.revenue;
-
-  const rawData = await fs.readFile(inputFilePath, "utf-8");
+export async function createRevenueCSV({ inputPath, outputPath }: { inputPath: string, outputPath: string }) {
+  const rawData = await fs.readFile(inputPath, "utf-8");
 
   const messages: Message[] = JSON.parse(rawData);
 
@@ -38,10 +34,10 @@ export async function createRevenueCSV() {
 
   const csvContent = [header, ...rows].join("\n");
 
-  await fs.writeFile(outputFilePath, csvContent, "utf-8");
+  await fs.writeFile(outputPath, csvContent, "utf-8");
 
   return {
     data: rows,
-    message: createResultMessage("Revenue", rows.length, outputFilePath),
+    message: createResultMessage("Revenue", rows.length, outputPath),
   };
 }

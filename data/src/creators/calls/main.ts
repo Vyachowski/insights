@@ -1,6 +1,5 @@
 import fs from "fs/promises";
 import path from "path";
-import config from "../../config";
 import type { CSVCallRow } from "./modules/calls-raw-schema";
 
 import { parseCSV } from "../utils/parsers";
@@ -24,11 +23,11 @@ interface CSVCreation {
  * 3. Transform each row to calls_raw format
  * 4. Generate output CSV file
  */
-export async function createCallsCSV(cities: City[]): Promise<CSVCreation> {
+export async function createCallsCSV({ inputPath, outputPath, cities }: { inputPath: string, outputPath: string, cities: City[] }): Promise<CSVCreation> {
   const importedAt = new Date();
 
   // Step 1: Parse input CSV
-  const rawRows = parseCSV(config.paths.input.calls);
+  const rawRows = parseCSV(inputPath);
   console.log(`Parsed ${rawRows.length} rows from input CSV`);
 
   // Step 2: Build city mapping
@@ -57,7 +56,6 @@ export async function createCallsCSV(cities: City[]): Promise<CSVCreation> {
 
   // Step 4: Generate and write CSV
   const csvContent = generateCallsRawCSV(callsRaw);
-  const outputPath = config.paths.output.calls;
 
   await fs.mkdir(path.dirname(outputPath), { recursive: true });
   await fs.writeFile(outputPath, csvContent, "utf-8");

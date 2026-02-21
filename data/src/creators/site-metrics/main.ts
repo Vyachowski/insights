@@ -7,9 +7,9 @@ type MetricsOptions =
   | { source: "backup" }
   | ({ source: "api" } & FetchSitesMetricsOptions);
 
-export async function createSiteMetricsCSV(sites: Site[], options: MetricsOptions) {
+export async function createSiteMetricsCSV({ inputPath, outputPath, sites, options }: { inputPath: string, outputPath: string, sites: Site[], options: MetricsOptions }) {
   if (options.source === "backup") {
-    return await copyMetricsBackup();
+    return await copyMetricsBackup(inputPath, outputPath);
   }
 
   const { metrics, errors } = await fetchSitesMetrics(sites, options);
