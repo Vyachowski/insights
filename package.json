@@ -11,9 +11,9 @@
   ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start:data": "npm run start --workspace data",
-    "start:server": "npm run start:prod --workspace server",
-    "dev:server": "npm run start:dev --workspace server",
+    "data": "npm run start --workspace data",
+    "server": "npm run start:prod --workspace server",
+    "server:dev": "npm run start:dev --workspace server",
     "infra:dev:up": "npm run dev:up --workspace infrastructure",
     "infra:dev:down": "npm run dev:down --workspace infrastructure",
     "infra:dev:reset": "npm run dev:reset --workspace infrastructure",
