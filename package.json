@@ -19,7 +19,7 @@
     "client:dev": "npm run dev --workspace client",
 
     "server": "npm run start:prod --workspace server",
-    "server:dev": "concurrently \"npm run prisma:generate:watch --workspace server\" \"npm run start:dev --workspace server\"",
+    "server:dev": "npm run start:dev --workspace server",
 
     "infra:dev:up": "npm run dev:up --workspace infrastructure",
     "infra:dev:down": "npm run dev:down --workspace infrastructure",

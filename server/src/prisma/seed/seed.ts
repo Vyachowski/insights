@@ -1,61 +1,12 @@
-import { checkDatabaseConnection, checkFilesExistence } from './utils/checkers';
-import {
-  seedCalls,
-  seedCities,
-  seedRevenue,
-  seedSites,
-  seedUsers,
-  seedExpenses,
-  seedSiteMetrics,
-} from './utils/seeders';
+import seed from './modules/main';
+import getSharedConfig from '@shared/config';
+import { defineRepoRootPath, resolveSharedPaths } from '@shared/utils';
 
-const main = async (
-  {
-    cities,
-    sites,
-    calls,
-    revenue,
-    expenses,
-    siteMetrics,
-  }: {
-    cities: string;
-    sites: string;
-    calls: string;
-    revenue: string;
-    siteMetrics: string;
-    expenses: string;
-  },
-  { logger } = { logger: console.log },
-) => {
-  // SECTION: Checks
-  logger('⏳ Check database connection...');
+const rootPath = defineRepoRootPath();
+const { FILE_PREFIX } = getSharedConfig();
+const { filePaths: paths } = resolveSharedPaths(rootPath, FILE_PREFIX);
 
-  await checkDatabaseConnection();
-  logger('✅ Database connection succesfully established.');
-
-  await checkFilesExistence(Object.values(config.paths));
-  logger('✅ Required files exists.');
-
-  // SECTION: Seeding
-  logger('⏳ Seeding data...');
-
-  await seedUsers();
-  logger('✅ Admin and User succesfully created.');
-  await seedCities(cities);
-  logger('✅ All cities succesfully imported to database.');
-  await seedSites(sites);
-  logger('✅ All sites succesfully imported to database.');
-  await seedCalls(calls);
-  logger('✅ All calls succesfully imported to database.');
-  await seedRevenue(revenue);
-  logger('✅ All revenue succesfully imported to database.');
-  await seedExpenses(expenses);
-  logger('✅ All expenses succesfully imported to database.');
-  await seedSiteMetrics(siteMetrics);
-  logger('✅ All site metrics succesfully imported to database.');
-};
-
-main(paths).catch((e) => {
+seed(paths).catch((e) => {
   console.error(e);
   process.exit(1);
 });
