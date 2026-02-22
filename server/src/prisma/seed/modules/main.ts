@@ -9,7 +9,7 @@ import {
   seedSiteMetrics,
 } from './seeders';
 
-const seed = async (
+type Seed = (
   paths: {
     cities: string;
     sites: string;
@@ -18,8 +18,12 @@ const seed = async (
     siteMetrics: string;
     expenses: string;
   },
-  { logger } = { logger: console.log },
-) => {
+  options?: {
+    logger: typeof console.log;
+  },
+) => Promise<void>;
+
+const seed: Seed = async (paths, { logger } = { logger: console.log }) => {
   const { cities, sites, calls, revenue, expenses, siteMetrics } = paths;
   const pathsList = Object.values(paths);
 
