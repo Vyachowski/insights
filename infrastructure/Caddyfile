@@ -4,7 +4,7 @@ insights.vypro.ru {
     }
 
     handle {
-        root * /var/www/insights/dist
+        root * /var/www/insights
         try_files {path} /index.html
         file_server
     }

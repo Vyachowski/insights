@@ -6,9 +6,10 @@
     "dev:up": "docker compose --env-file ../.env.dev -f docker-compose.dev.yml up -d",
     "dev:down": "docker compose --env-file ../.env.dev -f docker-compose.dev.yml down",
     "dev:reset": "docker compose --env-file ../.env.dev -f docker-compose.dev.yml down -v",
-    "dev:logs": "docker compose --env-file ../.env.dev -f docker-compose.dev.yml logs -f"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "UNLICENSED"
+    "dev:logs": "docker compose --env-file ../.env.dev -f docker-compose.dev.yml logs -f",
+    "up": "docker compose --env-file ../.env -f docker-compose.prod.yml up -d",
+    "down": "docker compose --env-file ../.env -f docker-compose.prod.yml down",
+    "reset": "docker compose --env-file ../.env -f docker-compose.prod.yml down -v",
+    "logs": "docker compose --env-file ../.env -f docker-compose.prod.yml logs -f"
+  }
 }

@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy": "npm run build && sudo rsync -av --delete dist/ /var/www/insights/"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.11.2",

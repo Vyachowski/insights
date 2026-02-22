@@ -1,32 +1,35 @@
 import axiosInstance from '@/lib/axios'
 
 export interface LoginRequest {
-  email: string
-  password: string
+  email: string;
+  password: string;
 }
 
 export interface LoginResponse {
   data: {
-    id: string
-    email: string
-    firstName: string
-    lastName: string
-    role: string
-  }
-  message: string
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    role: string;
+  };
+  message: string;
 }
 
 export interface User {
-  id: string
-  email: string
-  firstName: string
-  lastName: string
-  role: string
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: string;
 }
 
 export const authApi = {
   login: async (data: LoginRequest): Promise<User> => {
-    const { data: resData } = await axiosInstance.post<LoginResponse>('/auth/login', data)
+    const { data: resData } = await axiosInstance.post<LoginResponse>(
+      '/auth/login',
+      data,
+    )
     return resData.data
   },
 
