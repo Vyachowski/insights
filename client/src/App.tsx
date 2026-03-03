@@ -1,8 +1,7 @@
-import { lazy, Suspense } from 'react'
+import { Suspense } from 'react'
 
 import SplashScreen from './components/screens/SplashScreen'
-
-const LazyAppRouter = lazy(() => import('@/router/AppRouter'))
+import { LazyAppRouter } from './router'
 
 export default function App() {
   return (
