@@ -8,6 +8,7 @@ export interface AuthState {
   user: User | null
   isAuthenticated: boolean
   isLoading: boolean
+  isInitial: boolean
   error: string | null
 }
 
@@ -15,6 +16,7 @@ const initialState: AuthState = {
   user: null,
   isAuthenticated: false,
   isLoading: false,
+  isInitial: true,
   error: null,
 }
 
@@ -28,6 +30,8 @@ const authSlice = createSlice({
     resetAuth: state => {
       state.user = null
       state.isAuthenticated = false
+      state.isLoading = false
+      state.isInitial = true
       state.error = null
     },
   },
@@ -38,16 +42,19 @@ const authSlice = createSlice({
     builder
       .addCase(fetchLogin.pending, state => {
         state.isLoading = true
+        state.isInitial = false
         state.error = null
       })
       .addCase(fetchLogin.fulfilled, (state, action) => {
         state.isLoading = false
+        state.isInitial = false
         state.user = action.payload
         state.isAuthenticated = true
         state.error = null
       })
       .addCase(fetchLogin.rejected, (state, action) => {
         state.isLoading = false
+        state.isInitial = false
         state.user = null
         state.isAuthenticated = false
         state.error = action.error.message || 'Ошибка входа'
@@ -64,12 +71,14 @@ const authSlice = createSlice({
         state.isLoading = false
         state.user = null
         state.isAuthenticated = false
+        state.isInitial = true
         state.error = null
       })
       .addCase(fetchLogout.rejected, state => {
         state.isLoading = false
         state.user = null
         state.isAuthenticated = false
+        state.isInitial = true
       })
 
     // ============================================
@@ -81,12 +90,14 @@ const authSlice = createSlice({
       })
       .addCase(fetchMe.fulfilled, (state, action) => {
         state.isLoading = false
+        state.isInitial = false
         state.user = action.payload
         state.isAuthenticated = true
         state.error = null
       })
       .addCase(fetchMe.rejected, state => {
         state.isLoading = false
+        state.isInitial = false
         state.user = null
         state.isAuthenticated = false
       })

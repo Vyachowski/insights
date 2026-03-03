@@ -1,9 +1,9 @@
 import { Routes, Route, Navigate } from 'react-router'
 
-import GuestRoute from '@/components/GuestRoute'
-import ProtectedRoute from '@/components/ProtectedRoute'
+import GuestRoute from '@/components/guards/GuestRoute'
+import ProtectedRoute from '@/components/guards/ProtectedRoute'
 import AuthLayout from '@/layouts/AuthLayout'
-import MainLayout from '@/layouts/MainLayout'
+import MainLayout from '@/layouts/MainLayout/MainLayout'
 import { menuItems } from '@/navigation'
 import ErrorPage from '@/pages/404Page'
 import DashboardPage from '@/pages/DashboardPage'

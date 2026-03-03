@@ -3,4 +3,5 @@ import type { RootState } from '..'
 export const selectUser = (state: RootState) => state.auth.user
 export const selectIsAuthenticated = (state: RootState) => state.auth.isAuthenticated
 export const selectAuthLoading = (state: RootState) => state.auth.isLoading
+export const selectAuthLoaded = (state: RootState) => !state.auth.isInitial
 export const selectAuthError = (state: RootState) => state.auth.error

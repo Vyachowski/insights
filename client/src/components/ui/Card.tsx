@@ -1,8 +1,8 @@
 import { cva, type VariantProps } from 'class-variance-authority'
 
-import { cn } from '../lib/utils'
-
 import type { ReactNode } from 'react'
+
+import { cn } from '@/lib/utils'
 
 const cardVariants = cva(
   'backdrop-blur-xl bg-linear-to-br from-slate-800/50 to-slate-900/50 border border-slate-700/50 shadow-2xl',

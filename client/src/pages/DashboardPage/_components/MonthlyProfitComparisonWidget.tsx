@@ -1,8 +1,7 @@
+import Card from '@ui/Card'
 import { TrendingDown, TrendingUp } from 'lucide-react'
 
-import { formatNumber } from '../../../lib/utils'
-
-import Card from '@/components/Card'
+import { formatNumber } from '@/lib/utils'
 
 export default function MonthlyProfitComparisonWidget({ comparison }: {
   comparison: {

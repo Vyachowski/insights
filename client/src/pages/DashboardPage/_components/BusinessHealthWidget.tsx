@@ -1,6 +1,6 @@
 import { TrendingUp, TrendingDown } from 'lucide-react'
 
-import { formatNumber } from '../../../lib/utils'
+import { formatNumber } from '@/lib/utils'
 
 export default function BusinessHealthWidget({ summary }: {
   summary: {

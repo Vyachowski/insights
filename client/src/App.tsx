@@ -1,19 +1,13 @@
+import { lazy, Suspense } from 'react'
 
-import ErrorScreen from './components/ErrorScreen'
-import SplashScreen from './components/SplashScreen'
-import { useAppInit } from './hooks/useAppInit'
-import AppRouter from './router/AppRouter'
+import SplashScreen from './components/screens/SplashScreen'
+
+const LazyAppRouter = lazy(() => import('./router/AppRouter'))
 
 export default function App() {
-  const { isReady, error } = useAppInit()
-
-  if (error) {
-    return <ErrorScreen error={error}/>
-  }
-
-  if (!isReady) {
-    return <SplashScreen />
-  }
-
-  return <AppRouter />
+  return (
+    <Suspense fallback={<SplashScreen/>}>
+      <LazyAppRouter />
+    </Suspense>
+  )
 }

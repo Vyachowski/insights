@@ -1,8 +1,8 @@
+import Avatar from '@ui/Avatar'
+import Logo from '@ui/Logo'
 import { X } from 'lucide-react'
 import { NavLink } from 'react-router'
 
-import Avatar from '@/components/Avatar'
-import Logo from '@/components/Logo'
 import { useAuth } from '@/hooks/useAuth'
 import { formatUserRole } from '@/lib/utils'
 import { menuItems } from '@/navigation'

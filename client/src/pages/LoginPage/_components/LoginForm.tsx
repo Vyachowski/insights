@@ -1,7 +1,7 @@
+import Button from '@ui/Button'
+import Input from '@ui/Input'
 import { useState } from 'react'
 
-import Button from '@/components/Button'
-import Input from '@/components/Input'
 import { useAuth } from '@/hooks/useAuth'
 
 export default function LoginForm() {

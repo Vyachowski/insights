@@ -1,4 +1,4 @@
-import MetricCard from '../../../components/MetricCard'
+import MetricCard from '@ui/MetricCard'
 
 export default function WeeklyFinancialMetricsWidget({ metrics }: {
   metrics: {

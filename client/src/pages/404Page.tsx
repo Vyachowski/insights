@@ -2,7 +2,7 @@ import { DollarSign } from 'lucide-react'
 import React from 'react'
 import { useOutletContext } from 'react-router'
 
-import { menuItems } from '../navigation'
+import { menuItems } from '@/navigation'
 
 export default function ErrorPage() {
   const activePageId = useOutletContext<string>()

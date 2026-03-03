@@ -9,6 +9,7 @@ import {
   selectIsAuthenticated,
   selectAuthLoading,
   selectAuthError,
+  selectAuthLoaded,
 } from '@/store/selectors/authSelectors'
 import { clearError } from '@/store/slices/authSlice'
 import { fetchLogin, fetchLogout, fetchMe } from '@/store/thunks/authThunks'
@@ -20,12 +21,15 @@ export function useAuth() {
   const user = useAppSelector(selectUser)
   const isAuthenticated = useAppSelector(selectIsAuthenticated)
   const isLoading = useAppSelector(selectAuthLoading)
+  const isLoaded = useAppSelector(selectAuthLoaded)
   const error = useAppSelector(selectAuthError)
 
   const login = useCallback(
     async (credentials: LoginRequest) => {
       const result = await dispatch(fetchLogin(credentials))
-      if (fetchLogin.fulfilled.match(result)) {
+      const isLoggedIn = fetchLogin.fulfilled.match(result)
+
+      if (isLoggedIn) {
         navigate('/')
         return result.payload
       }
@@ -51,6 +55,7 @@ export function useAuth() {
     user,
     isAuthenticated,
     isLoading,
+    isLoaded,
     error,
     login,
     logout,

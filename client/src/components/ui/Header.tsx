@@ -1,8 +1,7 @@
 import { LogOut, Menu } from 'lucide-react'
 
-import { menuItems } from '../navigation'
-
 import { useAuth } from '@/hooks/useAuth'
+import { menuItems } from '@/navigation'
 
 interface HeaderProps {
   activeTabId: string

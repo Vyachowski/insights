@@ -1,7 +1,6 @@
+import Button from '@ui/Button'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
-
-import Button from './Button'
 
 interface ErrorScreenProps {
   error: string
