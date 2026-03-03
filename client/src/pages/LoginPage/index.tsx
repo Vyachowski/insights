@@ -1,7 +1,7 @@
 import Card from '@ui/Card'
 import Logo from '@ui/Logo'
 
-import LoginForm from './_components/LoginForm'
+import LoginForm from './components/LoginForm'
 
 export default function LoginPage() {
   return (

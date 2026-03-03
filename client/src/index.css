@@ -105,3 +105,19 @@ html {
   scrollbar-width: thin;
   scrollbar-color: #475569 #1e293b;
 }
+
+/* Skeleton styles */
+/* FIXME: Set dark theme as default */
+:root {
+  /* --skeleton-base: #f1f5f9; */
+  /* --skeleton-highlight: #e2e8f0; */
+  /* slate-900 */
+  --skeleton-base: #0f172a;
+  /* slate-800 */
+  --skeleton-highlight: #1e293b;
+}
+
+.dark {
+  --skeleton-base: #0f172a;
+  --skeleton-highlight: #1e293b;
+}
