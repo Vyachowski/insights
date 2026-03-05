@@ -1,7 +1,9 @@
 import dotenv from 'dotenv';
 import { defineConfig } from 'prisma/config';
 
-dotenv.config({ path: ['../.env.dev', '../.env'] });
+const envName = process.env['NODE_ENV'] === 'production' ? '.env' : '.env.dev';
+
+dotenv.config({ path: `../${envName}` });
 
 export default defineConfig({
   schema: 'src/prisma/schema.prisma',
