@@ -13,6 +13,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "concurrently \"npm run server:dev\" \"npm run client:dev\"",
     "start": "",
+    "build:client": "npm run build --workspace client",
     "data": "npm run start --workspace data",
     "client:dev": "npm run dev --workspace client",
     "server": "npm run start:prod --workspace server",

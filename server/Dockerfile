@@ -24,12 +24,12 @@ RUN apt-get update -qq && \
 COPY package.json ./
 RUN npm install --include=dev
 
-# Generate Prisma Client
-COPY src/prisma .
-RUN npx prisma generate
-
 # Copy application code
 COPY . .
+
+# Generate Prisma Client
+# COPY src/prisma .
+RUN npx prisma generate
 
 # Build application
 RUN npm run build
@@ -48,4 +48,4 @@ COPY --from=build /app /app
 
 # Start the server by default, this can be overwritten at runtime
 EXPOSE 3000
-CMD [ "npm", "run", "start" ]
+CMD [ "npm", "run", "start:prod" ]
