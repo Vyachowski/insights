@@ -12,10 +12,11 @@ import {
 import { AuthService } from './auth.service';
 import { LoginRequestDto } from './dto/auth.dto';
 import { LocalAuthGuard } from '../common/guards/local.auth.guard';
-import { User } from 'generated/prisma/client';
+
 import { ConfigService } from '@nestjs/config';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { PrismaService } from '@/database/prisma.service';
+import { User } from '@/prisma/generated/prisma/client';
 
 type RequestWithUser = LoginRequestDto & { user: User };
 

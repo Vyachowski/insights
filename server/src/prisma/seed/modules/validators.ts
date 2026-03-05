@@ -1,11 +1,11 @@
 import {
-  CallImportCreateManyZodSchema,
   CityCreateManySchema,
-  ExpenseCreateManyZodSchema,
-  RevenueCreateManyZodSchema,
   SiteCreateManySchema,
+  CallImportCreateManyZodSchema,
+  RevenueCreateManyZodSchema,
+  ExpenseCreateManyZodSchema,
   SiteMetricCreateManyZodSchema,
-} from '@shared/schema/schemas';
+} from '@/prisma/generated/schemas';
 
 export function validateCitiesData(
   citiesData: Record<string, string | number>[],

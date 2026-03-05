@@ -1,4 +1,4 @@
-import { RoleSchema } from '@shared/schema/schemas';
+import { RoleSchema } from '@/prisma/generated/schemas';
 import * as argon2 from 'argon2';
 
 export async function createUsers() {
