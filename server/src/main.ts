@@ -15,15 +15,7 @@ async function bootstrap() {
     }),
   );
   app.enableCors({
-    origin: isDev
-      ? {
-          origin: true,
-          credentials: true,
-        }
-      : {
-          origin: process.env.DOMAIN,
-          credentials: true,
-        },
+    origin: isDev ? true : process.env.DOMAIN,
     credentials: true,
   });
   app.use(cookieParser());
