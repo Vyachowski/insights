@@ -146,7 +146,7 @@ model Call {
   site              Site      @relation(fields: [siteId], references: [id], onDelete: Cascade)
 
   @@index([siteId])
-   @@map("calls")
+  @@map("calls")
 }
 
 model Revenue {
