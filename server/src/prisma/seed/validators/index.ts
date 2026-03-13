@@ -5,10 +5,18 @@ import {
   RevenueCreateManyZodSchema,
   ExpenseCreateManyZodSchema,
   SiteMetricCreateManyZodSchema,
-} from '@/prisma/generated/schemas';
+} from '../../generated/schemas';
+import {
+  normalizeCalls,
+  normalizeCities,
+  normalizeExpenses,
+  normalizeRevenue,
+  normalizeSiteMetrics,
+  normalizeSites,
+} from '../normalizers';
 
 export function validateCitiesData(
-  citiesData: Record<string, string | number>[],
+  citiesData: ReturnType<typeof normalizeCities>,
 ) {
   if (citiesData.length < 1) throw new Error('Нет данных сайта для валидации.');
 
@@ -19,7 +27,7 @@ export function validateCitiesData(
 }
 
 export function validateSitesData(
-  sitesData: Record<string, string | number>[],
+  sitesData: ReturnType<typeof normalizeSites>,
 ) {
   if (sitesData.length < 1) throw new Error('Нет данных сайта для валидации.');
 
@@ -29,8 +37,8 @@ export function validateSitesData(
   });
 }
 
-export function validateCallsData(
-  callsData: Record<string, string | number>[],
+export function validateCallImportData(
+  callsData: ReturnType<typeof normalizeCalls>,
 ) {
   if (callsData.length < 1) {
     throw new Error('Нет данных звонков для валидации.');
@@ -43,7 +51,7 @@ export function validateCallsData(
 }
 
 export function validateRevenuesData(
-  revenuesData: Record<string, string | null | Date | number>[],
+  revenuesData: ReturnType<typeof normalizeRevenue>,
 ) {
   if (revenuesData.length < 1) {
     throw new Error('Нет данных доходов для валидации.');
@@ -56,7 +64,7 @@ export function validateRevenuesData(
 }
 
 export function validateExpensesData(
-  expensesData: Record<string, string | number | Date | null>[],
+  expensesData: ReturnType<typeof normalizeExpenses>,
 ) {
   if (expensesData.length < 1) {
     throw new Error('Нет данных расходов для валидации.');
@@ -68,8 +76,8 @@ export function validateExpensesData(
   });
 }
 
-export function validateSiteMetrics(
-  siteMetricsData: Record<string, string | number | Date | null>[],
+export function validateSiteMetricsData(
+  siteMetricsData: ReturnType<typeof normalizeSiteMetrics>,
 ) {
   if (siteMetricsData.length < 1) {
     throw new Error('Нет данных метрик сайта для валидации.');

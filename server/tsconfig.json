@@ -24,7 +24,7 @@
     "paths": {
       "@shared/*": ["../shared/*"],
       "@/*": ["src/*"],
-      "@contracts/*": ["../shared/contracts/*"]
-    }
-  }
+      "@contracts/*": ["../shared/contracts/*"],
+    },
+  },
 }

@@ -18,7 +18,7 @@ export const parseCSV = (filepath: string, delimeter = ',') => {
   });
 };
 
-export const parseCallDate = (str: string) => {
+export const parseCallDate = (str: string): Date | null => {
   const [datePart, timePart] = str.split(' ');
   if (!datePart || !timePart) return null;
 
@@ -28,5 +28,6 @@ export const parseCallDate = (str: string) => {
   const [hour, minute] = timePart.split(':').map(Number);
 
   const fullYear = year < 100 ? 2000 + year : year;
+
   return new Date(fullYear, month - 1, day, hour, minute);
 };

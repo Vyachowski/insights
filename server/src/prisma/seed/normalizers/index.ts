@@ -1,23 +1,15 @@
-type CSVImport = Record<string, string>[];
+import z from 'zod';
+import type {
+  CallImport,
+  CityImport,
+  ExpenseImport,
+  RevenueImport,
+  SiteImport,
+  SiteMetricsImport,
+} from '../schemas';
+import { normalizeCallRow } from './normalize-calls-row';
 
-export function normalizeCallImportData(callsImport: CSVImport) {
-  return callsImport.map((call) => ({
-    ...call,
-    siteId: Number(call.siteId),
-    callNumber: Number(call.callNumber),
-    billsec: Number(call.billsec),
-  }));
-}
-
-export function normalizeSites(sitesImport: CSVImport) {
-  return sitesImport.map((site) => ({
-    ...site,
-    id: Number(site.id),
-    cityId: Number(site.cityId),
-  }));
-}
-
-export function normalizeCities(citiesImport: CSVImport) {
+export function normalizeCities(citiesImport: CityImport[]) {
   return citiesImport.map((city) => ({
     ...city,
     id: Number(city.id),
@@ -25,7 +17,15 @@ export function normalizeCities(citiesImport: CSVImport) {
   }));
 }
 
-export function normalizeRevenue(revenueImport: CSVImport) {
+export function normalizeSites(sitesImport: SiteImport[]) {
+  return sitesImport.map((site) => ({
+    ...site,
+    id: Number(site.id),
+    cityId: Number(site.cityId),
+  }));
+}
+
+export function normalizeRevenue(revenueImport: RevenueImport[]) {
   return revenueImport.map((rev) => ({
     ...rev,
     cityId: rev.cityId ? rev.cityId : null,
@@ -34,7 +34,11 @@ export function normalizeRevenue(revenueImport: CSVImport) {
   }));
 }
 
-export function normalizeExpenses(expensesImport: CSVImport) {
+export function normalizeCalls(callsImport: CallImport[]) {
+  return callsImport.map(normalizeCallRow);
+}
+
+export function normalizeExpenses(expensesImport: ExpenseImport[]) {
   return expensesImport.map((exp) => ({
     ...exp,
     date: new Date(exp.date),
@@ -43,7 +47,7 @@ export function normalizeExpenses(expensesImport: CSVImport) {
   }));
 }
 
-export function normalizeSiteMetrics(siteMetricsImport: CSVImport) {
+export function normalizeSiteMetrics(siteMetricsImport: SiteMetricsImport[]) {
   return siteMetricsImport.map((metrics) => ({
     ...metrics,
     siteId: Number(metrics.siteId),
