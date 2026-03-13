@@ -32,7 +32,6 @@ type Seed = (
 
 const seed: Seed = async (paths, rawPaths, isRefetchDataNeeded = false) => {
   const pathsList = Object.values(paths);
-  console.log(pathsList);
   // SECTION: Checks
   console.log('⏳ Check database connection...');
 
