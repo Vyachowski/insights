@@ -4,7 +4,7 @@ const envSchema = z.object({
   NODE_ENV: z
     .enum(['development', 'production', 'test'])
     .default('development'),
-  DB_URL: z.url(),
+  DATABASE_URL: z.url(),
   JWT_SECRET: z.string(),
   JWT_EXPIRATION: z.string(),
   JWT_MAX_AGE: z.coerce.number().int().positive().min(1000),
