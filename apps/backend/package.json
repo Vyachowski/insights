@@ -22,7 +22,7 @@
     "prisma:studio": "prisma studio",
     "prisma:migrate": "prisma migrate dev",
     "prisma:seed": "prisma db seed",
-    "prisma:reset": "prisma migrate reset --force"
+    "prisma:reset": "prisma migrate reset --force && prisma db seed"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
