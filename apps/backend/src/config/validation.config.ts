@@ -8,6 +8,9 @@ const envSchema = z.object({
   JWT_SECRET: z.string(),
   JWT_EXPIRATION: z.string(),
   JWT_MAX_AGE: z.coerce.number().int().positive().min(1000),
+  ALLOWED_ORIGIN: z.url(),
+  PORT: z.coerce.number().int().positive(),
+  YANDEX_API_OAUTH_TOKEN: z.string(),
 });
 
 export type EnvConfig = z.infer<typeof envSchema>;
