@@ -1,9 +1,12 @@
-export enum GroupBy {
-  DAY = "day",
-  WEEK = "week",
-  MONTH = "month",
-  YEAR = "year",
-}
+export const GroupBy = Object.freeze({
+  DAY: "day",
+  WEEK: "week",
+  MONTH: "month",
+  YEAR: "year",
+} as const)
+
+export type GroupBy = typeof GroupBy[keyof typeof GroupBy]
+
 
 export interface AnalyticsQuery {
   ciyId?: number;

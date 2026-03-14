@@ -1,4 +1,4 @@
-import type { DashboardResponse } from '@contracts/dashboard.contract'
+import type { DashboardResponse } from '@insights/contracts'
 
 import axiosInstance from '@/lib/axios'
 

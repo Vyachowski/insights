@@ -22,9 +22,7 @@
     "baseUrl": "./",
     "outDir": "./dist",
     "paths": {
-      "@shared/*": ["../shared/*"],
       "@/*": ["src/*"],
-      "@contracts/*": ["../shared/contracts/*"],
     },
   },
 }

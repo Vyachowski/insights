@@ -29,7 +29,6 @@
     "paths": {
       "@/*": ["./src/*"],
       "@ui/*":["./src/components/ui/*"],
-      "@contracts/*": ["../shared/contracts/*"]
     },
   },
   "include": ["src"],

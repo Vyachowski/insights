@@ -2,7 +2,7 @@ import Card from '@ui/Card'
 import { useMemo, useState } from 'react'
 import { ResponsiveContainer, CartesianGrid, XAxis, YAxis, Tooltip, Bar, BarChart } from 'recharts'
 
-import type { YearlyCityProfit } from '@contracts/dashboard.contract'
+import type { YearlyCityProfit } from '@insights/contracts'
 
 import { formatNumber } from '@/lib/utils'
 
