@@ -12,6 +12,7 @@ import { prisma } from '../connector';
 export async function seedUsers(users: ReturnType<typeof createUsers>) {
   await prisma.user.createMany({
     data: [users.admin, users.user],
+    skipDuplicates: true,
   });
 }
 
