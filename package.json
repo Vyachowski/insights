@@ -13,7 +13,8 @@
     "frontend:build": "npm run build --workspace @insights/frontend",
     "backend:dev": "npm run dev --workspace @insights/backend",
     "backend:start": "npm run start:prod --workspace @insights/backend",
-    "backend:build": "npm run build --workspace @insights/backend"
+    "backend:build": "npm run build --workspace @insights/backend",
+    "db:seed": "npm run prisma:seed --workspace @insights/backend"
   },
   "author": "Slava Haikin",
   "license": "UNLICENSED",
