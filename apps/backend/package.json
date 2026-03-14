@@ -3,6 +3,10 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
+    "dev:up": "docker compose --env-file ../.env.dev -f docker-compose.dev.yml up -d",
+    "dev:down": "docker compose --env-file ../.env.dev -f docker-compose.dev.yml down",
+    "dev:reset": "docker compose --env-file ../.env.dev -f docker-compose.dev.yml down -v",
+    "dev:logs": "docker compose --env-file ../.env.dev -f docker-compose.dev.yml logs -f",
     "build": "prisma generate && nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
