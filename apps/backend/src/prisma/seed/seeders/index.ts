@@ -1,5 +1,3 @@
-import { PrismaClient } from '@/prisma/generated/prisma/client';
-import { PrismaPg } from '@prisma/adapter-pg';
 import {
   validateCallImportData,
   validateCitiesData,
@@ -9,9 +7,7 @@ import {
   validateSitesData,
 } from '../validators';
 import { createUsers } from '../creators';
-
-const pool = new PrismaPg({ connectionString: process.env.DB_URL });
-const prisma = new PrismaClient({ adapter: pool });
+import { prisma } from '../connector';
 
 export async function seedUsers(users: ReturnType<typeof createUsers>) {
   await prisma.user.createMany({

@@ -1,8 +1,4 @@
-import { PrismaPg } from '@prisma/adapter-pg';
-import { PrismaClient } from '@/prisma/generated/prisma/client';
-
-const pool = new PrismaPg({ connectionString: process.env.DB_URL });
-const prisma = new PrismaClient({ adapter: pool });
+import { prisma } from '../connector';
 
 export async function checkDatabaseConnection(): Promise<void> {
   await prisma.$connect();
