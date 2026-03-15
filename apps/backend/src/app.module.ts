@@ -15,6 +15,7 @@ import { ExpensesModule } from './expenses/expenses.module';
 import { CallsModule } from './calls/calls.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { ProfitModule } from './profit/profit.module';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { ProfitModule } from './profit/profit.module';
     CallsModule,
     DashboardModule,
     ProfitModule,
+    HealthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
