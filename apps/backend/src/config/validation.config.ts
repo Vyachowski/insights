@@ -11,6 +11,13 @@ const envSchema = z.object({
   ALLOWED_ORIGIN: z.url(),
   PORT: z.coerce.number().int().positive(),
   YANDEX_API_OAUTH_TOKEN: z.string(),
+  DATABASE_CONNECT_RETRIES: z.coerce.number().int().positive().default(5),
+  DATABASE_CONNECT_DELAY: z.coerce
+    .number()
+    .int()
+    .positive()
+    .gt(1000)
+    .default(3000),
 });
 
 export type EnvConfig = z.infer<typeof envSchema>;
