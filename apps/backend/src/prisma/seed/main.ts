@@ -19,18 +19,10 @@ type Seed = (
     siteMetrics: string;
     expenses: string;
   },
-  rawFilePaths?: {
-    cities?: string;
-    sites?: string;
-    calls?: string;
-    revenue?: string;
-    siteMetrics?: string;
-    expenses?: string;
-  },
   withCreation?: boolean,
 ) => Promise<void>;
 
-const seed: Seed = async (paths, rawPaths, isRefetchDataNeeded = false) => {
+const seed: Seed = async (paths, isRefetchDataNeeded = false) => {
   const pathsList = Object.values(paths);
   // SECTION: Checks
   console.log('⏳ Check database connection...');
