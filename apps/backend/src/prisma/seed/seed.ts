@@ -1,8 +1,8 @@
 import seed from './main';
-import { PREPARED_FILES_PATHS, RAW_FILES_PATHS } from './config';
+import { PREPARED_FILES_PATHS } from './config';
 import { prisma } from './connector';
 
-seed(PREPARED_FILES_PATHS, RAW_FILES_PATHS)
+seed(PREPARED_FILES_PATHS)
   .catch((e) => {
     console.error(e);
 
