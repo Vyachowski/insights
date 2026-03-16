@@ -1,5 +1,6 @@
 import { checkFilesExistence } from './checkers';
 import { checkDatabaseConnection } from './checkers';
+import { formatImportResult } from './helpers';
 import {
   importCalls,
   importCities,
@@ -24,8 +25,6 @@ type Seed = (
 
 const seed: Seed = async (paths, isRefetchDataNeeded = false) => {
   const pathsList = Object.values(paths);
-  // SECTION: Checks
-  console.log('⏳ Check database connection...');
 
   await checkDatabaseConnection();
   console.log('✅ Database connection succesfully established.');
@@ -33,23 +32,29 @@ const seed: Seed = async (paths, isRefetchDataNeeded = false) => {
   await checkFilesExistence(pathsList);
   console.log('✅ Required files exists.');
 
-  // SECTION: Seeding
-  console.log('⏳ Seeding data...');
+  const usersResult = await importUsers();
+  console.log(formatImportResult('Users', usersResult));
 
-  await importUsers();
-  console.log('✅ Admin and User succesfully created.');
-  await importCities(paths.cities);
-  console.log('✅ All cities succesfully imported to database.');
-  const citiesNameswithSiteId = await importSites(paths.sites);
-  console.log('✅ All sites succesfully imported to database.');
-  await importCalls(paths.calls, citiesNameswithSiteId);
-  console.log('✅ All calls succesfully imported to database.');
-  await importRevenue(paths.revenue);
-  console.log('✅ All revenue succesfully imported to database.');
-  await importExpenses(paths.expenses);
-  console.log('✅ All expenses succesfully imported to database.');
-  await importSiteMetrics(paths.siteMetrics, isRefetchDataNeeded);
-  console.log('✅ All site metrics succesfully imported to database.');
+  const citiesResult = await importCities(paths.cities);
+  console.log(formatImportResult('Cities', citiesResult));
+
+  const sitesResult = await importSites(paths.sites);
+  console.log(formatImportResult('Sites', sitesResult));
+
+  const callsResult = await importCalls(paths.calls, sitesResult.data);
+  console.log(formatImportResult('Calls', callsResult));
+
+  const revenueResult = await importRevenue(paths.revenue);
+  console.log(formatImportResult('Revenue', revenueResult));
+
+  const expensesResult = await importExpenses(paths.expenses);
+  console.log(formatImportResult('Expenses', expensesResult));
+
+  const siteMetricsResult = await importSiteMetrics(
+    paths.siteMetrics,
+    isRefetchDataNeeded,
+  );
+  console.log(formatImportResult('Site metrics', siteMetricsResult));
 };
 
 export default seed;

@@ -9,7 +9,5 @@ export async function importSites(sitesPath: string) {
   const normalizedSites = normalizeSites(sitesImport);
   const validatedSites = validateSitesData(normalizedSites);
 
-  const importedSiteswithCityName = await seedSites(validatedSites);
-
-  return importedSiteswithCityName;
+  return await seedSites(validatedSites);
 }

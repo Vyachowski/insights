@@ -18,5 +18,5 @@ export async function importSiteMetrics(
   const normalizedSiteMetrics = normalizeSiteMetrics(siteMetricsData);
   const validatedSiteMetrics = validateSiteMetricsData(normalizedSiteMetrics);
 
-  await seedSiteMetrics(validatedSiteMetrics);
+  return await seedSiteMetrics(validatedSiteMetrics);
 }

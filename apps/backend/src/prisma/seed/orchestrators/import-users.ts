@@ -10,5 +10,5 @@ export async function importUsers() {
   const passwords = await hashPasswords(config);
   const users = createUsers(config, passwords);
 
-  await seedUsers(users);
+  return await seedUsers(users);
 }

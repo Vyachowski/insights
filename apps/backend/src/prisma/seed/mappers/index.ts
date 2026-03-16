@@ -1,9 +1,9 @@
 import { normalizeCalls } from '../normalizers';
-import { importSites } from '../orchestrators';
+import { SiteWithCity } from '../types';
 
 export function mapCallsToDomain(
   calls: ReturnType<typeof normalizeCalls>,
-  sitesWithCityName: Awaited<ReturnType<typeof importSites>>,
+  sitesWithCityName: SiteWithCity[],
 ) {
   return calls.map((call) => {
     const site = sitesWithCityName.find(

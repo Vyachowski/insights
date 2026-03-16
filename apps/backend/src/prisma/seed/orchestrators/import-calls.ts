@@ -4,16 +4,16 @@ import { seedCalls } from '../seeders';
 import { validateCallImportData } from '../validators';
 import { CallImportSchema } from '../schemas';
 import { mapCallsToDomain } from '../mappers';
-import { importSites } from './import-sites';
+import { SiteWithCity } from '../types';
 
 export async function importCalls(
   callsPath: string,
-  sitesWithCityName: Awaited<ReturnType<typeof importSites>>,
+  sitesWithCityName: SiteWithCity[],
 ) {
   const callsImport = parseCSV(callsPath, CallImportSchema);
   const normalizedCalls = normalizeCalls(callsImport);
   const mappedCalls = mapCallsToDomain(normalizedCalls, sitesWithCityName);
   const validatedCalls = validateCallImportData(mappedCalls);
 
-  await seedCalls(validatedCalls);
+  return await seedCalls(validatedCalls);
 }

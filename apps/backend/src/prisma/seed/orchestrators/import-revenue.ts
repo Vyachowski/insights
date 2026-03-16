@@ -9,5 +9,5 @@ export async function importRevenue(revenuePath: string) {
   const normalizedRevenue = normalizeRevenue(revenueImport);
   const validatedRevenue = validateRevenuesData(normalizedRevenue);
 
-  await seedRevenue(validatedRevenue);
+  return await seedRevenue(validatedRevenue);
 }
