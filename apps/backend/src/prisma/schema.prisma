@@ -39,7 +39,7 @@ model User {
 
 model City {
   id            Int      @id @default(autoincrement())
-  code          String
+  code          String   @unique
   slug          String
   name          String
   population    Int
@@ -119,6 +119,7 @@ model CallImport {
 
   @@index([siteId])
   @@map("call_imports")
+  @@unique([siteId, date, src])
 }
 
 model Call {
@@ -147,12 +148,13 @@ model Call {
 
   @@index([siteId])
   @@map("calls")
+  @@unique([siteId, date, src])
 }
 
 model Revenue {
   id            Int      @id @default(autoincrement())
   cityId        Int?     @map("city_id")
-  date          DateTime @db.Date
+  date          DateTime
   amount        Decimal  @db.Decimal(12, 2)
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
@@ -161,12 +163,13 @@ model Revenue {
 
   @@index([date])
   @@map("revenues")
+  @@unique([cityId, date])
 }
 
 model Expense {
   id        Int      @id @default(autoincrement())
   cityId    Int?     @map("city_id")
-  date      DateTime @db.Date
+  date      DateTime
   amount    Decimal  @db.Decimal(12, 2)
   type      String
   comment   String?
@@ -177,4 +180,5 @@ model Expense {
 
   @@index([date])
   @@map("expenses")
+  @@unique([cityId, date, type])
 }
