@@ -38,11 +38,11 @@ const seed: Seed = async (paths, isRefetchDataNeeded = false) => {
 
   await importUsers();
   console.log('✅ Admin and User succesfully created.');
-  const cities = await importCities(paths.cities);
+  await importCities(paths.cities);
   console.log('✅ All cities succesfully imported to database.');
-  await importSites(paths.sites);
+  const citiesNameswithSiteId = await importSites(paths.sites);
   console.log('✅ All sites succesfully imported to database.');
-  await importCalls(paths.calls, cities);
+  await importCalls(paths.calls, citiesNameswithSiteId);
   console.log('✅ All calls succesfully imported to database.');
   await importRevenue(paths.revenue);
   console.log('✅ All revenue succesfully imported to database.');

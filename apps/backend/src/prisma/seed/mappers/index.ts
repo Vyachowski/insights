@@ -1,16 +1,15 @@
-import { City } from '@/prisma/generated/prisma/client';
 import { normalizeCalls } from '../normalizers';
+import { importSites } from '../orchestrators';
 
 export function mapCallsToDomain(
   calls: ReturnType<typeof normalizeCalls>,
-  cities: City[],
+  sitesWithCityName: Awaited<ReturnType<typeof importSites>>,
 ) {
   return calls.map((call) => {
-    // NOTE: It will work only when in initial data site.id is the same as city.id
-    const site = cities.find(
-      (city) => city.name.toLowerCase() === call.projectTitle,
+    const site = sitesWithCityName.find(
+      (site) => site.city.name.toLowerCase() === call.projectTitle,
     );
-    const siteId = site ? site.id : '';
+    const siteId = site ? site.id : null;
 
     return {
       ...call,
