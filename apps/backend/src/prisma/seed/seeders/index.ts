@@ -19,11 +19,22 @@ export async function seedUsers(users: ReturnType<typeof createUsers>) {
 export async function seedCities(
   cities: ReturnType<typeof validateCitiesData>,
 ) {
-  return await prisma.city.createManyAndReturn(cities);
+  await prisma.city.createMany(cities);
 }
 
 export async function seedSites(sites: ReturnType<typeof validateSitesData>) {
   await prisma.site.createMany(sites);
+
+  return await prisma.site.findMany({
+    select: {
+      id: true,
+      city: {
+        select: {
+          name: true,
+        },
+      },
+    },
+  });
 }
 
 export async function seedCalls(
