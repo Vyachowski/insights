@@ -9,5 +9,5 @@ export async function importExpenses(expensesPath: string) {
   const normalizedExpenses = normalizeExpenses(expensesData);
   const validatedExpensesData = validateExpensesData(normalizedExpenses);
 
-  await seedExpenses(validatedExpensesData);
+  return await seedExpenses(validatedExpensesData);
 }
