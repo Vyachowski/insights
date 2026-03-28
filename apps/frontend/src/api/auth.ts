@@ -1,3 +1,5 @@
+import type { ApiResponse } from '@/types'
+
 import axiosInstance from '@/lib/axios'
 
 export interface LoginRequest {
@@ -6,14 +8,11 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
-  data: {
-    id: string
-    email: string
-    firstName: string
-    lastName: string
-    role: string
-  }
-  message: string
+  id: string
+  email: string
+  firstName: string
+  lastName: string
+  role: string
 }
 
 export interface User {
@@ -26,7 +25,8 @@ export interface User {
 
 export const authApi = {
   login: async (data: LoginRequest): Promise<User> => {
-    const { data: resData } = await axiosInstance.post<LoginResponse>('/auth/login', data)
+    const { data: resData } = await axiosInstance.post<ApiResponse<LoginResponse>>('/auth/login', data)
+
     return resData.data
   },
 
@@ -35,8 +35,8 @@ export const authApi = {
   },
 
   me: async (): Promise<User> => {
-    const response = await axiosInstance.get<User>('/auth/me')
-    return response.data
+    const { data: resData } = await axiosInstance.get<ApiResponse<User>>('/auth/me')
+    return resData.data
   },
 
   // refresh: async (): Promise<void> => {

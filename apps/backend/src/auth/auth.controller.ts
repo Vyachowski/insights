@@ -45,7 +45,7 @@ export class AuthController {
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, createdAt, updatedAt, status, ...safeUser } = req.user;
-    return { data: safeUser, message: 'Logged in successfully' };
+    return safeUser;
   }
 
   @UseGuards(JwtAuthGuard)
