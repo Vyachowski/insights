@@ -119,7 +119,7 @@ model CallImport {
 
   @@index([siteId])
   @@map("call_imports")
-  @@unique([siteId, date, src])
+  @@unique([siteId, date, src, callNumber])
 }
 
 model Call {

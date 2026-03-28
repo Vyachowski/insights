@@ -163,7 +163,7 @@ CREATE UNIQUE INDEX "site_metrics_site_id_date_key" ON "site_metrics"("site_id",
 CREATE INDEX "call_imports_site_id_idx" ON "call_imports"("site_id");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "call_imports_site_id_date_src_key" ON "call_imports"("site_id", "date", "src");
+CREATE UNIQUE INDEX "call_imports_site_id_date_src_call_number_key" ON "call_imports"("site_id", "date", "src", "call_number");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "calls_gudok_id_key" ON "calls"("gudok_id");
