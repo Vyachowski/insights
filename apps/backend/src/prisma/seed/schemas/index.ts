@@ -34,21 +34,21 @@ export const CallImportSchema = z.object({
 });
 
 export const RevenueImportSchema = z.object({
-  cityId: z.string(),
-  date: z.string(),
+  siteId: z.string(),
+  date: z.string().transform((val) => new Date(val + 'T00:00:00.000Z')),
   amount: z.string(),
 });
 
 export const ExpenseImportSchema = z.object({
-  date: z.string(),
+  date: z.string().transform((val) => new Date(val + 'T00:00:00.000Z')),
   type: z.string(),
-  cityId: z.string(),
+  siteId: z.string(),
   amount: z.string(),
 });
 
 export const SiteMetricsImportSchema = z.object({
   siteId: z.string(),
-  date: z.string(),
+  date: z.string().transform((val) => new Date(val)),
 
   yandexUsers: z.string(),
   googleUsers: z.string(),
