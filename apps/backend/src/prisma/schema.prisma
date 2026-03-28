@@ -180,5 +180,5 @@ model Expense {
 
   @@index([date])
   @@map("expenses")
-  @@unique([date, type])
+  @@unique([date, siteId, type])
 }

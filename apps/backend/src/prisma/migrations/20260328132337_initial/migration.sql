@@ -184,7 +184,7 @@ CREATE UNIQUE INDEX "revenues_date_site_id_key" ON "revenues"("date", "site_id")
 CREATE INDEX "expenses_date_idx" ON "expenses"("date");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "expenses_date_type_key" ON "expenses"("date", "type");
+CREATE UNIQUE INDEX "expenses_date_site_id_type_key" ON "expenses"("date", "site_id", "type");
 
 -- AddForeignKey
 ALTER TABLE "sites" ADD CONSTRAINT "sites_city_id_fkey" FOREIGN KEY ("city_id") REFERENCES "cities"("id") ON DELETE CASCADE ON UPDATE CASCADE;
