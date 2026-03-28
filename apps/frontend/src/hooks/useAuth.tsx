@@ -24,6 +24,7 @@ export function useAuth() {
   const isLoaded = useAppSelector(selectAuthLoaded)
   const error = useAppSelector(selectAuthError)
 
+  // FIXME: Add correct api response chekings
   const login = useCallback(
     async (credentials: LoginRequest) => {
       const result = await dispatch(fetchLogin(credentials))
