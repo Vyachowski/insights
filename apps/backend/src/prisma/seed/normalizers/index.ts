@@ -28,7 +28,6 @@ export function normalizeRevenue(revenueImport: RevenueImport[]) {
   return revenueImport.map((rev) => ({
     ...rev,
     siteId: rev.siteId ? rev.siteId : null,
-    isTotal: rev.siteId ? false : true,
     date: rev.date,
     amount: Number(rev.amount),
   }));
@@ -43,7 +42,6 @@ export function normalizeExpenses(expensesImport: ExpenseImport[]) {
     ...exp,
     date: exp.date,
     siteId: exp.siteId ? Number(exp.siteId) : null,
-    isTotal: exp.siteId ? false : true,
     amount: Number(exp.amount),
   }));
 }
