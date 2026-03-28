@@ -1,4 +1,3 @@
-import z from 'zod';
 import type {
   CallImport,
   CityImport,
@@ -28,8 +27,9 @@ export function normalizeSites(sitesImport: SiteImport[]) {
 export function normalizeRevenue(revenueImport: RevenueImport[]) {
   return revenueImport.map((rev) => ({
     ...rev,
-    cityId: rev.cityId ? rev.cityId : null,
-    date: new Date(rev.date),
+    siteId: rev.siteId ? rev.siteId : null,
+    isTotal: rev.siteId ? false : true,
+    date: rev.date,
     amount: Number(rev.amount),
   }));
 }
@@ -41,8 +41,9 @@ export function normalizeCalls(callsImport: CallImport[]) {
 export function normalizeExpenses(expensesImport: ExpenseImport[]) {
   return expensesImport.map((exp) => ({
     ...exp,
-    date: new Date(exp.date),
-    cityId: exp.cityId ? Number(exp.cityId) : null,
+    date: exp.date,
+    siteId: exp.siteId ? Number(exp.siteId) : null,
+    isTotal: exp.siteId ? false : true,
     amount: Number(exp.amount),
   }));
 }

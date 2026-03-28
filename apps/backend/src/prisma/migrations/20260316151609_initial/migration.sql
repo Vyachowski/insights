@@ -118,8 +118,9 @@ CREATE TABLE "calls" (
 -- CreateTable
 CREATE TABLE "revenues" (
     "id" SERIAL NOT NULL,
-    "city_id" INTEGER,
-    "date" DATE NOT NULL,
+    "site_id" INTEGER,
+    "is_total" BOOLEAN NOT NULL DEFAULT false,
+    "date" TIMESTAMP(3) NOT NULL,
     "amount" DECIMAL(12,2) NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
@@ -130,8 +131,9 @@ CREATE TABLE "revenues" (
 -- CreateTable
 CREATE TABLE "expenses" (
     "id" SERIAL NOT NULL,
-    "city_id" INTEGER,
-    "date" DATE NOT NULL,
+    "site_id" INTEGER,
+    "is_total" BOOLEAN NOT NULL DEFAULT false,
+    "date" TIMESTAMP(3) NOT NULL,
     "amount" DECIMAL(12,2) NOT NULL,
     "type" TEXT NOT NULL,
     "comment" TEXT,
@@ -148,6 +150,9 @@ CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 CREATE INDEX "users_email_idx" ON "users"("email");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "cities_code_key" ON "cities"("code");
+
+-- CreateIndex
 CREATE INDEX "sites_city_id_idx" ON "sites"("city_id");
 
 -- CreateIndex
@@ -160,16 +165,28 @@ CREATE UNIQUE INDEX "site_metrics_site_id_date_key" ON "site_metrics"("site_id",
 CREATE INDEX "call_imports_site_id_idx" ON "call_imports"("site_id");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "call_imports_site_id_date_src_key" ON "call_imports"("site_id", "date", "src");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "calls_gudok_id_key" ON "calls"("gudok_id");
 
 -- CreateIndex
 CREATE INDEX "calls_site_id_idx" ON "calls"("site_id");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "calls_site_id_date_src_key" ON "calls"("site_id", "date", "src");
+
+-- CreateIndex
 CREATE INDEX "revenues_date_idx" ON "revenues"("date");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "revenues_is_total_site_id_date_amount_key" ON "revenues"("is_total", "site_id", "date", "amount");
+
+-- CreateIndex
 CREATE INDEX "expenses_date_idx" ON "expenses"("date");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "expenses_is_total_site_id_date_type_amount_key" ON "expenses"("is_total", "site_id", "date", "type", "amount");
 
 -- AddForeignKey
 ALTER TABLE "sites" ADD CONSTRAINT "sites_city_id_fkey" FOREIGN KEY ("city_id") REFERENCES "cities"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -184,7 +201,7 @@ ALTER TABLE "call_imports" ADD CONSTRAINT "call_imports_site_id_fkey" FOREIGN KE
 ALTER TABLE "calls" ADD CONSTRAINT "calls_site_id_fkey" FOREIGN KEY ("site_id") REFERENCES "sites"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "revenues" ADD CONSTRAINT "revenues_city_id_fkey" FOREIGN KEY ("city_id") REFERENCES "cities"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "revenues" ADD CONSTRAINT "revenues_site_id_fkey" FOREIGN KEY ("site_id") REFERENCES "sites"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "expenses" ADD CONSTRAINT "expenses_city_id_fkey" FOREIGN KEY ("city_id") REFERENCES "cities"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "expenses" ADD CONSTRAINT "expenses_site_id_fkey" FOREIGN KEY ("site_id") REFERENCES "sites"("id") ON DELETE CASCADE ON UPDATE CASCADE;
