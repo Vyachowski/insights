@@ -24,10 +24,10 @@ export class ExpensesService {
     return amount;
   }
 
-  findAll({ cityId, startDate, endDate }: AnalyticsQueryDto) {
+  findAll({ siteId, startDate, endDate }: AnalyticsQueryDto) {
     return this.prismaService.expense.findMany({
       where: {
-        cityId,
+        siteId,
         date: {
           gte: startDate ? new Date(startDate) : undefined,
           lte: endDate ? new Date(endDate) : undefined,

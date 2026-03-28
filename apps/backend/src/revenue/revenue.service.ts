@@ -24,10 +24,10 @@ export class RevenueService {
     return amount;
   }
 
-  findAll({ cityId, startDate, endDate }: AnalyticsQueryDto) {
+  findAll({ siteId, startDate, endDate }: AnalyticsQueryDto) {
     return this.prismaService.revenue.findMany({
       where: {
-        cityId,
+        siteId,
         date: {
           gte: startDate ? new Date(startDate) : undefined,
           lte: endDate ? new Date(endDate) : undefined,
@@ -38,7 +38,7 @@ export class RevenueService {
 
   async getRevenueGroupedByCity(startDate: Date, endDate: Date) {
     const result = await this.prismaService.revenue.groupBy({
-      by: 'cityId',
+      by: 'siteId',
       _sum: {
         amount: true,
       },
@@ -51,7 +51,7 @@ export class RevenueService {
     });
 
     return result.map((item) => ({
-      cityId: item.cityId ?? 0,
+      cityId: item.siteId ?? 0,
       profit: item._sum.amount?.toNumber() ?? 0,
     }));
   }
