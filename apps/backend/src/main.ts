@@ -6,6 +6,7 @@ import { ConfigService } from '@nestjs/config';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -30,6 +31,21 @@ async function bootstrap() {
 
   app.useGlobalInterceptors(new ResponseInterceptor());
   app.useGlobalFilters(new AllExceptionsFilter());
+
+  if (isDev) {
+    const config = new DocumentBuilder()
+      .setTitle('Insights API')
+      .setVersion('1.0')
+      .setDescription('Internal analytics dashboard API')
+      .addCookieAuth('access_token')
+      .build();
+
+    const document = SwaggerModule.createDocument(app, config);
+
+    SwaggerModule.setup('api/docs', app, document, {
+      jsonDocumentUrl: 'api/docs/openapi.json',
+    });
+  }
 
   await app.listen(port);
 }
