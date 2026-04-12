@@ -21,7 +21,7 @@ import { HealthModule } from './health/health.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: ['../.env.dev', '../.env'],
+      envFilePath: ['.env.dev', '.env'],
       validate,
     }),
     JwtModule.registerAsync({
