@@ -33,6 +33,8 @@ insights/
 
 Server-specific notes: [apps/backend/README.md](apps/backend/README.md).
 
+**API contracts:** shared TypeScript types for the HTTP layer (including `ApiResponse<T>` and `ApiErrorResponse`) and domain payloads live in [`packages/contracts`](packages/contracts). Both apps depend on the workspace package `@insights/contracts`.
+
 ## Requirements
 
 - **Node.js** (LTS) and **npm**

@@ -1,4 +1,4 @@
-import type { ApiResponse } from '@/types'
+import type { ApiResponse } from '@insights/contracts'
 
 import axiosInstance from '@/lib/axios'
 
