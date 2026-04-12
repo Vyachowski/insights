@@ -9,7 +9,7 @@
       "runtimeArgs": ["tsx", "--tsconfig", "apps/backend/tsconfig.json", "apps/backend/src/prisma/seed/seed.ts"],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
-      "envFile": "${workspaceFolder}/apps/.env.dev"
+      "envFile": "${workspaceFolder}/apps/backend/.env.dev"
     }
   ]
 }

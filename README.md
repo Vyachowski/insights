@@ -48,7 +48,7 @@ npm install
 
 ### 2. Environment variables
 
-See **[apps/.env.example](apps/.env.example)** for backend and Docker Compose variables. Copy it to **`apps/.env.dev`** (same path the tooling expects).
+See **[apps/backend/.env.example](apps/backend/.env.example)** for backend and Docker Compose variables. Copy it to **`apps/backend/.env.dev`**.
 
 See **[apps/frontend/.env.example](apps/frontend/.env.example)** for the SPA. Copy it to **`apps/frontend/.env`**.
 
