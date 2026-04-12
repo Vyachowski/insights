@@ -12,14 +12,17 @@ import {
 import { AuthService } from './auth.service';
 import { LoginRequestDto } from './dto/auth.dto';
 import { LocalAuthGuard } from '../common/guards/local.auth.guard';
-
 import { ConfigService } from '@nestjs/config';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { PrismaService } from '@/database/prisma.service';
 import { User } from '@/prisma/generated/prisma/client';
+import { ApiBody, ApiCookieAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiWrappedResponse } from '@/common/decorators/api-wrapped-response.decorator';
+import { UserResponseDto } from './dto/user.dto';
 
 type RequestWithUser = LoginRequestDto & { user: User };
 
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -28,6 +31,9 @@ export class AuthController {
     private prismaService: PrismaService,
   ) {}
 
+  @ApiOperation({ summary: 'Login with email/password, sets access_token cookie' })
+  @ApiBody({ type: LoginRequestDto })
+  @ApiWrappedResponse(UserResponseDto)
   @UseGuards(LocalAuthGuard)
   @Post('login')
   login(
@@ -43,11 +49,11 @@ export class AuthController {
       maxAge: this.configService.get<number>('JWT_MAX_AGE'),
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password, createdAt, updatedAt, status, ...safeUser } = req.user;
-    return safeUser;
+    return new UserResponseDto(req.user);
   }
 
+  @ApiOperation({ summary: 'Logout, clears access_token cookie' })
+  @ApiCookieAuth('access_token')
   @UseGuards(JwtAuthGuard)
   @Post('logout')
   logout(@Res({ passthrough: true }) res: Response) {
@@ -60,6 +66,9 @@ export class AuthController {
     return { message: 'Logged out' };
   }
 
+  @ApiOperation({ summary: 'Get current authenticated user' })
+  @ApiCookieAuth('access_token')
+  @ApiWrappedResponse(UserResponseDto)
   @UseGuards(JwtAuthGuard)
   @Get('me')
   async getMe(@Request() req: LoginRequestDto & { user: { userId: string } }) {
@@ -69,8 +78,6 @@ export class AuthController {
 
     if (!user) throw new NotFoundException('User was not found.');
 
-    const { password: _, ...userWithoutPassword } = user;
-
-    return userWithoutPassword;
+    return new UserResponseDto(user);
   }
 }
