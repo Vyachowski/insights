@@ -3,6 +3,11 @@ export interface LoginRequest {
   password: string;
 }
 
-export interface LoginResponse {
-  access_token: string;
+export interface User {
+  id: string
+  email: string
+  firstName: string | null
+  lastName: string | null
+  role: string
+  status: string
 }

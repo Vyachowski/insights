@@ -1,4 +1,5 @@
 import type { Response } from 'express';
+import type { User } from '@/prisma/generated/prisma/client';
 
 import {
   Controller,
@@ -15,12 +16,10 @@ import { LocalAuthGuard } from '../common/guards/local.auth.guard';
 import { ConfigService } from '@nestjs/config';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { PrismaService } from '@/database/prisma.service';
-import { User } from '@/prisma/generated/prisma/client';
 import { ApiBody, ApiCookieAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApiWrappedResponse } from '@/common/decorators/api-wrapped-response.decorator';
 import { UserResponseDto } from './dto/user.dto';
-
-type RequestWithUser = LoginRequestDto & { user: User };
+import { CurrentUser } from '@/common/decorators/current-user.decorator';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -37,10 +36,10 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @Post('login')
   login(
-    @Request() req: RequestWithUser,
+    @Request() @CurrentUser() user: User,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { access_token } = this.authService.login(req.user);
+    const { access_token } = this.authService.login(user);
 
     res.cookie('access_token', access_token, {
       httpOnly: true,
@@ -49,7 +48,7 @@ export class AuthController {
       maxAge: this.configService.get<number>('JWT_MAX_AGE'),
     });
 
-    return new UserResponseDto(req.user);
+    return new UserResponseDto(user);
   }
 
   @ApiOperation({ summary: 'Logout, clears access_token cookie' })
@@ -71,13 +70,13 @@ export class AuthController {
   @ApiWrappedResponse(UserResponseDto)
   @UseGuards(JwtAuthGuard)
   @Get('me')
-  async getMe(@Request() req: LoginRequestDto & { user: { userId: string } }) {
-    const user = await this.prismaService.user.findUnique({
-      where: { id: req.user.userId },
+  async getMe(@CurrentUser() user: { userId: string }) {
+    const userData = await this.prismaService.user.findUnique({
+      where: { id: user.userId },
     });
 
-    if (!user) throw new NotFoundException('User was not found.');
+    if (!userData) throw new NotFoundException('User was not found.');
 
-    return new UserResponseDto(user);
+    return new UserResponseDto(userData);
   }
 }

@@ -2,30 +2,11 @@ import type { ApiResponse } from '@insights/contracts'
 
 import axiosInstance from '@/lib/axios'
 
-export interface LoginRequest {
-  email: string
-  password: string
-}
-
-export interface LoginResponse {
-  id: string
-  email: string
-  firstName: string
-  lastName: string
-  role: string
-}
-
-export interface User {
-  id: string
-  email: string
-  firstName: string
-  lastName: string
-  role: string
-}
+import type { LoginRequest, User } from '@insights/contracts/auth.types'
 
 export const authApi = {
   login: async (data: LoginRequest): Promise<User> => {
-    const { data: resData } = await axiosInstance.post<ApiResponse<LoginResponse>>('/auth/login', data)
+    const { data: resData } = await axiosInstance.post<ApiResponse<User>>('/auth/login', data)
 
     return resData.data
   },
@@ -38,8 +19,4 @@ export const authApi = {
     const { data: resData } = await axiosInstance.get<ApiResponse<User>>('/auth/me')
     return resData.data
   },
-
-  // refresh: async (): Promise<void> => {
-  //   await axiosInstance.post('/auth/refresh')
-  // },
 }
