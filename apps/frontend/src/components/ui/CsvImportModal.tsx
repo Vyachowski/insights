@@ -24,7 +24,11 @@ export default function CsvImportModal({ config, onClose }: Props) {
   const [error, setError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const canSubmit = !loading && (url.trim().length > 0 || file !== null)
+  function isValidUrl(s: string) {
+    try { const u = new URL(s); return u.protocol === 'https:' || u.protocol === 'http:' } catch { return false }
+  }
+
+  const canSubmit = !loading && (isValidUrl(url) || file !== null)
 
   async function run(action: () => Promise<ImportResult>) {
     setLoading(true)
