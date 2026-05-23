@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { Phone, BarChart3 } from 'lucide-react'
+import { BarChart3 } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
+import CallsTab from '../tabs/CallsTab'
 import CitiesTab from '../tabs/CitiesTab'
 import ExpensesTab from '../tabs/ExpensesTab'
 import PlaceholderTab from '../tabs/PlaceholderTab'
@@ -49,13 +50,7 @@ export default function DataPage() {
       <div>
         {activeTab === 'revenue' && <RevenueTab />}
         {activeTab === 'expenses' && <ExpensesTab />}
-        {activeTab === 'calls' && (
-          <PlaceholderTab
-            title="Звонки"
-            description="Загрузка CSV-отчётов из Гудок и просмотр истории звонков"
-            icon={Phone}
-          />
-        )}
+        {activeTab === 'calls' && <CallsTab />}
         {activeTab === 'metrics' && (
           <PlaceholderTab
             title="SEO-метрики"
