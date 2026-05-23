@@ -1,5 +1,6 @@
 import { PrismaService } from '@/database/prisma.service';
 import { Controller, Get } from '@nestjs/common';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   HealthCheck,
   HealthCheckResult,
@@ -8,6 +9,7 @@ import {
   MemoryHealthIndicator,
 } from '@nestjs/terminus';
 
+@ApiTags('Health')
 @Controller('health')
 export class HealthController {
   constructor(
@@ -16,6 +18,7 @@ export class HealthController {
     private prisma: PrismaService,
   ) {}
 
+  @ApiOperation({ summary: 'Check API and database health' })
   @Get()
   @HealthCheck()
   check(): Promise<HealthCheckResult> {
