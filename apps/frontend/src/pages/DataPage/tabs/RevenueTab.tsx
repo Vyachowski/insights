@@ -31,7 +31,8 @@ function formatDate(dateStr: string) {
 function getSiteName(siteId: number | null, sites: Site[]) {
   if (siteId === null) return null
   const site = sites.find(s => s.id === siteId)
-  return site?.name ?? site?.url ?? `Сайт #${siteId}`
+  if (!site) return `Сайт #${siteId}`
+  try { return new URL(site.url).hostname } catch { return site.url }
 }
 
 function getYearRange(year: number) {
