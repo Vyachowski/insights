@@ -4,11 +4,14 @@ import { useDispatch, useSelector } from 'react-redux'
 
 import type { Revenue, Site } from '@insights/contracts'
 
-import { revenueApi } from '@/api/revenue'
 import { sitesApi } from '@/api/sites'
 import { useAuth } from '@/hooks/useAuth'
 import { openImportModal } from '@/store/slices/appSlice'
+import { addRevenue, removeRevenue } from '@/store/slices/revenueSlice'
 import { selectImportTick } from '@/store/selectors/appSelectors'
+import { selectRevenueByYear, selectRevenueError, selectRevenueLoading, selectRevenueYears } from '@/store/selectors/revenueSelectors'
+import { fetchRevenue } from '@/store/thunks/revenueThunks'
+import type { AppDispatch } from '@/store'
 import Button from '@ui/Button'
 import Card from '@ui/Card'
 import YearSelect from '@ui/YearSelect'
@@ -17,19 +20,11 @@ import AddRevenueModal from '../components/AddRevenueModal'
 const PAGE_SIZE = 20
 
 function formatAmount(amount: number) {
-  return new Intl.NumberFormat('ru-RU', {
-    style: 'currency',
-    currency: 'RUB',
-    maximumFractionDigits: 0,
-  }).format(amount)
+  return new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 }).format(amount)
 }
 
 function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString('ru-RU', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  })
+  return new Date(dateStr).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' })
 }
 
 function getSiteName(siteId: number | null, sites: Site[]) {
@@ -39,23 +34,17 @@ function getSiteName(siteId: number | null, sites: Site[]) {
   try { return new URL(site.url).hostname } catch { return site.url }
 }
 
-function getYearRange(year: number) {
-  return {
-    startDate: `${year}-01-01`,
-    endDate: `${year}-12-31`,
-  }
-}
-
 export default function RevenueTab() {
-  const dispatch = useDispatch()
+  const dispatch = useDispatch<AppDispatch>()
   const importTick = useSelector(selectImportTick('revenue'))
   const { user } = useAuth()
   const isAdmin = user?.isAdmin ?? false
 
-  const [allEntries, setAllEntries] = useState<Revenue[]>([])
+  const loading = useSelector(selectRevenueLoading)
+  const error = useSelector(selectRevenueError)
+  const availableYears = useSelector(selectRevenueYears)
+
   const [sites, setSites] = useState<Site[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const [selectedYear, setSelectedYear] = useState<number | null>(null)
   const [page, setPage] = useState(1)
   const [showModal, setShowModal] = useState(false)
@@ -64,30 +53,14 @@ export default function RevenueTab() {
     sitesApi.findAll().then(setSites).catch(() => {})
   }, [])
 
-  function load() {
-    setLoading(true)
-    setError(null)
-    setPage(1)
-    revenueApi.findAll()
-      .then(setAllEntries)
-      .catch(e => setError(e?.message ?? 'Ошибка загрузки'))
-      .finally(() => setLoading(false))
-  }
-
-  useEffect(() => { load() }, [importTick])
-
-  const availableYears = useMemo(() => {
-    const years = [...new Set(allEntries.map(e => new Date(e.date).getFullYear()))]
-    return years.sort((a, b) => b - a)
-  }, [allEntries])
+  useEffect(() => { dispatch(fetchRevenue()) }, [importTick])
 
   useEffect(() => {
     if (availableYears.length > 0) setSelectedYear(prev => prev ?? availableYears[0])
   }, [availableYears])
 
-  const entries = useMemo(
-    () => allEntries.filter(e => new Date(e.date).getFullYear() === selectedYear),
-    [allEntries, selectedYear],
+  const entries = useSelector(
+    useMemo(() => selectedYear !== null ? selectRevenueByYear(selectedYear) : () => [], [selectedYear]),
   )
 
   const sorted = useMemo(
@@ -100,13 +73,9 @@ export default function RevenueTab() {
   const pageEntries = sorted.slice((clampedPage - 1) * PAGE_SIZE, clampedPage * PAGE_SIZE)
   const total = entries.reduce((sum, e) => sum + e.amount, 0)
 
-  function handleDelete(id: number) {
-    setAllEntries(prev => prev.filter(e => e.id !== id))
-  }
-
   function handleAdd(entry: Omit<Revenue, 'id'>) {
     const tempId = -(Date.now() * 1000 + Math.floor(Math.random() * 1000))
-    setAllEntries(prev => [{ ...entry, id: tempId }, ...prev])
+    dispatch(addRevenue({ ...entry, id: tempId }))
   }
 
   return (
@@ -118,12 +87,10 @@ export default function RevenueTab() {
             {loading ? 'Загрузка...' : `${entries.length} записей · итого ${formatAmount(total)}`}
           </p>
         </div>
-
         <div className="flex items-center gap-3">
           {availableYears.length > 0 && selectedYear && (
             <YearSelect value={selectedYear} onChange={setSelectedYear} years={availableYears} />
           )}
-
           <Button size="sm" variant="secondary" onClick={() => dispatch(openImportModal('revenue'))}>
             <Upload size={15} />
             Импорт CSV
@@ -139,7 +106,7 @@ export default function RevenueTab() {
 
       <Card size="sm" className="p-0 overflow-hidden">
         {error ? (
-          <div className="py-16 text-center text-red-400 text-sm">{error}</div>
+          <div className="py-16 text-center text-red-400 text-sm">{error.message}</div>
         ) : (
           <div className="flex flex-col">
             <div className="overflow-auto max-h-[480px]">
@@ -164,9 +131,7 @@ export default function RevenueTab() {
                     ))
                   ) : pageEntries.length === 0 ? (
                     <tr>
-                      <td colSpan={4} className="py-16 text-center text-slate-500 text-sm">
-                        Нет записей за {selectedYear} год
-                      </td>
+                      <td colSpan={4} className="py-16 text-center text-slate-500 text-sm">Нет записей за {selectedYear} год</td>
                     </tr>
                   ) : (
                     pageEntries.map(entry => (
@@ -184,7 +149,7 @@ export default function RevenueTab() {
                         <td className="px-6 py-4 text-right">
                           {isAdmin && (
                             <button
-                              onClick={() => handleDelete(entry.id)}
+                              onClick={() => dispatch(removeRevenue(entry.id))}
                               className="p-1.5 rounded-lg text-slate-600 hover:text-red-400 hover:bg-red-500/10 transition-colors"
                             >
                               <Trash2 size={15} />
@@ -197,52 +162,24 @@ export default function RevenueTab() {
                 </tbody>
               </table>
             </div>
-
             {!loading && totalPages > 1 && (
               <div className="flex items-center justify-between px-6 py-3 border-t border-slate-700/50">
                 <span className="text-xs text-slate-500">
                   {(clampedPage - 1) * PAGE_SIZE + 1}–{Math.min(clampedPage * PAGE_SIZE, sorted.length)} из {sorted.length}
                 </span>
                 <div className="flex items-center gap-1">
-                  <button
-                    onClick={() => setPage(p => Math.max(1, p - 1))}
-                    disabled={clampedPage === 1}
-                    className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                  >
-                    <ChevronLeft size={16} />
-                  </button>
+                  <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={clampedPage === 1} className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"><ChevronLeft size={16} /></button>
                   {Array.from({ length: totalPages }, (_, i) => i + 1)
                     .filter(p => p === 1 || p === totalPages || Math.abs(p - clampedPage) <= 1)
                     .reduce<(number | '...')[]>((acc, p, idx, arr) => {
                       if (idx > 0 && (p as number) - (arr[idx - 1] as number) > 1) acc.push('...')
-                      acc.push(p)
-                      return acc
+                      acc.push(p); return acc
                     }, [])
-                    .map((p, i) =>
-                      p === '...'
-                        ? <span key={`ellipsis-${i}`} className="px-2 text-slate-600 text-sm">…</span>
-                        : (
-                          <button
-                            key={p}
-                            onClick={() => setPage(p as number)}
-                            className={`min-w-[32px] h-8 px-2 rounded-lg text-sm font-medium transition-colors ${
-                              clampedPage === p
-                                ? 'bg-emerald-500/20 text-emerald-400'
-                                : 'text-slate-400 hover:text-white hover:bg-slate-800'
-                            }`}
-                          >
-                            {p}
-                          </button>
-                        ),
-                    )
-                  }
-                  <button
-                    onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                    disabled={clampedPage === totalPages}
-                    className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                  >
-                    <ChevronRight size={16} />
-                  </button>
+                    .map((p, i) => p === '...'
+                      ? <span key={`e${i}`} className="px-2 text-slate-600 text-sm">…</span>
+                      : <button key={p} onClick={() => setPage(p as number)} className={`min-w-[32px] h-8 px-2 rounded-lg text-sm font-medium transition-colors ${clampedPage === p ? 'bg-emerald-500/20 text-emerald-400' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}>{p}</button>
+                    )}
+                  <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={clampedPage === totalPages} className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"><ChevronRight size={16} /></button>
                 </div>
               </div>
             )}

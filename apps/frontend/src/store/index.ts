@@ -3,13 +3,21 @@ import { configureStore } from '@reduxjs/toolkit'
 import { authMiddleware } from './middlewares/authMiddlewares'
 import appSliceReducer from './slices/appSlice'
 import authSliceReducr from './slices/authSlice'
+import callsReducer from './slices/callsSlice'
 import dashboardReducer from './slices/dashboardSlice'
+import expensesReducer from './slices/expensesSlice'
+import metricsReducer from './slices/metricsSlice'
+import revenueReducer from './slices/revenueSlice'
 
 export const store = configureStore({
   reducer: {
     app: appSliceReducer,
     auth: authSliceReducr,
     dashboard: dashboardReducer,
+    expenses: expensesReducer,
+    revenue: revenueReducer,
+    calls: callsReducer,
+    metrics: metricsReducer,
   },
   middleware: getDefaultMiddleware =>
     getDefaultMiddleware().concat(authMiddleware),

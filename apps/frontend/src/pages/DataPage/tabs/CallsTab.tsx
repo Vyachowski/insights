@@ -2,11 +2,11 @@ import { useEffect, useMemo, useState } from 'react'
 import { ChevronLeft, ChevronRight, Upload } from 'lucide-react'
 import { useDispatch, useSelector } from 'react-redux'
 
-import type { CallImport } from '@insights/contracts'
-
-import { callsApi } from '@/api/calls'
 import { openImportModal } from '@/store/slices/appSlice'
 import { selectImportTick } from '@/store/selectors/appSelectors'
+import { selectCallsByYear, selectCallsError, selectCallsLoading, selectCallYears } from '@/store/selectors/callsSelectors'
+import { fetchCalls } from '@/store/thunks/callsThunks'
+import type { AppDispatch } from '@/store'
 import Button from '@ui/Button'
 import Card from '@ui/Card'
 import YearSelect from '@ui/YearSelect'
@@ -18,39 +18,24 @@ function formatDate(dateStr: string) {
 }
 
 export default function CallsTab() {
-  const dispatch = useDispatch()
+  const dispatch = useDispatch<AppDispatch>()
   const importTick = useSelector(selectImportTick('calls'))
 
-  const [allEntries, setAllEntries] = useState<CallImport[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const loading = useSelector(selectCallsLoading)
+  const error = useSelector(selectCallsError)
+  const availableYears = useSelector(selectCallYears)
+
   const [selectedYear, setSelectedYear] = useState<number | null>(null)
   const [page, setPage] = useState(1)
 
-  function load() {
-    setLoading(true)
-    setError(null)
-    setPage(1)
-    callsApi.findImports()
-      .then(setAllEntries)
-      .catch(e => setError(e?.message ?? 'Ошибка загрузки'))
-      .finally(() => setLoading(false))
-  }
-
-  useEffect(() => { load() }, [importTick])
-
-  const availableYears = useMemo(() => {
-    const years = [...new Set(allEntries.map(e => new Date(e.date).getFullYear()))]
-    return years.sort((a, b) => b - a)
-  }, [allEntries])
+  useEffect(() => { dispatch(fetchCalls()) }, [importTick])
 
   useEffect(() => {
     if (availableYears.length > 0) setSelectedYear(prev => prev ?? availableYears[0])
   }, [availableYears])
 
-  const entries = useMemo(
-    () => allEntries.filter(e => new Date(e.date).getFullYear() === selectedYear),
-    [allEntries, selectedYear],
+  const entries = useSelector(
+    useMemo(() => selectedYear !== null ? selectCallsByYear(selectedYear) : () => [], [selectedYear]),
   )
 
   const sorted = useMemo(
@@ -84,7 +69,7 @@ export default function CallsTab() {
 
       <Card size="sm" className="p-0 overflow-hidden">
         {error ? (
-          <div className="py-16 text-center text-red-400 text-sm">{error}</div>
+          <div className="py-16 text-center text-red-400 text-sm">{error.message}</div>
         ) : (
           <div className="flex flex-col">
             <div className="overflow-auto max-h-[480px]">

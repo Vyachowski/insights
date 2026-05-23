@@ -2,12 +2,15 @@ import { useEffect, useMemo, useState } from 'react'
 import { ChevronLeft, ChevronRight, Upload } from 'lucide-react'
 import { useDispatch, useSelector } from 'react-redux'
 
-import type { Expense, Site } from '@insights/contracts'
+import type { Site } from '@insights/contracts'
 
-import { expensesApi } from '@/api/expenses'
 import { sitesApi } from '@/api/sites'
 import { openImportModal } from '@/store/slices/appSlice'
 import { selectImportTick } from '@/store/selectors/appSelectors'
+import { selectExpensesError, selectExpensesLoading, selectExpenseYears } from '@/store/selectors/expensesSelectors'
+import { selectExpensesByYear } from '@/store/selectors/expensesSelectors'
+import { fetchExpenses } from '@/store/thunks/expensesThunks'
+import type { AppDispatch } from '@/store'
 import Button from '@ui/Button'
 import Card from '@ui/Card'
 import YearSelect from '@ui/YearSelect'
@@ -27,13 +30,13 @@ function getHostname(url: string) {
 }
 
 export default function ExpensesTab() {
-  const dispatch = useDispatch()
+  const dispatch = useDispatch<AppDispatch>()
   const importTick = useSelector(selectImportTick('expenses'))
+  const loading = useSelector(selectExpensesLoading)
+  const error = useSelector(selectExpensesError)
+  const availableYears = useSelector(selectExpenseYears)
 
-  const [allEntries, setAllEntries] = useState<Expense[]>([])
   const [sites, setSites] = useState<Site[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const [selectedYear, setSelectedYear] = useState<number | null>(null)
   const [page, setPage] = useState(1)
 
@@ -41,30 +44,14 @@ export default function ExpensesTab() {
     sitesApi.findAll().then(setSites).catch(() => {})
   }, [])
 
-  function load() {
-    setLoading(true)
-    setError(null)
-    setPage(1)
-    expensesApi.findAll()
-      .then(setAllEntries)
-      .catch(e => setError(e?.message ?? 'Ошибка загрузки'))
-      .finally(() => setLoading(false))
-  }
-
-  useEffect(() => { load() }, [importTick])
-
-  const availableYears = useMemo(() => {
-    const years = [...new Set(allEntries.map(e => new Date(e.date).getFullYear()))]
-    return years.sort((a, b) => b - a)
-  }, [allEntries])
+  useEffect(() => { dispatch(fetchExpenses()) }, [importTick])
 
   useEffect(() => {
     if (availableYears.length > 0) setSelectedYear(prev => prev ?? availableYears[0])
   }, [availableYears])
 
-  const entries = useMemo(
-    () => allEntries.filter(e => new Date(e.date).getFullYear() === selectedYear),
-    [allEntries, selectedYear],
+  const entries = useSelector(
+    useMemo(() => selectedYear !== null ? selectExpensesByYear(selectedYear) : () => [], [selectedYear]),
   )
 
   const sorted = useMemo(
@@ -106,7 +93,7 @@ export default function ExpensesTab() {
 
       <Card size="sm" className="p-0 overflow-hidden">
         {error ? (
-          <div className="py-16 text-center text-red-400 text-sm">{error}</div>
+          <div className="py-16 text-center text-red-400 text-sm">{error.message}</div>
         ) : (
           <div className="flex flex-col">
             <div className="overflow-auto max-h-[480px]">
