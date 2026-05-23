@@ -1,11 +1,11 @@
 import { AnalyticsQueryDto } from '@/common/dto/analytics-query.dto';
 import { PrismaService } from '@/database/prisma.service';
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { parse } from 'csv-parse/sync';
 
 @Injectable()
 export class ExpensesService {
-  constructor(private readonly prismaService: PrismaService) {}
+constructor(private readonly prismaService: PrismaService) {}
 
   async getExpensesForPeriod(startDate: Date, endDate: Date) {
     const aggregation = await this.prismaService.expense.aggregate({
@@ -39,7 +39,7 @@ export class ExpensesService {
 
   async importFromCsv(buffer: Buffer): Promise<{ created: number; skipped: number }> {
     const rows: { date: string; type: string; siteId: string; amount: string }[] =
-      parse(buffer, { columns: true, skip_empty_lines: true, trim: true });
+      parse(buffer, { columns: true, skip_empty_lines: true, trim: true, bom: true });
 
     let created = 0;
     let skipped = 0;
@@ -50,7 +50,10 @@ export class ExpensesService {
       const amount = parseFloat(row.amount);
       const type = row.type?.trim();
 
-      if (!type || isNaN(amount) || isNaN(date.getTime())) { skipped++; continue; }
+      if (!type || isNaN(amount) || isNaN(date.getTime())) {
+        skipped++;
+        continue;
+      }
 
       try {
         const existing = await this.prismaService.expense.findFirst({
@@ -66,7 +69,13 @@ export class ExpensesService {
         skipped++;
       }
     }
-
     return { created, skipped };
+  }
+
+  async importFromUrl(url: string): Promise<{ created: number; skipped: number }> {
+    const res = await fetch(url);
+    if (!res.ok) throw new BadRequestException(`Failed to fetch URL: ${res.status}`);
+    const buffer = Buffer.from(await res.arrayBuffer());
+    return this.importFromCsv(buffer);
   }
 }

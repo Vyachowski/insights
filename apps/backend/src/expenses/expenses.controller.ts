@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Query, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBody, ApiCookieAuth, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ExpensesService } from './expenses.service';
 import { AnalyticsQueryDto } from '@/common/dto/analytics-query.dto';
+import { ImportUrlDto } from '@/common/dto/import-url.dto';
 import { AdminGuard } from '@/common/guards/admin.guard';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { ApiWrappedResponse } from '@/common/decorators/api-wrapped-response.decorator';
@@ -31,5 +32,12 @@ export class ExpensesController {
   @Post('import')
   importCsv(@UploadedFile() file: Express.Multer.File) {
     return this.expensesService.importFromCsv(file.buffer);
+  }
+
+  @ApiOperation({ summary: 'Import expenses from URL pointing to a CSV file' })
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @Post('import-url')
+  importUrl(@Body() body: ImportUrlDto) {
+    return this.expensesService.importFromUrl(body.url);
   }
 }
