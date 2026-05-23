@@ -119,7 +119,11 @@ export default function CsvImportModal({ config, onClose }: Props) {
           {result && (
             <div className="flex items-center gap-2 text-sm text-emerald-400">
               <CheckCircle size={15} />
-              +{result.created} загружено{result.skipped > 0 ? `, ${result.skipped} пропущено` : ''}
+              {[
+                result.created > 0 && `+${result.created} создано`,
+                result.updated != null && result.updated > 0 && `${result.updated} обновлено`,
+                result.skipped > 0 && `${result.skipped} пропущено`,
+              ].filter(Boolean).join(', ') || 'Без изменений'}
             </div>
           )}
           {error && (
