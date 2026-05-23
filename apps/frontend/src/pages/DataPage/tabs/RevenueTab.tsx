@@ -5,6 +5,7 @@ import type { Revenue, Site } from '@insights/contracts'
 
 import { revenueApi } from '@/api/revenue'
 import { sitesApi } from '@/api/sites'
+import { useAuth } from '@/hooks/useAuth'
 import Button from '@ui/Button'
 import Card from '@ui/Card'
 import AddRevenueModal from '../components/AddRevenueModal'
@@ -43,6 +44,9 @@ function getYearRange(year: number) {
 export default function RevenueTab() {
   const currentYear = new Date().getFullYear()
   const yearOptions = [currentYear - 2, currentYear - 1, currentYear]
+
+  const { user } = useAuth()
+  const isAdmin = user?.isAdmin ?? false
 
   const [entries, setEntries] = useState<Revenue[]>([])
   const [sites, setSites] = useState<Site[]>([])
@@ -127,10 +131,12 @@ export default function RevenueTab() {
             ))}
           </div>
 
-          <Button size="sm" onClick={() => setShowModal(true)}>
-            <Plus size={16} />
-            Добавить
-          </Button>
+          {isAdmin && (
+            <Button size="sm" onClick={() => setShowModal(true)}>
+              <Plus size={16} />
+              Добавить
+            </Button>
+          )}
         </div>
       </div>
 
@@ -179,12 +185,14 @@ export default function RevenueTab() {
                           <span className="text-emerald-400 font-semibold tabular-nums">{formatAmount(entry.amount)}</span>
                         </td>
                         <td className="px-6 py-4 text-right">
-                          <button
-                            onClick={() => handleDelete(entry.id)}
-                            className="p-1.5 rounded-lg text-slate-600 hover:text-red-400 hover:bg-red-500/10 transition-colors"
-                          >
-                            <Trash2 size={15} />
-                          </button>
+                          {isAdmin && (
+                            <button
+                              onClick={() => handleDelete(entry.id)}
+                              className="p-1.5 rounded-lg text-slate-600 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                            >
+                              <Trash2 size={15} />
+                            </button>
+                          )}
                         </td>
                       </tr>
                     ))
@@ -245,7 +253,7 @@ export default function RevenueTab() {
         )}
       </Card>
 
-      {showModal && (
+      {isAdmin && showModal && (
         <AddRevenueModal onClose={() => setShowModal(false)} onAdd={handleAdd} sites={sites} />
       )}
     </div>
