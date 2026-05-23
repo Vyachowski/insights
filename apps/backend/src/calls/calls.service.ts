@@ -50,6 +50,19 @@ export class CallsService {
     });
   }
 
+  findImports({ siteId, startDate, endDate }: AnalyticsQueryDto) {
+    return this.prismaService.callImport.findMany({
+      where: {
+        siteId,
+        date: {
+          gte: startDate ? new Date(startDate) : undefined,
+          lte: endDate ? new Date(endDate) : undefined,
+        },
+      },
+      orderBy: { date: 'desc' },
+    });
+  }
+
   async importFromCsv(buffer: Buffer): Promise<{ created: number; skipped: number }> {
     const rows: Record<string, string>[] = parse(buffer, {
       columns: true,
