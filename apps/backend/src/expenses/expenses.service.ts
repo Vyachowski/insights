@@ -1,6 +1,7 @@
 import { AnalyticsQueryDto } from '@/common/dto/analytics-query.dto';
 import { PrismaService } from '@/database/prisma.service';
 import { Injectable } from '@nestjs/common';
+import { parse } from 'csv-parse/sync';
 
 @Injectable()
 export class ExpensesService {
@@ -34,5 +35,38 @@ export class ExpensesService {
         },
       },
     });
+  }
+
+  async importFromCsv(buffer: Buffer): Promise<{ created: number; skipped: number }> {
+    const rows: { date: string; type: string; siteId: string; amount: string }[] =
+      parse(buffer, { columns: true, skip_empty_lines: true, trim: true });
+
+    let created = 0;
+    let skipped = 0;
+
+    for (const row of rows) {
+      const date = new Date(row.date);
+      const siteId = row.siteId ? Number(row.siteId) : null;
+      const amount = parseFloat(row.amount);
+      const type = row.type?.trim();
+
+      if (!type || isNaN(amount) || isNaN(date.getTime())) { skipped++; continue; }
+
+      try {
+        const existing = await this.prismaService.expense.findFirst({
+          where: { date, siteId, type },
+        });
+        if (existing) {
+          await this.prismaService.expense.update({ where: { id: existing.id }, data: { amount } });
+        } else {
+          await this.prismaService.expense.create({ data: { date, siteId, amount, type } });
+        }
+        created++;
+      } catch {
+        skipped++;
+      }
+    }
+
+    return { created, skipped };
   }
 }
