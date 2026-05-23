@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/useAuth'
 import Button from '@ui/Button'
 import Card from '@ui/Card'
 import AddRevenueModal from '../components/AddRevenueModal'
+import CsvImportButton from '../components/CsvImportButton'
 
 const PAGE_SIZE = 20
 
@@ -62,29 +63,18 @@ export default function RevenueTab() {
     sitesApi.findAll().then(setSites).catch(() => {})
   }, [])
 
-  useEffect(() => {
-    let cancelled = false
+  function load() {
     setLoading(true)
     setError(null)
     setPage(1)
-
     const { startDate, endDate } = getYearRange(selectedYear)
-
     revenueApi.findAll(startDate, endDate)
-      .then(revenue => {
-        if (cancelled) return
-        setEntries(revenue)
-      })
-      .catch(e => {
-        if (cancelled) return
-        setError(e?.message ?? 'Ошибка загрузки')
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false)
-      })
+      .then(setEntries)
+      .catch(e => setError(e?.message ?? 'Ошибка загрузки'))
+      .finally(() => setLoading(false))
+  }
 
-    return () => { cancelled = true }
-  }, [selectedYear])
+  useEffect(() => { load() }, [selectedYear])
 
   const sorted = useMemo(
     () => [...entries].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
@@ -132,6 +122,7 @@ export default function RevenueTab() {
             ))}
           </div>
 
+          <CsvImportButton onImport={revenueApi.importCsv} onSuccess={load} label="Импорт CSV" />
           {isAdmin && (
             <Button size="sm" onClick={() => setShowModal(true)}>
               <Plus size={16} />

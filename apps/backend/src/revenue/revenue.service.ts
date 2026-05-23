@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@/database/prisma.service';
 import { AnalyticsQueryDto } from '@/common/dto/analytics-query.dto';
+import { parse } from 'csv-parse/sync';
 
 @Injectable()
 export class RevenueService {
@@ -34,6 +35,40 @@ export class RevenueService {
         },
       },
     });
+  }
+
+  async importFromCsv(buffer: Buffer): Promise<{ created: number; skipped: number }> {
+    const rows: Record<string, string>[] = parse(buffer, {
+      columns: true,
+      skip_empty_lines: true,
+      trim: true,
+      bom: true,
+    });
+
+    let created = 0;
+    let skipped = 0;
+
+    for (const row of rows) {
+      const date = row['date'] ? new Date(row['date']) : null;
+      const amount = Number(row['amount']);
+      if (!date || isNaN(date.getTime()) || isNaN(amount)) { skipped++; continue; }
+
+      const siteId = row['siteId'] ? Number(row['siteId']) : null;
+      if (siteId !== null && isNaN(siteId)) { skipped++; continue; }
+
+      const existing = await this.prismaService.revenue.findFirst({
+        where: { date, siteId },
+      });
+
+      if (existing) {
+        await this.prismaService.revenue.update({ where: { id: existing.id }, data: { amount } });
+      } else {
+        await this.prismaService.revenue.create({ data: { date, siteId, amount } });
+      }
+      created++;
+    }
+
+    return { created, skipped };
   }
 
   async getRevenueGroupedByCity(startDate: Date, endDate: Date) {
