@@ -4,7 +4,7 @@ import axiosInstance from '@/lib/axios'
 import { parseApiError } from '@/lib/parseApiError'
 
 export const metricsApi = {
-  findAll: async (startDate: string, endDate: string): Promise<SiteMetric[]> => {
+  findAll: async (startDate?: string, endDate?: string): Promise<SiteMetric[]> => {
     try {
       const { data: res } = await axiosInstance.get<ApiSuccess<SiteMetric[]>>('/metrics', {
         params: { startDate, endDate },

@@ -18,28 +18,40 @@ function formatDate(dateStr: string) {
 }
 
 export default function CallsTab() {
-  const currentYear = new Date().getFullYear()
-
   const dispatch = useDispatch()
   const importTick = useSelector(selectImportTick('calls'))
 
-  const [entries, setEntries] = useState<CallImport[]>([])
+  const [allEntries, setAllEntries] = useState<CallImport[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [selectedYear, setSelectedYear] = useState(currentYear)
+  const [selectedYear, setSelectedYear] = useState<number | null>(null)
   const [page, setPage] = useState(1)
 
   function load() {
     setLoading(true)
     setError(null)
     setPage(1)
-    callsApi.findImports(`${selectedYear}-01-01`, `${selectedYear}-12-31`)
-      .then(setEntries)
+    callsApi.findImports()
+      .then(setAllEntries)
       .catch(e => setError(e?.message ?? 'Ошибка загрузки'))
       .finally(() => setLoading(false))
   }
 
-  useEffect(() => { load() }, [selectedYear, importTick])
+  useEffect(() => { load() }, [importTick])
+
+  const availableYears = useMemo(() => {
+    const years = [...new Set(allEntries.map(e => new Date(e.date).getFullYear()))]
+    return years.sort((a, b) => b - a)
+  }, [allEntries])
+
+  useEffect(() => {
+    if (availableYears.length > 0) setSelectedYear(prev => prev ?? availableYears[0])
+  }, [availableYears])
+
+  const entries = useMemo(
+    () => allEntries.filter(e => new Date(e.date).getFullYear() === selectedYear),
+    [allEntries, selectedYear],
+  )
 
   const sorted = useMemo(
     () => [...entries].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
@@ -60,7 +72,9 @@ export default function CallsTab() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <YearSelect value={selectedYear} onChange={setSelectedYear} />
+          {availableYears.length > 0 && selectedYear && (
+            <YearSelect value={selectedYear} onChange={setSelectedYear} years={availableYears} />
+          )}
           <Button size="sm" variant="secondary" onClick={() => dispatch(openImportModal('calls'))}>
             <Upload size={15} />
             Импорт CSV
