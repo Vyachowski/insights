@@ -25,4 +25,13 @@ export const callsApi = {
       throw parseApiError(e)
     }
   },
+
+  importUrl: async (url: string): Promise<ImportResult> => {
+    try {
+      const { data: res } = await axiosInstance.post<ApiSuccess<ImportResult>>('/calls/import-url', { url })
+      return res.data
+    } catch (e) {
+      throw parseApiError(e)
+    }
+  },
 }

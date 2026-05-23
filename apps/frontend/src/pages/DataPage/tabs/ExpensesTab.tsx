@@ -1,12 +1,15 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Upload } from 'lucide-react'
+import { useDispatch, useSelector } from 'react-redux'
 
 import type { Expense, Site } from '@insights/contracts'
 
 import { expensesApi } from '@/api/expenses'
 import { sitesApi } from '@/api/sites'
+import { openImportModal } from '@/store/slices/appSlice'
+import { selectImportTick } from '@/store/selectors/appSelectors'
+import Button from '@ui/Button'
 import Card from '@ui/Card'
-import CsvImportButton from '../components/CsvImportButton'
 
 const PAGE_SIZE = 20
 
@@ -25,6 +28,9 @@ function getHostname(url: string) {
 export default function ExpensesTab() {
   const currentYear = new Date().getFullYear()
   const yearOptions = [currentYear - 2, currentYear - 1, currentYear]
+
+  const dispatch = useDispatch()
+  const importTick = useSelector(selectImportTick('expenses'))
 
   const [entries, setEntries] = useState<Expense[]>([])
   const [sites, setSites] = useState<Site[]>([])
@@ -47,7 +53,7 @@ export default function ExpensesTab() {
       .finally(() => setLoading(false))
   }
 
-  useEffect(() => { load() }, [selectedYear])
+  useEffect(() => { load() }, [selectedYear, importTick])
 
   const sorted = useMemo(
     () => [...entries].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
@@ -87,7 +93,10 @@ export default function ExpensesTab() {
               </button>
             ))}
           </div>
-          <CsvImportButton onImport={expensesApi.importCsv} onSuccess={load} label="Импорт CSV" />
+          <Button size="sm" variant="secondary" onClick={() => dispatch(openImportModal('expenses'))}>
+            <Upload size={15} />
+            Импорт CSV
+          </Button>
         </div>
       </div>
 

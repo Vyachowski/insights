@@ -1,15 +1,17 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ChevronLeft, ChevronRight, Plus, Trash2 } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus, Trash2, Upload } from 'lucide-react'
+import { useDispatch, useSelector } from 'react-redux'
 
 import type { Revenue, Site } from '@insights/contracts'
 
 import { revenueApi } from '@/api/revenue'
 import { sitesApi } from '@/api/sites'
 import { useAuth } from '@/hooks/useAuth'
+import { openImportModal } from '@/store/slices/appSlice'
+import { selectImportTick } from '@/store/selectors/appSelectors'
 import Button from '@ui/Button'
 import Card from '@ui/Card'
 import AddRevenueModal from '../components/AddRevenueModal'
-import CsvImportButton from '../components/CsvImportButton'
 
 const PAGE_SIZE = 20
 
@@ -47,6 +49,8 @@ export default function RevenueTab() {
   const currentYear = new Date().getFullYear()
   const yearOptions = [currentYear - 2, currentYear - 1, currentYear]
 
+  const dispatch = useDispatch()
+  const importTick = useSelector(selectImportTick('revenue'))
   const { user } = useAuth()
   const isAdmin = user?.isAdmin ?? false
 
@@ -74,7 +78,7 @@ export default function RevenueTab() {
       .finally(() => setLoading(false))
   }
 
-  useEffect(() => { load() }, [selectedYear])
+  useEffect(() => { load() }, [selectedYear, importTick])
 
   const sorted = useMemo(
     () => [...entries].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
@@ -122,7 +126,10 @@ export default function RevenueTab() {
             ))}
           </div>
 
-          <CsvImportButton onImport={revenueApi.importCsv} onSuccess={load} label="Импорт CSV" />
+          <Button size="sm" variant="secondary" onClick={() => dispatch(openImportModal('revenue'))}>
+            <Upload size={15} />
+            Импорт CSV
+          </Button>
           {isAdmin && (
             <Button size="sm" onClick={() => setShowModal(true)}>
               <Plus size={16} />

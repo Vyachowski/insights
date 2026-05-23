@@ -2,6 +2,7 @@ import Header from '@ui/Header'
 import { useState } from 'react'
 import { Outlet, useLocation } from 'react-router'
 
+import ModalManager from '@/components/ModalManager'
 import Sidebar from '@/layouts/MainLayout/_components/Sidebar'
 import { menuItems } from '@/navigation'
 
@@ -39,6 +40,8 @@ export default function MainLayout() {
           <Outlet context={activePageId} />
         </main>
       </div>
+
+      <ModalManager />
     </div>
   )
 }

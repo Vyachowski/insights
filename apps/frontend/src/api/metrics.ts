@@ -25,4 +25,13 @@ export const metricsApi = {
       throw parseApiError(e)
     }
   },
+
+  importUrl: async (url: string): Promise<ImportResult> => {
+    try {
+      const { data: res } = await axiosInstance.post<ApiSuccess<ImportResult>>('/metrics/import-url', { url })
+      return res.data
+    } catch (e) {
+      throw parseApiError(e)
+    }
+  },
 }
