@@ -70,7 +70,7 @@ export default function AddRevenueModal({ sites, onClose, onAdd }: AddRevenueMod
               <option value="">Общий (компания)</option>
               {sites.map(site => (
                 <option key={site.id} value={site.id}>
-                  {site.name ?? site.url}
+                  {new URL(site.url).hostname}
                 </option>
               ))}
             </select>
