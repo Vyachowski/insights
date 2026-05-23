@@ -1,5 +1,7 @@
 import { useCallback } from 'react'
 
+import type { LoginRequest } from '@insights/contracts'
+
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import {
   selectUser,
@@ -10,7 +12,6 @@ import {
 } from '@/store/selectors/authSelectors'
 import { clearError } from '@/store/slices/authSlice'
 import { fetchLogin, fetchLogout, fetchMe } from '@/store/thunks/authThunks'
-import type { LoginRequest } from '@insights/contracts'
 
 export function useAuth() {
   const dispatch = useAppDispatch()
