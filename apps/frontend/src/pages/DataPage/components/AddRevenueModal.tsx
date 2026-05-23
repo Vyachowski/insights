@@ -1,16 +1,18 @@
 import { useState } from 'react'
 import { X } from 'lucide-react'
 
+import type { Revenue, Site } from '@insights/contracts'
+
 import Button from '@ui/Button'
 import Input from '@ui/Input'
-import { mockSites, type RevenueEntry } from '../mock/data'
 
 interface AddRevenueModalProps {
+  sites: Site[]
   onClose: () => void
-  onAdd: (entry: Omit<RevenueEntry, 'id'>) => void
+  onAdd: (entry: Omit<Revenue, 'id'>) => void
 }
 
-export default function AddRevenueModal({ onClose, onAdd }: AddRevenueModalProps) {
+export default function AddRevenueModal({ sites, onClose, onAdd }: AddRevenueModalProps) {
   const [date, setDate] = useState('')
   const [siteId, setSiteId] = useState<string>('')
   const [amount, setAmount] = useState('')
@@ -66,9 +68,9 @@ export default function AddRevenueModal({ onClose, onAdd }: AddRevenueModalProps
               className="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200"
             >
               <option value="">Общий (компания)</option>
-              {mockSites.map(site => (
+              {sites.map(site => (
                 <option key={site.id} value={site.id}>
-                  {site.name} — {site.city}
+                  {site.name ?? site.url}
                 </option>
               ))}
             </select>
