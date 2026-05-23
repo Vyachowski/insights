@@ -1,6 +1,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit'
 
-import { authApi, type LoginRequest } from '../../api/auth'
+import { authApi } from '../../api/auth'
+import type { LoginRequest } from '@insights/contracts/auth.types'
 
 export const fetchLogin = createAsyncThunk(
   'auth/login',
