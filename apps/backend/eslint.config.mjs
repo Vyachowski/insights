@@ -1,5 +1,6 @@
 // @ts-check
 import eslint from '@eslint/js';
+
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
@@ -26,6 +27,7 @@ export default tseslint.config(
   },
   {
     rules: {
+      'max-lines-per-function': ['warn', 25],
       '@typescript-eslint/no-unused-vars': [
         'warn',
         {
