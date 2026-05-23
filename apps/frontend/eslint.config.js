@@ -13,6 +13,7 @@ import tseslint from 'typescript-eslint'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
+
 export default defineConfig([
   globalIgnores(['dist', 'build', 'node_modules', '.next', 'coverage']),
   {
@@ -109,6 +110,7 @@ export default defineConfig([
       // ============================================
       // ОБЩИЕ ПРАВИЛА
       // ============================================
+      'max-lines-per-function': ['warn', 25],
       'no-console': ['warn', { allow: ['warn', 'error'] }],
       'prefer-const': 'error',
       'no-var': 'error',
