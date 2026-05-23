@@ -18,10 +18,13 @@ interface Props {
 
 export default function CsvImportModal({ config, onClose }: Props) {
   const [url, setUrl] = useState('')
+  const [file, setFile] = useState<File | null>(null)
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<ImportResult | null>(null)
   const [error, setError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const canSubmit = !loading && (url.trim().length > 0 || file !== null)
 
   async function run(action: () => Promise<ImportResult>) {
     setLoading(true)
@@ -39,17 +42,23 @@ export default function CsvImportModal({ config, onClose }: Props) {
   }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
-    run(() => config.onImportFile(file)).then(() => {
-      if (fileInputRef.current) fileInputRef.current.value = ''
-    })
+    const picked = e.target.files?.[0]
+    if (!picked) return
+    setFile(picked)
+    setUrl('')
   }
 
-  function handleUrlSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!url.trim()) return
-    run(() => config.onImportUrl(url.trim()))
+    if (!canSubmit) return
+    if (file) {
+      run(() => config.onImportFile(file)).then(() => {
+        setFile(null)
+        if (fileInputRef.current) fileInputRef.current.value = ''
+      })
+    } else {
+      run(() => config.onImportUrl(url.trim()))
+    }
   }
 
   return (
@@ -64,21 +73,16 @@ export default function CsvImportModal({ config, onClose }: Props) {
           </button>
         </div>
 
-        <div className="px-6 py-5 flex flex-col gap-4">
+        <form onSubmit={handleSubmit} className="px-6 py-5 flex flex-col gap-4">
           {/* URL input */}
-          <form onSubmit={handleUrlSubmit} className="flex gap-2">
-            <input
-              type="url"
-              placeholder="Вставьте ссылку на .csv файл"
-              value={url}
-              onChange={e => setUrl(e.target.value)}
-              disabled={loading}
-              className="flex-1 px-4 py-2.5 rounded-xl bg-slate-800/50 border border-slate-700 text-white placeholder:text-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
-            />
-            <Button type="submit" size="sm" isLoading={loading} disabled={!url.trim()}>
-              Загрузить
-            </Button>
-          </form>
+          <input
+            type="url"
+            placeholder="Вставьте ссылку на .csv файл"
+            value={url}
+            onChange={e => { setUrl(e.target.value); setFile(null) }}
+            disabled={loading}
+            className="w-full px-4 py-2.5 rounded-xl bg-slate-800/50 border border-slate-700 text-white placeholder:text-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all disabled:opacity-50"
+          />
 
           {/* Divider */}
           <div className="flex items-center gap-3">
@@ -90,12 +94,20 @@ export default function CsvImportModal({ config, onClose }: Props) {
           {/* File drop area */}
           <div
             onClick={() => !loading && fileInputRef.current?.click()}
-            className="w-full border-2 border-dashed border-slate-700 hover:border-emerald-500/50 rounded-xl p-8 flex flex-col items-center gap-3 cursor-pointer transition-colors group"
+            className={`w-full border-2 border-dashed rounded-xl p-7 flex flex-col items-center gap-2 cursor-pointer transition-colors group ${
+              file
+                ? 'border-emerald-500/50 bg-emerald-500/5'
+                : 'border-slate-700 hover:border-emerald-500/50'
+            }`}
           >
-            <Upload size={26} className="text-slate-500 group-hover:text-emerald-400 transition-colors" />
-            <p className="text-slate-400 text-sm text-center">
-              Нажмите чтобы выбрать <span className="text-emerald-400">.csv</span> файл
-            </p>
+            <Upload size={24} className={`transition-colors ${file ? 'text-emerald-400' : 'text-slate-500 group-hover:text-emerald-400'}`} />
+            {file ? (
+              <p className="text-sm text-emerald-400 font-medium truncate max-w-full px-2">{file.name}</p>
+            ) : (
+              <p className="text-slate-400 text-sm text-center">
+                Нажмите чтобы выбрать <span className="text-emerald-400">.csv</span> файл
+              </p>
+            )}
           </div>
           <input ref={fileInputRef} type="file" accept=".csv" className="hidden" onChange={handleFileChange} />
 
@@ -112,7 +124,12 @@ export default function CsvImportModal({ config, onClose }: Props) {
               {error}
             </div>
           )}
-        </div>
+
+          <Button type="submit" isLoading={loading} disabled={!canSubmit}>
+            <Upload size={15} />
+            Загрузить
+          </Button>
+        </form>
       </div>
     </div>
   )
