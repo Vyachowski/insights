@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "dev": "prisma generate && concurrently \"prisma generate --watch\" \"npm run start:dev\"",
+    "dev": "prisma generate && npm run start:dev",
     "dev:up": "docker compose --env-file .env.dev -f docker-compose.dev.yml up -d",
     "dev:down": "docker compose --env-file .env.dev -f docker-compose.dev.yml down",
     "dev:reset": "docker compose --env-file .env.dev -f docker-compose.dev.yml down -v",
@@ -26,7 +26,7 @@
     "prisma:studio": "prisma studio",
     "prisma:migrate": "prisma migrate dev",
     "prisma:seed": "prisma db seed",
-    "prisma:reset": "prisma migrate reset --force"
+    "prisma:reset": "prisma migrate reset --force && prisma generate"
   },
   "dependencies": {
     "@insights/contracts": "*",
