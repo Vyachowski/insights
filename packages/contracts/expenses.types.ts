@@ -7,6 +7,11 @@ export interface Expense {
   comment: string | null
 }
 
+export interface ImportResult {
+  created: number
+  skipped: number
+}
+
 export interface CreateExpenseRequest {
   siteId?: number | null
   date: string
