@@ -12,7 +12,9 @@ import { DashboardResponseDto } from './dto/response-dashboard.dto';
 export class DashboardController {
   constructor(private readonly dashboardService: DashboardService) {}
 
-  @ApiOperation({ summary: 'Get dashboard summary with weekly, monthly, and yearly analytics' })
+  @ApiOperation({
+    summary: 'Get dashboard summary with weekly, monthly, and yearly analytics',
+  })
   @ApiWrappedResponse(DashboardResponseDto)
   @Get('summary')
   getDashboard() {

@@ -30,7 +30,9 @@ export class AuthController {
     private prismaService: PrismaService,
   ) {}
 
-  @ApiOperation({ summary: 'Login with email/password, sets access_token cookie' })
+  @ApiOperation({
+    summary: 'Login with email/password, sets access_token cookie',
+  })
   @ApiBody({ type: LoginRequestDto })
   @ApiWrappedResponse(UserResponseDto)
   @UseGuards(LocalAuthGuard)
