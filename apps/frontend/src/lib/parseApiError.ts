@@ -1,4 +1,5 @@
 import { AxiosError } from 'axios'
+
 import type { ApiError, ApiFailure } from '@insights/contracts'
 
 export function parseApiError(error: unknown): ApiError {

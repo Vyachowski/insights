@@ -1,8 +1,9 @@
 import { createSlice } from '@reduxjs/toolkit'
-import type { ApiError } from '@insights/contracts'
-import type { User } from '@insights/contracts/auth.types'
 
 import { fetchLogin, fetchLogout, fetchMe } from '../thunks/authThunks'
+
+import type { ApiError } from '@insights/contracts'
+import type { User } from '@insights/contracts/auth.types'
 
 export interface AuthState {
   user: User | null

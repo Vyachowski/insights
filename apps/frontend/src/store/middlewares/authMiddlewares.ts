@@ -1,7 +1,7 @@
-import type { Middleware } from '@reduxjs/toolkit'
-import type { ApiError } from '@insights/contracts'
-
 import { resetAuth } from '../slices/authSlice'
+
+import type { ApiError } from '@insights/contracts'
+import type { Middleware } from '@reduxjs/toolkit'
 
 const isUnauthorizedError = (action: unknown): boolean => {
   return (
