@@ -1,13 +1,10 @@
 interface Props {
   value: number
   onChange: (year: number) => void
-  startYear?: number
+  years: number[]
 }
 
-export default function YearSelect({ value, onChange, startYear = 2020 }: Props) {
-  const currentYear = new Date().getFullYear()
-  const years = Array.from({ length: currentYear - startYear + 1 }, (_, i) => currentYear - i)
-
+export default function YearSelect({ value, onChange, years }: Props) {
   return (
     <select
       value={value}

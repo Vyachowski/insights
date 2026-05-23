@@ -4,7 +4,7 @@ import axiosInstance from '@/lib/axios'
 import { parseApiError } from '@/lib/parseApiError'
 
 export const callsApi = {
-  findImports: async (startDate: string, endDate: string): Promise<CallImport[]> => {
+  findImports: async (startDate?: string, endDate?: string): Promise<CallImport[]> => {
     try {
       const { data: res } = await axiosInstance.get<ApiSuccess<CallImport[]>>('/calls/imports', {
         params: { startDate, endDate },

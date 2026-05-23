@@ -4,7 +4,7 @@ import axiosInstance from '@/lib/axios'
 import { parseApiError } from '@/lib/parseApiError'
 
 export const expensesApi = {
-  findAll: async (startDate: string, endDate: string): Promise<Expense[]> => {
+  findAll: async (startDate?: string, endDate?: string): Promise<Expense[]> => {
     try {
       const { data: res } = await axiosInstance.get<ApiSuccess<Expense[]>>('/expenses', {
         params: { startDate, endDate },
