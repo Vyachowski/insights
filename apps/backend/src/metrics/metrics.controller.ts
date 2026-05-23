@@ -1,7 +1,9 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
-import { ApiCookieAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Controller, Get, Post, Query, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiBody, ApiCookieAuth, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { MetricsService } from './metrics.service';
 import { AnalyticsQueryDto } from '@/common/dto/analytics-query.dto';
+import { AdminGuard } from '@/common/guards/admin.guard';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { ApiWrappedResponse } from '@/common/decorators/api-wrapped-response.decorator';
 import { MetricResponseDto } from './dto/metric-response.dto';
@@ -19,5 +21,15 @@ export class MetricsController {
   async findAll(@Query() query: AnalyticsQueryDto) {
     const metrics = await this.metricsService.findAll(query);
     return metrics.map((m) => new MetricResponseDto(m));
+  }
+
+  @ApiOperation({ summary: 'Import site metrics from CSV (columns: siteId,date,yandexUsers,...)' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({ schema: { type: 'object', properties: { file: { type: 'string', format: 'binary' } } } })
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @UseInterceptors(FileInterceptor('file'))
+  @Post('import')
+  importCsv(@UploadedFile() file: Express.Multer.File) {
+    return this.metricsService.importFromCsv(file.buffer);
   }
 }
