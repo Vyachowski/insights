@@ -1,15 +1,15 @@
 import { createSlice } from '@reduxjs/toolkit'
+import type { ApiError } from '@insights/contracts'
+import type { User } from '@insights/contracts/auth.types'
 
 import { fetchLogin, fetchLogout, fetchMe } from '../thunks/authThunks'
-
-import type { User } from '../../api/auth'
 
 export interface AuthState {
   user: User | null
   isAuthenticated: boolean
   isLoading: boolean
   isInitial: boolean
-  error: string | null
+  error: ApiError | null
 }
 
 const initialState: AuthState = {
@@ -57,7 +57,7 @@ const authSlice = createSlice({
         state.isInitial = false
         state.user = null
         state.isAuthenticated = false
-        state.error = action.error.message || 'Ошибка входа'
+        state.error = (action.payload as ApiError) ?? { code: 'UNKNOWN', message: 'Ошибка входа' }
       })
 
     // ============================================

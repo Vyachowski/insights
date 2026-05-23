@@ -1,4 +1,5 @@
-import axios from 'axios'
+import axios, { type AxiosError } from 'axios'
+import type { ApiError, ApiFailure } from '@insights/contracts'
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL
 
@@ -29,11 +30,17 @@ axiosInstance.interceptors.request.use(
 
 axiosInstance.interceptors.response.use(
   response => response,
-  error => {
-    if (import.meta.env.DEV) {
-      console.error('[API Error]', error.response?.status)
+  (error: AxiosError<ApiFailure>) => {
+    const apiError: ApiError = error.response?.data?.error ?? {
+      code: 'NETWORK_ERROR',
+      message: 'Network request failed',
     }
-    return Promise.reject(error)
+
+    if (import.meta.env.DEV) {
+      console.error(`[API Error] ${apiError.code}: ${apiError.message}`)
+    }
+
+    return Promise.reject(apiError)
   },
 )
 
