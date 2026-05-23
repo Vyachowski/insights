@@ -1,4 +1,5 @@
 import { LogOut, Menu } from 'lucide-react'
+import { useNavigate } from 'react-router'
 
 import { useAuth } from '@/hooks/useAuth'
 import { menuItems } from '@/navigation'
@@ -14,8 +15,15 @@ export default function Header({
   onMenuClick,
   isSidebarOpen,
 }: HeaderProps) {
+  const navigate = useNavigate()
   const { logout, isLoading } = useAuth()
+
   const activeMenuItem = menuItems.find(item => item.id === activeTabId)
+
+  const handleLogout = async () => {
+    await logout()
+    navigate('/login')
+  }
 
   return (
     <header className="bg-slate-900/50 backdrop-blur-xl border-b border-slate-800 px-4 md:px-6 lg:px-8 py-4">
@@ -45,7 +53,7 @@ export default function Header({
           </div>
         </div>
 
-        <button onClick={logout} disabled={isLoading} className="flex items-center gap-2 px-3 md:px-4 py-2 rounded-xl bg-slate-800 hover:bg-red-500/20 text-slate-300 hover:text-red-400 border border-slate-700 hover:border-red-500/50 transition-all duration-300 cursor-pointer">
+        <button onClick={handleLogout} disabled={isLoading} className="flex items-center gap-2 px-3 md:px-4 py-2 rounded-xl bg-slate-800 hover:bg-red-500/20 text-slate-300 hover:text-red-400 border border-slate-700 hover:border-red-500/50 transition-all duration-300 cursor-pointer">
           <LogOut size={18} />
           <span className="font-medium hidden sm:inline">{isLoading ? 'Выходим...' : 'Выход'}</span>
         </button>
