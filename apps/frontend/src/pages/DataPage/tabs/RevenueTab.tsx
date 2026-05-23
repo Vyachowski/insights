@@ -40,10 +40,10 @@ function getYearRange(year: number) {
   }
 }
 
-const currentYear = new Date().getFullYear()
-const yearOptions = [currentYear - 2, currentYear - 1, currentYear]
-
 export default function RevenueTab() {
+  const currentYear = new Date().getFullYear()
+  const yearOptions = [currentYear - 2, currentYear - 1, currentYear]
+
   const [entries, setEntries] = useState<Revenue[]>([])
   const [sites, setSites] = useState<Site[]>([])
   const [loading, setLoading] = useState(true)
@@ -51,6 +51,11 @@ export default function RevenueTab() {
   const [selectedYear, setSelectedYear] = useState(currentYear)
   const [page, setPage] = useState(1)
   const [showModal, setShowModal] = useState(false)
+
+  // Sites are year-independent — fetch once on mount
+  useEffect(() => {
+    sitesApi.findAll().then(setSites).catch(() => {})
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -60,14 +65,10 @@ export default function RevenueTab() {
 
     const { startDate, endDate } = getYearRange(selectedYear)
 
-    Promise.all([
-      revenueApi.findAll(startDate, endDate),
-      sitesApi.findAll(),
-    ])
-      .then(([revenue, siteList]) => {
+    revenueApi.findAll(startDate, endDate)
+      .then(revenue => {
         if (cancelled) return
         setEntries(revenue)
-        setSites(siteList)
       })
       .catch(e => {
         if (cancelled) return
@@ -86,7 +87,8 @@ export default function RevenueTab() {
   )
 
   const totalPages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE))
-  const pageEntries = sorted.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+  const clampedPage = Math.min(page, totalPages)
+  const pageEntries = sorted.slice((clampedPage - 1) * PAGE_SIZE, clampedPage * PAGE_SIZE)
   const total = entries.reduce((sum, e) => sum + e.amount, 0)
 
   function handleDelete(id: number) {
@@ -94,7 +96,8 @@ export default function RevenueTab() {
   }
 
   function handleAdd(entry: Omit<Revenue, 'id'>) {
-    setEntries(prev => [{ ...entry, id: Date.now() }, ...prev])
+    const tempId = -(Date.now() * 1000 + Math.floor(Math.random() * 1000))
+    setEntries(prev => [{ ...entry, id: tempId }, ...prev])
   }
 
   return (
@@ -193,18 +196,18 @@ export default function RevenueTab() {
             {!loading && totalPages > 1 && (
               <div className="flex items-center justify-between px-6 py-3 border-t border-slate-700/50">
                 <span className="text-xs text-slate-500">
-                  {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, sorted.length)} из {sorted.length}
+                  {(clampedPage - 1) * PAGE_SIZE + 1}–{Math.min(clampedPage * PAGE_SIZE, sorted.length)} из {sorted.length}
                 </span>
                 <div className="flex items-center gap-1">
                   <button
                     onClick={() => setPage(p => Math.max(1, p - 1))}
-                    disabled={page === 1}
+                    disabled={clampedPage === 1}
                     className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                   >
                     <ChevronLeft size={16} />
                   </button>
                   {Array.from({ length: totalPages }, (_, i) => i + 1)
-                    .filter(p => p === 1 || p === totalPages || Math.abs(p - page) <= 1)
+                    .filter(p => p === 1 || p === totalPages || Math.abs(p - clampedPage) <= 1)
                     .reduce<(number | '...')[]>((acc, p, idx, arr) => {
                       if (idx > 0 && (p as number) - (arr[idx - 1] as number) > 1) acc.push('...')
                       acc.push(p)
@@ -218,7 +221,7 @@ export default function RevenueTab() {
                             key={p}
                             onClick={() => setPage(p as number)}
                             className={`min-w-[32px] h-8 px-2 rounded-lg text-sm font-medium transition-colors ${
-                              page === p
+                              clampedPage === p
                                 ? 'bg-emerald-500/20 text-emerald-400'
                                 : 'text-slate-400 hover:text-white hover:bg-slate-800'
                             }`}
@@ -230,7 +233,7 @@ export default function RevenueTab() {
                   }
                   <button
                     onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                    disabled={page === totalPages}
+                    disabled={clampedPage === totalPages}
                     className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                   >
                     <ChevronRight size={16} />
