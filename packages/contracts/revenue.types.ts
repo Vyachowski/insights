@@ -12,3 +12,11 @@ export interface Site {
   group: string | null
   url: string
 }
+
+export interface City {
+  id: number
+  code: string
+  slug: string
+  name: string
+  population: number
+}

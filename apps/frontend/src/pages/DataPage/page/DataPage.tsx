@@ -2,14 +2,18 @@ import { useState } from 'react'
 import { Phone, BarChart3, DollarSign } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
-import RevenueTab from '../tabs/RevenueTab'
+import CitiesTab from '../tabs/CitiesTab'
 import PlaceholderTab from '../tabs/PlaceholderTab'
+import RevenueTab from '../tabs/RevenueTab'
+import SitesTab from '../tabs/SitesTab'
 
 const tabs = [
   { id: 'revenue', label: 'Доходы' },
   { id: 'expenses', label: 'Расходы' },
   { id: 'calls', label: 'Звонки' },
   { id: 'metrics', label: 'Метрики' },
+  { id: 'cities', label: 'Города' },
+  { id: 'sites', label: 'Сайты' },
 ] as const
 
 type TabId = typeof tabs[number]['id']
@@ -24,7 +28,7 @@ export default function DataPage() {
         <p className="text-slate-500 text-sm mt-1">Управление доходами, расходами, звонками и метриками</p>
       </div>
 
-      <div className="flex gap-1 p-1 bg-slate-800/50 rounded-xl w-fit border border-slate-700/50">
+      <div className="flex flex-wrap gap-1 p-1 bg-slate-800/50 rounded-xl w-fit border border-slate-700/50">
         {tabs.map(tab => (
           <button
             key={tab.id}
@@ -64,6 +68,8 @@ export default function DataPage() {
             icon={BarChart3}
           />
         )}
+        {activeTab === 'cities' && <CitiesTab />}
+        {activeTab === 'sites' && <SitesTab />}
       </div>
     </div>
   )
