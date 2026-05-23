@@ -19,7 +19,7 @@ export class MetricsService {
     });
   }
 
-  async importFromCsv(buffer: Buffer): Promise<{ upserted: number; skipped: number }> {
+  async importFromCsv(buffer: Buffer): Promise<{ created: number; skipped: number }> {
     const rows: Record<string, string>[] = parse(buffer, {
       columns: true,
       skip_empty_lines: true,
@@ -58,6 +58,6 @@ export class MetricsService {
       upserted++;
     }
 
-    return { upserted, skipped };
+    return { created: upserted, skipped };
   }
 }
