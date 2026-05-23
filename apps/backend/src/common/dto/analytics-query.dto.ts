@@ -15,9 +15,11 @@ export class AnalyticsQueryDto {
   @Type(() => Number)
   siteId?: number;
 
+  @IsOptional()
   @IsDateString()
-  startDate: string;
+  startDate?: string;
 
+  @IsOptional()
   @IsDateString()
-  endDate: string;
+  endDate?: string;
 }
