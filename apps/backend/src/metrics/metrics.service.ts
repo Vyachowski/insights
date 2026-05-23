@@ -28,7 +28,13 @@ export class MetricsService {
       bom: true,
     });
 
-    assertCsvColumns(rows, ['siteId', 'date', 'yandexUsers', 'googleUsers', 'otherUsers']);
+    assertCsvColumns(rows, [
+      'siteId', 'date',
+      'yandexUsers', 'googleUsers', 'otherUsers',
+      'visitDurationYandexInSec', 'visitDurationGoogleInSec', 'visitDurationOtherInSec',
+      'bounceYandex', 'bounceGoogle', 'bounceOther',
+      'leadsYandex', 'leadsGoogle', 'leadsOther',
+    ]);
     let upserted = 0;
     let skipped = 0;
 
