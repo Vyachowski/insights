@@ -8,6 +8,6 @@ export interface User {
   email: string
   firstName: string | null
   lastName: string | null
-  role: string
-  status: string
+  isAdmin: boolean
+  isActive: boolean
 }

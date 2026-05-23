@@ -2,8 +2,10 @@ import Button from '@ui/Button'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
 
+import type { ApiError } from '@insights/contracts'
+
 interface ErrorScreenProps {
-  error: string
+  error: ApiError
 }
 
 export default function ErrorScreen({ error }: ErrorScreenProps) {
@@ -15,7 +17,7 @@ export default function ErrorScreen({ error }: ErrorScreenProps) {
     // TODO: Отправка ошибки администратору
     const sendErrorReport = async () => {
       try {
-        console.error(error)
+        console.error(error.message)
         setErrorSent(true)
       } catch (err) {
         console.error('Failed to send error report:', err)
@@ -86,7 +88,7 @@ export default function ErrorScreen({ error }: ErrorScreenProps) {
           {/* Детали ошибки */}
           <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/30">
             <p className="text-sm font-mono text-red-300 break-all">
-              {error}
+              {error.message}
             </p>
           </div>
 
