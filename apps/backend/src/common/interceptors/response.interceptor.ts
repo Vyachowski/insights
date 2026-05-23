@@ -8,7 +8,10 @@ import { Observable, map } from 'rxjs';
 import type { ApiSuccess } from '@insights/contracts';
 
 @Injectable()
-export class ResponseInterceptor<T> implements NestInterceptor<T, ApiSuccess<T>> {
+export class ResponseInterceptor<T> implements NestInterceptor<
+  T,
+  ApiSuccess<T>
+> {
   intercept(
     context: ExecutionContext,
     next: CallHandler<T>,

@@ -39,7 +39,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
     response.status(status).json(body);
   }
 
-  private resolveError(exception: unknown): Pick<ApiError, 'message' | 'details'> {
+  private resolveError(
+    exception: unknown,
+  ): Pick<ApiError, 'message' | 'details'> {
     if (!(exception instanceof HttpException)) {
       return { message: 'Internal server error' };
     }

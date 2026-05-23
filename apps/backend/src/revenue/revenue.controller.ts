@@ -13,7 +13,9 @@ import { RevenueResponseDto } from './dto/revenue-response.dto';
 export class RevenueController {
   constructor(private readonly revenueService: RevenueService) {}
 
-  @ApiOperation({ summary: 'Get revenue entries filtered by site and date range' })
+  @ApiOperation({
+    summary: 'Get revenue entries filtered by site and date range',
+  })
   @ApiWrappedResponse(RevenueResponseDto, true)
   @Get()
   async findAll(@Query() query: AnalyticsQueryDto) {
