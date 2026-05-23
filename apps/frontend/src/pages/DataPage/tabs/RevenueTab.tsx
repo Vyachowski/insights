@@ -50,7 +50,7 @@ export default function RevenueTab() {
   const [showModal, setShowModal] = useState(false)
 
   useEffect(() => {
-    sitesApi.findAll().then(setSites).catch(() => {})
+    sitesApi.fetchAll().then(setSites).catch(() => {})
   }, [])
 
   useEffect(() => { dispatch(fetchRevenue()) }, [importTick])

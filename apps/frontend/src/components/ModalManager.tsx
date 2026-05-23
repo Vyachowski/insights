@@ -11,23 +11,23 @@ import { selectActiveModal } from '@/store/selectors/appSelectors'
 const CONFIGS: Record<ImportModalTarget, Omit<CsvImportConfig, 'onSuccess'>> = {
   expenses: {
     title: 'Импорт расходов',
-    onImportFile: expensesApi.importCsv,
-    onImportUrl: expensesApi.importUrl,
+    onImportFile: expensesApi.uploadCsv,
+    onImportUrl: expensesApi.uploadUrl,
   },
   revenue: {
     title: 'Импорт доходов',
-    onImportFile: revenueApi.importCsv,
-    onImportUrl: revenueApi.importUrl,
+    onImportFile: revenueApi.uploadCsv,
+    onImportUrl: revenueApi.uploadUrl,
   },
   calls: {
     title: 'Импорт звонков',
-    onImportFile: callsApi.importCsv,
-    onImportUrl: callsApi.importUrl,
+    onImportFile: callsApi.uploadCsv,
+    onImportUrl: callsApi.uploadUrl,
   },
   metrics: {
     title: 'Импорт метрик',
-    onImportFile: metricsApi.importCsv,
-    onImportUrl: metricsApi.importUrl,
+    onImportFile: metricsApi.uploadCsv,
+    onImportUrl: metricsApi.uploadUrl,
   },
 }
 

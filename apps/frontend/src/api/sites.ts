@@ -4,7 +4,7 @@ import axiosInstance from '@/lib/axios'
 import { parseApiError } from '@/lib/parseApiError'
 
 export const sitesApi = {
-  findAll: async (): Promise<Site[]> => {
+  fetchAll: async (): Promise<Site[]> => {
     try {
       const { data: res } = await axiosInstance.get<ApiSuccess<Site[]>>('/sites')
       return res.data

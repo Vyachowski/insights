@@ -8,7 +8,7 @@ export const fetchMetrics = createAsyncThunk<SiteMetric[], void, { rejectValue: 
   'metrics/fetchAll',
   async (_, { rejectWithValue }) => {
     try {
-      return await metricsApi.findAll()
+      return await metricsApi.fetchAll()
     } catch (e) {
       return rejectWithValue(e as ApiError)
     }
