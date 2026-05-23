@@ -1,6 +1,6 @@
 import { AnalyticsQueryDto } from '@/common/dto/analytics-query.dto';
 import { PrismaService } from '@/database/prisma.service';
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { parse } from 'csv-parse/sync';
 
 // City name aliases matching the seed normalizer logic
@@ -112,5 +112,12 @@ export class CallsService {
     });
 
     return { created: result.count, skipped: records.length - result.count };
+  }
+
+  async importFromUrl(url: string): Promise<{ created: number; skipped: number }> {
+    const res = await fetch(url);
+    if (!res.ok) throw new BadRequestException(`Failed to fetch URL: ${res.status}`);
+    const buffer = Buffer.from(await res.arrayBuffer());
+    return this.importFromCsv(buffer);
   }
 }

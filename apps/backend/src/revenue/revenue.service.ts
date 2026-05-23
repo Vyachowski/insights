@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '@/database/prisma.service';
 import { AnalyticsQueryDto } from '@/common/dto/analytics-query.dto';
 import { parse } from 'csv-parse/sync';
@@ -69,6 +69,13 @@ export class RevenueService {
     }
 
     return { created, skipped };
+  }
+
+  async importFromUrl(url: string): Promise<{ created: number; skipped: number }> {
+    const res = await fetch(url);
+    if (!res.ok) throw new BadRequestException(`Failed to fetch URL: ${res.status}`);
+    const buffer = Buffer.from(await res.arrayBuffer());
+    return this.importFromCsv(buffer);
   }
 
   async getRevenueGroupedByCity(startDate: Date, endDate: Date) {
