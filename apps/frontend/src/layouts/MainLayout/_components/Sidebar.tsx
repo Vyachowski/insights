@@ -4,7 +4,6 @@ import { X } from 'lucide-react'
 import { NavLink } from 'react-router'
 
 import { useAuth } from '@/hooks/useAuth'
-import { formatUserRole } from '@/lib/utils'
 import { menuItems } from '@/navigation'
 
 interface SidebarProps {
@@ -81,7 +80,7 @@ export default function Sidebar({
               <p className="text-white text-sm font-medium truncate">
                 {`${user?.firstName} ${user?.lastName}`}
               </p>
-              <p className="text-slate-500 text-xs">{user?.role ? formatUserRole(user?.role) : '-'}</p>
+              <p className="text-slate-500 text-xs">{user?.isAdmin ? 'Администратор' : 'Пользователь'}</p>
             </div>
           </div>
         </div>
