@@ -1,11 +1,10 @@
 import { useState } from 'react'
-import { BarChart3 } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 import CallsTab from '../tabs/CallsTab'
 import CitiesTab from '../tabs/CitiesTab'
 import ExpensesTab from '../tabs/ExpensesTab'
-import PlaceholderTab from '../tabs/PlaceholderTab'
+import MetricsTab from '../tabs/MetricsTab'
 import RevenueTab from '../tabs/RevenueTab'
 import SitesTab from '../tabs/SitesTab'
 
@@ -51,13 +50,7 @@ export default function DataPage() {
         {activeTab === 'revenue' && <RevenueTab />}
         {activeTab === 'expenses' && <ExpensesTab />}
         {activeTab === 'calls' && <CallsTab />}
-        {activeTab === 'metrics' && (
-          <PlaceholderTab
-            title="SEO-метрики"
-            description="Импорт метрик Яндекс.Метрики и Google Analytics по сайтам"
-            icon={BarChart3}
-          />
-        )}
+        {activeTab === 'metrics' && <MetricsTab />}
         {activeTab === 'cities' && <CitiesTab />}
         {activeTab === 'sites' && <SitesTab />}
       </div>
