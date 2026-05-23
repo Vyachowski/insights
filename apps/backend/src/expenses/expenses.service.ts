@@ -1,8 +1,7 @@
 import { AnalyticsQueryDto } from '@/common/dto/analytics-query.dto';
 import { PrismaService } from '@/database/prisma.service';
-import { BadRequestException, Injectable } from '@nestjs/common';
-import { parse } from 'csv-parse/sync';
-import { assertCsvColumns, assertSkipRate } from '@/common/utils/csv.utils';
+import { Injectable } from '@nestjs/common';
+import { assertCsvColumns, assertSkipRate, fetchUrlToBuffer, parseCsvBuffer } from '@/common/utils/csv.utils';
 
 @Injectable()
 export class ExpensesService {
@@ -39,48 +38,48 @@ constructor(private readonly prismaService: PrismaService) {}
   }
 
   async importFromCsv(buffer: Buffer): Promise<{ created: number; updated: number; skipped: number }> {
-    const rows: { date: string; type: string; siteId: string; amount: string }[] =
-      parse(buffer, { columns: true, skip_empty_lines: true, trim: true, bom: true });
-
+    const rows = parseCsvBuffer(buffer);
     assertCsvColumns(rows, ['date', 'type', 'siteId', 'amount']);
-    let created = 0;
-    let updated = 0;
-    let skipped = 0;
+
+    let created = 0, updated = 0, skipped = 0, invalid = 0;
 
     for (const row of rows) {
-      const date = new Date(row.date);
-      const siteId = row.siteId ? Number(row.siteId) : null;
-      const amount = parseFloat(row.amount);
-      const type = row.type?.trim();
+      const date = new Date(row['date']);
+      const siteId = row['siteId'] ? Number(row['siteId']) : null;
+      const amount = parseFloat(row['amount']);
+      const type = row['type']?.trim();
 
-      if (!type || isNaN(amount) || isNaN(date.getTime())) {
-        skipped++;
-        continue;
-      }
+      if (!type || isNaN(amount) || isNaN(date.getTime())) { invalid++; continue; }
 
-      try {
-        const existing = await this.prismaService.expense.findFirst({
-          where: { date, siteId, type },
-        });
-        if (existing) {
-          await this.prismaService.expense.update({ where: { id: existing.id }, data: { amount } });
-          updated++;
-        } else {
-          await this.prismaService.expense.create({ data: { date, siteId, amount, type } });
-          created++;
-        }
-      } catch {
-        skipped++;
-      }
+      const outcome = await this.upsertRow(date, siteId, amount, type).catch(() => 'invalid' as const);
+      if (outcome === 'created') created++;
+      else if (outcome === 'updated') updated++;
+      else if (outcome === 'skipped') skipped++;
+      else invalid++;
     }
-    assertSkipRate(created + updated, skipped);
+
+    assertSkipRate(created + updated, invalid);
     return { created, updated, skipped };
   }
 
-  async importFromUrl(url: string): Promise<{ created: number; skipped: number }> {
-    const res = await fetch(url);
-    if (!res.ok) throw new BadRequestException(`Failed to fetch URL: ${res.status}`);
-    const buffer = Buffer.from(await res.arrayBuffer());
-    return this.importFromCsv(buffer);
+  private async upsertRow(date: Date, siteId: number | null, amount: number, type: string): Promise<'created' | 'updated' | 'skipped'> {
+    const existing = await this.prismaService.expense.findFirst({
+      where: { date, siteId, type },
+      select: { id: true, amount: true },
+    });
+
+    if (existing && existing.amount.toNumber() === amount) return 'skipped';
+
+    const record = await this.prismaService.expense.upsert({
+      where: { id: existing?.id ?? -1 },
+      create: { date, siteId, amount, type },
+      update: { amount },
+    });
+
+    return record.createdAt.getTime() === record.updatedAt.getTime() ? 'created' : 'updated';
+  }
+
+  async importFromUrl(url: string): Promise<{ created: number; updated: number; skipped: number }> {
+    return this.importFromCsv(await fetchUrlToBuffer(url));
   }
 }
