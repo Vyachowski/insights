@@ -1,7 +1,4 @@
 import { useCallback } from 'react'
-import { useNavigate } from 'react-router'
-
-import type { LoginRequest } from '@/api/auth'
 
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import {
@@ -13,36 +10,29 @@ import {
 } from '@/store/selectors/authSelectors'
 import { clearError } from '@/store/slices/authSlice'
 import { fetchLogin, fetchLogout, fetchMe } from '@/store/thunks/authThunks'
+import type { LoginRequest } from '@insights/contracts'
 
 export function useAuth() {
   const dispatch = useAppDispatch()
-  const navigate = useNavigate()
 
   const user = useAppSelector(selectUser)
+  const error = useAppSelector(selectAuthError)
+
   const isAuthenticated = useAppSelector(selectIsAuthenticated)
   const isLoading = useAppSelector(selectAuthLoading)
   const isLoaded = useAppSelector(selectAuthLoaded)
-  const error = useAppSelector(selectAuthError)
 
-  // FIXME: Add correct api response chekings
   const login = useCallback(
     async (credentials: LoginRequest) => {
       const result = await dispatch(fetchLogin(credentials))
-      const isLoggedIn = fetchLogin.fulfilled.match(result)
-
-      if (isLoggedIn) {
-        navigate('/')
-        return result.payload
-      }
-      throw result.error
+      return fetchLogin.fulfilled.match(result)
     },
-    [dispatch, navigate],
+    [dispatch],
   )
 
   const logout = useCallback(async () => {
     await dispatch(fetchLogout())
-    navigate('/login')
-  }, [dispatch, navigate])
+  }, [dispatch])
 
   const checkAuth = useCallback(async () => {
     await dispatch(fetchMe())

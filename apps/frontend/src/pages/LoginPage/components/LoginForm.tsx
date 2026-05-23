@@ -1,23 +1,24 @@
 import Button from '@ui/Button'
 import Input from '@ui/Input'
 import { useState } from 'react'
+import { useNavigate } from 'react-router'
 
 import { useAuth } from '@/hooks/useAuth'
 
 export default function LoginForm() {
+  const navigate = useNavigate()
+  const { login, isLoading, error, clearError } = useAuth()
+
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const { login, isLoading, error, clearError } = useAuth()
 
   const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault()
     clearError()
 
-    try {
-      await login({ email, password })
-    } catch (err) {
-      console.error('Login failed:', err)
-    }
+    const success = await login({ email, password })
+
+    if (success) navigate('/')
   }
 
   return (
