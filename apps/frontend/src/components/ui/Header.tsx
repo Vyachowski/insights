@@ -42,21 +42,23 @@ export default function Header({
             <h1 className="text-xl md:text-2xl font-bold text-white truncate">
               {activeMenuItem?.label}
             </h1>
-            <p className="text-slate-500 text-xs md:text-sm mt-0.5 md:mt-1 truncate">
-              {new Date().toLocaleDateString('ru-RU', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-              })}
-            </p>
+            {activeMenuItem?.description && (
+              <p className="text-slate-500 text-xs md:text-sm mt-0.5 md:mt-1 truncate">
+                {activeMenuItem.description}
+              </p>
+            )}
           </div>
         </div>
 
-        <button onClick={handleLogout} disabled={isLoading} className="flex items-center gap-2 px-3 md:px-4 py-2 rounded-xl bg-slate-800 hover:bg-red-500/20 text-slate-300 hover:text-red-400 border border-slate-700 hover:border-red-500/50 transition-all duration-300 cursor-pointer">
-          <LogOut size={18} />
-          <span className="font-medium hidden sm:inline">{isLoading ? 'Выходим...' : 'Выход'}</span>
-        </button>
+        <div className="flex items-center gap-3 shrink-0">
+          <span className="hidden md:block text-slate-500 text-sm">
+            {new Date().toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })}
+          </span>
+          <button onClick={handleLogout} disabled={isLoading} className="flex items-center gap-2 px-3 md:px-4 py-2 rounded-xl bg-slate-800 hover:bg-red-500/20 text-slate-300 hover:text-red-400 border border-slate-700 hover:border-red-500/50 transition-all duration-300 cursor-pointer">
+            <LogOut size={18} />
+            <span className="font-medium hidden sm:inline">{isLoading ? 'Выходим...' : 'Выход'}</span>
+          </button>
+        </div>
       </div>
     </header>
   )
