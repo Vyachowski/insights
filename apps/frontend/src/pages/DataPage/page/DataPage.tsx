@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { Phone, BarChart3, DollarSign } from 'lucide-react'
+import { Phone, BarChart3 } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 import CitiesTab from '../tabs/CitiesTab'
+import ExpensesTab from '../tabs/ExpensesTab'
 import PlaceholderTab from '../tabs/PlaceholderTab'
 import RevenueTab from '../tabs/RevenueTab'
 import SitesTab from '../tabs/SitesTab'
@@ -47,13 +48,7 @@ export default function DataPage() {
 
       <div>
         {activeTab === 'revenue' && <RevenueTab />}
-        {activeTab === 'expenses' && (
-          <PlaceholderTab
-            title="Расходы"
-            description="Импорт и просмотр расходов по сайтам и компании"
-            icon={DollarSign}
-          />
-        )}
+        {activeTab === 'expenses' && <ExpensesTab />}
         {activeTab === 'calls' && (
           <PlaceholderTab
             title="Звонки"
