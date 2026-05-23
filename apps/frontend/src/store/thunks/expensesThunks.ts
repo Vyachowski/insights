@@ -8,7 +8,7 @@ export const fetchExpenses = createAsyncThunk<Expense[], void, { rejectValue: Ap
   'expenses/fetchAll',
   async (_, { rejectWithValue }) => {
     try {
-      return await expensesApi.findAll()
+      return await expensesApi.fetchAll()
     } catch (e) {
       return rejectWithValue(e as ApiError)
     }

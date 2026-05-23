@@ -8,7 +8,7 @@ export const fetchCalls = createAsyncThunk<CallImport[], void, { rejectValue: Ap
   'calls/fetchAll',
   async (_, { rejectWithValue }) => {
     try {
-      return await callsApi.findImports()
+      return await callsApi.fetchImports()
     } catch (e) {
       return rejectWithValue(e as ApiError)
     }

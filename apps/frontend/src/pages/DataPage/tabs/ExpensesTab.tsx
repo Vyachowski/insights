@@ -41,7 +41,7 @@ export default function ExpensesTab() {
   const [page, setPage] = useState(1)
 
   useEffect(() => {
-    sitesApi.findAll().then(setSites).catch(() => {})
+    sitesApi.fetchAll().then(setSites).catch(() => {})
   }, [])
 
   useEffect(() => { dispatch(fetchExpenses()) }, [importTick])

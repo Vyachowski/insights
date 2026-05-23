@@ -19,7 +19,7 @@ export default function SitesTab() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    Promise.all([sitesApi.findAll(), citiesApi.findAll()])
+    Promise.all([sitesApi.fetchAll(), citiesApi.fetchAll()])
       .then(([siteList, cityList]) => { setSites(siteList); setCities(cityList) })
       .catch(e => setError(e?.message ?? 'Ошибка загрузки'))
       .finally(() => setLoading(false))

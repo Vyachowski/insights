@@ -4,7 +4,7 @@ import axiosInstance from '@/lib/axios'
 import { parseApiError } from '@/lib/parseApiError'
 
 export const metricsApi = {
-  findAll: async (startDate?: string, endDate?: string): Promise<SiteMetric[]> => {
+  fetchAll: async (startDate?: string, endDate?: string): Promise<SiteMetric[]> => {
     try {
       const { data: res } = await axiosInstance.get<ApiSuccess<SiteMetric[]>>('/metrics', {
         params: { startDate, endDate },
@@ -15,7 +15,7 @@ export const metricsApi = {
     }
   },
 
-  importCsv: async (file: File): Promise<ImportResult> => {
+  uploadCsv: async (file: File): Promise<ImportResult> => {
     try {
       const form = new FormData()
       form.append('file', file)
@@ -26,7 +26,7 @@ export const metricsApi = {
     }
   },
 
-  importUrl: async (url: string): Promise<ImportResult> => {
+  uploadUrl: async (url: string): Promise<ImportResult> => {
     try {
       const { data: res } = await axiosInstance.post<ApiSuccess<ImportResult>>('/metrics/import-url', { url })
       return res.data

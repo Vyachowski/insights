@@ -4,7 +4,7 @@ import axiosInstance from '@/lib/axios'
 import { parseApiError } from '@/lib/parseApiError'
 
 export const expensesApi = {
-  findAll: async (startDate?: string, endDate?: string): Promise<Expense[]> => {
+  fetchAll: async (startDate?: string, endDate?: string): Promise<Expense[]> => {
     try {
       const { data: res } = await axiosInstance.get<ApiSuccess<Expense[]>>('/expenses', {
         params: { startDate, endDate },
@@ -15,7 +15,7 @@ export const expensesApi = {
     }
   },
 
-  importCsv: async (file: File): Promise<ImportResult> => {
+  uploadCsv: async (file: File): Promise<ImportResult> => {
     try {
       const form = new FormData()
       form.append('file', file)
@@ -26,7 +26,7 @@ export const expensesApi = {
     }
   },
 
-  importUrl: async (url: string): Promise<ImportResult> => {
+  uploadUrl: async (url: string): Promise<ImportResult> => {
     try {
       const { data: res } = await axiosInstance.post<ApiSuccess<ImportResult>>('/expenses/import-url', { url })
       return res.data

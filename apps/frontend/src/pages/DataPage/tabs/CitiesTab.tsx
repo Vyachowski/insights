@@ -17,7 +17,7 @@ export default function CitiesTab() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    citiesApi.findAll()
+    citiesApi.fetchAll()
       .then(setCities)
       .catch(e => setError(e?.message ?? 'Ошибка загрузки'))
       .finally(() => setLoading(false))
