@@ -24,7 +24,7 @@ export default function LoginForm() {
     <form onSubmit={handleSubmit} className="space-y-6">
       {error && (
         <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/50 text-red-400 text-sm">
-          {error}
+          {error.message}
         </div>
       )}
 

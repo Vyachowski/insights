@@ -1,19 +1,15 @@
-/** JSON envelope for successful HTTP responses (see backend ResponseInterceptor). */
-export interface ApiResponse<T> {
-  success: true;
-  data: T;
-  timestamp: string;
+export type ApiError = {
+  code: string
+  message: string
+  details?: Record<string, string[]>
 }
 
-/** Error payload inside {@link ApiErrorResponse}. */
-export interface ApiErrorPayload {
-  code: number;
-  message: string;
+export type ApiSuccess<T> = {
+  data: T
 }
 
-/** JSON envelope for error responses (see backend AllExceptionsFilter). */
-export interface ApiErrorResponse {
-  success: false;
-  error: ApiErrorPayload;
-  timestamp: string;
+export type ApiFailure = {
+  error: ApiError
 }
+
+export type ApiResponse<T> = ApiSuccess<T> | ApiFailure

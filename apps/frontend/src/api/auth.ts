@@ -1,13 +1,11 @@
-import type { ApiResponse } from '@insights/contracts'
+import type { ApiSuccess } from '@insights/contracts'
+import type { LoginRequest, User } from '@insights/contracts/auth.types'
 
 import axiosInstance from '@/lib/axios'
 
-import type { LoginRequest, User } from '@insights/contracts/auth.types'
-
 export const authApi = {
   login: async (data: LoginRequest): Promise<User> => {
-    const { data: resData } = await axiosInstance.post<ApiResponse<User>>('/auth/login', data)
-
+    const { data: resData } = await axiosInstance.post<ApiSuccess<User>>('/auth/login', data)
     return resData.data
   },
 
@@ -16,7 +14,7 @@ export const authApi = {
   },
 
   me: async (): Promise<User> => {
-    const { data: resData } = await axiosInstance.get<ApiResponse<User>>('/auth/me')
+    const { data: resData } = await axiosInstance.get<ApiSuccess<User>>('/auth/me')
     return resData.data
   },
 }
