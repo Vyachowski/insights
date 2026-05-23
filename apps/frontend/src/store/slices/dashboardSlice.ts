@@ -31,7 +31,7 @@ const dashboardSlice = createSlice({
       })
       .addCase(fetchDashboardSummary.rejected, (state, action) => {
         state.isLoading = false
-        state.error = action.error.message || 'Failed to load dashboard'
+        state.error = action.payload ?? { code: 'UNKNOWN', message: 'Failed to load dashboard' }
       })
   },
 })
