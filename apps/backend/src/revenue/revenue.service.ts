@@ -38,7 +38,7 @@ export class RevenueService {
     });
   }
 
-  async importFromCsv(buffer: Buffer): Promise<{ created: number; skipped: number }> {
+  async importFromCsv(buffer: Buffer): Promise<{ created: number; updated: number; skipped: number }> {
     const rows: Record<string, string>[] = parse(buffer, {
       columns: true,
       skip_empty_lines: true,
@@ -48,6 +48,7 @@ export class RevenueService {
 
     assertCsvColumns(rows, ['date', 'siteId', 'amount']);
     let created = 0;
+    let updated = 0;
     let skipped = 0;
 
     for (const row of rows) {
@@ -64,17 +65,18 @@ export class RevenueService {
 
       if (existing) {
         await this.prismaService.revenue.update({ where: { id: existing.id }, data: { amount } });
+        updated++;
       } else {
         await this.prismaService.revenue.create({ data: { date, siteId, amount } });
+        created++;
       }
-      created++;
     }
 
-    assertSkipRate(created, skipped);
-    return { created, skipped };
+    assertSkipRate(created + updated, skipped);
+    return { created, updated, skipped };
   }
 
-  async importFromUrl(url: string): Promise<{ created: number; skipped: number }> {
+  async importFromUrl(url: string): Promise<{ created: number; updated: number; skipped: number }> {
     const res = await fetch(url);
     if (!res.ok) throw new BadRequestException(`Failed to fetch URL: ${res.status}`);
     const buffer = Buffer.from(await res.arrayBuffer());

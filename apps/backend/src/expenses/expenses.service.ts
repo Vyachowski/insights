@@ -38,12 +38,13 @@ constructor(private readonly prismaService: PrismaService) {}
     });
   }
 
-  async importFromCsv(buffer: Buffer): Promise<{ created: number; skipped: number }> {
+  async importFromCsv(buffer: Buffer): Promise<{ created: number; updated: number; skipped: number }> {
     const rows: { date: string; type: string; siteId: string; amount: string }[] =
       parse(buffer, { columns: true, skip_empty_lines: true, trim: true, bom: true });
 
     assertCsvColumns(rows, ['date', 'type', 'siteId', 'amount']);
     let created = 0;
+    let updated = 0;
     let skipped = 0;
 
     for (const row of rows) {
@@ -63,16 +64,17 @@ constructor(private readonly prismaService: PrismaService) {}
         });
         if (existing) {
           await this.prismaService.expense.update({ where: { id: existing.id }, data: { amount } });
+          updated++;
         } else {
           await this.prismaService.expense.create({ data: { date, siteId, amount, type } });
+          created++;
         }
-        created++;
       } catch {
         skipped++;
       }
     }
-    assertSkipRate(created, skipped);
-    return { created, skipped };
+    assertSkipRate(created + updated, skipped);
+    return { created, updated, skipped };
   }
 
   async importFromUrl(url: string): Promise<{ created: number; skipped: number }> {

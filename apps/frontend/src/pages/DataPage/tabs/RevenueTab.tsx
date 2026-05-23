@@ -11,6 +11,7 @@ import { openImportModal } from '@/store/slices/appSlice'
 import { selectImportTick } from '@/store/selectors/appSelectors'
 import Button from '@ui/Button'
 import Card from '@ui/Card'
+import YearSelect from '@ui/YearSelect'
 import AddRevenueModal from '../components/AddRevenueModal'
 
 const PAGE_SIZE = 20
@@ -47,7 +48,6 @@ function getYearRange(year: number) {
 
 export default function RevenueTab() {
   const currentYear = new Date().getFullYear()
-  const yearOptions = [currentYear - 2, currentYear - 1, currentYear]
 
   const dispatch = useDispatch()
   const importTick = useSelector(selectImportTick('revenue'))
@@ -110,21 +110,7 @@ export default function RevenueTab() {
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="flex gap-1 p-1 bg-slate-800/50 rounded-xl border border-slate-700/50">
-            {yearOptions.map(year => (
-              <button
-                key={year}
-                onClick={() => setSelectedYear(year)}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${
-                  selectedYear === year
-                    ? 'bg-slate-700 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200'
-                }`}
-              >
-                {year}
-              </button>
-            ))}
-          </div>
+          <YearSelect value={selectedYear} onChange={setSelectedYear} />
 
           <Button size="sm" variant="secondary" onClick={() => dispatch(openImportModal('revenue'))}>
             <Upload size={15} />
