@@ -2,6 +2,7 @@ import { AnalyticsQueryDto } from '@/common/dto/analytics-query.dto';
 import { PrismaService } from '@/database/prisma.service';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { parse } from 'csv-parse/sync';
+import { assertCsvColumns, assertSkipRate } from '@/common/utils/csv.utils';
 
 @Injectable()
 export class MetricsService {
@@ -27,6 +28,7 @@ export class MetricsService {
       bom: true,
     });
 
+    assertCsvColumns(rows, ['siteId', 'date', 'yandexUsers', 'googleUsers', 'otherUsers']);
     let upserted = 0;
     let skipped = 0;
 
@@ -58,6 +60,7 @@ export class MetricsService {
       upserted++;
     }
 
+    assertSkipRate(upserted, skipped);
     return { created: upserted, skipped };
   }
 

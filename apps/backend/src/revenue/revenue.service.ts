@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '@/database/prisma.service';
 import { AnalyticsQueryDto } from '@/common/dto/analytics-query.dto';
 import { parse } from 'csv-parse/sync';
+import { assertCsvColumns, assertSkipRate } from '@/common/utils/csv.utils';
 
 @Injectable()
 export class RevenueService {
@@ -45,6 +46,7 @@ export class RevenueService {
       bom: true,
     });
 
+    assertCsvColumns(rows, ['date', 'siteId', 'amount']);
     let created = 0;
     let skipped = 0;
 
@@ -68,6 +70,7 @@ export class RevenueService {
       created++;
     }
 
+    assertSkipRate(created, skipped);
     return { created, skipped };
   }
 

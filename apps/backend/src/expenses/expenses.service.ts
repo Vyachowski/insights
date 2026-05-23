@@ -2,6 +2,7 @@ import { AnalyticsQueryDto } from '@/common/dto/analytics-query.dto';
 import { PrismaService } from '@/database/prisma.service';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { parse } from 'csv-parse/sync';
+import { assertCsvColumns, assertSkipRate } from '@/common/utils/csv.utils';
 
 @Injectable()
 export class ExpensesService {
@@ -41,6 +42,7 @@ constructor(private readonly prismaService: PrismaService) {}
     const rows: { date: string; type: string; siteId: string; amount: string }[] =
       parse(buffer, { columns: true, skip_empty_lines: true, trim: true, bom: true });
 
+    assertCsvColumns(rows, ['date', 'type', 'siteId', 'amount']);
     let created = 0;
     let skipped = 0;
 
@@ -69,6 +71,7 @@ constructor(private readonly prismaService: PrismaService) {}
         skipped++;
       }
     }
+    assertSkipRate(created, skipped);
     return { created, skipped };
   }
 

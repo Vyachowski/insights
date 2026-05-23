@@ -2,6 +2,7 @@ import { AnalyticsQueryDto } from '@/common/dto/analytics-query.dto';
 import { PrismaService } from '@/database/prisma.service';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { parse } from 'csv-parse/sync';
+import { assertCsvColumns, assertSkipRate } from '@/common/utils/csv.utils';
 
 // City name aliases matching the seed normalizer logic
 const CITY_ALIASES: Record<string, string[]> = {
@@ -71,6 +72,7 @@ export class CallsService {
       bom: true,
     });
 
+    assertCsvColumns(rows, ['Дата', 'Кто звонил', '№', 'Проект', 'Куда звонил']);
     const sites = await this.prismaService.site.findMany({
       select: { id: true, city: { select: { name: true } } },
     });
@@ -111,7 +113,10 @@ export class CallsService {
       skipDuplicates: true,
     });
 
-    return { created: result.count, skipped: records.length - result.count };
+    const created = result.count;
+    const skipped = records.length - result.count;
+    assertSkipRate(created, skipped);
+    return { created, skipped };
   }
 
   async importFromUrl(url: string): Promise<{ created: number; skipped: number }> {
