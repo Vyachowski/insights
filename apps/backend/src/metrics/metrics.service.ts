@@ -1,6 +1,7 @@
 import { AnalyticsQueryDto } from '@/common/dto/analytics-query.dto';
 import { PrismaService } from '@/database/prisma.service';
 import { Injectable } from '@nestjs/common';
+import { parse } from 'csv-parse/sync';
 
 @Injectable()
 export class MetricsService {
@@ -16,5 +17,47 @@ export class MetricsService {
         },
       },
     });
+  }
+
+  async importFromCsv(buffer: Buffer): Promise<{ upserted: number; skipped: number }> {
+    const rows: Record<string, string>[] = parse(buffer, {
+      columns: true,
+      skip_empty_lines: true,
+      trim: true,
+      bom: true,
+    });
+
+    let upserted = 0;
+    let skipped = 0;
+
+    for (const row of rows) {
+      const siteId = Number(row['siteId']);
+      const date = row['date'] ? new Date(row['date']) : null;
+      if (!siteId || isNaN(siteId) || !date || isNaN(date.getTime())) { skipped++; continue; }
+
+      const data = {
+        yandexUsers: Number(row['yandexUsers'] ?? 0) || 0,
+        googleUsers: Number(row['googleUsers'] ?? 0) || 0,
+        otherUsers: Number(row['otherUsers'] ?? 0) || 0,
+        visitDurationYandexInSec: Number(row['visitDurationYandexInSec'] ?? 0) || 0,
+        visitDurationGoogleInSec: Number(row['visitDurationGoogleInSec'] ?? 0) || 0,
+        visitDurationOtherInSec: Number(row['visitDurationOtherInSec'] ?? 0) || 0,
+        bounceYandex: Number(row['bounceYandex'] ?? 0) || 0,
+        bounceGoogle: Number(row['bounceGoogle'] ?? 0) || 0,
+        bounceOther: Number(row['bounceOther'] ?? 0) || 0,
+        leadsYandex: Number(row['leadsYandex'] ?? 0) || 0,
+        leadsGoogle: Number(row['leadsGoogle'] ?? 0) || 0,
+        leadsOther: Number(row['leadsOther'] ?? 0) || 0,
+      };
+
+      await this.prismaService.siteMetric.upsert({
+        where: { siteId_date: { siteId, date } },
+        create: { siteId, date, ...data },
+        update: data,
+      });
+      upserted++;
+    }
+
+    return { upserted, skipped };
   }
 }
