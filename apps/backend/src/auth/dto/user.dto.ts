@@ -30,7 +30,9 @@ export class UserResponseDto implements User {
   @Exclude()
   updatedAt: Date;
 
-  constructor(partial: Partial<UserResponseDto>) {
+  constructor(partial: Partial<UserResponseDto> & { role?: Role; status?: UserStatus }) {
     Object.assign(this, partial);
+    this.isAdmin = partial.role === 'ADMIN';
+    this.isActive = partial.status === 'ACTIVE';
   }
 }
