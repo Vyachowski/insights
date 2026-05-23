@@ -133,10 +133,16 @@ export default function CsvImportModal({ config, onClose }: Props) {
             </div>
           )}
 
-          <Button type="submit" isLoading={loading} disabled={!canSubmit}>
-            <Upload size={15} />
-            Загрузить
-          </Button>
+          {result ? (
+            <Button type="button" onClick={onClose}>
+              Готово
+            </Button>
+          ) : (
+            <Button type="submit" isLoading={loading} disabled={!canSubmit}>
+              <Upload size={15} />
+              Загрузить
+            </Button>
+          )}
         </form>
       </div>
     </div>
