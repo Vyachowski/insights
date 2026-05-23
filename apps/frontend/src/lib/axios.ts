@@ -14,7 +14,7 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.request.use(
   config => {
     if (import.meta.env.DEV) {
-      console.log(`[API Request] ${config.method?.toUpperCase()} ${config.url}`)
+      console.warn(`[API Request] ${config.method?.toUpperCase()} ${config.url}`)
     }
     return config
   },
@@ -22,7 +22,7 @@ axiosInstance.interceptors.request.use(
     if (import.meta.env.DEV) {
       console.error('[API Request Error]', error)
     }
-  
+
     return Promise.reject(error)
   },
 )
