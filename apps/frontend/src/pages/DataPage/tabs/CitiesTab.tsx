@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react'
+import Button from '@ui/Button'
+import Card from '@ui/Card'
 import { MapPin, Plus } from 'lucide-react'
+import { useEffect, useState } from 'react'
 
 import type { City } from '@insights/contracts'
 
 import { citiesApi } from '@/api/cities'
-import Button from '@ui/Button'
-import Card from '@ui/Card'
 
 function formatPopulation(n: number) {
   return new Intl.NumberFormat('ru-RU').format(n)

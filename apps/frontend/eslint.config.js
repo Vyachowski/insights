@@ -13,7 +13,6 @@ import tseslint from 'typescript-eslint'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
-
 export default defineConfig([
   globalIgnores(['dist', 'build', 'node_modules', '.next', 'coverage']),
   {
@@ -120,6 +119,12 @@ export default defineConfig([
       'no-multiple-empty-lines': ['error', { max: 1, maxEOF: 0 }],
       'eol-last': ['error', 'always'],
       'no-trailing-spaces': 'error',
+    },
+  },
+  {
+    files: ['**/*.tsx'],
+    rules: {
+      'max-lines-per-function': 'off',
     },
   },
 ])

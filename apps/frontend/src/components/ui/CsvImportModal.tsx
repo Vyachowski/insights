@@ -1,7 +1,7 @@
-import { useRef, useState } from 'react'
-import { X, Upload, CheckCircle, XCircle } from 'lucide-react'
-
 import Button from '@ui/Button'
+import { X, Upload, CheckCircle, XCircle } from 'lucide-react'
+import { useRef, useState } from 'react'
+
 import type { ImportResult } from '@insights/contracts'
 
 export interface CsvImportConfig {

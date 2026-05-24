@@ -36,10 +36,8 @@ const authSlice = createSlice({
       state.error = null
     },
   },
+  // eslint-disable-next-line max-lines-per-function
   extraReducers: builder => {
-    // ============================================
-    // LOGIN
-    // ============================================
     builder
       .addCase(fetchLogin.pending, state => {
         state.isLoading = true
@@ -61,9 +59,6 @@ const authSlice = createSlice({
         state.error = (action.payload as ApiError) ?? { code: 'UNKNOWN', message: 'Ошибка входа' }
       })
 
-    // ============================================
-    // LOGOUT
-    // ============================================
     builder
       .addCase(fetchLogout.pending, state => {
         state.isLoading = true
@@ -82,9 +77,6 @@ const authSlice = createSlice({
         state.isInitial = true
       })
 
-    // ============================================
-    // ME (проверка авторизации при загрузке)
-    // ============================================
     builder
       .addCase(fetchMe.pending, state => {
         state.isLoading = true

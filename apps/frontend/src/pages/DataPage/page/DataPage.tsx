@@ -1,12 +1,13 @@
 import { useState } from 'react'
 
-import { cn } from '@/lib/utils'
 import CallsTab from '../tabs/CallsTab'
 import CitiesTab from '../tabs/CitiesTab'
 import ExpensesTab from '../tabs/ExpensesTab'
 import MetricsTab from '../tabs/MetricsTab'
 import RevenueTab from '../tabs/RevenueTab'
 import SitesTab from '../tabs/SitesTab'
+
+import { cn } from '@/lib/utils'
 
 const tabs = [
   { id: 'revenue', label: 'Доходы' },

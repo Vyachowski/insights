@@ -1,19 +1,19 @@
-import { useEffect, useMemo, useState } from 'react'
-import { ChevronLeft, ChevronRight, Upload } from 'lucide-react'
-import { useDispatch, useSelector } from 'react-redux'
-
-import type { Site } from '@insights/contracts'
-
-import { sitesApi } from '@/api/sites'
-import { openImportModal } from '@/store/slices/appSlice'
-import { selectImportTick } from '@/store/selectors/appSelectors'
-import { selectExpensesError, selectExpensesLoading, selectExpenseYears } from '@/store/selectors/expensesSelectors'
-import { selectExpensesByYear } from '@/store/selectors/expensesSelectors'
-import { fetchExpenses } from '@/store/thunks/expensesThunks'
-import type { AppDispatch } from '@/store'
 import Button from '@ui/Button'
 import Card from '@ui/Card'
 import YearSelect from '@ui/YearSelect'
+import { ChevronLeft, ChevronRight, Upload } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+
+import type { AppDispatch } from '@/store'
+import type { Site } from '@insights/contracts'
+
+import { sitesApi } from '@/api/sites'
+import { selectImportTick } from '@/store/selectors/appSelectors'
+import { selectExpensesError, selectExpensesLoading, selectExpenseYears } from '@/store/selectors/expensesSelectors'
+import { selectExpensesByYear } from '@/store/selectors/expensesSelectors'
+import { openImportModal } from '@/store/slices/appSlice'
+import { fetchExpenses } from '@/store/thunks/expensesThunks'
 
 const PAGE_SIZE = 20
 
@@ -39,19 +39,16 @@ export default function ExpensesTab() {
   const [sites, setSites] = useState<Site[]>([])
   const [selectedYear, setSelectedYear] = useState<number | null>(null)
   const [page, setPage] = useState(1)
+  const effectiveYear = selectedYear ?? availableYears[0] ?? null
 
   useEffect(() => {
     sitesApi.fetchAll().then(setSites).catch(() => {})
   }, [])
 
-  useEffect(() => { dispatch(fetchExpenses()) }, [importTick])
-
-  useEffect(() => {
-    if (availableYears.length > 0) setSelectedYear(prev => prev ?? availableYears[0])
-  }, [availableYears])
+  useEffect(() => { dispatch(fetchExpenses()) }, [importTick, dispatch])
 
   const entries = useSelector(
-    useMemo(() => selectedYear !== null ? selectExpensesByYear(selectedYear) : () => [], [selectedYear]),
+    useMemo(() => effectiveYear !== null ? selectExpensesByYear(effectiveYear) : () => [], [effectiveYear]),
   )
 
   const sorted = useMemo(
@@ -81,8 +78,8 @@ export default function ExpensesTab() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          {availableYears.length > 0 && selectedYear && (
-            <YearSelect value={selectedYear} onChange={setSelectedYear} years={availableYears} />
+          {availableYears.length > 0 && effectiveYear && (
+            <YearSelect value={effectiveYear} onChange={setSelectedYear} years={availableYears} />
           )}
           <Button size="sm" variant="secondary" onClick={() => dispatch(openImportModal('expenses'))}>
             <Upload size={15} />
@@ -118,7 +115,7 @@ export default function ExpensesTab() {
                     ))
                   ) : pageEntries.length === 0 ? (
                     <tr>
-                      <td colSpan={4} className="py-16 text-center text-slate-500 text-sm">Нет записей за {selectedYear} год</td>
+                      <td colSpan={4} className="py-16 text-center text-slate-500 text-sm">Нет записей за {effectiveYear} год</td>
                     </tr>
                   ) : (
                     pageEntries.map(entry => (
@@ -157,7 +154,7 @@ export default function ExpensesTab() {
                     }, [])
                     .map((p, i) => p === '...'
                       ? <span key={`e${i}`} className="px-2 text-slate-600 text-sm">…</span>
-                      : <button key={p} onClick={() => setPage(p as number)} className={`min-w-[32px] h-8 px-2 rounded-lg text-sm font-medium transition-colors ${clampedPage === p ? 'bg-emerald-500/20 text-emerald-400' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}>{p}</button>
+                      : <button key={p} onClick={() => setPage(p as number)} className={`min-w-[32px] h-8 px-2 rounded-lg text-sm font-medium transition-colors ${clampedPage === p ? 'bg-emerald-500/20 text-emerald-400' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}>{p}</button>,
                     )}
                   <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={clampedPage === totalPages} className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"><ChevronRight size={16} /></button>
                 </div>
