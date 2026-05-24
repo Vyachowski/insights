@@ -1,12 +1,12 @@
+import CsvImportModal, { type CsvImportConfig } from '@ui/CsvImportModal'
 import { useDispatch, useSelector } from 'react-redux'
 
-import CsvImportModal, { type CsvImportConfig } from '@ui/CsvImportModal'
 import { callsApi } from '@/api/calls'
 import { expensesApi } from '@/api/expenses'
 import { metricsApi } from '@/api/metrics'
 import { revenueApi } from '@/api/revenue'
-import { bumpImportTick, closeModal, type ImportModalTarget } from '@/store/slices/appSlice'
 import { selectActiveModal } from '@/store/selectors/appSelectors'
+import { bumpImportTick, closeModal, type ImportModalTarget } from '@/store/slices/appSlice'
 
 const CONFIGS: Record<ImportModalTarget, Omit<CsvImportConfig, 'onSuccess'>> = {
   expenses: {

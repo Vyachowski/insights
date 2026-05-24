@@ -1,10 +1,9 @@
-import { useState } from 'react'
-import { X } from 'lucide-react'
-
-import type { Revenue, Site } from '@insights/contracts'
-
 import Button from '@ui/Button'
 import Input from '@ui/Input'
+import { X } from 'lucide-react'
+import { useState } from 'react'
+
+import type { Revenue, Site } from '@insights/contracts'
 
 interface AddRevenueModalProps {
   sites: Site[]

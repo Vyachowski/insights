@@ -1,10 +1,9 @@
 import { createSlice } from '@reduxjs/toolkit'
 
-import type { SiteMetric } from '@insights/contracts'
-
 import { fetchMetrics } from '../thunks/metricsThunks'
 
 import type { ResourceState } from './types'
+import type { SiteMetric } from '@insights/contracts'
 
 const initialState: ResourceState<SiteMetric[]> = {
   data: [],

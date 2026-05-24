@@ -1,10 +1,9 @@
 import { createSlice } from '@reduxjs/toolkit'
 
-import type { Expense } from '@insights/contracts'
-
 import { fetchExpenses } from '../thunks/expensesThunks'
 
 import type { ResourceState } from './types'
+import type { Expense } from '@insights/contracts'
 
 const initialState: ResourceState<Expense[]> = {
   data: [],

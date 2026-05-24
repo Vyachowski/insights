@@ -1,12 +1,12 @@
-import { useEffect, useState } from 'react'
+import Button from '@ui/Button'
+import Card from '@ui/Card'
 import { Globe, Plus } from 'lucide-react'
+import { useEffect, useState } from 'react'
 
 import type { City, Site } from '@insights/contracts'
 
 import { citiesApi } from '@/api/cities'
 import { sitesApi } from '@/api/sites'
-import Button from '@ui/Button'
-import Card from '@ui/Card'
 
 function getHostname(url: string) {
   try { return new URL(url).hostname } catch { return url }

@@ -1,5 +1,6 @@
-import type { LucideIcon } from 'lucide-react'
 import Card from '@ui/Card'
+
+import type { LucideIcon } from 'lucide-react'
 
 interface PlaceholderTabProps {
   title: string
