@@ -6,6 +6,10 @@ See `specs/README.md` for the full architecture spec: repository layout, data mo
 
 See `AGENTS.md` for communication style.
 
+## Git conventions
+
+- Never add AI attribution to commits, PRs, or any other text — no `Co-Authored-By: Claude`, no "Generated with Claude Code", no 🤖 markers, no similar trailers or mentions.
+
 ## Dev commands
 
 ```bash
