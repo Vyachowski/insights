@@ -1,5 +1,4 @@
 import { TextInput } from '@mantine/core'
-
 import { forwardRef, type InputHTMLAttributes } from 'react'
 
 interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size' | 'color'> {

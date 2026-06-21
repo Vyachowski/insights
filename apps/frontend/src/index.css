@@ -1,60 +1,4 @@
 @import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap");
-@import "tailwindcss";
-
-@theme {
-  /* Шрифты */
-  --font-sans: "Manrope", -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-mono: "JetBrains Mono", monospace;
-
-  /* Анимации */
-  --animate-slide-up: slideUp 0.6s ease-out forwards;
-
-  /* Keyframes */
-  @keyframes slideUp {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-}
-
-/* Кастомные утилиты */
-@utility stagger-1 {
-  animation-delay: 0.1s;
-}
-
-@utility stagger-2 {
-  animation-delay: 0.2s;
-}
-
-@utility stagger-3 {
-  animation-delay: 0.3s;
-}
-
-@utility stagger-4 {
-  animation-delay: 0.4s;
-}
-
-@utility stagger-5 {
-  animation-delay: 0.5s;
-}
-
-@utility stagger-6 {
-  animation-delay: 0.6s;
-}
-
-@utility bg-gradient-radial {
-  background: radial-gradient(circle, var(--tw-gradient-stops));
-}
-
-/* Глобальные стили */
-* {
-  font-family: var(--font-sans);
-}
 
 body,
 html {
@@ -69,15 +13,15 @@ html {
   height: 100%;
 }
 
-/* Recharts стили */
+/* Recharts */
 .recharts-surface {
   filter: drop-shadow(0 0 20px rgba(16, 185, 129, 0.1));
 }
 
-/* Webkit (Chrome, Safari, Edge) */
+/* Scrollbar */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #475569 #1e293b; /* thumb track */
+  scrollbar-color: #475569 #1e293b;
 }
 
 ::-webkit-scrollbar {
@@ -86,38 +30,16 @@ html {
 }
 
 ::-webkit-scrollbar-track {
-  background: #1e293b; /* slate-800 */
+  background: #1e293b;
   border-radius: 8px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #475569; /* slate-600 */
+  background: #475569;
   border-radius: 8px;
-  border: 2px solid #1e293b; /* отступ от краёв */
+  border: 2px solid #1e293b;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #10b981; /* emerald-500 */
-}
-
-/* Firefox */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: #475569 #1e293b;
-}
-
-/* Skeleton styles */
-/* FIXME: Set dark theme as default */
-:root {
-  /* --skeleton-base: #f1f5f9; */
-  /* --skeleton-highlight: #e2e8f0; */
-  /* slate-900 */
-  --skeleton-base: #0f172a;
-  /* slate-800 */
-  --skeleton-highlight: #1e293b;
-}
-
-.dark {
-  --skeleton-base: #0f172a;
-  --skeleton-highlight: #1e293b;
+  background: #10b981;
 }
