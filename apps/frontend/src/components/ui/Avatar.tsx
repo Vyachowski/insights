@@ -1,9 +1,12 @@
+import { Avatar as MantineAvatar } from '@mantine/core'
 import { User } from 'lucide-react'
 
 export default function Avatar({ size = 10 }: { size?: number }) {
+  const px = size * 4
+
   return (
-    <div className={`w-${size} h-${size} rounded-full bg-linear-to-br from-emerald-500 to-teal-500 flex items-center justify-center hover:shadow-lg hover:shadow-emerald-500/20 transition-all`}>
-      <User size={size * 2} className="text-white" />
-    </div>
+    <MantineAvatar size={px} radius="xl" color="blue" variant="filled">
+      <User size={px * 0.5} />
+    </MantineAvatar>
   )
 }
