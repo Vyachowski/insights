@@ -8,6 +8,8 @@ See `AGENTS.md` for communication style.
 
 ## Git conventions
 
+- Solo-dev project: commit directly to `main`. Don't create feature branches unless explicitly asked.
+- Use Conventional Commits. Keep each commit atomic and non-breaking — the project must build at every commit.
 - Never add AI attribution to commits, PRs, or any other text — no `Co-Authored-By: Claude`, no "Generated with Claude Code", no 🤖 markers, no similar trailers or mentions.
 
 ## Dev commands
