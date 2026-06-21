@@ -1,3 +1,4 @@
+import { Container, Stack } from '@mantine/core'
 import { useEffect } from 'react'
 
 import BusinessHealthWidget from '../components/BusinessHealthWidget'
@@ -26,13 +27,15 @@ const DashboardPage = () => {
   }, [dispatch])
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8">
-      {businessHealth && <BusinessHealthWidget summary={businessHealth} />}
-      {currentFinances && <WeeklyFinancialMetricsWidget metrics={currentFinances}/>}
-      {monthlyComparison && <MonthlyProfitComparisonWidget comparison={monthlyComparison} />}
-      {yearlyProfitTrend && <YearlyProfitTrendChart data={yearlyProfitTrend} />}
-      {citiesProfit && <CityProfitShareWidget metrics={citiesProfit} />}
-    </div>
+    <Container size="xl" px={0}>
+      <Stack gap="xl">
+        {businessHealth && <BusinessHealthWidget summary={businessHealth} />}
+        {currentFinances && <WeeklyFinancialMetricsWidget metrics={currentFinances} />}
+        {monthlyComparison && <MonthlyProfitComparisonWidget comparison={monthlyComparison} />}
+        {yearlyProfitTrend && <YearlyProfitTrendChart data={yearlyProfitTrend} />}
+        {citiesProfit && <CityProfitShareWidget metrics={citiesProfit} />}
+      </Stack>
+    </Container>
   )
 }
 

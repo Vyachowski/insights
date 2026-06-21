@@ -1,4 +1,6 @@
+import { Group, Title } from '@mantine/core'
 import Card from '@ui/Card'
+import YearSelect from '@ui/YearSelect'
 import { useMemo, useState } from 'react'
 import { ResponsiveContainer, CartesianGrid, XAxis, YAxis, Tooltip, Bar, BarChart } from 'recharts'
 
@@ -17,19 +19,15 @@ export default function CityProfitShareWidget({ metrics }: { metrics: YearlyCity
   )
 
   return (
-    <Card className='animate-slide-up opacity-0 stagger-5'>
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-white">Прибыль по городам</h2>
-        <select
-          value={selectedYear}
-          onChange={e => setSelectedYear(Number(e.target.value))}
-          className="px-4 py-2 rounded-lg bg-slate-700/50 border border-slate-600 text-white font-medium hover:bg-slate-700 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500"
-        >
-          {availableYears.map(year => (
-            <option value={year} key={year}>{year}</option>
-          ))}
-        </select>
-      </div>
+    <Card>
+      <Group justify="space-between" mb="lg">
+        <Title order={3}>Прибыль по городам</Title>
+        <YearSelect
+          value={selectedYear ?? availableYears[0]}
+          onChange={setSelectedYear}
+          years={availableYears}
+        />
+      </Group>
 
       <ResponsiveContainer width="100%" height={500}>
         <BarChart data={sortedCitiesData} layout="vertical">

@@ -1,4 +1,3 @@
-import { SkeletonTheme } from 'react-loading-skeleton'
 import { Routes, Route, Navigate } from 'react-router'
 
 import GuestRoute from '@/components/guards/GuestRoute'
@@ -11,33 +10,24 @@ import { DashboardPageWithSkeleton } from '@/pages/DashboardPage'
 import { DataPage } from '@/pages/DataPage'
 import LoginPage from '@/pages/LoginPage'
 
-import 'react-loading-skeleton/dist/skeleton.css'
-
 export default function AppRouter() {
   return (
-    <SkeletonTheme
-      baseColor="var(--skeleton-base)"
-      highlightColor="var(--skeleton-highlight)"
-      borderRadius={16}
-      duration={1.2}
-    >
-      <Routes>
-        <Route element={<GuestRoute />}>
-          <Route element={<AuthLayout />}>
-            <Route path="login" element={<LoginPage />} />
-            {/* <Route path="register" element={<Register />} /> */}
-          </Route>
+    <Routes>
+      <Route element={<GuestRoute />}>
+        <Route element={<AuthLayout />}>
+          <Route path="login" element={<LoginPage />} />
+          {/* <Route path="register" element={<Register />} /> */}
         </Route>
+      </Route>
 
-        <Route element={<ProtectedRoute />}>
-          <Route path="/" element={<MainLayout />}>
-            <Route index element={<Navigate to={menuItems[0].id} replace />} />
-            <Route path={menuItems[0].id} element={<DashboardPageWithSkeleton />} />
-            <Route path={menuItems[1].id} element={<DataPage />} />
-            <Route path="*" element={<ErrorPage />} />
-          </Route>
+      <Route element={<ProtectedRoute />}>
+        <Route path="/" element={<MainLayout />}>
+          <Route index element={<Navigate to={menuItems[0].id} replace />} />
+          <Route path={menuItems[0].id} element={<DashboardPageWithSkeleton />} />
+          <Route path={menuItems[1].id} element={<DataPage />} />
+          <Route path="*" element={<ErrorPage />} />
         </Route>
-      </Routes>
-    </SkeletonTheme>
+      </Route>
+    </Routes>
   )
 }

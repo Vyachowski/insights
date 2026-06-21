@@ -1,15 +1,14 @@
+import { Box, Group, Text, Title } from '@mantine/core'
 import Card from '@ui/Card'
 import { LineChart, ResponsiveContainer, CartesianGrid, XAxis, YAxis, Tooltip, Line } from 'recharts'
 
 import type { YearlyProfitTrendPoint } from '@insights/contracts'
 
 export default function YearlyProfitTrendChart({ data }: { data: YearlyProfitTrendPoint[] }) {
-
   return (
-    <Card className='animate-slide-up opacity-0 stagger-4'>
-      <h2 className="text-2xl font-bold text-white mb-6">
-        Годовой тренд прибыли
-      </h2>
+    <Card>
+      <Title order={3} mb="lg">Годовой тренд прибыли</Title>
+
       <ResponsiveContainer width="100%" height={350}>
         <LineChart data={data}>
           <defs>
@@ -62,17 +61,17 @@ export default function YearlyProfitTrendChart({ data }: { data: YearlyProfitTre
           />
         </LineChart>
       </ResponsiveContainer>
-      <div className="mt-4 flex gap-6 text-sm">
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded-full bg-emerald-500"></div>
-          <span className="text-slate-400">Текущий год</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded-full bg-slate-500"></div>
-          <span className="text-slate-400">Прошлый год</span>
-        </div>
-      </div>
-    </Card>
 
+      <Group gap="lg" mt="md">
+        <Group gap="xs">
+          <Box w={16} h={16} bg="#10b981" style={{ borderRadius: '50%' }} />
+          <Text size="sm" c="dimmed">Текущий год</Text>
+        </Group>
+        <Group gap="xs">
+          <Box w={16} h={16} bg="#475569" style={{ borderRadius: '50%' }} />
+          <Text size="sm" c="dimmed">Прошлый год</Text>
+        </Group>
+      </Group>
+    </Card>
   )
 }

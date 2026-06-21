@@ -1,3 +1,4 @@
+import { SimpleGrid } from '@mantine/core'
 import MetricCard from '@ui/MetricCard'
 
 export default function WeeklyFinancialMetricsWidget({ metrics }: {
@@ -10,13 +11,10 @@ export default function WeeklyFinancialMetricsWidget({ metrics }: {
   const { profit, revenue, expenses } = metrics
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-slide-up opacity-0 stagger-2">
-      <MetricCard
-        title="Прибыль недели"
-        value={profit}
-      />
+    <SimpleGrid cols={{ base: 1, md: 3 }} spacing="lg">
+      <MetricCard title="Прибыль недели" value={profit} />
       <MetricCard title="Выручка недели" value={revenue} />
       <MetricCard title="Расходы недели" value={expenses} />
-    </div>
+    </SimpleGrid>
   )
 }
