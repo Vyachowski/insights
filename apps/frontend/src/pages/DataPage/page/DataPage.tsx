@@ -1,3 +1,4 @@
+import { Container, Tabs } from '@mantine/core'
 import { useState } from 'react'
 
 import CallsTab from '../tabs/CallsTab'
@@ -6,8 +7,6 @@ import ExpensesTab from '../tabs/ExpensesTab'
 import MetricsTab from '../tabs/MetricsTab'
 import RevenueTab from '../tabs/RevenueTab'
 import SitesTab from '../tabs/SitesTab'
-
-import { cn } from '@/lib/utils'
 
 const tabs = [
   { id: 'revenue', label: 'Доходы' },
@@ -24,32 +23,21 @@ export default function DataPage() {
   const [activeTab, setActiveTab] = useState<TabId>('revenue')
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
-      <div className="flex flex-wrap gap-1 p-1 bg-slate-800/50 rounded-xl w-fit border border-slate-700/50">
-        {tabs.map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={cn(
-              'px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200',
-              activeTab === tab.id
-                ? 'bg-slate-700 text-white shadow-sm'
-                : 'text-slate-400 hover:text-slate-200',
-            )}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
+    <Container size="xl" px={0}>
+      <Tabs value={activeTab} onChange={value => setActiveTab(value as TabId)} keepMounted={false}>
+        <Tabs.List mb="md">
+          {tabs.map(tab => (
+            <Tabs.Tab key={tab.id} value={tab.id}>{tab.label}</Tabs.Tab>
+          ))}
+        </Tabs.List>
 
-      <div>
-        {activeTab === 'revenue' && <RevenueTab />}
-        {activeTab === 'expenses' && <ExpensesTab />}
-        {activeTab === 'calls' && <CallsTab />}
-        {activeTab === 'metrics' && <MetricsTab />}
-        {activeTab === 'cities' && <CitiesTab />}
-        {activeTab === 'sites' && <SitesTab />}
-      </div>
-    </div>
+        <Tabs.Panel value="revenue"><RevenueTab /></Tabs.Panel>
+        <Tabs.Panel value="expenses"><ExpensesTab /></Tabs.Panel>
+        <Tabs.Panel value="calls"><CallsTab /></Tabs.Panel>
+        <Tabs.Panel value="metrics"><MetricsTab /></Tabs.Panel>
+        <Tabs.Panel value="cities"><CitiesTab /></Tabs.Panel>
+        <Tabs.Panel value="sites"><SitesTab /></Tabs.Panel>
+      </Tabs>
+    </Container>
   )
 }

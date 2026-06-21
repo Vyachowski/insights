@@ -1,3 +1,4 @@
+import { Group, Text } from '@mantine/core'
 import Button from '@ui/Button'
 import { Upload, CheckCircle, XCircle } from 'lucide-react'
 import { useRef, useState } from 'react'
@@ -45,24 +46,26 @@ export default function CsvImportButton({ onImport, onSuccess, label = 'Импо
   }
 
   return (
-    <div className="flex items-center gap-2">
+    <Group gap="sm">
       {result && (
-        <span className="flex items-center gap-1.5 text-xs text-emerald-400">
+        <Group gap={6} c="teal">
           <CheckCircle size={13} />
-          +{result.created} загружено{result.skipped > 0 ? `, ${result.skipped} пропущено` : ''}
-        </span>
+          <Text size="xs">
+            +{result.created} загружено{result.skipped > 0 ? `, ${result.skipped} пропущено` : ''}
+          </Text>
+        </Group>
       )}
       {error && (
-        <span className="flex items-center gap-1.5 text-xs text-red-400">
+        <Group gap={6} c="red">
           <XCircle size={13} />
-          {error}
-        </span>
+          <Text size="xs">{error}</Text>
+        </Group>
       )}
       <input
         ref={inputRef}
         type="file"
         accept=".csv"
-        className="hidden"
+        hidden
         onChange={handleChange}
       />
       <Button
@@ -74,6 +77,6 @@ export default function CsvImportButton({ onImport, onSuccess, label = 'Импо
         <Upload size={15} />
         {label}
       </Button>
-    </div>
+    </Group>
   )
 }

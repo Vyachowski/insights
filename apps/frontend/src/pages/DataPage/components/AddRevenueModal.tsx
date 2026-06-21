@@ -1,6 +1,6 @@
+import { Group, Modal, Select, Stack } from '@mantine/core'
 import Button from '@ui/Button'
 import Input from '@ui/Input'
-import { X } from 'lucide-react'
 import { useState } from 'react'
 
 import type { Revenue, Site } from '@insights/contracts'
@@ -11,11 +11,20 @@ interface AddRevenueModalProps {
   onAdd: (entry: Omit<Revenue, 'id'>) => void
 }
 
+function siteLabel(url: string) {
+  try { return new URL(url).hostname } catch { return url }
+}
+
 export default function AddRevenueModal({ sites, onClose, onAdd }: AddRevenueModalProps) {
   const [date, setDate] = useState('')
   const [siteId, setSiteId] = useState<string>('')
   const [amount, setAmount] = useState('')
   const [errors, setErrors] = useState<Record<string, string>>({})
+
+  const siteOptions = [
+    { value: '', label: 'Общий (компания)' },
+    ...sites.map(site => ({ value: String(site.id), label: siteLabel(site.url) })),
+  ]
 
   function validate() {
     const e: Record<string, string> = {}
@@ -37,20 +46,9 @@ export default function AddRevenueModal({ sites, onClose, onAdd }: AddRevenueMod
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative z-10 w-full max-w-md mx-4 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl">
-        <div className="flex items-center justify-between p-6 border-b border-slate-800">
-          <h2 className="text-white font-semibold text-lg">Добавить доход</h2>
-          <button
-            onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
-          >
-            <X size={18} />
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+    <Modal opened onClose={onClose} title="Добавить доход" centered>
+      <form onSubmit={handleSubmit}>
+        <Stack gap="md">
           <Input
             label="Дата"
             type="date"
@@ -59,21 +57,14 @@ export default function AddRevenueModal({ sites, onClose, onAdd }: AddRevenueMod
             error={errors.date}
           />
 
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-slate-300">Сайт</label>
-            <select
-              value={siteId}
-              onChange={e => setSiteId(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200"
-            >
-              <option value="">Общий (компания)</option>
-              {sites.map(site => (
-                <option key={site.id} value={site.id}>
-                  {new URL(site.url).hostname}
-                </option>
-              ))}
-            </select>
-          </div>
+          <Select
+            label="Сайт"
+            value={siteId}
+            onChange={value => setSiteId(value ?? '')}
+            data={siteOptions}
+            allowDeselect={false}
+            comboboxProps={{ withinPortal: false }}
+          />
 
           <Input
             label="Сумма (₽)"
@@ -86,16 +77,16 @@ export default function AddRevenueModal({ sites, onClose, onAdd }: AddRevenueMod
             error={errors.amount}
           />
 
-          <div className="flex gap-3 pt-2">
-            <Button type="button" variant="secondary" className="flex-1" onClick={onClose}>
+          <Group justify="flex-end" gap="sm" pt="xs">
+            <Button type="button" variant="secondary" onClick={onClose}>
               Отмена
             </Button>
-            <Button type="submit" className="flex-1">
+            <Button type="submit">
               Добавить
             </Button>
-          </div>
-        </form>
-      </div>
-    </div>
+          </Group>
+        </Stack>
+      </form>
+    </Modal>
   )
 }

@@ -1,5 +1,5 @@
+import { Box, Code, Group, Paper, ScrollArea, Skeleton, Stack, Table, Text, Title } from '@mantine/core'
 import Button from '@ui/Button'
-import Card from '@ui/Card'
 import { MapPin, Plus } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
@@ -24,67 +24,67 @@ export default function CitiesTab() {
   }, [])
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-white font-semibold text-lg">Города</h2>
-          <p className="text-slate-500 text-sm mt-0.5">
+    <Stack gap="md">
+      <Group justify="space-between">
+        <Box>
+          <Title order={4}>Города</Title>
+          <Text c="dimmed" size="sm">
             {loading ? 'Загрузка...' : `${cities.length} городов`}
-          </p>
-        </div>
+          </Text>
+        </Box>
         <Button size="sm" disabled title="Добавление городов пока недоступно">
           <Plus size={16} />
           Добавить
         </Button>
-      </div>
+      </Group>
 
-      <Card size="sm" className="p-0 overflow-hidden">
+      <Paper withBorder radius="md" style={{ overflow: 'hidden' }}>
         {error ? (
-          <div className="py-16 text-center text-red-400 text-sm">{error}</div>
+          <Text c="red" ta="center" size="sm" py={64}>{error}</Text>
         ) : (
-          <table className="w-full">
-            <thead className="sticky top-0 z-10 bg-slate-900 border-b border-slate-700/50">
-              <tr>
-                <th className="text-left px-6 py-3.5 text-xs font-medium text-slate-400 uppercase tracking-wider">Город</th>
-                <th className="text-left px-6 py-3.5 text-xs font-medium text-slate-400 uppercase tracking-wider">Код</th>
-                <th className="text-right px-6 py-3.5 text-xs font-medium text-slate-400 uppercase tracking-wider">Население</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-700/30">
-              {loading ? (
-                Array.from({ length: 6 }).map((_, i) => (
-                  <tr key={i} className="animate-pulse">
-                    <td className="px-6 py-4"><div className="h-4 w-32 bg-slate-800 rounded" /></td>
-                    <td className="px-6 py-4"><div className="h-4 w-12 bg-slate-800 rounded" /></td>
-                    <td className="px-6 py-4 text-right"><div className="h-4 w-20 bg-slate-800 rounded ml-auto" /></td>
-                  </tr>
-                ))
-              ) : cities.length === 0 ? (
-                <tr>
-                  <td colSpan={3} className="py-16 text-center text-slate-500 text-sm">Нет данных</td>
-                </tr>
-              ) : (
-                cities.map(city => (
-                  <tr key={city.id} className="hover:bg-slate-800/30 transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                        <MapPin size={14} className="text-slate-500 shrink-0" />
-                        <span className="text-slate-200 font-medium">{city.name}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="text-xs font-mono px-2 py-1 rounded-md bg-slate-800 text-slate-400">{city.code}</span>
-                    </td>
-                    <td className="px-6 py-4 text-right text-slate-400 tabular-nums text-sm">
-                      {formatPopulation(city.population)}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+          <ScrollArea.Autosize mah={480}>
+            <Table stickyHeader highlightOnHover verticalSpacing="sm" horizontalSpacing="lg">
+              <Table.Thead>
+                <Table.Tr>
+                  <Table.Th>Город</Table.Th>
+                  <Table.Th>Код</Table.Th>
+                  <Table.Th ta="right">Население</Table.Th>
+                </Table.Tr>
+              </Table.Thead>
+              <Table.Tbody>
+                {loading ? (
+                  Array.from({ length: 6 }).map((_, i) => (
+                    <Table.Tr key={i}>
+                      <Table.Td><Skeleton h={16} w={130} /></Table.Td>
+                      <Table.Td><Skeleton h={16} w={50} /></Table.Td>
+                      <Table.Td><Skeleton h={16} w={80} ml="auto" /></Table.Td>
+                    </Table.Tr>
+                  ))
+                ) : cities.length === 0 ? (
+                  <Table.Tr>
+                    <Table.Td colSpan={3}>
+                      <Text ta="center" c="dimmed" size="sm" py={64}>Нет данных</Text>
+                    </Table.Td>
+                  </Table.Tr>
+                ) : (
+                  cities.map(city => (
+                    <Table.Tr key={city.id}>
+                      <Table.Td>
+                        <Group gap="xs" wrap="nowrap">
+                          <MapPin size={14} color="var(--mantine-color-dimmed)" />
+                          <Text fw={500}>{city.name}</Text>
+                        </Group>
+                      </Table.Td>
+                      <Table.Td><Code>{city.code}</Code></Table.Td>
+                      <Table.Td ta="right" c="dimmed">{formatPopulation(city.population)}</Table.Td>
+                    </Table.Tr>
+                  ))
+                )}
+              </Table.Tbody>
+            </Table>
+          </ScrollArea.Autosize>
         )}
-      </Card>
-    </div>
+      </Paper>
+    </Stack>
   )
 }

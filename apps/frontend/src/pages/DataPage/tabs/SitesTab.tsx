@@ -1,5 +1,5 @@
+import { Anchor, Box, Group, Paper, ScrollArea, Skeleton, Stack, Table, Text, Title } from '@mantine/core'
 import Button from '@ui/Button'
-import Card from '@ui/Card'
 import { Globe, Plus } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
@@ -30,72 +30,69 @@ export default function SitesTab() {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-white font-semibold text-lg">Сайты</h2>
-          <p className="text-slate-500 text-sm mt-0.5">
+    <Stack gap="md">
+      <Group justify="space-between">
+        <Box>
+          <Title order={4}>Сайты</Title>
+          <Text c="dimmed" size="sm">
             {loading ? 'Загрузка...' : `${sites.length} сайтов`}
-          </p>
-        </div>
+          </Text>
+        </Box>
         <Button size="sm" disabled title="Добавление сайтов пока недоступно">
           <Plus size={16} />
           Добавить
         </Button>
-      </div>
+      </Group>
 
-      <Card size="sm" className="p-0 overflow-hidden">
+      <Paper withBorder radius="md" style={{ overflow: 'hidden' }}>
         {error ? (
-          <div className="py-16 text-center text-red-400 text-sm">{error}</div>
+          <Text c="red" ta="center" size="sm" py={64}>{error}</Text>
         ) : (
-          <div className="overflow-auto max-h-[480px]">
-            <table className="w-full">
-              <thead className="sticky top-0 z-10 bg-slate-900 border-b border-slate-700/50">
-                <tr>
-                  <th className="text-left px-6 py-3.5 text-xs font-medium text-slate-400 uppercase tracking-wider">Сайт</th>
-                  <th className="text-left px-6 py-3.5 text-xs font-medium text-slate-400 uppercase tracking-wider">Город</th>
-                  <th className="text-left px-6 py-3.5 text-xs font-medium text-slate-400 uppercase tracking-wider">Группа</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-700/30">
+          <ScrollArea.Autosize mah={480}>
+            <Table stickyHeader highlightOnHover verticalSpacing="sm" horizontalSpacing="lg">
+              <Table.Thead>
+                <Table.Tr>
+                  <Table.Th>Сайт</Table.Th>
+                  <Table.Th>Город</Table.Th>
+                  <Table.Th>Группа</Table.Th>
+                </Table.Tr>
+              </Table.Thead>
+              <Table.Tbody>
                 {loading ? (
                   Array.from({ length: 8 }).map((_, i) => (
-                    <tr key={i} className="animate-pulse">
-                      <td className="px-6 py-4"><div className="h-4 w-48 bg-slate-800 rounded" /></td>
-                      <td className="px-6 py-4"><div className="h-4 w-24 bg-slate-800 rounded" /></td>
-                      <td className="px-6 py-4"><div className="h-4 w-16 bg-slate-800 rounded" /></td>
-                    </tr>
+                    <Table.Tr key={i}>
+                      <Table.Td><Skeleton h={16} w={180} /></Table.Td>
+                      <Table.Td><Skeleton h={16} w={100} /></Table.Td>
+                      <Table.Td><Skeleton h={16} w={60} /></Table.Td>
+                    </Table.Tr>
                   ))
                 ) : sites.length === 0 ? (
-                  <tr>
-                    <td colSpan={3} className="py-16 text-center text-slate-500 text-sm">Нет данных</td>
-                  </tr>
+                  <Table.Tr>
+                    <Table.Td colSpan={3}>
+                      <Text ta="center" c="dimmed" size="sm" py={64}>Нет данных</Text>
+                    </Table.Td>
+                  </Table.Tr>
                 ) : (
                   sites.map(site => (
-                    <tr key={site.id} className="hover:bg-slate-800/30 transition-colors">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
-                          <Globe size={14} className="text-slate-500 shrink-0" />
-                          <a
-                            href={site.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-slate-200 hover:text-emerald-400 transition-colors text-sm"
-                          >
+                    <Table.Tr key={site.id}>
+                      <Table.Td>
+                        <Group gap="xs" wrap="nowrap">
+                          <Globe size={14} color="var(--mantine-color-dimmed)" />
+                          <Anchor href={site.url} target="_blank" rel="noopener noreferrer" size="sm">
                             {getHostname(site.url)}
-                          </a>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-slate-400 text-sm">{getCityName(site.cityId)}</td>
-                      <td className="px-6 py-4 text-slate-500 text-sm">{site.group ?? '—'}</td>
-                    </tr>
+                          </Anchor>
+                        </Group>
+                      </Table.Td>
+                      <Table.Td c="dimmed">{getCityName(site.cityId)}</Table.Td>
+                      <Table.Td c="dimmed">{site.group ?? '—'}</Table.Td>
+                    </Table.Tr>
                   ))
                 )}
-              </tbody>
-            </table>
-          </div>
+              </Table.Tbody>
+            </Table>
+          </ScrollArea.Autosize>
         )}
-      </Card>
-    </div>
+      </Paper>
+    </Stack>
   )
 }
