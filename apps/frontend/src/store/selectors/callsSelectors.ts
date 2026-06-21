@@ -2,7 +2,7 @@ import { createSelector } from '@reduxjs/toolkit'
 
 import type { RootState } from '..'
 
-export const selectCallsData = (state: RootState) => state.calls.data
+const selectCallsData = (state: RootState) => state.calls.data
 export const selectCallsLoading = (state: RootState) => state.calls.isLoading
 export const selectCallsError = (state: RootState) => state.calls.error
 

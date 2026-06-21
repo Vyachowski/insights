@@ -14,11 +14,7 @@ const initialState: ResourceState<Partial<DashboardResponse>> = {
 const dashboardSlice = createSlice({
   name: 'dashboard',
   initialState,
-  reducers: {
-    clearDashboard: state => {
-      state.data = initialState.data
-    },
-  },
+  reducers: {},
   extraReducers: builder => {
     builder
       .addCase(fetchDashboardSummary.pending, state => {
@@ -36,5 +32,4 @@ const dashboardSlice = createSlice({
   },
 })
 
-export const { clearDashboard } = dashboardSlice.actions
 export default dashboardSlice.reducer

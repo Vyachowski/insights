@@ -5,7 +5,7 @@ import { fetchLogin, fetchLogout, fetchMe } from '../thunks/authThunks'
 import type { ApiError } from '@insights/contracts'
 import type { User } from '@insights/contracts/auth.types'
 
-export interface AuthState {
+interface AuthState {
   user: User | null
   isAuthenticated: boolean
   isLoading: boolean

@@ -14,14 +14,7 @@ const initialState: ResourceState<Expense[]> = {
 const expensesSlice = createSlice({
   name: 'expenses',
   initialState,
-  reducers: {
-    removeExpense: (state, action: { payload: number }) => {
-      state.data = state.data.filter(e => e.id !== action.payload)
-    },
-    addExpense: (state, action: { payload: Expense }) => {
-      state.data.unshift(action.payload)
-    },
-  },
+  reducers: {},
   extraReducers: builder => {
     builder
       .addCase(fetchExpenses.pending, state => {
@@ -39,5 +32,4 @@ const expensesSlice = createSlice({
   },
 })
 
-export const { removeExpense, addExpense } = expensesSlice.actions
 export default expensesSlice.reducer

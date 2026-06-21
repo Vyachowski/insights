@@ -5,8 +5,3 @@ export interface ResourceState<T> {
   isLoading: boolean
   error: ApiError | null
 }
-
-export interface EntityState<T> {
-  entities: Record<string, T>
-  ids: string[]
-}
