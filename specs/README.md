@@ -26,7 +26,7 @@ The project is a monorepo managed with npm workspaces:
 insights/
 ├── apps/
 │   ├── backend/      # NestJS REST API
-│   └── frontend/     # SPA (React, Vite, Tailwind CSS, Redux Toolkit)
+│   └── frontend/     # SPA (React, Vite, Mantine UI, Redux Toolkit)
 ├── packages/
 │   └── contracts/    # Shared TypeScript contracts (API types and payloads)
 ├── specs/
@@ -42,7 +42,7 @@ insights/
 
 ### 3.2 Frontend Stack
 - **Bundler & Tooling**: Vite + React.
-- **Styling**: Tailwind CSS.
+- **UI & Styling**: [Mantine UI](https://mantine.dev/) component library.
 - **State Management**: Redux Toolkit.
 - **HTTP Client**: Axios with `withCredentials: true` (cookies).
 
