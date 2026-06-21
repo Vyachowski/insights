@@ -1,5 +1,6 @@
+import { AppShell } from '@mantine/core'
+import { useDisclosure } from '@mantine/hooks'
 import Header from '@ui/Header'
-import { useState } from 'react'
 import { Outlet, useLocation } from 'react-router'
 
 import ModalManager from '@/components/ModalManager'
@@ -8,40 +9,33 @@ import { menuItems } from '@/navigation'
 
 export default function MainLayout() {
   const { pathname } = useLocation()
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
-
-  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen)
-  const closeSidebar = () => setIsSidebarOpen(false)
+  const [opened, { toggle, close }] = useDisclosure(false)
 
   const activePageId = pathname.split('/').at(1) || menuItems[0].id
 
   return (
-    <div className="h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 flex">
-      {isSidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-          onClick={closeSidebar}
-        />
-      )}
-
-      <Sidebar
-        onClose={closeSidebar}
-        isSidebarOpen={isSidebarOpen}
-      />
-
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+    <AppShell
+      header={{ height: 72 }}
+      navbar={{ width: 260, breakpoint: 'lg', collapsed: { mobile: !opened } }}
+      padding="lg"
+    >
+      <AppShell.Header>
         <Header
           activeTabId={activePageId}
-          onMenuClick={toggleSidebar}
-          isSidebarOpen={isSidebarOpen}
+          onMenuClick={toggle}
+          isSidebarOpen={opened}
         />
+      </AppShell.Header>
 
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
-          <Outlet context={activePageId} />
-        </main>
-      </div>
+      <AppShell.Navbar>
+        <Sidebar onClose={close} />
+      </AppShell.Navbar>
+
+      <AppShell.Main>
+        <Outlet context={activePageId} />
+      </AppShell.Main>
 
       <ModalManager />
-    </div>
+    </AppShell>
   )
 }
