@@ -1,37 +1,28 @@
-import { cva, type VariantProps } from 'class-variance-authority'
+import { Paper } from '@mantine/core'
 
 import type { ReactNode } from 'react'
 
-import { cn } from '@/lib/utils'
+type Size = 'sm' | 'md' | 'lg'
 
-const cardVariants = cva(
-  'backdrop-blur-xl bg-linear-to-br from-slate-800/50 to-slate-900/50 border border-slate-700/50 shadow-2xl',
-  {
-    variants: {
-      size: {
-        sm: 'p-4 rounded-lg',
-        md: 'p-6 rounded-2xl',
-        lg: 'p-8 rounded-2xl',
-      },
-    },
-    defaultVariants: {
-      size: 'lg',
-    },
-  },
-)
+const sizeProps: Record<Size, { p: string, radius: string }> = {
+  sm: { p: 'md', radius: 'md' },
+  md: { p: 'lg', radius: 'lg' },
+  lg: { p: 'xl', radius: 'lg' },
+}
 
-interface CardProps extends VariantProps<typeof cardVariants> {
+interface CardProps {
   children: ReactNode
   className?: string
+  size?: Size
   as?: 'article' | 'section' | 'div'
 }
 
-export default function Card({ children, className, size, as = 'article' }: CardProps) {
-  const Component = as
+export default function Card({ children, className, size = 'lg', as = 'article' }: CardProps) {
+  const { p, radius } = sizeProps[size]
 
   return (
-    <Component className={cn(cardVariants({ size }), className)}>
+    <Paper component={as} className={className} p={p} radius={radius} withBorder shadow="sm">
       {children}
-    </Component>
+    </Paper>
   )
 }
