@@ -1,5 +1,6 @@
+import { Box, Divider, Group, Modal, Stack, Text, TextInput } from '@mantine/core'
 import Button from '@ui/Button'
-import { X, Upload, CheckCircle, XCircle } from 'lucide-react'
+import { CheckCircle, Upload, XCircle } from 'lucide-react'
 import { useRef, useState } from 'react'
 
 import type { ImportResult } from '@insights/contracts'
@@ -66,71 +67,61 @@ export default function CsvImportModal({ config, onClose }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-
-      <div className="relative w-full max-w-md bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800">
-          <h2 className="text-lg font-semibold text-white">{config.title}</h2>
-          <button onClick={onClose} className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
-            <X size={18} />
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="px-6 py-5 flex flex-col gap-4">
-          {/* URL input */}
-          <input
+    <Modal opened onClose={onClose} title={config.title} centered>
+      <form onSubmit={handleSubmit}>
+        <Stack gap="md">
+          <TextInput
             type="url"
             placeholder="Вставьте ссылку на .csv файл"
             value={url}
-            onChange={e => { setUrl(e.target.value); setFile(null) }}
+            onChange={e => { setUrl(e.currentTarget.value); setFile(null) }}
             disabled={loading}
-            className="w-full px-4 py-2.5 rounded-xl bg-slate-800/50 border border-slate-700 text-white placeholder:text-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all disabled:opacity-50"
           />
 
-          {/* Divider */}
-          <div className="flex items-center gap-3">
-            <div className="flex-1 h-px bg-slate-800" />
-            <span className="text-xs text-slate-600">или</span>
-            <div className="flex-1 h-px bg-slate-800" />
-          </div>
+          <Divider label="или" labelPosition="center" />
 
-          {/* File drop area */}
-          <div
+          <Box
             onClick={() => !loading && fileInputRef.current?.click()}
-            className={`w-full border-2 border-dashed rounded-xl p-7 flex flex-col items-center gap-2 cursor-pointer transition-colors group ${
-              file
-                ? 'border-emerald-500/50 bg-emerald-500/5'
-                : 'border-slate-700 hover:border-emerald-500/50'
-            }`}
+            p="lg"
+            style={{
+              cursor: loading ? 'default' : 'pointer',
+              borderRadius: 'var(--mantine-radius-md)',
+              border: `2px dashed var(--mantine-color-${file ? 'teal-5' : 'default-border'})`,
+            }}
           >
-            <Upload size={24} className={`transition-colors ${file ? 'text-emerald-400' : 'text-slate-500 group-hover:text-emerald-400'}`} />
-            {file ? (
-              <p className="text-sm text-emerald-400 font-medium truncate max-w-full px-2">{file.name}</p>
-            ) : (
-              <p className="text-slate-400 text-sm text-center">
-                Нажмите чтобы выбрать <span className="text-emerald-400">.csv</span> файл
-              </p>
-            )}
-          </div>
-          <input ref={fileInputRef} type="file" accept=".csv" className="hidden" onChange={handleFileChange} />
+            <Stack align="center" gap="xs">
+              <Upload
+                size={24}
+                color={file ? 'var(--mantine-color-teal-4)' : 'var(--mantine-color-dimmed)'}
+              />
+              {file ? (
+                <Text size="sm" c="teal" fw={500} truncate="end">{file.name}</Text>
+              ) : (
+                <Text size="sm" c="dimmed" ta="center">
+                  Нажмите чтобы выбрать <Text span c="teal">.csv</Text> файл
+                </Text>
+              )}
+            </Stack>
+          </Box>
+          <input ref={fileInputRef} type="file" accept=".csv" hidden onChange={handleFileChange} />
 
-          {/* Result / Error */}
           {result && (
-            <div className="flex items-center gap-2 text-sm text-emerald-400">
+            <Group gap="xs" c="teal">
               <CheckCircle size={15} />
-              {[
-                result.created > 0 && `+${result.created} создано`,
-                result.updated != null && result.updated > 0 && `${result.updated} обновлено`,
-                result.skipped > 0 && `${result.skipped} пропущено`,
-              ].filter(Boolean).join(', ') || 'Без изменений'}
-            </div>
+              <Text size="sm">
+                {[
+                  result.created > 0 && `+${result.created} создано`,
+                  result.updated != null && result.updated > 0 && `${result.updated} обновлено`,
+                  result.skipped > 0 && `${result.skipped} пропущено`,
+                ].filter(Boolean).join(', ') || 'Без изменений'}
+              </Text>
+            </Group>
           )}
           {error && (
-            <div className="flex items-center gap-2 text-sm text-red-400">
+            <Group gap="xs" c="red">
               <XCircle size={15} />
-              {error}
-            </div>
+              <Text size="sm">{error}</Text>
+            </Group>
           )}
 
           {result ? (
@@ -143,8 +134,8 @@ export default function CsvImportModal({ config, onClose }: Props) {
               Загрузить
             </Button>
           )}
-        </form>
-      </div>
-    </div>
+        </Stack>
+      </form>
+    </Modal>
   )
 }
