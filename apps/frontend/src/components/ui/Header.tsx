@@ -1,4 +1,5 @@
-import { LogOut, Menu } from 'lucide-react'
+import { Box, Burger, Button, Group, Text, Title } from '@mantine/core'
+import { LogOut } from 'lucide-react'
 import { useNavigate } from 'react-router'
 
 import { useAuth } from '@/hooks/useAuth'
@@ -26,40 +27,48 @@ export default function Header({
   }
 
   return (
-    <header className="bg-slate-900/50 backdrop-blur-xl border-b border-slate-800 px-4 md:px-6 lg:px-8 py-4">
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3 md:gap-4 min-w-0 flex-1">
-          {/* Burger button: mobile only */}
-          <button
-            onClick={onMenuClick}
-            className="lg:hidden p-2 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors shrink-0"
-            aria-label={isSidebarOpen ? 'Закрыть меню' : 'Открыть меню'}
-          >
-            <Menu size={24} />
-          </button>
+    <Group
+      component="header"
+      justify="space-between"
+      gap="md"
+      px="lg"
+      py="md"
+      wrap="nowrap"
+      style={{ borderBottom: '1px solid var(--mantine-color-default-border)' }}
+    >
+      <Group gap="md" wrap="nowrap" style={{ minWidth: 0, flex: 1 }}>
+        <Burger
+          opened={isSidebarOpen}
+          onClick={onMenuClick}
+          hiddenFrom="lg"
+          size="sm"
+          aria-label={isSidebarOpen ? 'Закрыть меню' : 'Открыть меню'}
+        />
 
-          <div className="min-w-0">
-            <h1 className="text-xl md:text-2xl font-bold text-white truncate">
-              {activeMenuItem?.label}
-            </h1>
-            {activeMenuItem?.description && (
-              <p className="text-slate-500 text-xs md:text-sm mt-0.5 md:mt-1 truncate">
-                {activeMenuItem.description}
-              </p>
-            )}
-          </div>
-        </div>
+        <Box style={{ minWidth: 0 }}>
+          <Title order={3} lineClamp={1}>{activeMenuItem?.label}</Title>
+          {activeMenuItem?.description && (
+            <Text c="dimmed" size="sm" lineClamp={1}>
+              {activeMenuItem.description}
+            </Text>
+          )}
+        </Box>
+      </Group>
 
-        <div className="flex items-center gap-3 shrink-0">
-          <span className="hidden md:block text-slate-500 text-sm">
-            {new Date().toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })}
-          </span>
-          <button onClick={handleLogout} disabled={isLoading} className="flex items-center gap-2 px-3 md:px-4 py-2 rounded-xl bg-slate-800 hover:bg-red-500/20 text-slate-300 hover:text-red-400 border border-slate-700 hover:border-red-500/50 transition-all duration-300 cursor-pointer">
-            <LogOut size={18} />
-            <span className="font-medium hidden sm:inline">{isLoading ? 'Выходим...' : 'Выход'}</span>
-          </button>
-        </div>
-      </div>
-    </header>
+      <Group gap="sm" wrap="nowrap">
+        <Text c="dimmed" size="sm" visibleFrom="md">
+          {new Date().toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })}
+        </Text>
+        <Button
+          variant="default"
+          color="red"
+          onClick={handleLogout}
+          loading={isLoading}
+          leftSection={<LogOut size={18} />}
+        >
+          {isLoading ? 'Выходим...' : 'Выход'}
+        </Button>
+      </Group>
+    </Group>
   )
 }
