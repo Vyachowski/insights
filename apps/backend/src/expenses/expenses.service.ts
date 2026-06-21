@@ -58,7 +58,7 @@ constructor(private readonly prismaService: PrismaService) {}
       else invalid++;
     }
 
-    assertSkipRate(created + updated, invalid);
+    assertSkipRate(created + updated + skipped, invalid);
     return { created, updated, skipped };
   }
 
