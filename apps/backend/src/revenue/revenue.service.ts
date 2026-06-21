@@ -58,7 +58,7 @@ export class RevenueService {
       else invalid++;
     }
 
-    assertSkipRate(created + updated, invalid);
+    assertSkipRate(created + updated + skipped, invalid);
     return { created, updated, skipped };
   }
 

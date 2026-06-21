@@ -81,6 +81,8 @@ export class CallsService {
       sites.map(s => [s.city.name.toLowerCase(), s.id]),
     );
 
+    let invalidCount = 0;
+
     const records = rows.flatMap(row => {
       const date = parseGudokDate(row['Дата'] ?? '');
       const src = row['Кто звонил']?.trim();
@@ -90,7 +92,10 @@ export class CallsService {
       const siteId = cityToSiteId.get(projectTitle);
 
       // Skip rows with no date, src, invalid callNumber, or unresolved siteId
-      if (!date || !src || isNaN(callNumber) || siteId === undefined) return [];
+      if (!date || !src || isNaN(callNumber) || siteId === undefined) {
+        invalidCount++;
+        return [];
+      }
 
       return [{
         siteId,
@@ -115,7 +120,7 @@ export class CallsService {
 
     const created = result.count;
     const skipped = records.length - result.count;
-    assertSkipRate(created, skipped);
+    assertSkipRate(records.length, invalidCount);
     return { created, skipped };
   }
 

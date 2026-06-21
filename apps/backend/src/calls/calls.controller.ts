@@ -20,15 +20,17 @@ export class CallsController {
   @ApiOperation({ summary: 'Get calls filtered by site and date range' })
   @ApiWrappedResponse(CallResponseDto, true)
   @Get()
-  findAll(@Query() query: AnalyticsQueryDto) {
-    return this.callsService.findAll(query);
+  async findAll(@Query() query: AnalyticsQueryDto) {
+    const calls = await this.callsService.findAll(query);
+    return calls.map((c) => new CallResponseDto(c));
   }
 
   @ApiOperation({ summary: 'Get call imports filtered by site and date range' })
   @ApiWrappedResponse(CallImportResponseDto, true)
   @Get('imports')
-  findImports(@Query() query: AnalyticsQueryDto) {
-    return this.callsService.findImports(query);
+  async findImports(@Query() query: AnalyticsQueryDto) {
+    const imports = await this.callsService.findImports(query);
+    return imports.map((i) => new CallImportResponseDto(i));
   }
 
   @ApiOperation({ summary: 'Import calls from Gudok CSV export (Russian headers)' })
