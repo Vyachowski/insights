@@ -17,6 +17,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant
   size?: Size
   isLoading?: boolean
+  fullWidth?: boolean
 }
 
 export default function Button({
@@ -25,6 +26,7 @@ export default function Button({
   variant = 'primary',
   size = 'md',
   isLoading,
+  fullWidth,
   disabled,
   ...props
 }: ButtonProps) {
@@ -36,6 +38,7 @@ export default function Button({
       variant={mapped.variant}
       color={mapped.color}
       size={size}
+      fullWidth={fullWidth}
       loading={isLoading}
       disabled={disabled}
       {...props}

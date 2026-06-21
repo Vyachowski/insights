@@ -1,3 +1,4 @@
+import { Alert, Stack } from '@mantine/core'
 import Button from '@ui/Button'
 import Input from '@ui/Input'
 import { useState } from 'react'
@@ -22,42 +23,44 @@ export default function LoginForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {error && (
-        <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/50 text-red-400 text-sm">
-          {error.message}
-        </div>
-      )}
+    <form onSubmit={handleSubmit}>
+      <Stack gap="lg">
+        {error && (
+          <Alert color="red" variant="light">
+            {error.message}
+          </Alert>
+        )}
 
-      <Input
-        type="email"
-        label="Email"
-        placeholder="example@company.com"
-        value={email}
-        onChange={e => setEmail(e.target.value)}
-        required
-        autoComplete="email"
-        autoFocus
-      />
+        <Input
+          type="email"
+          label="Email"
+          placeholder="example@company.com"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          required
+          autoComplete="email"
+          autoFocus
+        />
 
-      <Input
-        type="password"
-        label="Пароль"
-        placeholder="••••••••"
-        value={password}
-        onChange={e => setPassword(e.target.value)}
-        required
-        autoComplete="current-password"
-      />
+        <Input
+          type="password"
+          label="Пароль"
+          placeholder="••••••••"
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+          required
+          autoComplete="current-password"
+        />
 
-      <Button
-        type="submit"
-        size="lg"
-        className="w-full cursor-pointer"
-        isLoading={isLoading}
-      >
-        Войти
-      </Button>
+        <Button
+          type="submit"
+          size="lg"
+          fullWidth
+          isLoading={isLoading}
+        >
+          Войти
+        </Button>
+      </Stack>
     </form>
   )
 }

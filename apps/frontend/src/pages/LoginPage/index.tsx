@@ -1,3 +1,4 @@
+import { Stack, Text, Title } from '@mantine/core'
 import Card from '@ui/Card'
 import Logo from '@ui/Logo'
 
@@ -5,27 +6,16 @@ import LoginForm from './components/LoginForm'
 
 export default function LoginPage() {
   return (
-    <div className="space-y-8">
-
-      <div className="text-center space-y-3">
-        <Logo className='mx-auto mb-4'/>
-        <h1 className="text-3xl font-bold text-white">
-          Добро пожаловать
-        </h1>
-        <p className="text-slate-400">
-          Войдите в систему для доступа к аналитике
-        </p>
-      </div>
+    <Stack gap="xl">
+      <Stack align="center" gap="xs">
+        <Logo />
+        <Title order={2} mt="md">Добро пожаловать</Title>
+        <Text c="dimmed">Войдите в систему для доступа к аналитике</Text>
+      </Stack>
 
       <Card size="lg">
         <LoginForm />
       </Card>
-
-      {/* <div className="text-center">
-        <button className="text-sm text-slate-400 hover:text-emerald-400 transition-colors">
-          Забыли пароль?
-        </button>
-      </div> */}
-    </div>
+    </Stack>
   )
 }
