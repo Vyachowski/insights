@@ -172,7 +172,7 @@ ESLint is the single source of truth for linting. **oxlint is deliberately not u
 
 Driven by **`simple-git-hooks`** (config in root `package.json`), activated on `npm install` via the `prepare` script. After a fresh clone, run `npx simple-git-hooks` once to install them.
 
-- **`pre-commit`** → `npx lint-staged`. `lint-staged` runs `eslint --fix` on **staged files only**, routed to the correct workspace config by path glob (`apps/backend/**/*.ts`, `apps/frontend/**/*.{ts,tsx}`). Fast — it never lints the whole tree.
+- **`pre-commit`** → `npx lint-staged`. `lint-staged` runs `eslint --fix` on **staged `apps/**/*.{ts,tsx}` files only** (never the whole tree). ESLint runs once from the repo root; the `--flag v10_config_lookup_from_file` option makes it resolve each file's nearest workspace flat config (the default in ESLint v10), so a mixed-workspace commit is linted correctly in a single pass.
 - **`commit-msg`** → `npx commitlint --edit` validates the message.
 
 ### 11.3 Commit messages
