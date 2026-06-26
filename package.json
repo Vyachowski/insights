@@ -31,5 +31,8 @@
   "simple-git-hooks": {
     "pre-commit": "npx lint-staged",
     "commit-msg": "npx --no-install commitlint --edit \"$1\""
+  },
+  "lint-staged": {
+    "apps/**/*.{ts,tsx}": "eslint --flag v10_config_lookup_from_file --fix"
   }
 }
