@@ -4,13 +4,13 @@ import { useDispatch, useSelector } from 'react-redux'
 import MetricsTabView from './MetricsTabView'
 
 import type { AppDispatch } from '@/store'
-import type { Site } from '@insights/contracts'
 
-import { sitesApi } from '@/api/sites'
 import { selectImportTick } from '@/store/selectors/appSelectors'
 import { selectMetricsByYear, selectMetricsError, selectMetricsLoading, selectMetricYears } from '@/store/selectors/metricsSelectors'
+import { selectSites } from '@/store/selectors/sitesSelectors'
 import { openImportModal } from '@/store/slices/appSlice'
 import { fetchMetrics } from '@/store/thunks/metricsThunks'
+import { fetchSites } from '@/store/thunks/sitesThunks'
 
 export default function MetricsTab() {
   const dispatch = useDispatch<AppDispatch>()
@@ -20,13 +20,11 @@ export default function MetricsTab() {
   const error = useSelector(selectMetricsError)
   const availableYears = useSelector(selectMetricYears)
 
-  const [sites, setSites] = useState<Site[]>([])
+  const sites = useSelector(selectSites)
   const [selectedYear, setSelectedYear] = useState<number | null>(null)
   const effectiveYear = selectedYear ?? availableYears[0] ?? null
 
-  useEffect(() => {
-    sitesApi.fetchAll().then(setSites).catch(() => {})
-  }, [])
+  useEffect(() => { dispatch(fetchSites()) }, [dispatch])
 
   useEffect(() => { dispatch(fetchMetrics()) }, [importTick, dispatch])
 

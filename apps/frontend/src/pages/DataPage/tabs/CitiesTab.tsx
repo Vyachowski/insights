@@ -1,27 +1,25 @@
 import { Box, Code, Group, Paper, ScrollArea, Skeleton, Stack, Table, Text, Title } from '@mantine/core'
 import Button from '@ui/Button'
 import { MapPin, Plus } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 
-import type { City } from '@insights/contracts'
+import type { AppDispatch } from '@/store'
 
-import { citiesApi } from '@/api/cities'
+import { selectCities, selectCitiesError, selectCitiesLoading } from '@/store/selectors/citiesSelectors'
+import { fetchCities } from '@/store/thunks/citiesThunks'
 
 function formatPopulation(n: number) {
   return new Intl.NumberFormat('ru-RU').format(n)
 }
 
 export default function CitiesTab() {
-  const [cities, setCities] = useState<City[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const dispatch = useDispatch<AppDispatch>()
+  const cities = useSelector(selectCities)
+  const loading = useSelector(selectCitiesLoading)
+  const error = useSelector(selectCitiesError)
 
-  useEffect(() => {
-    citiesApi.fetchAll()
-      .then(setCities)
-      .catch(e => setError(e?.message ?? 'Ошибка загрузки'))
-      .finally(() => setLoading(false))
-  }, [])
+  useEffect(() => { dispatch(fetchCities()) }, [dispatch])
 
   return (
     <Stack gap="md">
@@ -40,7 +38,7 @@ export default function CitiesTab() {
 
       <Paper withBorder radius="md" style={{ overflow: 'hidden' }}>
         {error ? (
-          <Text c="red" ta="center" size="sm" py={64}>{error}</Text>
+          <Text c="red" ta="center" size="sm" py={64}>{error.message}</Text>
         ) : (
           <ScrollArea.Autosize mah={480}>
             <Table stickyHeader highlightOnHover verticalSpacing="sm" horizontalSpacing="lg">

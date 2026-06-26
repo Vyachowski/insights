@@ -4,15 +4,16 @@ import { useDispatch, useSelector } from 'react-redux'
 import RevenueTabView from './RevenueTabView'
 
 import type { AppDispatch } from '@/store'
-import type { Revenue, Site } from '@insights/contracts'
+import type { Revenue } from '@insights/contracts'
 
-import { sitesApi } from '@/api/sites'
 import { useAuth } from '@/hooks/useAuth'
 import { selectImportTick } from '@/store/selectors/appSelectors'
 import { selectRevenueByYear, selectRevenueError, selectRevenueLoading, selectRevenueYears } from '@/store/selectors/revenueSelectors'
+import { selectSites } from '@/store/selectors/sitesSelectors'
 import { openImportModal } from '@/store/slices/appSlice'
 import { addRevenue, removeRevenue } from '@/store/slices/revenueSlice'
 import { fetchRevenue } from '@/store/thunks/revenueThunks'
+import { fetchSites } from '@/store/thunks/sitesThunks'
 
 export default function RevenueTab() {
   const dispatch = useDispatch<AppDispatch>()
@@ -24,14 +25,12 @@ export default function RevenueTab() {
   const error = useSelector(selectRevenueError)
   const availableYears = useSelector(selectRevenueYears)
 
-  const [sites, setSites] = useState<Site[]>([])
+  const sites = useSelector(selectSites)
   const [selectedYear, setSelectedYear] = useState<number | null>(null)
   const [showModal, setShowModal] = useState(false)
   const effectiveYear = selectedYear ?? availableYears[0] ?? null
 
-  useEffect(() => {
-    sitesApi.fetchAll().then(setSites).catch(() => {})
-  }, [])
+  useEffect(() => { dispatch(fetchSites()) }, [dispatch])
 
   useEffect(() => { dispatch(fetchRevenue()) }, [importTick, dispatch])
 

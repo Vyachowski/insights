@@ -1,49 +1,37 @@
 import CsvImportModal, { type CsvImportConfig } from '@ui/CsvImportModal'
 import { useDispatch, useSelector } from 'react-redux'
 
-import { callsApi } from '@/api/calls'
-import { expensesApi } from '@/api/expenses'
-import { metricsApi } from '@/api/metrics'
-import { revenueApi } from '@/api/revenue'
+import type { AppDispatch } from '@/store'
+
 import { selectActiveModal } from '@/store/selectors/appSelectors'
 import { bumpImportTick, closeModal, type ImportModalTarget } from '@/store/slices/appSlice'
+import { importData } from '@/store/thunks/importThunks'
 
-const CONFIGS: Record<ImportModalTarget, Omit<CsvImportConfig, 'onSuccess'>> = {
-  expenses: {
-    title: 'Импорт расходов',
-    onImportFile: expensesApi.uploadCsv,
-    onImportUrl: expensesApi.uploadUrl,
-  },
-  revenue: {
-    title: 'Импорт доходов',
-    onImportFile: revenueApi.uploadCsv,
-    onImportUrl: revenueApi.uploadUrl,
-  },
-  calls: {
-    title: 'Импорт звонков',
-    onImportFile: callsApi.uploadCsv,
-    onImportUrl: callsApi.uploadUrl,
-  },
-  metrics: {
-    title: 'Импорт метрик',
-    onImportFile: metricsApi.uploadCsv,
-    onImportUrl: metricsApi.uploadUrl,
-  },
+const TITLES: Record<ImportModalTarget, string> = {
+  expenses: 'Импорт расходов',
+  revenue: 'Импорт доходов',
+  calls: 'Импорт звонков',
+  metrics: 'Импорт метрик',
 }
 
 export default function ModalManager() {
-  const dispatch = useDispatch()
+  const dispatch = useDispatch<AppDispatch>()
   const activeModal = useSelector(selectActiveModal)
 
   if (!activeModal || activeModal.type !== 'csv-import') return null
 
-  const config = CONFIGS[activeModal.target]
-
   const target = activeModal.target
+
+  const config: CsvImportConfig = {
+    title: TITLES[target],
+    onImportFile: file => dispatch(importData({ target, file })).unwrap(),
+    onImportUrl: url => dispatch(importData({ target, url })).unwrap(),
+    onSuccess: () => dispatch(bumpImportTick(target)),
+  }
 
   return (
     <CsvImportModal
-      config={{ ...config, onSuccess: () => dispatch(bumpImportTick(target)) }}
+      config={config}
       onClose={() => dispatch(closeModal())}
     />
   )

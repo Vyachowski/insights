@@ -4,13 +4,13 @@ import { useDispatch, useSelector } from 'react-redux'
 import ExpensesTabView from './ExpensesTabView'
 
 import type { AppDispatch } from '@/store'
-import type { Site } from '@insights/contracts'
 
-import { sitesApi } from '@/api/sites'
 import { selectImportTick } from '@/store/selectors/appSelectors'
 import { selectExpensesByYear, selectExpensesError, selectExpensesLoading, selectExpenseYears } from '@/store/selectors/expensesSelectors'
+import { selectSites } from '@/store/selectors/sitesSelectors'
 import { openImportModal } from '@/store/slices/appSlice'
 import { fetchExpenses } from '@/store/thunks/expensesThunks'
+import { fetchSites } from '@/store/thunks/sitesThunks'
 
 export default function ExpensesTab() {
   const dispatch = useDispatch<AppDispatch>()
@@ -20,13 +20,11 @@ export default function ExpensesTab() {
   const error = useSelector(selectExpensesError)
   const availableYears = useSelector(selectExpenseYears)
 
-  const [sites, setSites] = useState<Site[]>([])
+  const sites = useSelector(selectSites)
   const [selectedYear, setSelectedYear] = useState<number | null>(null)
   const effectiveYear = selectedYear ?? availableYears[0] ?? null
 
-  useEffect(() => {
-    sitesApi.fetchAll().then(setSites).catch(() => {})
-  }, [])
+  useEffect(() => { dispatch(fetchSites()) }, [dispatch])
 
   useEffect(() => { dispatch(fetchExpenses()) }, [importTick, dispatch])
 

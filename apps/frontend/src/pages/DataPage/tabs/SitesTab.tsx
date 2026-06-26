@@ -1,29 +1,35 @@
 import { Anchor, Box, Group, Paper, ScrollArea, Skeleton, Stack, Table, Text, Title } from '@mantine/core'
 import Button from '@ui/Button'
 import { Globe, Plus } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 
-import type { City, Site } from '@insights/contracts'
+import type { AppDispatch } from '@/store'
 
-import { citiesApi } from '@/api/cities'
-import { sitesApi } from '@/api/sites'
+import { selectCities, selectCitiesError, selectCitiesLoading } from '@/store/selectors/citiesSelectors'
+import { selectSites, selectSitesError, selectSitesLoading } from '@/store/selectors/sitesSelectors'
+import { fetchCities } from '@/store/thunks/citiesThunks'
+import { fetchSites } from '@/store/thunks/sitesThunks'
 
 function getHostname(url: string) {
   try { return new URL(url).hostname } catch { return url }
 }
 
 export default function SitesTab() {
-  const [sites, setSites] = useState<Site[]>([])
-  const [cities, setCities] = useState<City[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const dispatch = useDispatch<AppDispatch>()
+  const sites = useSelector(selectSites)
+  const cities = useSelector(selectCities)
+  const sitesLoading = useSelector(selectSitesLoading)
+  const citiesLoading = useSelector(selectCitiesLoading)
+  const sitesError = useSelector(selectSitesError)
+  const citiesError = useSelector(selectCitiesError)
+  const loading = sitesLoading || citiesLoading
+  const error = sitesError ?? citiesError
 
   useEffect(() => {
-    Promise.all([sitesApi.fetchAll(), citiesApi.fetchAll()])
-      .then(([siteList, cityList]) => { setSites(siteList); setCities(cityList) })
-      .catch(e => setError(e?.message ?? 'Ошибка загрузки'))
-      .finally(() => setLoading(false))
-  }, [])
+    dispatch(fetchSites())
+    dispatch(fetchCities())
+  }, [dispatch])
 
   function getCityName(cityId: number) {
     return cities.find(c => c.id === cityId)?.name ?? `Город #${cityId}`
@@ -46,7 +52,7 @@ export default function SitesTab() {
 
       <Paper withBorder radius="md" style={{ overflow: 'hidden' }}>
         {error ? (
-          <Text c="red" ta="center" size="sm" py={64}>{error}</Text>
+          <Text c="red" ta="center" size="sm" py={64}>{error.message}</Text>
         ) : (
           <ScrollArea.Autosize mah={480}>
             <Table stickyHeader highlightOnHover verticalSpacing="sm" horizontalSpacing="lg">
