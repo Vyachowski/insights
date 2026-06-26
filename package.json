@@ -14,12 +14,26 @@
     "backend:dev": "npm run dev --workspace @insights/backend",
     "backend:start": "npm run start:prod --workspace @insights/backend",
     "backend:build": "npm run build --workspace @insights/backend",
-    "db:seed": "npm run prisma:seed --workspace @insights/backend"
+    "db:seed": "npm run prisma:seed --workspace @insights/backend",
+    "lint": "npm run lint --workspace @insights/backend && npm run lint --workspace @insights/frontend",
+    "prepare": "simple-git-hooks"
   },
   "author": "Slava Haikin",
   "license": "UNLICENSED",
   "devDependencies": {
+    "@commitlint/cli": "^19.6.1",
+    "@commitlint/config-conventional": "^19.6.0",
     "concurrently": "^9.2.1",
-    "knip": "^5.86.0"
+    "knip": "^5.86.0",
+    "lint-staged": "^15.2.11",
+    "simple-git-hooks": "^2.11.1"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "npx lint-staged",
+    "commit-msg": "npx --no-install commitlint --edit \"$1\""
+  },
+  "lint-staged": {
+    "apps/backend/**/*.ts": "eslint --fix",
+    "apps/frontend/**/*.{ts,tsx}": "eslint --fix"
   }
 }

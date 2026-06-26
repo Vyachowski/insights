@@ -1,6 +1,6 @@
 # Insights: Application-Wide Specification
 
-> **Last Updated**: 2026-06-21
+> **Last Updated**: 2026-06-26
 
 This document defines the global architecture, data models, conventions, and guidelines for the **Insights** business analytics monorepo.
 
@@ -31,7 +31,8 @@ insights/
 │   └── contracts/    # Shared TypeScript contracts (API types and payloads)
 ├── specs/
 │   └── README.md     # This app-wide specification
-└── package.json      # Workspace root configuration
+├── commitlint.config.mjs  # Conventional Commits rules (commit-msg hook)
+└── package.json      # Workspace root config + git hooks, lint-staged
 ```
 
 ### 3.1 Backend Stack
@@ -147,3 +148,34 @@ pages/ + components/ → composition and rendering
 1. **Define Contract**: Add new DTO and API interface types to `packages/contracts/`.
 2. **Implement Backend**: Update the database schema if needed, run Prisma migrations, write NestJS routes, and add validation.
 3. **Implement Frontend**: Add an `api/` call, a thunk, slice state, a selector, then wire it into a container component (or hook) and its view.
+
+---
+
+## 11. Code Quality & Tooling
+
+Quality is enforced by two layers: per-workspace **ESLint** (the rules) and root-level **git hooks** (the gate that runs them). Configs are intentionally kept per-workspace — there is no shared base config — because the backend and frontend have different formatting strategies and rule sets.
+
+### 11.1 Linting
+
+Each app owns a flat ESLint 9 config; lint the whole repo with `npm run lint` from the root (fans out to both workspaces).
+
+- **Backend** (`apps/backend/eslint.config.mjs`): `typescript-eslint` **type-aware** preset (`recommendedTypeChecked`) — catches `no-floating-promises`, `no-unsafe-argument`, etc. via the TS type-checker (`projectService: true`). Formatting is delegated to **Prettier** (`eslint-plugin-prettier`, errors on violation). `no-explicit-any` is intentionally off (NestJS/Prisma interop).
+- **Frontend** (`apps/frontend/eslint.config.js`): `typescript-eslint` `recommended` (not type-aware) plus `react-hooks`, `react-refresh`, `import`, and `unused-imports`. Formatting is handled by **`@stylistic`** rules, not Prettier — notably **no semicolons**, single quotes, 2-space indent, trailing commas. Imports are grouped and alphabetized (`import/order`); `consistent-type-imports` enforces `import type`.
+- **Shared convention**: `max-lines-per-function` warns at 25 lines (off for `.tsx`, where JSX inflates length). Unused vars are allowed only with a leading underscore.
+
+> **Known divergence**: backend uses Prettier, frontend uses `@stylistic`; the frontend's `import/order` / `no-console` hygiene rules are not mirrored on the backend. Accepted for now — unifying would mean a shared `packages/eslint-config`, which is overkill for two consumers. Revisit if a third workspace appears.
+
+ESLint is the single source of truth for linting. **oxlint is deliberately not used**: it cannot run the type-aware backend rules, and a second linter config is not worth maintaining for a project this size.
+
+### 11.2 Git hooks
+
+Driven by **`simple-git-hooks`** (config in root `package.json`), activated on `npm install` via the `prepare` script. After a fresh clone, run `npx simple-git-hooks` once to install them.
+
+- **`pre-commit`** → `npx lint-staged`. `lint-staged` runs `eslint --fix` on **staged files only**, routed to the correct workspace config by path glob (`apps/backend/**/*.ts`, `apps/frontend/**/*.{ts,tsx}`). Fast — it never lints the whole tree.
+- **`commit-msg`** → `npx commitlint --edit` validates the message.
+
+### 11.3 Commit messages
+
+Enforced by **commitlint** (`commitlint.config.mjs`, extends `@commitlint/config-conventional`). Every commit must follow **Conventional Commits** (`type(scope): subject`); type is required, scope is free-form (not restricted to a fixed list). This is the machine-checked counterpart to the Git conventions in `CLAUDE.md`.
+
+> Hooks gate *local* commits only. If CI is added later, `npm run lint` should run there as the backstop.
