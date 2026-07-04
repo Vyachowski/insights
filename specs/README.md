@@ -76,8 +76,8 @@ City (code [unique], name, slug, population)
 ## 5. Database & Migrations
 - **Engine**: PostgreSQL, run locally via `docker-compose.dev.yml` (`npm run dev:up -w @insights/backend`).
 - **Schema**: `apps/backend/src/prisma/schema.prisma` is the single source of truth for tables, columns, and relations.
-- **Migrations**: `npm run db:migrate -w @insights/backend` (dev, creates+applies) generates files under `apps/backend/src/prisma/migrations/`. In production, `start:prod` runs `prisma migrate deploy` before the server boots — migrations are never applied manually on deploy targets.
-- **Seeding**: `apps/backend/src/prisma/seed/` + `npm run db:seed -w @insights/backend` (wraps `prisma db seed`). Seeds an admin and a regular user from `ADMIN_*` / `USER_*` env vars (see `.env.example`).
+- **Migrations**: `npm run prisma:migrate -w @insights/backend` (dev, creates+applies) generates files under `apps/backend/src/prisma/migrations/`. In production, `start:prod` runs `prisma migrate deploy` before the server boots — migrations are never applied manually on deploy targets.
+- **Seeding**: `apps/backend/src/prisma/seed/` + `npm run prisma:seed -w @insights/backend` (wraps `prisma db seed`). Seeds an admin and a regular user from `ADMIN_*` / `USER_*` env vars (see `.env.example`).
 - **Reset**: `prisma:reset` (backend workspace) drops and recreates the dev database — destructive, dev-only.
 
 ---

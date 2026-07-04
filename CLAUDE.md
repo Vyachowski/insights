@@ -20,9 +20,9 @@ npm run backend:dev    # backend only (runs prisma generate first)
 npm run frontend:dev   # frontend only
 
 # backend workspace
-npm run dev:up -w @insights/backend      # start Postgres via Docker Compose
-npm run db:migrate -w @insights/backend  # apply migrations
-npm run db:seed -w @insights/backend     # seed data
+npm run dev:up -w @insights/backend          # start Postgres via Docker Compose
+npm run prisma:migrate -w @insights/backend  # apply migrations
+npm run prisma:seed -w @insights/backend     # seed data
 ```
 
 Env files: `apps/backend/.env.dev` (copy from `.env.example`), `apps/frontend/.env` (copy from `.env.example`).
