@@ -5,7 +5,7 @@
   "private": true,
   "workspaces": [
     "apps/*",
-    "packages/*"
+    "contracts"
   ],
   "scripts": {
     "dev": "concurrently \"npm run dev -w @insights/backend\" \"npm run dev -w @insights/frontend\"",
