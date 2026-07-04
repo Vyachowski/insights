@@ -12,7 +12,6 @@
     "start:dev": "NODE_ENV=development nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "prisma migrate deploy && node dist/src/main.js",
-    "start:pm": "pm2 start dist/server/src/main.js --name insights-server --watch --max-memory-restart 850M",
     "build": "prisma generate && nest build",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
