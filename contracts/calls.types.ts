@@ -1,7 +1,7 @@
-export interface CallImport {
+export interface CallImportDto {
   id: number
   siteId: number
-  date: string
+  date: string | Date
   src: string
   region: string | null
   callNumber: number

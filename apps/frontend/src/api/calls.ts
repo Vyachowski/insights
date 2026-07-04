@@ -1,4 +1,4 @@
-import type { ApiSuccess, CallImport, ImportResult } from '@insights/contracts'
+import type { ApiSuccess, CallImportDto as CallImport, ImportResultDto as ImportResult } from '@insights/contracts'
 
 import axiosInstance from '@/lib/axios'
 import { parseApiError } from '@/lib/parseApiError'

@@ -1,6 +1,6 @@
 import { createAsyncThunk } from '@reduxjs/toolkit'
 
-import type { ApiError, DashboardResponse } from '@insights/contracts'
+import type { ApiError, DashboardDto as DashboardResponse } from '@insights/contracts'
 
 import { dashboardApi } from '@/api/dashboard'
 

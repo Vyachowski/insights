@@ -1,6 +1,6 @@
 import { createAsyncThunk } from '@reduxjs/toolkit'
 
-import type { ApiError, Expense } from '@insights/contracts'
+import type { ApiError, ExpenseDto as Expense } from '@insights/contracts'
 
 import { expensesApi } from '@/api/expenses'
 

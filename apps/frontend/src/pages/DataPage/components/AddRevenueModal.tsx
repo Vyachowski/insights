@@ -3,7 +3,7 @@ import Button from '@ui/Button'
 import Input from '@ui/Input'
 import { useState } from 'react'
 
-import type { Revenue, Site } from '@insights/contracts'
+import type { RevenueDto as Revenue, SiteDto as Site } from '@insights/contracts'
 
 interface AddRevenueModalProps {
   sites: Site[]

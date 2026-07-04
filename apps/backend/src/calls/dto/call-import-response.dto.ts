@@ -1,7 +1,8 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
+import { CallImportDto } from '@insights/contracts';
 
-export class CallImportResponseDto {
+export class CallImportResponseDto implements CallImportDto {
   @ApiProperty() id: number;
   @ApiProperty() siteId: number;
   @ApiProperty() date: Date;

@@ -3,7 +3,7 @@ import { createSlice } from '@reduxjs/toolkit'
 import { fetchLogin, fetchLogout, fetchMe } from '../thunks/authThunks'
 
 import type { ApiError } from '@insights/contracts'
-import type { User } from '@insights/contracts/auth.types'
+import type { UserDto as User } from '@insights/contracts/auth.types'
 
 interface AuthState {
   user: User | null

@@ -4,11 +4,11 @@ import YearSelect from '@ui/YearSelect'
 import { Upload } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
-import type { ApiError, Site, SiteMetric } from '@insights/contracts'
+import type { ApiError, SiteDto as Site, SiteMetricDto as SiteMetric } from '@insights/contracts'
 
 const PAGE_SIZE = 20
 
-function formatDate(dateStr: string) {
+function formatDate(dateStr: string | Date) {
   return new Date(dateStr).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' })
 }
 

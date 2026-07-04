@@ -8,19 +8,18 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-// import type {
-//   BusinessHealth,
-//   CityProfit,
-//   DashboardResponse,
-//   LastWeekSummary,
-//   MonthlyComparison,
-//   YearlyCityProfit,
-//   YearlyProfitTrendPoint,
-// } from '@contracts/dashboard.contract';
+import type {
+  BusinessHealthDto as IBusinessHealthDto,
+  CityProfitDto as ICityProfitDto,
+  DashboardDto as IDashboardDto,
+  LastWeekSummaryDto as ILastWeekSummaryDto,
+  MonthlyComparisonDto as IMonthlyComparisonDto,
+  MonthlyProfitDto as IMonthlyProfitDto,
+  YearlyCityProfitDto as IYearlyCityProfitDto,
+  YearlyProfitTrendDto as IYearlyProfitTrendDto,
+} from '@insights/contracts';
 
-// FIXME: Add shared types implementation
-// export class LastWeekSummaryDto implements LastWeekSummary {
-export class LastWeekSummaryDto {
+export class LastWeekSummaryDto implements ILastWeekSummaryDto {
   @IsISO8601()
   readonly weekStart: string;
 
@@ -37,7 +36,7 @@ export class LastWeekSummaryDto {
   readonly profit: number;
 }
 
-class MonthlyProfitDto {
+class MonthlyProfitDto implements IMonthlyProfitDto {
   @IsISO8601()
   readonly month: string;
 
@@ -45,8 +44,7 @@ class MonthlyProfitDto {
   readonly profit: number;
 }
 
-// export class MonthlyComparisonDto implements MonthlyComparison {
-export class MonthlyComparisonDto {
+export class MonthlyComparisonDto implements IMonthlyComparisonDto {
   @ValidateNested()
   @Type(() => MonthlyProfitDto)
   readonly currentMonth: MonthlyProfitDto;
@@ -62,8 +60,7 @@ export class MonthlyComparisonDto {
   readonly percentage: number;
 }
 
-// export class YearlyProfitTrendPointDto implements YearlyProfitTrendPoint {
-export class YearlyProfitTrendPointDto {
+export class YearlyProfitTrendPointDto implements IYearlyProfitTrendDto {
   @IsInt()
   readonly week: number;
 
@@ -74,8 +71,7 @@ export class YearlyProfitTrendPointDto {
   readonly previous: number;
 }
 
-// export class CityProfitDto implements CityProfit {
-class CityProfitDto {
+class CityProfitDto implements ICityProfitDto {
   @IsString()
   readonly city: string;
 
@@ -83,8 +79,7 @@ class CityProfitDto {
   readonly profit: number;
 }
 
-// export class YearlyCityProfitDto implements YearlyCityProfit {
-class YearlyCityProfitDto {
+class YearlyCityProfitDto implements IYearlyCityProfitDto {
   @IsInt()
   readonly year: number;
 
@@ -94,8 +89,7 @@ class YearlyCityProfitDto {
   readonly cities: CityProfitDto[];
 }
 
-// export class BusinessHealthDto implements BusinessHealth {
-class BusinessHealthDto {
+class BusinessHealthDto implements IBusinessHealthDto {
   @IsBoolean()
   readonly isGrowing: boolean;
 
@@ -109,8 +103,7 @@ class BusinessHealthDto {
   readonly avgPrevious: number;
 }
 
-// export class DashboardResponseDto implements DashboardResponse {
-export class DashboardResponseDto {
+export class DashboardResponseDto implements IDashboardDto {
   @ValidateNested()
   @Type(() => LastWeekSummaryDto)
   readonly lastWeekSummary: LastWeekSummaryDto;

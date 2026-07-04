@@ -1,7 +1,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit'
 
 import type { ImportModalTarget } from '@/store/slices/appSlice'
-import type { ApiError, ImportResult } from '@insights/contracts'
+import type { ApiError, ImportResultDto as ImportResult } from '@insights/contracts'
 
 import { callsApi } from '@/api/calls'
 import { expensesApi } from '@/api/expenses'

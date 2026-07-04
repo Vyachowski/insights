@@ -1,5 +1,5 @@
 import type { Role, UserStatus } from '@/prisma/generated/schemas';
-import { User } from '@insights/contracts';
+import { UserDto as User } from '@insights/contracts';
 import { ApiHideProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 

@@ -1,11 +1,11 @@
-export interface Revenue {
+export interface RevenueDto {
   id: number
   siteId: number | null
-  date: string
+  date: string | Date
   amount: number
 }
 
-export interface Site {
+export interface SiteDto {
   id: number
   cityId: number
   name: string | null
@@ -13,7 +13,7 @@ export interface Site {
   url: string
 }
 
-export interface City {
+export interface CityDto {
   id: number
   code: string
   slug: string

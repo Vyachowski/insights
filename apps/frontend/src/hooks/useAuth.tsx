@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 
-import type { LoginRequest } from '@insights/contracts'
+import type { LoginDto as LoginRequest } from '@insights/contracts'
 
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import {

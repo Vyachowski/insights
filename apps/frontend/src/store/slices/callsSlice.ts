@@ -3,7 +3,7 @@ import { createSlice } from '@reduxjs/toolkit'
 import { fetchCalls } from '../thunks/callsThunks'
 
 import type { ResourceState } from './types'
-import type { CallImport } from '@insights/contracts'
+import type { CallImportDto as CallImport } from '@insights/contracts'
 
 const initialState: ResourceState<CallImport[]> = {
   data: [],

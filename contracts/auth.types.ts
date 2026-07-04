@@ -1,9 +1,9 @@
-export interface LoginRequest {
+export interface LoginDto {
   email: string;
   password: string;
 }
 
-export interface User {
+export interface UserDto {
   id: string
   email: string
   firstName: string | null

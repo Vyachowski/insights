@@ -1,9 +1,7 @@
 import { IsEmail, IsString, MinLength } from 'class-validator';
-// import { LoginRequest, LoginResponse } from '@shared/contracts/auth.types';
+import { LoginDto } from '@insights/contracts';
 
-// FIXME: Add shared types implementation
-// export class LoginRequestDto implements LoginRequest {
-export class LoginRequestDto {
+export class LoginRequestDto implements LoginDto {
   @IsEmail()
   email: string;
 

@@ -3,7 +3,7 @@ import Button from '@ui/Button'
 import { CheckCircle, Upload, XCircle } from 'lucide-react'
 import { useRef, useState } from 'react'
 
-import type { ImportResult } from '@insights/contracts'
+import type { ImportResultDto as ImportResult } from '@insights/contracts'
 
 export interface CsvImportConfig {
   title: string

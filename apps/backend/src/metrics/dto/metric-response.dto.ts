@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { SiteMetricDto } from '@insights/contracts';
 
-export class MetricResponseDto {
+export class MetricResponseDto implements SiteMetricDto {
   @ApiProperty() id: number;
   @ApiProperty() siteId: number;
   @ApiProperty() date: Date;

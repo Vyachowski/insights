@@ -1,6 +1,6 @@
 import { createAsyncThunk } from '@reduxjs/toolkit'
 
-import type { ApiError, SiteMetric } from '@insights/contracts'
+import type { ApiError, SiteMetricDto as SiteMetric } from '@insights/contracts'
 
 import { metricsApi } from '@/api/metrics'
 

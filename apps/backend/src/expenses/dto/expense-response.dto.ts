@@ -1,7 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
+import { ExpenseDto } from '@insights/contracts';
 
-export class ExpenseResponseDto {
+export class ExpenseResponseDto implements ExpenseDto {
   @ApiProperty() id: number;
   @ApiProperty({ nullable: true }) siteId: number | null;
   @ApiProperty() date: Date;

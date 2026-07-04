@@ -1,7 +1,7 @@
-export interface SiteMetric {
+export interface SiteMetricDto {
   id: number
   siteId: number
-  date: string
+  date: string | Date
   yandexUsers: number
   googleUsers: number
   otherUsers: number

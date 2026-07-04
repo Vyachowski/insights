@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import RevenueTabView from './RevenueTabView'
 
 import type { AppDispatch } from '@/store'
-import type { Revenue } from '@insights/contracts'
+import type { RevenueDto as Revenue } from '@insights/contracts'
 
 import { useAuth } from '@/hooks/useAuth'
 import { selectImportTick } from '@/store/selectors/appSelectors'

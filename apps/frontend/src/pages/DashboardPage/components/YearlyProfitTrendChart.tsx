@@ -2,7 +2,7 @@ import { Box, Group, Text, Title } from '@mantine/core'
 import Card from '@ui/Card'
 import { LineChart, ResponsiveContainer, CartesianGrid, XAxis, YAxis, Tooltip, Line } from 'recharts'
 
-import type { YearlyProfitTrendPoint } from '@insights/contracts'
+import type { YearlyProfitTrendDto as YearlyProfitTrendPoint } from '@insights/contracts'
 
 export default function YearlyProfitTrendChart({ data }: { data: YearlyProfitTrendPoint[] }) {
   return (

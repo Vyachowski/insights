@@ -1,7 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
+import { CityDto } from '@insights/contracts';
 
-export class CityResponseDto {
+export class CityResponseDto implements CityDto {
   @ApiProperty() id: number;
   @ApiProperty() code: string;
   @ApiProperty() slug: string;

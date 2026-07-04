@@ -1,4 +1,4 @@
-export interface LastWeekSummary {
+export interface LastWeekSummaryDto {
   weekStart: string;
   weekEnd: string;
   revenue: number;
@@ -6,45 +6,45 @@ export interface LastWeekSummary {
   profit: number;
 }
 
-export interface MonthlyProfit {
+export interface MonthlyProfitDto {
   month: string;
   profit: number;
 }
 
-export interface MonthlyComparison {
-  currentMonth: MonthlyProfit;
-  lastYearSameMonth: MonthlyProfit;
+export interface MonthlyComparisonDto {
+  currentMonth: MonthlyProfitDto;
+  lastYearSameMonth: MonthlyProfitDto;
   difference: number;
   percentage: number;
 }
 
-export interface YearlyProfitTrendPoint {
+export interface YearlyProfitTrendDto {
   week: number;
   current: number;
   previous: number;
 }
 
-export interface CityProfit {
+export interface CityProfitDto {
   city: string;
   profit: number;
 }
 
-export interface YearlyCityProfit {
+export interface YearlyCityProfitDto {
   year: number;
-  cities: CityProfit[];
+  cities: CityProfitDto[];
 }
 
-export interface BusinessHealth {
+export interface BusinessHealthDto {
   isGrowing: boolean;
   growthPercent: number;
   avgCurrent: number;
   avgPrevious: number;
 }
 
-export interface DashboardResponse {
-  lastWeekSummary: LastWeekSummary;
-  monthlyComparison: MonthlyComparison;
-  yearlyProfitTrend: YearlyProfitTrendPoint[];
-  citiesProfit: YearlyCityProfit[];
-  businessHealth: BusinessHealth;
+export interface DashboardDto {
+  lastWeekSummary: LastWeekSummaryDto;
+  monthlyComparison: MonthlyComparisonDto;
+  yearlyProfitTrend: YearlyProfitTrendDto[];
+  citiesProfit: YearlyCityProfitDto[];
+  businessHealth: BusinessHealthDto;
 }

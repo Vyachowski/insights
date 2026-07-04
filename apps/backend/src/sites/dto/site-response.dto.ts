@@ -1,7 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
+import { SiteDto } from '@insights/contracts';
 
-export class SiteResponseDto {
+export class SiteResponseDto implements SiteDto {
   @ApiProperty() id: number;
   @ApiProperty() cityId: number;
   @ApiProperty({ nullable: true }) name: string | null;

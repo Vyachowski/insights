@@ -4,7 +4,7 @@ import YearSelect from '@ui/YearSelect'
 import { useMemo, useState } from 'react'
 import { ResponsiveContainer, CartesianGrid, XAxis, YAxis, Tooltip, Bar, BarChart } from 'recharts'
 
-import type { YearlyCityProfit } from '@insights/contracts'
+import type { YearlyCityProfitDto as YearlyCityProfit } from '@insights/contracts'
 
 import { formatNumber } from '@/lib/utils'
 

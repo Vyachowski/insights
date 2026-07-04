@@ -3,7 +3,7 @@ import { createSlice } from '@reduxjs/toolkit'
 import { fetchDashboardSummary } from '../thunks/dashboardThunks'
 
 import type { ResourceState } from './types'
-import type { DashboardResponse } from '@insights/contracts'
+import type { DashboardDto as DashboardResponse } from '@insights/contracts'
 
 const initialState: ResourceState<Partial<DashboardResponse>> = {
   data: {},

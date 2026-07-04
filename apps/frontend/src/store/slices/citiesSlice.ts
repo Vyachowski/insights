@@ -3,7 +3,7 @@ import { createSlice } from '@reduxjs/toolkit'
 import { fetchCities } from '../thunks/citiesThunks'
 
 import type { ResourceState } from './types'
-import type { City } from '@insights/contracts'
+import type { CityDto as City } from '@insights/contracts'
 
 const initialState: ResourceState<City[]> = {
   data: [],

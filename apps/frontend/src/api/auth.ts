@@ -1,5 +1,5 @@
 import type { ApiSuccess } from '@insights/contracts'
-import type { LoginRequest, User } from '@insights/contracts/auth.types'
+import type { LoginDto as LoginRequest, UserDto as User } from '@insights/contracts/auth.types'
 
 import axiosInstance from '@/lib/axios'
 import { parseApiError } from '@/lib/parseApiError'

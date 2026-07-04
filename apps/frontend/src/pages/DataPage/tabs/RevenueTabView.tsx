@@ -7,7 +7,7 @@ import { useMemo, useState } from 'react'
 import AddRevenueModal from '../components/AddRevenueModal'
 
 import type { ApiError } from '@insights/contracts'
-import type { Revenue, Site } from '@insights/contracts'
+import type { RevenueDto as Revenue, SiteDto as Site } from '@insights/contracts'
 
 const PAGE_SIZE = 20
 
@@ -15,7 +15,7 @@ function formatAmount(amount: number) {
   return new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 }).format(amount)
 }
 
-function formatDate(dateStr: string) {
+function formatDate(dateStr: string | Date) {
   return new Date(dateStr).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' })
 }
 

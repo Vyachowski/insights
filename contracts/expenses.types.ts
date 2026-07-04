@@ -1,31 +1,14 @@
-export interface Expense {
+export interface ExpenseDto {
   id: number
   siteId: number | null
-  date: string
+  date: string | Date
   amount: number
   type: string
   comment: string | null
 }
 
-export interface ImportResult {
+export interface ImportResultDto {
   created: number
   updated?: number
-  skipped: number
-}
-
-export interface CreateExpenseRequest {
-  siteId?: number | null
-  date: string
-  amount: number
-  type: string
-  comment?: string | null
-}
-
-export interface ImportExpensesRequest {
-  expenses: CreateExpenseRequest[]
-}
-
-export interface ImportExpensesResult {
-  created: number
   skipped: number
 }

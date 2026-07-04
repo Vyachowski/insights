@@ -1,10 +1,8 @@
 import { IsOptional, IsDateString, IsInt } from 'class-validator';
 import { Type } from 'class-transformer';
-// import { AnalyticsQuery } from '@shared/contracts/analytics.types';
+import { AnalyticsQueryDto as IAnalyticsQueryDto } from '@insights/contracts';
 
-// FIXME: Add shared types implementation
-// export class AnalyticsQueryDto implements AnalyticsQuery {
-export class AnalyticsQueryDto {
+export class AnalyticsQueryDto implements IAnalyticsQueryDto {
   @IsOptional()
   @IsInt()
   @Type(() => Number)
