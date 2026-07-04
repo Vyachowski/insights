@@ -54,19 +54,7 @@ export class ExpensesService {
       invalid = 0;
 
     for (const row of rows) {
-      const date = new Date(row['date']);
-      const siteId = row['siteId'] ? Number(row['siteId']) : null;
-      const amount = parseFloat(row['amount']);
-      const type = row['type']?.trim();
-
-      if (!type || isNaN(amount) || isNaN(date.getTime())) {
-        invalid++;
-        continue;
-      }
-
-      const outcome = await this.upsertRow(date, siteId, amount, type).catch(
-        () => 'invalid' as const,
-      );
+      const outcome = await this.processExpenseRow(row);
       if (outcome === 'created') created++;
       else if (outcome === 'updated') updated++;
       else if (outcome === 'skipped') skipped++;
@@ -75,6 +63,23 @@ export class ExpensesService {
 
     assertSkipRate(created + updated + skipped, invalid);
     return { created, updated, skipped };
+  }
+
+  private async processExpenseRow(
+    row: Record<string, string>,
+  ): Promise<'created' | 'updated' | 'skipped' | 'invalid'> {
+    const date = new Date(row['date']);
+    const siteId = row['siteId'] ? Number(row['siteId']) : null;
+    const amount = parseFloat(row['amount']);
+    const type = row['type']?.trim();
+
+    if (!type || isNaN(amount) || isNaN(date.getTime())) {
+      return 'invalid';
+    }
+
+    return this.upsertRow(date, siteId, amount, type).catch(
+      () => 'invalid' as const,
+    );
   }
 
   private async upsertRow(

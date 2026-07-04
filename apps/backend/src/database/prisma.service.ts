@@ -45,19 +45,28 @@ export class PrismaService
       try {
         await this.$queryRaw`SELECT current_database()`;
       } catch (error) {
-        this.logger.error(
-          `Database connection failed. Retry ${i + 1}/${retries}`,
-          error instanceof Error ? error.stack : String(error),
-        );
-
-        if (i === retries - 1) {
-          throw error;
-        }
-
-        const backoff = delay * Math.pow(2, i);
-
-        await setTimeout(backoff);
+        await this.handleConnectFailure(error, i, retries, delay);
       }
     }
+  }
+
+  private async handleConnectFailure(
+    error: unknown,
+    attempt: number,
+    retries: number,
+    delay: number,
+  ): Promise<void> {
+    this.logger.error(
+      `Database connection failed. Retry ${attempt + 1}/${retries}`,
+      error instanceof Error ? error.stack : String(error),
+    );
+
+    if (attempt === retries - 1) {
+      throw error;
+    }
+
+    const backoff = delay * Math.pow(2, attempt);
+
+    await setTimeout(backoff);
   }
 }

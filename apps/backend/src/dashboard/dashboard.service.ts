@@ -19,22 +19,12 @@ export class DashboardService {
 
   async getDashboard(): Promise<DashboardResponseDto> {
     const dateService = new DateService();
-    const yearlyWeeks = dateService.getYearlyCompletedWeeks();
-
-    const periods: DashboardPeriods = {
-      lastWeek: dateService.getLastWeek(),
-      currentMonth: dateService.getCurrentMonth(),
-      lastYearSameMonth: dateService.getLastYearSameMonth(),
-      currentYearWeeks: yearlyWeeks.currentYear,
-      previousYearWeeks: yearlyWeeks.previousYear,
-    };
+    const periods = this.buildPeriods(dateService);
 
     const [data, citiesProfit] = await Promise.all([
       this.repo.fetchAllData(periods),
       this.fetchCitiesProfit(dateService),
     ]);
-
-    const yearlyProfitTrend = buildYearlyTrend(data.yearlyWeeks);
 
     return {
       lastWeekSummary: buildLastWeekSummary(data.lastWeek, periods.lastWeek),
@@ -43,20 +33,50 @@ export class DashboardService {
         data.lastYearSameMonth,
         periods,
       ),
-      yearlyProfitTrend,
+      yearlyProfitTrend: buildYearlyTrend(data.yearlyWeeks),
       citiesProfit,
       businessHealth: buildBusinessHealth(data.yearlyWeeks),
     };
   }
 
+  private buildPeriods(dateService: DateService): DashboardPeriods {
+    const yearlyWeeks = dateService.getYearlyCompletedWeeks();
+
+    return {
+      lastWeek: dateService.getLastWeek(),
+      currentMonth: dateService.getCurrentMonth(),
+      lastYearSameMonth: dateService.getLastYearSameMonth(),
+      currentYearWeeks: yearlyWeeks.currentYear,
+      previousYearWeeks: yearlyWeeks.previousYear,
+    };
+  }
+
   private async fetchCitiesProfit(dateService: DateService) {
     const { currentYear, previousYear } = dateService.getComparablePeriods();
+    const { totals, shareCurrent, sharePrevious } = await this.fetchProfitParts(
+      currentYear,
+      previousYear,
+    );
 
-    const [
-      { currentYearTotalProfit, previousYearTotalProfit },
-      profitShareCurrentYear,
-      profitSharePreviousYear,
-    ] = await Promise.all([
+    return [
+      this.buildYearCities(
+        currentYear,
+        totals.currentYearTotalProfit,
+        shareCurrent,
+      ),
+      this.buildYearCities(
+        previousYear,
+        totals.previousYearTotalProfit,
+        sharePrevious,
+      ),
+    ];
+  }
+
+  private async fetchProfitParts(
+    currentYear: { start: Date; end: Date },
+    previousYear: { start: Date; end: Date },
+  ) {
+    const [totals, shareCurrent, sharePrevious] = await Promise.all([
       this.profitService.getYearlyComparablePeriodsProfit(),
       this.profitService.calculateProfitShareByCities(
         currentYear.start,
@@ -68,21 +88,17 @@ export class DashboardService {
       ),
     ]);
 
-    return [
-      {
-        year: currentYear.start.getFullYear(),
-        cities: this.profitService.calucalteCitiesProfit(
-          currentYearTotalProfit,
-          profitShareCurrentYear,
-        ),
-      },
-      {
-        year: previousYear.start.getFullYear(),
-        cities: this.profitService.calucalteCitiesProfit(
-          previousYearTotalProfit,
-          profitSharePreviousYear,
-        ),
-      },
-    ];
+    return { totals, shareCurrent, sharePrevious };
+  }
+
+  private buildYearCities(
+    period: { start: Date; end: Date },
+    totalProfit: number,
+    share: { city: string; leadsShare: number }[],
+  ) {
+    return {
+      year: period.start.getFullYear(),
+      cities: this.profitService.calucalteCitiesProfit(totalProfit, share),
+    };
   }
 }

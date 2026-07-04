@@ -59,46 +59,41 @@ export default class DateService {
     previousYear: { start: Date; end: Date }[];
   } {
     const now = new Date();
-
     const currentYearNumber = now.getFullYear();
     const previousYearNumber = currentYearNumber - 1;
-
     const startOfCurrentYear = startOfYear(new Date(currentYearNumber, 0, 1));
     const startOfPreviousYear = startOfYear(new Date(previousYearNumber, 0, 1));
 
     const startOfCurrentWeek = startOfWeek(now, {
       weekStartsOn: this.weekStartsOn,
     });
-
     const startOfLastFullWeek = subWeeks(startOfCurrentWeek, 1);
 
     const completedWeeks =
       differenceInCalendarWeeks(startOfLastFullWeek, startOfCurrentYear, {
         weekStartsOn: this.weekStartsOn,
       }) + 1;
+    return {
+      currentYear: this.buildWeekRanges(startOfCurrentYear, completedWeeks),
+      previousYear: this.buildWeekRanges(startOfPreviousYear, completedWeeks),
+    };
+  }
 
-    const currentYearWeeks: { start: Date; end: Date }[] = [];
-    const previousYearWeeks: { start: Date; end: Date }[] = [];
+  private buildWeekRanges(
+    yearStart: Date,
+    count: number,
+  ): { start: Date; end: Date }[] {
+    const weeks: { start: Date; end: Date }[] = [];
 
-    for (let i = 0; i < completedWeeks; i++) {
-      const currentStart = addWeeks(startOfCurrentYear, i);
-      const previousStart = addWeeks(startOfPreviousYear, i);
-
-      currentYearWeeks.push({
-        start: currentStart,
-        end: endOfWeek(currentStart, { weekStartsOn: this.weekStartsOn }),
-      });
-
-      previousYearWeeks.push({
-        start: previousStart,
-        end: endOfWeek(previousStart, { weekStartsOn: this.weekStartsOn }),
+    for (let i = 0; i < count; i++) {
+      const start = addWeeks(yearStart, i);
+      weeks.push({
+        start,
+        end: endOfWeek(start, { weekStartsOn: this.weekStartsOn }),
       });
     }
 
-    return {
-      currentYear: currentYearWeeks,
-      previousYear: previousYearWeeks,
-    };
+    return weeks;
   }
 
   getComparablePeriods() {

@@ -67,6 +67,23 @@ export class CallsService {
   async importFromCsv(
     buffer: Buffer,
   ): Promise<{ created: number; skipped: number }> {
+    const rows = this.parseCallRows(buffer);
+    const cityToSiteId = await this.buildCityToSiteIdMap();
+    const { records, invalidCount } = this.buildCallRecords(rows, cityToSiteId);
+
+    const result = await this.prismaService.callImport.createMany({
+      data: records,
+      skipDuplicates: true,
+    });
+
+    assertSkipRate(records.length, invalidCount);
+    return {
+      created: result.count,
+      skipped: records.length - result.count,
+    };
+  }
+
+  private parseCallRows(buffer: Buffer): Record<string, string>[] {
     const rows: Record<string, string>[] = parse(buffer, {
       columns: true,
       skip_empty_lines: true,
@@ -81,8 +98,13 @@ export class CallsService {
       'Проект',
       'Куда звонил',
     ]);
-    const cityToSiteId = await this.buildCityToSiteIdMap();
+    return rows;
+  }
 
+  private buildCallRecords(
+    rows: Record<string, string>[],
+    cityToSiteId: Map<string, number>,
+  ) {
     let invalidCount = 0;
 
     const records = rows.flatMap((row) => {
@@ -94,15 +116,7 @@ export class CallsService {
       return [record];
     });
 
-    const result = await this.prismaService.callImport.createMany({
-      data: records,
-      skipDuplicates: true,
-    });
-
-    const created = result.count;
-    const skipped = records.length - result.count;
-    assertSkipRate(records.length, invalidCount);
-    return { created, skipped };
+    return { records, invalidCount };
   }
 
   private async buildCityToSiteIdMap(): Promise<Map<string, number>> {
@@ -121,7 +135,6 @@ export class CallsService {
     const src = row['Кто звонил']?.trim();
     const callNumber = Number(row['№']);
     const projectTitle = resolveProjectTitle(row['Проект'] ?? '');
-    const advChannelName = row['Куда звонил']?.trim() ?? '';
     const siteId = cityToSiteId.get(projectTitle);
 
     // Skip rows with no date, src, invalid callNumber, or unresolved siteId
@@ -129,15 +142,30 @@ export class CallsService {
       return null;
     }
 
-    return {
+    return this.toCallImportRow(row, {
       siteId,
       date,
       src,
-      region: row['Откуда']?.trim() || null,
       callNumber,
-      class: row['Класс']?.trim() || null,
       projectTitle,
-      advChannelName,
+    });
+  }
+
+  private toCallImportRow(
+    row: Record<string, string>,
+    base: {
+      siteId: number;
+      date: Date;
+      src: string;
+      callNumber: number;
+      projectTitle: string;
+    },
+  ) {
+    return {
+      ...base,
+      region: row['Откуда']?.trim() || null,
+      class: row['Класс']?.trim() || null,
+      advChannelName: row['Куда звонил']?.trim() ?? '',
       billsec: 0,
       comment: row['Комментарий']?.trim() || null,
       redirectNumber: row['Вызов завершен']?.replace(/\D/g, '') || null,

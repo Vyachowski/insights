@@ -4,6 +4,23 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { parse } from 'csv-parse/sync';
 import { assertCsvColumns, assertSkipRate } from '@/common/utils/csv.utils';
 
+const METRIC_COLUMNS = [
+  'siteId',
+  'date',
+  'yandexUsers',
+  'googleUsers',
+  'otherUsers',
+  'visitDurationYandexInSec',
+  'visitDurationGoogleInSec',
+  'visitDurationOtherInSec',
+  'bounceYandex',
+  'bounceGoogle',
+  'bounceOther',
+  'leadsYandex',
+  'leadsGoogle',
+  'leadsOther',
+];
+
 @Injectable()
 export class MetricsService {
   constructor(private readonly prismaService: PrismaService) {}
@@ -23,6 +40,22 @@ export class MetricsService {
   async importFromCsv(
     buffer: Buffer,
   ): Promise<{ created: number; skipped: number }> {
+    const rows = this.parseMetricRows(buffer);
+
+    let upserted = 0;
+    let skipped = 0;
+
+    for (const row of rows) {
+      const ok = await this.upsertMetricRow(row);
+      if (ok) upserted++;
+      else skipped++;
+    }
+
+    assertSkipRate(upserted, skipped);
+    return { created: upserted, skipped };
+  }
+
+  private parseMetricRows(buffer: Buffer): Record<string, string>[] {
     const rows: Record<string, string>[] = parse(buffer, {
       columns: true,
       skip_empty_lines: true,
@@ -30,61 +63,43 @@ export class MetricsService {
       bom: true,
     });
 
-    assertCsvColumns(rows, [
-      'siteId',
-      'date',
-      'yandexUsers',
-      'googleUsers',
-      'otherUsers',
-      'visitDurationYandexInSec',
-      'visitDurationGoogleInSec',
-      'visitDurationOtherInSec',
-      'bounceYandex',
-      'bounceGoogle',
-      'bounceOther',
-      'leadsYandex',
-      'leadsGoogle',
-      'leadsOther',
-    ]);
-    let upserted = 0;
-    let skipped = 0;
+    assertCsvColumns(rows, METRIC_COLUMNS);
+    return rows;
+  }
 
-    for (const row of rows) {
-      const siteId = Number(row['siteId']);
-      const date = row['date'] ? new Date(row['date']) : null;
-      if (!siteId || isNaN(siteId) || !date || isNaN(date.getTime())) {
-        skipped++;
-        continue;
-      }
-
-      const data = {
-        yandexUsers: Number(row['yandexUsers'] ?? 0) || 0,
-        googleUsers: Number(row['googleUsers'] ?? 0) || 0,
-        otherUsers: Number(row['otherUsers'] ?? 0) || 0,
-        visitDurationYandexInSec:
-          Number(row['visitDurationYandexInSec'] ?? 0) || 0,
-        visitDurationGoogleInSec:
-          Number(row['visitDurationGoogleInSec'] ?? 0) || 0,
-        visitDurationOtherInSec:
-          Number(row['visitDurationOtherInSec'] ?? 0) || 0,
-        bounceYandex: Number(row['bounceYandex'] ?? 0) || 0,
-        bounceGoogle: Number(row['bounceGoogle'] ?? 0) || 0,
-        bounceOther: Number(row['bounceOther'] ?? 0) || 0,
-        leadsYandex: Number(row['leadsYandex'] ?? 0) || 0,
-        leadsGoogle: Number(row['leadsGoogle'] ?? 0) || 0,
-        leadsOther: Number(row['leadsOther'] ?? 0) || 0,
-      };
-
-      await this.prismaService.siteMetric.upsert({
-        where: { siteId_date: { siteId, date } },
-        create: { siteId, date, ...data },
-        update: data,
-      });
-      upserted++;
+  private async upsertMetricRow(row: Record<string, string>): Promise<boolean> {
+    const siteId = Number(row['siteId']);
+    const date = row['date'] ? new Date(row['date']) : null;
+    if (!siteId || isNaN(siteId) || !date || isNaN(date.getTime())) {
+      return false;
     }
 
-    assertSkipRate(upserted, skipped);
-    return { created: upserted, skipped };
+    const data = this.buildMetricData(row);
+    await this.prismaService.siteMetric.upsert({
+      where: { siteId_date: { siteId, date } },
+      create: { siteId, date, ...data },
+      update: data,
+    });
+    return true;
+  }
+
+  private buildMetricData(row: Record<string, string>) {
+    return {
+      yandexUsers: Number(row['yandexUsers'] ?? 0) || 0,
+      googleUsers: Number(row['googleUsers'] ?? 0) || 0,
+      otherUsers: Number(row['otherUsers'] ?? 0) || 0,
+      visitDurationYandexInSec:
+        Number(row['visitDurationYandexInSec'] ?? 0) || 0,
+      visitDurationGoogleInSec:
+        Number(row['visitDurationGoogleInSec'] ?? 0) || 0,
+      visitDurationOtherInSec: Number(row['visitDurationOtherInSec'] ?? 0) || 0,
+      bounceYandex: Number(row['bounceYandex'] ?? 0) || 0,
+      bounceGoogle: Number(row['bounceGoogle'] ?? 0) || 0,
+      bounceOther: Number(row['bounceOther'] ?? 0) || 0,
+      leadsYandex: Number(row['leadsYandex'] ?? 0) || 0,
+      leadsGoogle: Number(row['leadsGoogle'] ?? 0) || 0,
+      leadsOther: Number(row['leadsOther'] ?? 0) || 0,
+    };
   }
 
   async importFromUrl(

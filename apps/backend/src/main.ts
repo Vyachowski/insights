@@ -16,6 +16,19 @@ async function bootstrap() {
   const port = configService.get<number>('PORT') ?? 3000;
   const allowedOrigin = configService.get<string>('ALLOWED_ORIGIN');
 
+  configureGlobals(app, { isDev, allowedOrigin });
+
+  if (isDev) {
+    setupSwagger(app);
+  }
+
+  await app.listen(port);
+}
+
+function configureGlobals(
+  app: NestExpressApplication,
+  { isDev, allowedOrigin }: { isDev: boolean; allowedOrigin?: string },
+) {
   app.setGlobalPrefix('api/v1');
   app.useGlobalPipes(
     new ValidationPipe({
@@ -34,23 +47,21 @@ async function bootstrap() {
     new ClassSerializerInterceptor(app.get(Reflector)),
   );
   app.useGlobalFilters(new AllExceptionsFilter());
+}
 
-  if (isDev) {
-    const config = new DocumentBuilder()
-      .setTitle('Insights API')
-      .setVersion('1.0')
-      .setDescription('Internal analytics dashboard API')
-      .addCookieAuth('access_token')
-      .build();
+function setupSwagger(app: NestExpressApplication) {
+  const config = new DocumentBuilder()
+    .setTitle('Insights API')
+    .setVersion('1.0')
+    .setDescription('Internal analytics dashboard API')
+    .addCookieAuth('access_token')
+    .build();
 
-    const document = SwaggerModule.createDocument(app, config);
+  const document = SwaggerModule.createDocument(app, config);
 
-    SwaggerModule.setup('api/docs', app, document, {
-      jsonDocumentUrl: 'api/docs/openapi.json',
-    });
-  }
-
-  await app.listen(port);
+  SwaggerModule.setup('api/docs', app, document, {
+    jsonDocumentUrl: 'api/docs/openapi.json',
+  });
 }
 
 void bootstrap();
