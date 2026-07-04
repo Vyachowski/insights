@@ -81,46 +81,17 @@ export class CallsService {
       'Проект',
       'Куда звонил',
     ]);
-    const sites = await this.prismaService.site.findMany({
-      select: { id: true, city: { select: { name: true } } },
-    });
-
-    const cityToSiteId = new Map(
-      sites.map((s) => [s.city.name.toLowerCase(), s.id]),
-    );
+    const cityToSiteId = await this.buildCityToSiteIdMap();
 
     let invalidCount = 0;
 
     const records = rows.flatMap((row) => {
-      const date = parseGudokDate(row['Дата'] ?? '');
-      const src = row['Кто звонил']?.trim();
-      const callNumber = Number(row['№']);
-      const projectTitle = resolveProjectTitle(row['Проект'] ?? '');
-      const advChannelName = row['Куда звонил']?.trim() ?? '';
-      const siteId = cityToSiteId.get(projectTitle);
-
-      // Skip rows with no date, src, invalid callNumber, or unresolved siteId
-      if (!date || !src || isNaN(callNumber) || siteId === undefined) {
+      const record = this.mapRowToCallImport(row, cityToSiteId);
+      if (!record) {
         invalidCount++;
         return [];
       }
-
-      return [
-        {
-          siteId,
-          date,
-          src,
-          region: row['Откуда']?.trim() || null,
-          callNumber,
-          class: row['Класс']?.trim() || null,
-          projectTitle,
-          advChannelName,
-          billsec: 0,
-          comment: row['Комментарий']?.trim() || null,
-          redirectNumber: row['Вызов завершен']?.replace(/\D/g, '') || null,
-          source: 'csv' as const,
-        },
-      ];
+      return [record];
     });
 
     const result = await this.prismaService.callImport.createMany({
@@ -132,6 +103,46 @@ export class CallsService {
     const skipped = records.length - result.count;
     assertSkipRate(records.length, invalidCount);
     return { created, skipped };
+  }
+
+  private async buildCityToSiteIdMap(): Promise<Map<string, number>> {
+    const sites = await this.prismaService.site.findMany({
+      select: { id: true, city: { select: { name: true } } },
+    });
+
+    return new Map(sites.map((s) => [s.city.name.toLowerCase(), s.id]));
+  }
+
+  private mapRowToCallImport(
+    row: Record<string, string>,
+    cityToSiteId: Map<string, number>,
+  ) {
+    const date = parseGudokDate(row['Дата'] ?? '');
+    const src = row['Кто звонил']?.trim();
+    const callNumber = Number(row['№']);
+    const projectTitle = resolveProjectTitle(row['Проект'] ?? '');
+    const advChannelName = row['Куда звонил']?.trim() ?? '';
+    const siteId = cityToSiteId.get(projectTitle);
+
+    // Skip rows with no date, src, invalid callNumber, or unresolved siteId
+    if (!date || !src || isNaN(callNumber) || siteId === undefined) {
+      return null;
+    }
+
+    return {
+      siteId,
+      date,
+      src,
+      region: row['Откуда']?.trim() || null,
+      callNumber,
+      class: row['Класс']?.trim() || null,
+      projectTitle,
+      advChannelName,
+      billsec: 0,
+      comment: row['Комментарий']?.trim() || null,
+      redirectNumber: row['Вызов завершен']?.replace(/\D/g, '') || null,
+      source: 'csv' as const,
+    };
   }
 
   async importFromUrl(
