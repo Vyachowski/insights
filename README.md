@@ -1,92 +1,35 @@
 # Insights
 
-Monorepo for a **business analytics dashboard**: goals, centralized data ingestion, and recurring metric reviews for owners and analysts.
+[![Status](https://img.shields.io/badge/status-in%20development-yellow)](https://github.com)
+[![License](https://img.shields.io/badge/license-private-red)](https://github.com)
 
-Product areas:
+Insights is a business analytics dashboard for site owners and analysts. It helps teams track performance across multiple properties, review financial and SEO signals, and stay on top of recurring reporting without stitching together spreadsheets and scattered exports.
 
-- Goal tracking
-- Financial health
-- SEO performance
-- Data import and refresh
+## What it does
 
-## Stack
+- Centralizes revenue, expense, and profitability data
+- Tracks SEO and traffic-related metrics
+- Supports recurring reviews for business performance
+- Helps teams monitor multiple sites and cities from one place
 
-| Layer | Technologies |
-|-------|----------------|
-| **API** | [NestJS](https://nestjs.com/), [Prisma](https://www.prisma.io/), PostgreSQL |
-| **Client** | [React](https://react.dev/), [Vite](https://vite.dev/), [Tailwind CSS](https://tailwindcss.com/), [Redux Toolkit](https://redux-toolkit.js.org/), [React Router](https://reactrouter.com/) |
-| **Shared** | `packages/contracts` |
-| **Production** | [Railway](https://railway.app/) for API and database; frontend static hosting as you prefer |
+## Demo
 
-## Repository layout
+A short product demo will be added here soon.
 
-```
-insights/
-├── apps/
-│   ├── backend/      # NestJS, Prisma, REST API (/api/v1/...)
-│   └── frontend/     # SPA (Vite + React)
-├── packages/
-│   └── contracts/    # Shared types and contracts
-├── package.json      # npm workspaces, root scripts
-└── README.md
-```
+<!-- Add screenshot, GIF, or video walkthrough here -->
 
-Server-specific notes: [apps/backend/README.md](apps/backend/README.md).
+## More information
 
-**API contracts:** shared TypeScript types for the HTTP layer (including `ApiResponse<T>` and `ApiErrorResponse`) and domain payloads live in [`packages/contracts`](packages/contracts). Both apps depend on the workspace package `@insights/contracts`.
+For a closer look at the product direction, architecture, and technical implementation, see:
 
-## Requirements
+- [specs/README.md](specs/README.md)
 
-- **Node.js** (LTS) and **npm**
-- **Docker** for local PostgreSQL (Compose)
+## Agents and developer guidance
 
-## Local development
+This repository also includes guidance files for AI-assisted development and project-specific conventions:
 
-### 1. Install dependencies
-
-```bash
-npm install
-```
-
-### 2. Environment variables
-
-See **[apps/backend/.env.example](apps/backend/.env.example)** for backend and Docker Compose variables. Copy it to **`apps/backend/.env.dev`**.
-
-See **[apps/frontend/.env.example](apps/frontend/.env.example)** for the SPA. Copy it to **`apps/frontend/.env`**.
-
-### 3. Database
-
-From the repository root:
-
-```bash
-npm run dev:up --workspace @insights/backend
-```
-
-Run Prisma migrations (and seeds if needed) using the backend workspace — see [apps/backend/README.md](apps/backend/README.md).
-
-### 4. Run backend and frontend
-
-```bash
-npm run dev
-```
-
-Or separately:
-
-```bash
-npm run backend:dev
-npm run frontend:dev
-```
-
-## Build
-
-```bash
-npm run backend:build
-npm run frontend:build
-```
-
-## Deployment (Railway)
-
-Production target is **Railway**: managed PostgreSQL, a Node service for Nest (build, `prisma migrate deploy` on start, env vars from Railway). A separate step-by-step guide can be added later.
+- [AGENTS.md](AGENTS.md) — explains how to interact with the repository and the preferred communication style.
+- [CLAUDE.md](CLAUDE.md) — provides project-specific developer context, commands, and constraints.
 
 ## License
 
