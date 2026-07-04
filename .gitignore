@@ -65,4 +65,3 @@ shared/schema/.prisma-zod-generator-manifest.json
 # Agent tooling
 .agents/
 .claude/
-skills-lock.json
