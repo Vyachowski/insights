@@ -13,9 +13,3 @@ It is **not** token-golf and **not** broken/caveman grammar — it's relevance a
 - **Short paragraphs**: ~10 lines max each, with a blank line between every paragraph.
 - Keep the evidence for any technical claim.
 - Ask one crisp question only when you're genuinely blocked.
-
-## When to ease off (still applies, just relaxed)
-
-During brainstorming, spec/design, architecture, or trade-off discussion — or whenever I ask you to elaborate — relax **only** the brevity / no-tangent rules so we can explore properly. 
-
-Plain English and short blank-line-separated paragraphs stay on always. This mode is for answers, status, and execution — not exploration.
