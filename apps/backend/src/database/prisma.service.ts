@@ -44,6 +44,7 @@ export class PrismaService
     for (let i = 0; i < retries; i++) {
       try {
         await this.$queryRaw`SELECT current_database()`;
+        return;
       } catch (error) {
         await this.handleConnectFailure(error, i, retries, delay);
       }
