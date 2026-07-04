@@ -42,4 +42,12 @@ export default tseslint.config(
       'prettier/prettier': ['error', { endOfLine: 'auto' }],
     },
   },
+  {
+    // Seed scripts are one-off procedural data-loading tools; the 25-line
+    // function limit is noise there, so exempt them.
+    files: ['**/prisma/seed/**'],
+    rules: {
+      'max-lines-per-function': 'off',
+    },
+  },
 );
