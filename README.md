@@ -29,7 +29,7 @@ For a closer look at the product direction, architecture, and technical implemen
 This repository also includes guidance files for AI-assisted development and project-specific conventions:
 
 - [AGENTS.md](AGENTS.md) — explains preferred communication style.
-- [CLAUDE.md](CLAUDE.md) — provides project-specific developer context, commands, and constraints for claude.
+- [CLAUDE.md](CLAUDE.md) — provides project-specific developer context, commands, and constraints for Claude.
 
 ## License
 
