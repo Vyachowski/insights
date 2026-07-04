@@ -2,15 +2,16 @@
 
 Business analytics dashboard for site owners and analysts. Tracks revenue, expenses, SEO metrics, and call data across a portfolio of sites grouped by city.
 
-See `specs/README.md` for the full architecture spec: repository layout, data model, API conventions, backend/frontend architecture, database, and deployment.
+See `specs/README.md` for architecture (repository layout, data model, backend/frontend architecture, database, deployment) and `openspec/specs/` for capability specs (API conventions, development workflow).
 
 See @AGENTS.md for communication style.
 
 ## Git conventions
 
+Full engineering workflow (testing, linting, git hooks, commits) is specified in `openspec/specs/development-workflow`. Essentials, repeated here since this file is always loaded:
+
 - Solo-dev project: commit directly to `main`. Don't create feature branches unless explicitly asked.
-- Use Conventional Commits (`type(scope): short description`). Short subject; no body unless truly necessary. Format is enforced by commitlint (`commitlint.config.mjs`, config-conventional) via a `commit-msg` hook.
-- Keep each commit atomic and non-breaking — the project must build at every commit.
+- Conventional Commits (`type(scope): short description`), enforced by commitlint; keep each commit atomic and non-breaking.
 - Never add AI attribution to commits, PRs, or any other text — no `Co-Authored-By: Claude`, no "Generated with Claude Code", no 🤖 markers, no similar trailers or mentions.
 
 ## Dev commands
