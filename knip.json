@@ -3,5 +3,12 @@
   "ignore": [
     "apps/backend/src/prisma/generated/**",
     "apps/backend/test/**/*.e2e-spec.ts"
+  ],
+  "ignoreDependencies": [
+    "@types/multer",
+    "@types/supertest",
+    "supertest",
+    "dayjs",
+    "axios"
   ]
 }
