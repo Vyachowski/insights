@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
-import { PrismaService } from 'src/database/prisma.service';
+import { PrismaService } from '@/database/prisma.service';
 import * as argon2 from 'argon2';
 import { User, UserStatus } from '@/prisma/generated/prisma/client';
 
