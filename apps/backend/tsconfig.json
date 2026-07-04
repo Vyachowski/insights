@@ -19,10 +19,9 @@
     "noImplicitAny": true,
     "strictBindCallApply": true,
     "noFallthroughCasesInSwitch": true,
-    "baseUrl": "./",
     "outDir": "./dist",
     "paths": {
-      "@/*": ["src/*"],
-    },
+      "@/*": ["./src/*"]
+    }
   },
 }
