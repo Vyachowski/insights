@@ -2,7 +2,7 @@
 
 Business analytics dashboard for site owners and analysts. Tracks revenue, expenses, SEO metrics, and call data across a portfolio of sites grouped by city.
 
-See `specs/README.md` for architecture (repository layout, data model, backend/frontend architecture, database, deployment) and `openspec/specs/` for capability specs (API conventions, development workflow).
+See `openspec/specs/` for the capability specs: app layout & data model, backend/frontend architecture, API conventions, and development workflow.
 
 See @AGENTS.md for communication style.
 

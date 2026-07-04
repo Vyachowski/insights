@@ -22,7 +22,7 @@ A short product demo will be added here soon.
 
 For a closer look at the product direction, architecture, and technical implementation, see:
 
-- [specs/README.md](specs/README.md)
+- [openspec/specs/](openspec/specs/) — capability specs: app layout & data model, backend/frontend architecture, API conventions, development workflow.
 
 ## Agents and developer guidance
 
