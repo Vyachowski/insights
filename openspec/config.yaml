@@ -1,20 +1,22 @@
 schema: spec-driven
 
-# Project context (optional)
-# This is shown to AI when creating artifacts.
-# Add your tech stack, conventions, style guides, domain knowledge, etc.
-# Example:
-#   context: |
-#     Tech stack: TypeScript, React, Node.js
-#     We use conventional commits
-#     Domain: e-commerce platform
+# Project context — shown to AI when creating artifacts.
+context: |
+  Insights — business analytics dashboard (revenue, expenses, SEO, call data)
+  for sites grouped by city. Audience: site owners and analysts.
 
-# Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always include a "Non-goals" section
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
+  Monorepo, npm workspaces:
+    - apps/backend   NestJS 11, Prisma 7 + PostgreSQL, Zod, TypeScript, Jest
+    - apps/frontend  React 19, Redux Toolkit, React Router, Vite, axios
+    - contracts      shared TS API types / Zod contracts used by both apps
+
+  Deeper docs: specs/README.md (architecture, data model, API, DB, deploy),
+  CLAUDE.md (dev commands, conventions).
+  Commits: Conventional Commits, enforced by commitlint (config-conventional).
+
+# Per-artifact rules.
+rules:
+  tasks:
+    - Break work into small tasks, ideally ≤ 2 hours each.
+    - Each task should be independently committable as one atomic,
+      non-breaking commit (Conventional Commits).
