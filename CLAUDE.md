@@ -15,9 +15,15 @@ See `AGENTS.md` for communication style.
 ## Dev commands
 
 ```bash
-npm run dev            # backend + frontend concurrently
-npm run backend:dev    # backend only (runs prisma generate first)
-npm run frontend:dev   # frontend only
+npm run dev     # backend + frontend concurrently
+npm run lint    # lint both workspaces
+npm run knip    # find unused files/exports/deps repo-wide
+
+# per app: run from repo root with -w, or cd into apps/backend | apps/frontend
+npm run dev -w @insights/backend         # backend only (runs prisma generate first)
+npm run dev -w @insights/frontend        # frontend only
+npm run build -w @insights/backend
+npm run build -w @insights/frontend
 
 # backend workspace
 npm run dev:up -w @insights/backend          # start Postgres via Docker Compose

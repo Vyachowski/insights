@@ -8,14 +8,9 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "concurrently \"npm run backend:dev\" \"npm run frontend:dev\"",
-    "frontend:dev": "npm run dev --workspace @insights/frontend",
-    "frontend:build": "npm run build --workspace @insights/frontend",
-    "backend:dev": "npm run dev --workspace @insights/backend",
-    "backend:start": "npm run start:prod --workspace @insights/backend",
-    "backend:build": "npm run build --workspace @insights/backend",
-    "db:seed": "npm run prisma:seed --workspace @insights/backend",
-    "lint": "npm run lint --workspace @insights/backend && npm run lint --workspace @insights/frontend",
+    "dev": "concurrently \"npm run dev -w @insights/backend\" \"npm run dev -w @insights/frontend\"",
+    "lint": "npm run lint -w @insights/backend && npm run lint -w @insights/frontend",
+    "knip": "knip",
     "prepare": "simple-git-hooks"
   },
   "author": "Slava Haikin",
