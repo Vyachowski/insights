@@ -24,12 +24,12 @@ For a closer look at the product direction, architecture, and technical implemen
 
 - [openspec/specs/](openspec/specs/) — capability specs: app layout & data model, backend/frontend architecture, API conventions, development workflow.
 
-## Agents and developer guidance
+## Agents guidance
 
 This repository also includes guidance files for AI-assisted development and project-specific conventions:
 
-- [AGENTS.md](AGENTS.md) — explains how to interact with the repository and the preferred communication style.
-- [CLAUDE.md](CLAUDE.md) — provides project-specific developer context, commands, and constraints.
+- [AGENTS.md](AGENTS.md) — explains preferred communication style.
+- [CLAUDE.md](CLAUDE.md) — provides project-specific developer context, commands, and constraints for claude.
 
 ## License
 
