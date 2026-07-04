@@ -11,7 +11,3 @@ export class LoginRequestDto {
   @MinLength(10)
   password: string;
 }
-// export class LoginResponseDto implements LoginResponse {
-export class LoginResponseDto {
-  access_token: string;
-}
