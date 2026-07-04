@@ -37,7 +37,7 @@ export class LastWeekSummaryDto {
   readonly profit: number;
 }
 
-export class MonthlyProfitDto {
+class MonthlyProfitDto {
   @IsISO8601()
   readonly month: string;
 
@@ -75,7 +75,7 @@ export class YearlyProfitTrendPointDto {
 }
 
 // export class CityProfitDto implements CityProfit {
-export class CityProfitDto {
+class CityProfitDto {
   @IsString()
   readonly city: string;
 
@@ -84,7 +84,7 @@ export class CityProfitDto {
 }
 
 // export class YearlyCityProfitDto implements YearlyCityProfit {
-export class YearlyCityProfitDto {
+class YearlyCityProfitDto {
   @IsInt()
   readonly year: number;
 
@@ -95,7 +95,7 @@ export class YearlyCityProfitDto {
 }
 
 // export class BusinessHealthDto implements BusinessHealth {
-export class BusinessHealthDto {
+class BusinessHealthDto {
   @IsBoolean()
   readonly isGrowing: boolean;
 

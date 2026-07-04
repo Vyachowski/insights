@@ -20,7 +20,7 @@ const envSchema = z.object({
     .default(3000),
 });
 
-export type EnvConfig = z.infer<typeof envSchema>;
+type EnvConfig = z.infer<typeof envSchema>;
 
 export function validate(config: Record<string, unknown>): EnvConfig {
   return envSchema.parse(config);

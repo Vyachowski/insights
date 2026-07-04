@@ -1,7 +1,7 @@
 import { BadRequestException } from '@nestjs/common';
 import { parse } from 'csv-parse/sync';
 
-export const CSV_PARSE_OPTIONS = {
+const CSV_PARSE_OPTIONS = {
   columns: true,
   skip_empty_lines: true,
   trim: true,
@@ -14,15 +14,19 @@ export function parseCsvBuffer(buffer: Buffer): Record<string, string>[] {
 
 export async function fetchUrlToBuffer(url: string): Promise<Buffer> {
   const res = await fetch(url);
-  if (!res.ok) throw new BadRequestException(`Failed to fetch URL: ${res.status}`);
+  if (!res.ok)
+    throw new BadRequestException(`Failed to fetch URL: ${res.status}`);
   return Buffer.from(await res.arrayBuffer());
 }
 
-export function assertCsvColumns(rows: Record<string, string>[], required: string[]): void {
+export function assertCsvColumns(
+  rows: Record<string, string>[],
+  required: string[],
+): void {
   if (rows.length === 0) throw new BadRequestException('CSV file is empty');
   const actual = Object.keys(rows[0]);
-  const missing = required.filter(c => !actual.includes(c));
-  const extra = actual.filter(c => !required.includes(c));
+  const missing = required.filter((c) => !actual.includes(c));
+  const extra = actual.filter((c) => !required.includes(c));
   if (missing.length > 0 || extra.length > 0) {
     throw new BadRequestException(
       `Invalid CSV format. Expected columns: ${required.join(', ')}. Got: ${actual.join(', ')}`,

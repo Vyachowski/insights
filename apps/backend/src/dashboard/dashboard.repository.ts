@@ -13,7 +13,7 @@ export interface WeekData {
   previous: PeriodData;
 }
 
-export interface DashboardRawData {
+interface DashboardRawData {
   lastWeek: PeriodData;
   currentMonth: PeriodData;
   lastYearSameMonth: PeriodData;
