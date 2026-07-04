@@ -4,12 +4,13 @@ Business analytics dashboard for site owners and analysts. Tracks revenue, expen
 
 See `specs/README.md` for the full architecture spec: repository layout, data model, API conventions, backend/frontend architecture, database, and deployment.
 
-See `AGENTS.md` for communication style.
+See @AGENTS.md for communication style.
 
 ## Git conventions
 
 - Solo-dev project: commit directly to `main`. Don't create feature branches unless explicitly asked.
-- Use Conventional Commits. Keep each commit atomic and non-breaking — the project must build at every commit.
+- Use Conventional Commits (`type(scope): short description`). Short subject; no body unless truly necessary. Format is enforced by commitlint (`commitlint.config.mjs`, config-conventional) via a `commit-msg` hook.
+- Keep each commit atomic and non-breaking — the project must build at every commit.
 - Never add AI attribution to commits, PRs, or any other text — no `Co-Authored-By: Claude`, no "Generated with Claude Code", no 🤖 markers, no similar trailers or mentions.
 
 ## Dev commands
