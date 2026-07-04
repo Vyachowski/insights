@@ -10,8 +10,8 @@ context: |
     - apps/frontend  React 19, Redux Toolkit, React Router, Vite, axios
     - contracts      shared TS API types / Zod contracts used by both apps
 
-  Deeper docs: specs/README.md (architecture, data model, API, DB, deploy),
-  CLAUDE.md (dev commands, conventions).
+  Deeper docs: openspec/specs/ (app layout & data model, backend/frontend
+  architecture, API conventions, development workflow), CLAUDE.md (dev commands).
   Commits: Conventional Commits, enforced by commitlint (config-conventional).
 
 # Per-artifact rules.
