@@ -1,11 +1,16 @@
 import { AnalyticsQueryDto } from '@/common/dto/analytics-query.dto';
 import { PrismaService } from '@/database/prisma.service';
 import { Injectable } from '@nestjs/common';
-import { assertCsvColumns, assertSkipRate, fetchUrlToBuffer, parseCsvBuffer } from '@/common/utils/csv.utils';
+import {
+  assertCsvColumns,
+  assertSkipRate,
+  fetchUrlToBuffer,
+  parseCsvBuffer,
+} from '@/common/utils/csv.utils';
 
 @Injectable()
 export class ExpensesService {
-constructor(private readonly prismaService: PrismaService) {}
+  constructor(private readonly prismaService: PrismaService) {}
 
   async getExpensesForPeriod(startDate: Date, endDate: Date) {
     const aggregation = await this.prismaService.expense.aggregate({
@@ -37,11 +42,16 @@ constructor(private readonly prismaService: PrismaService) {}
     });
   }
 
-  async importFromCsv(buffer: Buffer): Promise<{ created: number; updated: number; skipped: number }> {
+  async importFromCsv(
+    buffer: Buffer,
+  ): Promise<{ created: number; updated: number; skipped: number }> {
     const rows = parseCsvBuffer(buffer);
     assertCsvColumns(rows, ['date', 'type', 'siteId', 'amount']);
 
-    let created = 0, updated = 0, skipped = 0, invalid = 0;
+    let created = 0,
+      updated = 0,
+      skipped = 0,
+      invalid = 0;
 
     for (const row of rows) {
       const date = new Date(row['date']);
@@ -49,9 +59,14 @@ constructor(private readonly prismaService: PrismaService) {}
       const amount = parseFloat(row['amount']);
       const type = row['type']?.trim();
 
-      if (!type || isNaN(amount) || isNaN(date.getTime())) { invalid++; continue; }
+      if (!type || isNaN(amount) || isNaN(date.getTime())) {
+        invalid++;
+        continue;
+      }
 
-      const outcome = await this.upsertRow(date, siteId, amount, type).catch(() => 'invalid' as const);
+      const outcome = await this.upsertRow(date, siteId, amount, type).catch(
+        () => 'invalid' as const,
+      );
       if (outcome === 'created') created++;
       else if (outcome === 'updated') updated++;
       else if (outcome === 'skipped') skipped++;
@@ -62,7 +77,12 @@ constructor(private readonly prismaService: PrismaService) {}
     return { created, updated, skipped };
   }
 
-  private async upsertRow(date: Date, siteId: number | null, amount: number, type: string): Promise<'created' | 'updated' | 'skipped'> {
+  private async upsertRow(
+    date: Date,
+    siteId: number | null,
+    amount: number,
+    type: string,
+  ): Promise<'created' | 'updated' | 'skipped'> {
     const existing = await this.prismaService.expense.findFirst({
       where: { date, siteId, type },
       select: { id: true, amount: true },
@@ -76,10 +96,14 @@ constructor(private readonly prismaService: PrismaService) {}
       update: { amount },
     });
 
-    return record.createdAt.getTime() === record.updatedAt.getTime() ? 'created' : 'updated';
+    return record.createdAt.getTime() === record.updatedAt.getTime()
+      ? 'created'
+      : 'updated';
   }
 
-  async importFromUrl(url: string): Promise<{ created: number; updated: number; skipped: number }> {
+  async importFromUrl(
+    url: string,
+  ): Promise<{ created: number; updated: number; skipped: number }> {
     return this.importFromCsv(await fetchUrlToBuffer(url));
   }
 }

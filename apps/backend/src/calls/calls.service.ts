@@ -6,10 +6,10 @@ import { assertCsvColumns, assertSkipRate } from '@/common/utils/csv.utils';
 
 // City name aliases matching the seed normalizer logic
 const CITY_ALIASES: Record<string, string[]> = {
-  'новосибирск': ['нск'],
+  новосибирск: ['нск'],
   'санкт-петербург': ['спб', 'петербург'],
   'нижний новгород': ['нижний'],
-  'екатеринбург': ['екб'],
+  екатеринбург: ['екб'],
   'ростов-на-дону': ['ростов'],
   'набережные челны': ['челны'],
 };
@@ -64,7 +64,9 @@ export class CallsService {
     });
   }
 
-  async importFromCsv(buffer: Buffer): Promise<{ created: number; skipped: number }> {
+  async importFromCsv(
+    buffer: Buffer,
+  ): Promise<{ created: number; skipped: number }> {
     const rows: Record<string, string>[] = parse(buffer, {
       columns: true,
       skip_empty_lines: true,
@@ -72,18 +74,24 @@ export class CallsService {
       bom: true,
     });
 
-    assertCsvColumns(rows, ['Дата', 'Кто звонил', '№', 'Проект', 'Куда звонил']);
+    assertCsvColumns(rows, [
+      'Дата',
+      'Кто звонил',
+      '№',
+      'Проект',
+      'Куда звонил',
+    ]);
     const sites = await this.prismaService.site.findMany({
       select: { id: true, city: { select: { name: true } } },
     });
 
     const cityToSiteId = new Map(
-      sites.map(s => [s.city.name.toLowerCase(), s.id]),
+      sites.map((s) => [s.city.name.toLowerCase(), s.id]),
     );
 
     let invalidCount = 0;
 
-    const records = rows.flatMap(row => {
+    const records = rows.flatMap((row) => {
       const date = parseGudokDate(row['Дата'] ?? '');
       const src = row['Кто звонил']?.trim();
       const callNumber = Number(row['№']);
@@ -97,20 +105,22 @@ export class CallsService {
         return [];
       }
 
-      return [{
-        siteId,
-        date,
-        src,
-        region: row['Откуда']?.trim() || null,
-        callNumber,
-        class: row['Класс']?.trim() || null,
-        projectTitle,
-        advChannelName,
-        billsec: 0,
-        comment: row['Комментарий']?.trim() || null,
-        redirectNumber: row['Вызов завершен']?.replace(/\D/g, '') || null,
-        source: 'csv' as const,
-      }];
+      return [
+        {
+          siteId,
+          date,
+          src,
+          region: row['Откуда']?.trim() || null,
+          callNumber,
+          class: row['Класс']?.trim() || null,
+          projectTitle,
+          advChannelName,
+          billsec: 0,
+          comment: row['Комментарий']?.trim() || null,
+          redirectNumber: row['Вызов завершен']?.replace(/\D/g, '') || null,
+          source: 'csv' as const,
+        },
+      ];
     });
 
     const result = await this.prismaService.callImport.createMany({
@@ -124,9 +134,12 @@ export class CallsService {
     return { created, skipped };
   }
 
-  async importFromUrl(url: string): Promise<{ created: number; skipped: number }> {
+  async importFromUrl(
+    url: string,
+  ): Promise<{ created: number; skipped: number }> {
     const res = await fetch(url);
-    if (!res.ok) throw new BadRequestException(`Failed to fetch URL: ${res.status}`);
+    if (!res.ok)
+      throw new BadRequestException(`Failed to fetch URL: ${res.status}`);
     const buffer = Buffer.from(await res.arrayBuffer());
     return this.importFromCsv(buffer);
   }

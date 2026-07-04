@@ -20,7 +20,9 @@ export class MetricsService {
     });
   }
 
-  async importFromCsv(buffer: Buffer): Promise<{ created: number; skipped: number }> {
+  async importFromCsv(
+    buffer: Buffer,
+  ): Promise<{ created: number; skipped: number }> {
     const rows: Record<string, string>[] = parse(buffer, {
       columns: true,
       skip_empty_lines: true,
@@ -29,11 +31,20 @@ export class MetricsService {
     });
 
     assertCsvColumns(rows, [
-      'siteId', 'date',
-      'yandexUsers', 'googleUsers', 'otherUsers',
-      'visitDurationYandexInSec', 'visitDurationGoogleInSec', 'visitDurationOtherInSec',
-      'bounceYandex', 'bounceGoogle', 'bounceOther',
-      'leadsYandex', 'leadsGoogle', 'leadsOther',
+      'siteId',
+      'date',
+      'yandexUsers',
+      'googleUsers',
+      'otherUsers',
+      'visitDurationYandexInSec',
+      'visitDurationGoogleInSec',
+      'visitDurationOtherInSec',
+      'bounceYandex',
+      'bounceGoogle',
+      'bounceOther',
+      'leadsYandex',
+      'leadsGoogle',
+      'leadsOther',
     ]);
     let upserted = 0;
     let skipped = 0;
@@ -41,15 +52,21 @@ export class MetricsService {
     for (const row of rows) {
       const siteId = Number(row['siteId']);
       const date = row['date'] ? new Date(row['date']) : null;
-      if (!siteId || isNaN(siteId) || !date || isNaN(date.getTime())) { skipped++; continue; }
+      if (!siteId || isNaN(siteId) || !date || isNaN(date.getTime())) {
+        skipped++;
+        continue;
+      }
 
       const data = {
         yandexUsers: Number(row['yandexUsers'] ?? 0) || 0,
         googleUsers: Number(row['googleUsers'] ?? 0) || 0,
         otherUsers: Number(row['otherUsers'] ?? 0) || 0,
-        visitDurationYandexInSec: Number(row['visitDurationYandexInSec'] ?? 0) || 0,
-        visitDurationGoogleInSec: Number(row['visitDurationGoogleInSec'] ?? 0) || 0,
-        visitDurationOtherInSec: Number(row['visitDurationOtherInSec'] ?? 0) || 0,
+        visitDurationYandexInSec:
+          Number(row['visitDurationYandexInSec'] ?? 0) || 0,
+        visitDurationGoogleInSec:
+          Number(row['visitDurationGoogleInSec'] ?? 0) || 0,
+        visitDurationOtherInSec:
+          Number(row['visitDurationOtherInSec'] ?? 0) || 0,
         bounceYandex: Number(row['bounceYandex'] ?? 0) || 0,
         bounceGoogle: Number(row['bounceGoogle'] ?? 0) || 0,
         bounceOther: Number(row['bounceOther'] ?? 0) || 0,
@@ -70,9 +87,12 @@ export class MetricsService {
     return { created: upserted, skipped };
   }
 
-  async importFromUrl(url: string): Promise<{ created: number; skipped: number }> {
+  async importFromUrl(
+    url: string,
+  ): Promise<{ created: number; skipped: number }> {
     const res = await fetch(url);
-    if (!res.ok) throw new BadRequestException(`Failed to fetch URL: ${res.status}`);
+    if (!res.ok)
+      throw new BadRequestException(`Failed to fetch URL: ${res.status}`);
     const buffer = Buffer.from(await res.arrayBuffer());
     return this.importFromCsv(buffer);
   }

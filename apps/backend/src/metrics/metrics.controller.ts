@@ -1,6 +1,23 @@
-import { Body, Controller, Get, MaxFileSizeValidator, ParseFilePipe, Post, Query, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  MaxFileSizeValidator,
+  ParseFilePipe,
+  Post,
+  Query,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBody, ApiCookieAuth, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiCookieAuth,
+  ApiConsumes,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { MetricsService } from './metrics.service';
 import { AnalyticsQueryDto } from '@/common/dto/analytics-query.dto';
 import { ImportUrlDto } from '@/common/dto/import-url.dto';
@@ -24,17 +41,28 @@ export class MetricsController {
     return metrics.map((m) => new MetricResponseDto(m));
   }
 
-  @ApiOperation({ summary: 'Import site metrics from CSV (columns: siteId,date,yandexUsers,...)' })
+  @ApiOperation({
+    summary:
+      'Import site metrics from CSV (columns: siteId,date,yandexUsers,...)',
+  })
   @ApiConsumes('multipart/form-data')
-  @ApiBody({ schema: { type: 'object', properties: { file: { type: 'string', format: 'binary' } } } })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: { file: { type: 'string', format: 'binary' } },
+    },
+  })
   @UseGuards(JwtAuthGuard, AdminGuard)
   @UseInterceptors(FileInterceptor('file'))
   @Post('import')
-  importCsv(@UploadedFile(new ParseFilePipe({
-    validators: [
-      new MaxFileSizeValidator({ maxSize: 10 * 1024 * 1024 }),
-    ],
-  })) file: Express.Multer.File) {
+  importCsv(
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [new MaxFileSizeValidator({ maxSize: 10 * 1024 * 1024 })],
+      }),
+    )
+    file: Express.Multer.File,
+  ) {
     return this.metricsService.importFromCsv(file.buffer);
   }
 
