@@ -30,5 +30,5 @@
 
 ## 5. Production cutover
 
-- [ ] 5.1 Set Railway service variables (CSV URLs + bootstrap credentials); recreate the prod database
-- [ ] 5.2 Deploy, confirm bootstrap logs, upload data CSVs via UI, verify dashboard
+- [x] 5.1 Set Railway service variables (CSV URLs + bootstrap credentials); recreate the prod database — `CITIES_CSV_URL`/`SITES_CSV_URL` added (`ADMIN_*`/`USER_*` already existed), prod schema dropped and recreated; `YANDEX_API_OAUTH_TOKEN` left for the user to delete manually
+- [x] 5.2 Deploy, confirm bootstrap logs, upload data CSVs via UI, verify dashboard — init migration applied clean, bootstrap created 2 users / 40 cities / 40 sites on prod; data CSV upload via prod UI on the user (metrics upload bug tracked separately)
