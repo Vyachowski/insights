@@ -8,11 +8,11 @@
 
 ## 2. Data layer
 
-- [ ] 2.1 Drizzle schema (`app/server/schema.ts`) mirroring current tables/columns 1:1 (snake_case names, enums, indexes), **including the two partial unique indexes** via `uniqueIndex().where()` (`expenses_date_type_null_site_idx`, `revenue_date_null_site_idx` — Prisma couldn't express them; migration `20260705140000` is the reference SQL)
-- [ ] 2.2 `app/server/db.ts` (node-postgres pool + drizzle client); `drizzle-kit generate` init migration (drizzle-kit stays devDependency); programmatic `migrate()` in server entry wrapped in the connect-retry loop (`DATABASE_CONNECT_RETRIES`/`DELAY`)
-- [ ] 2.3 Reset dev DB and verify init migration applies cleanly
-- [ ] 2.4 Port bootstrap (users/cities/sites, empty-table guards, sequence reset, fault-tolerant) to `app/server/bootstrap.ts`, called from server entry after migrate; port its 8 unit tests to vitest
-- [ ] 2.5 Verify bootstrap against fresh dev DB: 2 users / 40 cities / 40 sites from env URLs, skip-on-restart
+- [x] 2.1 Drizzle schema (`app/server/schema.ts`) mirroring current tables/columns 1:1 (snake_case names, enums, indexes), **including the two partial unique indexes** via `uniqueIndex().where()` (`expenses_date_type_null_site_idx`, `revenue_date_null_site_idx` — Prisma couldn't express them; migration `20260705140000` is the reference SQL)
+- [x] 2.2 `app/server/db.ts` (node-postgres pool + drizzle client); `drizzle-kit generate` init migration (drizzle-kit stays devDependency); programmatic `migrate()` in server entry wrapped in the connect-retry loop (`DATABASE_CONNECT_RETRIES`/`DELAY`)
+- [x] 2.3 Reset dev DB and verify init migration applies cleanly
+- [x] 2.4 Port bootstrap (users/cities/sites, empty-table guards, sequence reset, fault-tolerant) to `app/server/bootstrap.ts`, called from server entry after migrate; port its 8 unit tests to vitest
+- [x] 2.5 Verify bootstrap against fresh dev DB: 2 users / 40 cities / 40 sites from env URLs, skip-on-restart
 
 ## 3. Auth (verify before any page work)
 
