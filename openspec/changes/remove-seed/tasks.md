@@ -18,15 +18,15 @@
 
 ## 3. Migration squash
 
-- [ ] 3.1 Delete the two existing migration folders and generate a single fresh `init` migration from the current `schema.prisma`
-- [ ] 3.2 Recreate local dev DB: `dev:up` → `prisma migrate deploy` → verify schema matches
+- [x] 3.1 Delete the two existing migration folders and generate a single fresh `init` migration from the current `schema.prisma` — `20260705092230_init`
+- [x] 3.2 Recreate local dev DB: `dev:up` → `prisma migrate deploy` → verify schema matches — `migrate status` clean
 
 ## 4. Verify clean-slate flow
 
 - [x] 4.1 Upload `cities.csv`/`sites.csv` to Google Drive (anyone-with-link), set URLs in `.env.dev` — done 2026-07-05, both URLs verified byte-identical to Desktop copies; `ADMIN_*`/`USER_*` credentials already present in `.env.dev`
-- [ ] 4.2 Start app against the fresh DB; verify users/cities/sites bootstrapped and admin login works
-- [ ] 4.3 Upload all data CSVs (calls, revenue, expenses, metrics) via the UI; spot-check dashboard numbers against pre-reset values
-- [ ] 4.4 Update `CLAUDE.md` dev commands / README setup section: remove seed step, document bootstrap-then-upload flow
+- [x] 4.2 Start app against the fresh DB; verify users/cities/sites bootstrapped and admin login works — bootstrap created 2 users / 40 cities / 40 sites from Drive URLs, restart skips all steps, login 201
+- [ ] 4.3 Upload all data CSVs (calls, revenue, expenses, metrics) via the UI; spot-check dashboard numbers against pre-reset values — **user does this**; endpoints pre-verified via curl (revenue 209, expenses 1120, metrics 22781 rows; calls needed the extra-columns fix, then data tables truncated for the UI run)
+- [x] 4.4 Update `CLAUDE.md` dev commands / README setup section: remove seed step, document bootstrap-then-upload flow — CLAUDE.md done; README has no seed mentions
 
 ## 5. Production cutover
 
