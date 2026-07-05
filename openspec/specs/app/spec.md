@@ -1,25 +1,15 @@
 # app Specification
 
 ## Purpose
-Application-wide structure: the npm-workspace monorepo layout, the shared-contracts (DTO) convention, the City → Site portfolio schema with company-vs-site financial split, and the automated Railway deployment flow.
+Application-wide structure: the flat single-package repository layout, the City → Site portfolio schema with company-vs-site financial split, and the automated Railway deployment flow.
 
 ## Requirements
 ### Requirement: Workspace and Repository Layout
-The project SHALL be structured as a monorepo using npm workspaces containing:
-- `apps/backend/`: NestJS REST API
-- `apps/frontend/`: React SPA (Vite, Mantine UI)
-- `contracts/`: Shared TypeScript and Zod contracts
+The project SHALL be a flat single-package repository (no npm workspaces): one root `package.json`, the React Router 7 app under `app/` (routes, modules, server code), Drizzle migrations under `drizzle/`, and OpenSpec docs under `openspec/`.
 
-#### Scenario: Sub-apps share contracts
-- **WHEN** a client request/response type is updated in `contracts/`
-- **THEN** both the frontend and backend import the updated type from the same shared workspace
-
-### Requirement: Contract-only shared workspace
-The `contracts/` workspace SHALL only define API request and response data transfer objects (DTOs), payload types, and error envelopes. It SHALL NOT replicate database entity models, which are owned by the database schema. All shared models SHALL be standardized to use a `Dto` suffix. Backend DTO classes and DTO wrappers SHALL implement their respective shared contract DTO interfaces.
-
-#### Scenario: API payload types in contracts
-- **WHEN** defining API boundaries for an entity (e.g. `Revenue`)
-- **THEN** the request/response payloads are defined in `contracts/` as DTO interfaces, and the backend DTO classes implement them
+#### Scenario: Single install and dev flow
+- **WHEN** a developer clones the repo and runs `npm install && npm run dev`
+- **THEN** one package installs and one dev server starts, with no workspace flags or cross-package wiring
 
 ### Requirement: Centralized portfolio schema
 The database SHALL group `Site` records under a `City` parent, allowing metrics, calls, revenue, and expenses to roll up to the city level.
@@ -38,9 +28,8 @@ The database SHALL group `Site` records under a `City` parent, allowing metrics,
 - **THEN** it is aggregated as company-wide revenue
 
 ### Requirement: Automated platform deployment
-The application deployment SHALL target Railway, running database migrations automatically via `prisma migrate deploy` prior to backend server boot.
+The application deployment SHALL target Railway, applying database migrations automatically via the programmatic Drizzle migrator in the server entry, before bootstrap and before the server begins accepting requests.
 
 #### Scenario: Safe database schema updates on deploy
-- **WHEN** the backend is deployed to production
-- **THEN** migrations run successfully before the NestJS server starts
-
+- **WHEN** the app is deployed to production
+- **THEN** pending Drizzle migrations are applied before the server starts serving requests

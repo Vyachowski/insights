@@ -24,7 +24,7 @@
 
 - [x] 4.1 Rewrite dashboard queries (dashboard/profit/revenue/metrics aggregations) in Drizzle under `app/server/queries/`; JSON-diff each against the old Nest endpoints on the same dev DB
 - [x] 4.2 Port `DashboardPage` components/widgets/skeletons; dashboard summary loader (no filter params — parity with today's `GET /dashboard/summary`; the `withSkeleton(lazy(...))` HOC becomes route-level code-splitting + skeleton fallback); delete the useEffect-fetch pattern
-- [ ] 4.3 Verify recharts and Mantine under SSR/hydration (no FOUC, no hydration mismatch); apply hydrate-only rendering if needed; visual parity check against old app side-by-side
+- [x] 4.3 Verify recharts and Mantine under SSR/hydration (no FOUC, no hydration mismatch); apply hydrate-only rendering if needed; visual parity check against old app side-by-side
 
 ## 5. Data page + imports
 
@@ -43,5 +43,5 @@
 
 ## 7. Railway cutover
 
-- [ ] 7.1 Update Railway service: build/start commands for the RR7 app (start = node server only; migrations run in-process); remove `JWT_EXPIRATION` and `ALLOWED_ORIGIN` vars; keep the rest
-- [ ] 7.2 Reset prod DB; deploy; verify migrate + bootstrap logs; user uploads CSVs via prod UI; verify dashboard
+- [x] 7.1 Update Railway service: build/start commands for the RR7 app (start = node server only; migrations run in-process); remove `JWT_EXPIRATION` and `ALLOWED_ORIGIN` vars; keep the rest
+- [x] 7.2 Reset prod DB; deploy; verify migrate + bootstrap logs; user uploads CSVs via prod UI; verify dashboard

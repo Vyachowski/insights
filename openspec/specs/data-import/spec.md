@@ -1,31 +1,31 @@
 # data-import Specification
 
 ## Purpose
-How data enters the system: admin-only CSV imports (upload and by-URL) for the data resources (calls, revenue, expenses, metrics), and startup bootstrap of reference data (users, cities, sites) from environment configuration. There is no seed subsystem; a fresh database becomes fully usable via bootstrap + uploads.
+How data enters the system: admin-only CSV imports (multipart upload and by-URL, dispatched by intent through route actions) for the data resources (calls, revenue, expenses, metrics), and startup bootstrap of reference data (users, cities, sites) from environment configuration. There is no seed subsystem; a fresh database becomes fully usable via bootstrap + uploads.
 
 ## Requirements
 ### Requirement: Data resources are importable via CSV upload and URL
 
-Each data resource (calls, revenue, expenses, metrics) SHALL expose admin-only import endpoints: `POST <resource>/import` accepting a multipart CSV file and `POST <resource>/import-url` accepting a JSON body with a URL to fetch the CSV from. Both paths SHALL run the same parse-and-insert logic and return `{ created, skipped }` counts. Inserts SHALL be duplicate-safe (`skipDuplicates`), so re-importing the same file is idempotent.
+Each data resource (calls, revenue, expenses, metrics) SHALL be importable by admins through route actions: a multipart CSV file upload and a fetch-by-URL variant, dispatched by an `intent` form field. Both paths SHALL run the same parse-and-insert pipeline and report `{ created, skipped }` counts back to the page via action data. Inserts SHALL be duplicate-safe (`onConflictDoNothing`), so re-importing the same file is idempotent. Admin authorization SHALL be enforced by `requireAdmin` inside the action.
 
 #### Scenario: Admin uploads a CSV file
 
-- **WHEN** an admin uploads a valid CSV to `POST <resource>/import`
-- **THEN** rows are parsed, valid records inserted, duplicates skipped, and the response reports `{ created, skipped }`
+- **WHEN** an admin submits a valid CSV through the import UI
+- **THEN** the route action parses rows, inserts valid records, skips duplicates, and the page renders `{ created, skipped }` from action data
 
 #### Scenario: Same file imported twice
 
 - **WHEN** the same CSV is imported a second time
-- **THEN** no duplicate records are created and the response reports all rows as skipped
+- **THEN** no duplicate records are created and the result reports all rows as skipped
 
 #### Scenario: Non-admin attempts an import
 
-- **WHEN** a non-admin user calls any import endpoint
-- **THEN** the request is rejected by the admin guard
+- **WHEN** a USER-role session submits an import
+- **THEN** the action rejects with 403 and performs no work
 
 ### Requirement: CSV imports validate structure and reject noisy files
 
-CSV import SHALL fail fast with a `BadRequestException` naming the missing columns when the file is empty or lacks any of the resource's required columns; extra columns SHALL be ignored (real exports, e.g. Gudok call logs, carry more columns than the import consumes). After row mapping, the import SHALL fail if more than 50% of rows were invalid (skip-rate guard), preventing silent acceptance of a wrong or corrupted file.
+CSV import SHALL fail fast with a validation error naming the missing columns when the file is empty or lacks any of the resource's required columns; extra columns SHALL be ignored (real exports, e.g. Gudok call logs, carry more columns than the import consumes). After row mapping, the import SHALL fail if more than 50% of rows were invalid (skip-rate guard), preventing silent acceptance of a wrong or corrupted file. Validation failures SHALL surface to the import UI as readable error messages, not error boundaries.
 
 #### Scenario: Missing columns
 
@@ -44,7 +44,7 @@ CSV import SHALL fail fast with a `BadRequestException` naming the missing colum
 
 ### Requirement: Reference data bootstraps on startup from environment configuration
 
-On application startup, after the database connection is established, the system SHALL bootstrap reference data in order — users, cities, sites — with each step running only if its table is empty:
+On server startup, before the app begins serving requests, the system SHALL bootstrap reference data in order — users, cities, sites — with each step running only if its table is empty:
 
 - **Users**: create an admin and a regular user from the `ADMIN_*` and `USER_*` env vars (email, name, lastname, password), with passwords hashed via argon2. No credentials or hashes are stored in the repository.
 - **Cities**: fetch a CSV from `CITIES_CSV_URL` and insert rows preserving their explicit `id` values.
@@ -54,12 +54,12 @@ After inserting rows with explicit ids, the system SHALL reset the corresponding
 
 #### Scenario: Fresh database
 
-- **WHEN** the app starts against an empty database with all bootstrap env vars set
+- **WHEN** the server starts against an empty database with all bootstrap env vars set
 - **THEN** users, cities, and sites are created, sequences are reset, and an admin can log in and upload data CSVs immediately
 
 #### Scenario: Populated database
 
-- **WHEN** the app starts and the User, City, and Site tables are non-empty
+- **WHEN** the server starts and the User, City, and Site tables are non-empty
 - **THEN** every bootstrap step is skipped and no external fetches occur
 
 ### Requirement: Bootstrap is fault-tolerant and never blocks startup

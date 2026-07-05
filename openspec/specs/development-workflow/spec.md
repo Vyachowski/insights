@@ -1,16 +1,16 @@
 # development-workflow Specification
 
 ## Purpose
-How the Insights repo is built and kept healthy: the contract → backend → frontend implementation flow, per-workspace ESLint, git hooks (pre-commit lint-staged, commit-msg commitlint), Conventional Commits enforcement, and test layout.
+How the Insights repo is built and kept healthy: the loader-first implementation flow, a single root ESLint config, git hooks (pre-commit lint-staged, commit-msg commitlint), Conventional Commits enforcement, and colocated vitest tests.
 
 ## Requirements
 ### Requirement: Git hooks gate every commit
 
-The project SHALL install git hooks via `simple-git-hooks` (configured in the root `package.json`, activated by the `prepare` script on `npm install`). A `pre-commit` hook SHALL run `lint-staged` (`eslint --fix` on staged `apps/**/*.{ts,tsx}` files only, never the whole tree, resolving each file's nearest workspace flat config). A `commit-msg` hook SHALL run `commitlint`. After a fresh clone, `npx simple-git-hooks` MUST be run once to install the hooks.
+The project SHALL install git hooks via `simple-git-hooks` (configured in the root `package.json`, activated by the `prepare` script on `npm install`). A `pre-commit` hook SHALL run `lint-staged` (`eslint --fix` on staged `**/*.{ts,tsx}` files only, never the whole tree). A `commit-msg` hook SHALL run `commitlint`. After a fresh clone, `npx simple-git-hooks` MUST be run once to install the hooks.
 
-#### Scenario: Staged app file is auto-fixed before commit
+#### Scenario: Staged file is auto-fixed before commit
 
-- **WHEN** a commit stages an `apps/**/*.ts` file with an auto-fixable lint error
+- **WHEN** a commit stages a `*.ts`/`*.tsx` file with an auto-fixable lint error
 - **THEN** the `pre-commit` hook runs `eslint --fix` on that file before the commit is recorded
 
 #### Scenario: Commit message is validated by the hook
@@ -41,30 +41,29 @@ Commit messages SHALL NOT contain AI attribution — no `Co-Authored-By: Claude`
 - **WHEN** a drafted commit message contains a `Co-Authored-By: Claude` trailer
 - **THEN** the trailer is removed before the commit is made
 
-### Requirement: Linting is per-workspace and runnable repo-wide
+### Requirement: Linting is single-config and runnable repo-wide
 
-Each workspace SHALL own its flat ESLint 9 config (backend: `typescript-eslint` type-aware + Prettier; frontend: `typescript-eslint` recommended + `@stylistic`, no semicolons, single quotes). There SHALL be no shared base config. The whole repo SHALL be lintable from the root via `npm run lint`, which fans out to both workspaces.
+The repo SHALL have a single flat ESLint 9 config at the root (typescript-eslint type-aware, `@stylistic`, no semicolons, single quotes — continuing the frontend style, which most surviving code comes from), covering both server and client code. `npm run lint` at the root SHALL lint the whole repo.
 
-#### Scenario: Repo-wide lint fans out to both workspaces
+#### Scenario: Repo-wide lint
 
 - **WHEN** `npm run lint` runs at the repo root
-- **THEN** both the backend and frontend workspaces are linted using their own configs
+- **THEN** all app code (routes, server modules, components) is linted with the single root config
 
-### Requirement: Feature implementation follows contract → backend → frontend
+### Requirement: Feature implementation follows loader-first flow
 
-New features SHALL be implemented in order: (1) define shared types in `contracts/`; (2) implement backend (update schema and run migrations if needed, add routes and validation); (3) implement frontend (`api/` call → thunk → slice → selector → container/view).
+New features SHALL be implemented loader-first: (1) update the Drizzle schema and generate a migration if the data model changes; (2) implement the query/mutation in `app/server/`; (3) wire it into the route's loader/action; (4) render from `useLoaderData`/`useActionData` in components. Types flow by inference from server code — no shared contract types are written by hand.
 
-#### Scenario: New API field flows contract-first
+#### Scenario: New dashboard field
 
-- **WHEN** a new API field is added
-- **THEN** the `contracts/` types are updated first, then the backend, then the frontend consumes it
+- **WHEN** a new field is added to a dashboard widget
+- **THEN** the query in `app/server/queries/` is extended, the loader returns it, and the component consumes it via typed loader data with no intermediate type definitions
 
-### Requirement: Tests are colocated and run per workspace
+### Requirement: Tests are colocated and run via vitest
 
-Backend unit tests SHALL be colocated with source as `*.spec.ts` and run via `npm test` (jest) in the backend workspace; the e2e suite SHALL live in `apps/backend/test/`. Shared types in `contracts/` SHALL be validated against the Zod schemas generated from the Prisma schema.
+Unit tests SHALL be colocated with source as `*.test.ts` and run via `npm test` (vitest). Server-only logic (bootstrap, CSV parsing/import mappers, auth helpers) SHALL be the primary test surface; UI snapshots are not required.
 
-#### Scenario: Backend unit tests run via jest
+#### Scenario: Unit tests run via vitest
 
-- **WHEN** `npm test` runs in the backend workspace
-- **THEN** the colocated `*.spec.ts` files execute via jest
-
+- **WHEN** `npm test` runs at the repo root
+- **THEN** the colocated `*.test.ts` files execute via vitest
