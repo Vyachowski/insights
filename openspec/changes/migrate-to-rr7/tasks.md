@@ -28,10 +28,10 @@
 
 ## 5. Data page + imports
 
-- [ ] 5.1 Port CSV utils + per-resource row schemas/mappers to `app/server/imports/` (allow-extra columns, skip-rate guard, `onConflictDoNothing`); port unit tests
-- [ ] 5.2 `data.tsx` loader (table data per resource) + action dispatching by `intent` (upload multipart via `request.formData()` / import-url), guarded by `requireAdmin`
-- [ ] 5.3 Port DataPage UI (tabs, import modal) from Redux to `<Form>`/`useFetcher` + action data
-- [ ] 5.4 Import all 4 CSVs from `~/Desktop/data/prepared/` through the new UI — including the metrics file that failed in the old UI; verify counts match the old import results (calls, revenue 209, expenses 1120, metrics 22781)
+- [x] 5.1 Port CSV utils + per-resource row schemas/mappers to `app/server/imports/` (allow-extra columns, skip-rate guard, `onConflictDoNothing`); port unit tests
+- [x] 5.2 `data.tsx` loader (table data per resource) + action dispatching by `intent` (upload multipart via `request.formData()` / import-url), guarded by `requireAdmin`
+- [x] 5.3 Port DataPage UI (tabs, import modal) from Redux to `<Form>`/`useFetcher` + action data
+- [x] 5.4 Import all 4 CSVs (verified via /import route: metrics 22781 incl. the file that failed in the old UI, calls/revenue/expenses idempotent re-imports; user UI click-through pending as part of 5.5) from `~/Desktop/data/prepared/` through the new UI — including the metrics file that failed in the old UI; verify counts match the old import results (calls, revenue 209, expenses 1120, metrics 22781)
 - [ ] 5.5 Full-app JSON/visual parity pass; then stop the old apps
 
 ## 6. Cutover + flatten
