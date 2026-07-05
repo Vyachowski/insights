@@ -66,4 +66,4 @@ shared/schema/.prisma-zod-generator-manifest.json
 .agents/
 .claude/
 .react-router/
-apps/web/build/
+build/

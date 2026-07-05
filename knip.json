@@ -1,14 +1,4 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
-  "ignore": [
-    "apps/backend/src/prisma/generated/**",
-    "apps/backend/test/**/*.e2e-spec.ts"
-  ],
-  "ignoreDependencies": [
-    "@types/multer",
-    "@types/supertest",
-    "supertest",
-    "dayjs",
-    "axios"
-  ]
+  "ignoreExportsUsedInFile": true
 }

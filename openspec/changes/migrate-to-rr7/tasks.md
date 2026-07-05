@@ -32,14 +32,14 @@
 - [x] 5.2 `data.tsx` loader (table data per resource) + action dispatching by `intent` (upload multipart via `request.formData()` / import-url), guarded by `requireAdmin`
 - [x] 5.3 Port DataPage UI (tabs, import modal) from Redux to `<Form>`/`useFetcher` + action data
 - [x] 5.4 Import all 4 CSVs (verified via /import route: metrics 22781 incl. the file that failed in the old UI, calls/revenue/expenses idempotent re-imports; user UI click-through pending as part of 5.5) from `~/Desktop/data/prepared/` through the new UI — including the metrics file that failed in the old UI; verify counts match the old import results (calls, revenue 209, expenses 1120, metrics 22781)
-- [ ] 5.5 Full-app JSON/visual parity pass; then stop the old apps
+- [x] 5.5 Full-app JSON/visual parity pass; then stop the old apps
 
 ## 6. Cutover + flatten
 
-- [ ] 6.1 Delete `apps/backend`, `apps/frontend`, `contracts/`; flatten `apps/web` to repo root; remove npm workspaces; single root package.json; move `docker-compose.dev.yml` + `dev:up/down/reset/logs` scripts (currently in the backend package) to the root
-- [ ] 6.2 Single root ESLint flat config (frontend style: @stylistic, no semicolons, single quotes); update lint-staged pattern; knip config; `npm run lint` + `npm test` + `npm run build` green
-- [ ] 6.3 Update CLAUDE.md (commands, remove the DashboardPage known-constraint as resolved) and README
-- [ ] 6.4 Full clean-slate rehearsal on dev: drop DB → start → bootstrap → upload CSVs → dashboard numbers spot-checked
+- [x] 6.1 Delete `apps/backend`, `apps/frontend`, `contracts/`; flatten `apps/web` to repo root; remove npm workspaces; single root package.json; move `docker-compose.dev.yml` + `dev:up/down/reset/logs` scripts (currently in the backend package) to the root
+- [x] 6.2 Single root ESLint flat config (frontend style: @stylistic, no semicolons, single quotes); update lint-staged pattern; knip config; `npm run lint` + `npm test` + `npm run build` green
+- [x] 6.3 Update CLAUDE.md (commands, remove the DashboardPage known-constraint as resolved) and README
+- [x] 6.4 Full clean-slate rehearsal on dev: drop DB → start → bootstrap → upload CSVs → dashboard numbers spot-checked
 
 ## 7. Railway cutover
 
