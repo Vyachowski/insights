@@ -30,5 +30,5 @@
 
 ## 5. Production cutover
 
-- [ ] 5.1 Set Fly secrets (CSV URLs + bootstrap credentials); recreate the prod database
+- [ ] 5.1 Set Railway service variables (CSV URLs + bootstrap credentials); recreate the prod database
 - [ ] 5.2 Deploy, confirm bootstrap logs, upload data CSVs via UI, verify dashboard

@@ -9,7 +9,7 @@ Constraints:
 - City names and site domains are private business data — must not be committed to the repo.
 - Other CSVs (calls, revenue, expenses, metrics) reference sites by explicit `id`/city name, so bootstrap must preserve the ids from `sites.csv` / `cities.csv`.
 - CSV parsing must stay portable (pure functions), since a future migration to React Router 7 framework mode will reuse it in route actions.
-- Deployed on Fly.io; config via env vars / Fly secrets.
+- Deployed on Railway; config via env vars / Railway service variables.
 
 ## Goals / Non-Goals
 
@@ -78,7 +78,7 @@ Added to `validation.config.ts` (all **optional** — absence means the correspo
 ## Migration Plan
 
 1. Land bootstrap module + env schema changes + seed deletion + squashed `init` migration in one commit series on `main`.
-2. Upload `cities.csv`/`sites.csv` (from the Desktop `data/` copy) to Google Drive, set share = anyone-with-link, put direct-download URLs into `.env.dev` and Fly secrets along with bootstrap credentials.
+2. Upload `cities.csv`/`sites.csv` (from the Desktop `data/` copy) to Google Drive, set share = anyone-with-link, put direct-download URLs into `.env.dev` and Railway service variables along with bootstrap credentials.
 3. Local verify (full clean-slate rehearsal): drop dev DB → `prisma migrate deploy` → start app → confirm users/cities/sites bootstrapped → upload all data CSVs via UI → spot-check dashboard numbers.
 4. Prod: same clean-slate procedure — recreate the database, deploy, let bootstrap populate reference data, upload data CSVs via UI.
 

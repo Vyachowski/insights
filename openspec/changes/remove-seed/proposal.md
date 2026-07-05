@@ -26,7 +26,7 @@ None — existing specs (`development-workflow`, `backend-architecture`) do not 
 ## Impact
 
 - Backend: startup bootstrap provider (users from env vars, cities/sites from env-URL CSVs); delete `src/prisma/seed/**` (~1,245 lines); remove `prisma:seed` script and seed config from `package.json`.
-- Env: new vars `CITIES_CSV_URL`, `SITES_CSV_URL`, admin/user credentials — documented in `.env.example`, set as Fly secrets in prod.
+- Env: new vars `CITIES_CSV_URL`, `SITES_CSV_URL`, admin/user credentials — documented in `.env.example`, set as Railway service variables in prod.
 - Frontend: no changes (existing import UI already covers calls/revenue/expenses/metrics).
 - Deps: none added; `csv-parse` already in use.
 - Data: `seed_data.zip` deleted (backed up outside the repo); no schema changes, but migration history reset (existing DBs recreated).
