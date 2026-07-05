@@ -22,7 +22,7 @@
 
 ## 4. Dashboard page
 
-- [ ] 4.1 Rewrite dashboard queries (dashboard/profit/revenue/metrics aggregations) in Drizzle under `app/server/queries/`; JSON-diff each against the old Nest endpoints on the same dev DB
+- [x] 4.1 Rewrite dashboard queries (dashboard/profit/revenue/metrics aggregations) in Drizzle under `app/server/queries/`; JSON-diff each against the old Nest endpoints on the same dev DB
 - [ ] 4.2 Port `DashboardPage` components/widgets/skeletons; dashboard summary loader (no filter params — parity with today's `GET /dashboard/summary`; the `withSkeleton(lazy(...))` HOC becomes route-level code-splitting + skeleton fallback); delete the useEffect-fetch pattern
 - [ ] 4.3 Verify recharts and Mantine under SSR/hydration (no FOUC, no hydration mismatch); apply hydrate-only rendering if needed; visual parity check against old app side-by-side
 
