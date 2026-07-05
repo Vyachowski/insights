@@ -23,12 +23,17 @@ Each data resource (calls, revenue, expenses, metrics) SHALL expose admin-only i
 
 ### Requirement: CSV imports validate structure and reject noisy files
 
-CSV import SHALL fail fast with a `BadRequestException` naming the expected columns when the file is empty or its header set does not exactly match the resource's contract. After row mapping, the import SHALL fail if more than 50% of rows were invalid (skip-rate guard), preventing silent acceptance of a wrong or corrupted file.
+CSV import SHALL fail fast with a `BadRequestException` naming the missing columns when the file is empty or lacks any of the resource's required columns; extra columns SHALL be ignored (real exports, e.g. Gudok call logs, carry more columns than the import consumes). After row mapping, the import SHALL fail if more than 50% of rows were invalid (skip-rate guard), preventing silent acceptance of a wrong or corrupted file.
 
-#### Scenario: Wrong columns
+#### Scenario: Missing columns
 
-- **WHEN** a CSV is imported whose headers do not match the resource's expected columns
-- **THEN** the import fails with an error listing expected vs actual columns and no rows are inserted
+- **WHEN** a CSV is imported that lacks one or more required columns
+- **THEN** the import fails with an error listing the missing columns and no rows are inserted
+
+#### Scenario: Extra columns
+
+- **WHEN** a CSV containing all required columns plus extra ones is imported
+- **THEN** the extra columns are ignored and the import proceeds
 
 #### Scenario: Mostly-invalid file
 

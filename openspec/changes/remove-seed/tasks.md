@@ -12,9 +12,9 @@
 
 ## 2. Seed removal
 
-- [ ] 2.1 Delete `apps/backend/src/prisma/seed/**` (including `seed_data.zip` and the Metrika fetcher)
-- [ ] 2.2 Remove `prisma:seed` script and the prisma `seed` config key from `apps/backend/package.json`; remove seed-only deps if any become unused (`npm run knip` to confirm)
-- [ ] 2.3 Fix any imports referencing seed code (e.g. comments in `calls.service.ts` mentioning the seed normalizer); lint + build must pass
+- [x] 2.1 Delete `apps/backend/src/prisma/seed/**` (including `seed_data.zip` and the Metrika fetcher)
+- [x] 2.2 Remove `prisma:seed` script and the prisma `seed` config key from `apps/backend/package.json`; remove seed-only deps if any become unused (`npm run knip` to confirm) — also removed `tsx` devDep, `fromSrcRoot` lib helper, and the seed eslint exemption
+- [x] 2.3 Fix any imports referencing seed code (e.g. comments in `calls.service.ts` mentioning the seed normalizer); lint + build must pass — knip clean, build green
 
 ## 3. Migration squash
 

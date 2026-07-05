@@ -19,6 +19,8 @@ export async function fetchUrlToBuffer(url: string): Promise<Buffer> {
   return Buffer.from(await res.arrayBuffer());
 }
 
+// Extra columns are allowed (real exports carry more than we consume);
+// only missing required columns reject the file.
 export function assertCsvColumns(
   rows: Record<string, string>[],
   required: string[],
@@ -26,10 +28,9 @@ export function assertCsvColumns(
   if (rows.length === 0) throw new BadRequestException('CSV file is empty');
   const actual = Object.keys(rows[0]);
   const missing = required.filter((c) => !actual.includes(c));
-  const extra = actual.filter((c) => !required.includes(c));
-  if (missing.length > 0 || extra.length > 0) {
+  if (missing.length > 0) {
     throw new BadRequestException(
-      `Invalid CSV format. Expected columns: ${required.join(', ')}. Got: ${actual.join(', ')}`,
+      `Invalid CSV format. Missing columns: ${missing.join(', ')}. Got: ${actual.join(', ')}`,
     );
   }
 }
