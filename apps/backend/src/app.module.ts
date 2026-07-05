@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { validate } from './config/validation.config';
 import { DatabaseModule } from './database/database.module';
+import { BootstrapModule } from './bootstrap/bootstrap.module';
 import { AuthModule } from './auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
 import type { StringValue } from 'ms';
@@ -35,6 +36,7 @@ import { HealthModule } from './health/health.module';
       inject: [ConfigService],
     }),
     DatabaseModule,
+    BootstrapModule,
     AuthModule,
     CitiesModule,
     SitesModule,

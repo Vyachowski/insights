@@ -2,13 +2,13 @@
 
 ## 1. Bootstrap module
 
-- [ ] 1.1 Extend `validation.config.ts` env schema: add optional `CITIES_CSV_URL`, `SITES_CSV_URL` and the existing `ADMIN_*`/`USER_*` credential vars; remove `YANDEX_API_OAUTH_TOKEN`; update `apps/backend/.env.example` with the new vars and the Google Drive direct-download URL format
-- [ ] 1.2 Create `src/bootstrap/` module with an `OnApplicationBootstrap` provider: skeleton with step runner that checks table emptiness, logs skip/success/failure per step, and never throws out of startup
-- [ ] 1.3 Implement users step: create admin + regular user from `ADMIN_*`/`USER_*` env vars with argon2-hashed passwords when `User` table is empty
-- [ ] 1.4 Implement cities step: fetch CSV via `fetchUrlToBuffer`, parse with a zod row schema (headers matching the existing `cities.csv`), insert with explicit ids when `City` table is empty
-- [ ] 1.5 Implement sites step: same pattern against `sites.csv` headers, runs only when `Site` is empty and `City` is not
-- [ ] 1.6 Reset Postgres identity sequences for `City`/`Site` after explicit-id inserts
-- [ ] 1.7 Unit tests for the bootstrap provider: empty vs populated tables, missing env vars, failed fetch (spec scenarios from `data-import`)
+- [x] 1.1 Extend `validation.config.ts` env schema: add optional `CITIES_CSV_URL`, `SITES_CSV_URL` and the existing `ADMIN_*`/`USER_*` credential vars; remove `YANDEX_API_OAUTH_TOKEN`; update `apps/backend/.env.example` with the new vars and the Google Drive direct-download URL format
+- [x] 1.2 Create `src/bootstrap/` module with an `OnApplicationBootstrap` provider: skeleton with step runner that checks table emptiness, logs skip/success/failure per step, and never throws out of startup
+- [x] 1.3 Implement users step: create admin + regular user from `ADMIN_*`/`USER_*` env vars with argon2-hashed passwords when `User` table is empty
+- [x] 1.4 Implement cities step: fetch CSV via `fetchUrlToBuffer`, parse with a zod row schema (headers matching the existing `cities.csv`), insert with explicit ids when `City` table is empty
+- [x] 1.5 Implement sites step: same pattern against `sites.csv` headers, runs only when `Site` is empty and `City` is not
+- [x] 1.6 Reset Postgres identity sequences for `City`/`Site` after explicit-id inserts
+- [x] 1.7 Unit tests for the bootstrap provider: empty vs populated tables, missing env vars, failed fetch (spec scenarios from `data-import`) — 8/8 pass; fixed jest `moduleNameMapper` (`@/` alias + `.js`→`.ts`), which exposed 19 pre-existing broken scaffold specs (missing PrismaService mocks, out of scope)
 
 ## 2. Seed removal
 
