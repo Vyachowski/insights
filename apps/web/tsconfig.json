@@ -20,7 +20,8 @@
     "types": ["@react-router/node", "vite/client"],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./app/*"]
+      "@/*": ["./app/*"],
+      "@ui/*": ["./app/components/ui/*"]
     }
   }
 }

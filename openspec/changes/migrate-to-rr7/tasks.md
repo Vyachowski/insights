@@ -16,9 +16,9 @@
 
 ## 3. Auth (verify before any page work)
 
-- [ ] 3.1 `app/server/auth.ts`: cookie session storage (signed with `JWT_SECRET`, httpOnly, sameSite=lax, secure in prod, maxAge from `JWT_MAX_AGE`); `login`, `requireUser`, `requireAdmin`; unit tests
-- [ ] 3.2 `login.tsx` (loader redirects authed users; action verifies argon2 + sets cookie), `logout.tsx` (destroy session), `app-layout.tsx` (requireUser + MainLayout port)
-- [ ] 3.3 Manual verify: login with bootstrapped admin, wrong password rejected, protected redirect, logout, USER-role gets 403 on admin action stub
+- [x] 3.1 `app/server/auth.ts`: cookie session storage (signed with `JWT_SECRET`, httpOnly, sameSite=lax, secure in prod, maxAge from `JWT_MAX_AGE`); `login`, `requireUser`, `requireAdmin`; unit tests deferred (user request: tests later)
+- [x] 3.2 `login.tsx` (loader redirects authed users; action verifies argon2 + sets cookie), `logout.tsx` (destroy session), `app-layout.tsx` (requireUser + MainLayout port)
+- [x] 3.3 Manual verify: login with bootstrapped admin, wrong password rejected, protected redirect, logout, USER-role gets 403 on admin action stub
 
 ## 4. Dashboard page
 

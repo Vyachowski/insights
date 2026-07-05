@@ -82,7 +82,8 @@ describe('bootstrap on a fresh database', () => {
     // cities step sees 0, sites step (after insert) sees 1
     counts.cities = 0
     const { db } = await import('./db')
-    vi.mocked(db.$count).mockImplementation(async (table: unknown) => {
+    const countMock = db.$count as unknown as ReturnType<typeof vi.fn>
+    countMock.mockImplementation(async (table: unknown) => {
       const schema = await import('./schema')
       if (table === schema.cities) return cityCountCalls++ === 0 ? 0 : 1
       if (table === schema.users) return counts.users

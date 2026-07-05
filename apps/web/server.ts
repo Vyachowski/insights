@@ -33,8 +33,7 @@ if (viteDevServer) {
   app.use(express.static('build/client', { maxAge: '1h' }))
 }
 
-app.all(
-  '*',
+app.use(
   createRequestHandler({
     build: viteDevServer
       ? () => viteDevServer.ssrLoadModule('virtual:react-router/server-build')

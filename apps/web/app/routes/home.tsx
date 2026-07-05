@@ -1,3 +1,5 @@
-export default function Home() {
-  return <p style={{ padding: 32 }}>Insights — RR7 scaffold. Login comes next.</p>
+import { redirect } from 'react-router'
+
+export function loader() {
+  return redirect('/dashboard')
 }
