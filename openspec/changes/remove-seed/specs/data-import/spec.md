@@ -39,7 +39,7 @@ CSV import SHALL fail fast with a `BadRequestException` naming the expected colu
 
 On application startup, after the database connection is established, the system SHALL bootstrap reference data in order — users, cities, sites — with each step running only if its table is empty:
 
-- **Users**: create an admin and a regular user from `BOOTSTRAP_ADMIN_EMAIL`/`BOOTSTRAP_ADMIN_PASSWORD` and `BOOTSTRAP_USER_EMAIL`/`BOOTSTRAP_USER_PASSWORD`, with passwords hashed via argon2. No credentials or hashes are stored in the repository.
+- **Users**: create an admin and a regular user from the `ADMIN_*` and `USER_*` env vars (email, name, lastname, password), with passwords hashed via argon2. No credentials or hashes are stored in the repository.
 - **Cities**: fetch a CSV from `CITIES_CSV_URL` and insert rows preserving their explicit `id` values.
 - **Sites**: fetch a CSV from `SITES_CSV_URL` (only after cities exist) and insert rows preserving their explicit `id` values.
 

@@ -32,7 +32,7 @@ Constraints:
 
 A `BootstrapModule` with a provider implementing `OnApplicationBootstrap` runs after DB connection:
 
-1. **Users**: if `User` table is empty, create admin + regular user from env vars (`BOOTSTRAP_ADMIN_EMAIL`, `BOOTSTRAP_ADMIN_PASSWORD`, `BOOTSTRAP_USER_EMAIL`, `BOOTSTRAP_USER_PASSWORD`), hashing with argon2 (same as auth).
+1. **Users**: if `User` table is empty, create admin + regular user from the env vars the seed already used (`ADMIN_EMAIL`, `ADMIN_NAME`, `ADMIN_LASTNAME`, `ADMIN_PASSWORD` and the `USER_*` counterparts), hashing with argon2 (same as auth).
 2. **Cities**: if `City` table is empty, fetch CSV from `CITIES_CSV_URL`, parse, insert with explicit ids.
 3. **Sites**: if `Site` table is empty (and cities exist), fetch from `SITES_CSV_URL`, insert with explicit ids.
 
@@ -65,7 +65,7 @@ The DB is now fully re-creatable from files, and the user has explicitly OK'd a 
 
 ### 7. Env schema changes
 
-Added to `validation.config.ts` (all **optional** — absence means the corresponding bootstrap step is skipped): `CITIES_CSV_URL`, `SITES_CSV_URL`, `BOOTSTRAP_ADMIN_EMAIL`, `BOOTSTRAP_ADMIN_PASSWORD`, `BOOTSTRAP_USER_EMAIL`, `BOOTSTRAP_USER_PASSWORD`. Removed: `YANDEX_API_OAUTH_TOKEN`. `.env.example` documents the Google Drive direct-download URL format (`https://drive.google.com/uc?export=download&id=<FILE_ID>`, file shared as "anyone with the link").
+Added to `validation.config.ts` (all **optional** — absence means the corresponding bootstrap step is skipped): `CITIES_CSV_URL`, `SITES_CSV_URL`, and the existing seed credential vars `ADMIN_EMAIL`/`ADMIN_NAME`/`ADMIN_LASTNAME`/`ADMIN_PASSWORD`, `USER_EMAIL`/`USER_NAME`/`USER_LASTNAME`/`USER_PASSWORD` (already present in `.env.dev`, reused as-is). Removed: `YANDEX_API_OAUTH_TOKEN`. `.env.example` documents the Google Drive direct-download URL format (`https://drive.google.com/uc?export=download&id=<FILE_ID>`, file shared as "anyone with the link").
 
 ## Risks / Trade-offs
 
