@@ -35,6 +35,3 @@ export const siteRowSchema = z.object({
   yandexTagManagerId: z.string().transform(emptyToNull),
   googleTagManagerId: z.string().transform(emptyToNull),
 });
-
-export type CityRow = z.infer<typeof cityRowSchema>;
-export type SiteRow = z.infer<typeof siteRowSchema>;

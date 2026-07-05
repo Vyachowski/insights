@@ -30,8 +30,9 @@ npm run build -w @insights/frontend
 # backend workspace
 npm run dev:up -w @insights/backend          # start Postgres via Docker Compose
 npm run prisma:migrate -w @insights/backend  # apply migrations
-npm run prisma:seed -w @insights/backend     # seed data
 ```
+
+Fresh database bootstrap: users, cities, and sites are created automatically on app startup from env config (`ADMIN_*`/`USER_*` vars, `CITIES_CSV_URL`/`SITES_CSV_URL`); data CSVs (calls, revenue, expenses, metrics) are uploaded via the frontend import UI.
 
 Env files: `apps/backend/.env.dev` (copy from `.env.example`), `apps/frontend/.env` (copy from `.env.example`).
 

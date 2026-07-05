@@ -4,7 +4,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { parse } from 'csv-parse/sync';
 import { assertCsvColumns, assertSkipRate } from '@/common/utils/csv.utils';
 
-// City name aliases matching the seed normalizer logic
+// City name aliases used to resolve Gudok project titles to canonical city names
 const CITY_ALIASES: Record<string, string[]> = {
   новосибирск: ['нск'],
   'санкт-петербург': ['спб', 'петербург'],
