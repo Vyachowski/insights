@@ -2,7 +2,7 @@
 
 ## Context
 
-Two apps joined by REST: NestJS backend (~2.7k lines, 11 modules, Prisma 7, passport JWT-cookie auth, Swagger) and React 19 SPA (~3.5k lines, Redux Toolkit, axios, recharts; pages: Login, Dashboard, Data, 404; route guards Guest/Protected). Shared `contracts/` (160 lines of TS types). Deployed as one Railway service (backend) + static frontend. `remove-seed` already made the DB fully re-creatable: startup bootstrap (users/cities/sites from env) + CSV uploads for data tables.
+Two apps joined by REST: NestJS backend (~2.7k lines, 12 feature modules, Prisma 7, passport JWT-cookie auth, Swagger) and React 19 SPA (~3.5k lines, Redux Toolkit, axios, recharts; pages: Login, Dashboard, Data, 404; route guards Guest/Protected). Shared `contracts/` (160 lines of TS types). Deployed as one Railway service (backend) + static frontend. `remove-seed` already made the DB fully re-creatable: startup bootstrap (users/cities/sites from env) + CSV uploads for data tables.
 
 Constraints:
 
@@ -58,7 +58,7 @@ Existing `components/ui`, layouts, and page components move under `app/` with im
 
 ### 3. Auth: signed cookie session, hand-rolled
 
-`createCookieSessionStorage` (react-router built-in) with `secrets: [JWT_SECRET]`, `httpOnly`, `sameSite: 'lax'`, `secure` in production, `maxAge` from `JWT_MAX_AGE`. Session payload: `{ userId }` only — role is read from DB in `requireUser` (cheap, always fresh). Helpers in `server/auth.ts`:
+`createCookieSessionStorage` (react-router built-in) with `secrets: [JWT_SECRET]`, `httpOnly`, `sameSite: 'lax'`, `secure` in production, `maxAge` from `JWT_MAX_AGE` — **converted ms → seconds** (the env value is milliseconds, e.g. `2592000000`; react-router's cookie `maxAge` is seconds). Session payload: `{ userId }` only — role is read from DB in `requireUser` (cheap, always fresh). Helpers in `server/auth.ts`:
 
 - `login(email, password)`: user lookup + `argon2.verify` (salt embedded in hash; users table unchanged).
 - `requireUser(request)`: no session → `redirect('/login')`; returns user.
@@ -68,7 +68,7 @@ No auth library. Rationale: two fixed roles, no registration, no OAuth — a lib
 
 ### 4. Drizzle schema mirrors the current Prisma schema 1:1
 
-Same table/column names (`users`, `cities`, `sites`, `site_metrics`, `calls`, `call_imports`, `revenues`, `expenses`, same snake_case mappings), so CSV import mappers and bootstrap logic port without data-shape changes. `drizzle-kit generate` produces a single fresh init migration (dev-time CLI only); in production, migrations are applied programmatically via `migrate()` from `drizzle-orm/node-postgres/migrator` in the server entry before bootstrap — the SQL files ship with the build and `drizzle-kit` stays a devDependency. Old Prisma migrations are deleted with the backend. `drizzle-zod` derives insert schemas where useful; hand-written zod row schemas for CSV parsing stay.
+Same table/column names (`users`, `cities`, `sites`, `site_metrics`, `calls`, `call_imports`, `revenues`, `expenses`, same snake_case mappings), so CSV import mappers and bootstrap logic port without data-shape changes. **Including the two partial unique indexes** (`expenses_date_type_null_site_idx`, `revenue_date_null_site_idx`, `WHERE site_id IS NULL`) that Prisma's schema language cannot express — Drizzle can, via `uniqueIndex().where()`; they guard duplicate company-level rows and must not be lost again (they were silently dropped once by the Prisma migration squash and restored by hand). `drizzle-kit generate` produces a single fresh init migration (dev-time CLI only); in production, migrations are applied programmatically via `migrate()` from `drizzle-orm/node-postgres/migrator` in the server entry before bootstrap — the SQL files ship with the build and `drizzle-kit` stays a devDependency. Old Prisma migrations are deleted with the backend. `drizzle-zod` derives insert schemas where useful; hand-written zod row schemas for CSV parsing stay.
 
 ### 5. Queries rewritten resource-by-resource with output parity
 
@@ -76,15 +76,15 @@ Each Nest service's Prisma queries are rewritten in Drizzle inside `server/queri
 
 ### 6. CSV imports as route actions
 
-`_app.data.tsx` action receives multipart via native `request.formData()` (Node 20+ undici; files are ≤5MB so in-memory is fine, no streaming parser needed), dispatches by `intent` field (resource + upload vs url), and calls the same ported parse/insert pipeline (`assertCsvColumns` allow-extra semantics, skip-rate guard, duplicate-safe inserts via `onConflictDoNothing`). Import responses (`{ created, skipped }`) render via `useActionData`. The old UI metrics-upload bug is retested on this path; expected to disappear with axios/Redux upload plumbing.
+The `data.tsx` action receives multipart via native `request.formData()` (Node 20+ undici; files are ≤5MB so in-memory is fine, no streaming parser needed), dispatches by `intent` field (resource + upload vs url), and calls the same ported parse/insert pipeline (`assertCsvColumns` allow-extra semantics, skip-rate guard, duplicate-safe inserts via `onConflictDoNothing`). Import responses (`{ created, skipped }`) render via `useActionData`. The old UI metrics-upload bug is retested on this path; expected to disappear with axios/Redux upload plumbing.
 
-### 7. Bootstrap runs in the server entry
+### 7. Custom server entry: migrate → bootstrap → listen
 
-Same three steps (users → cities → sites, empty-table guards, env-driven, fault-tolerant, sequence reset) called once at server start before listening. Tests port from the existing 8-case jest suite (runner: vitest, which RR7/Vite templates use natively; jest dies with Nest).
+RR7's stock `react-router-serve` has no pre-listen hook, so the app uses a small custom server (`server.ts`: node http/Express + `@react-router/express` request handler). Startup order: env validation → `migrate()` (with connect-retry) → bootstrap → listen. Bootstrap keeps the same three steps (users → cities → sites, empty-table guards, env-driven, fault-tolerant, sequence reset). Tests port from the existing 8-case jest suite (runner: vitest, which RR7/Vite templates use natively; jest dies with Nest).
 
 ### 8. Env and config
 
-All existing env vars keep their names and meaning; `JWT_EXPIRATION` becomes unused (cookie `maxAge` covers it) and is dropped. Single `.env` (dev) validated by the same zod env schema, ported to `server/env.ts`.
+Env vars keep their names and meaning, with two drops: `JWT_EXPIRATION` (cookie `maxAge` covers it) and `ALLOWED_ORIGIN` (CORS is meaningless in a single-origin app). `DATABASE_CONNECT_RETRIES`/`DATABASE_CONNECT_DELAY` keep their role: the server entry wraps the startup `migrate()` call in the same retry loop (Railway Postgres may not be ready when the app boots). Single `.env` (dev) validated by the same zod env schema, ported to `server/env.ts`.
 
 ## Risks / Trade-offs
 
@@ -92,7 +92,8 @@ All existing env vars keep their names and meaning; `JWT_EXPIRATION` becomes unu
 - [Drizzle aggregation rewrites drift from Prisma results] → per-resource JSON diff against the old endpoints on the same DB before deleting the old code.
 - [Multipart handling differs from multer] → calls CSV (4.5MB, Cyrillic headers, BOM) is the canonical test file; verified early.
 - [Strangler period has two apps in one repo] → old app stays untouched and runnable; new app changes never edit old workspaces, so rollback = delete `apps/web`.
-- [Recharts/react 19 components assume client rendering] → chart modules get `clientLoader`-safe usage or hydrate-only rendering; visual parity checked page-by-page.
+- [Recharts/react 19 components assume client rendering] → chart modules get hydrate-only rendering if SSR bites; visual parity checked page-by-page.
+- [Mantine under SSR] → root.tsx needs `ColorSchemeScript`, Mantine style injection, and `defaultColorScheme="dark"` handling to avoid FOUC/hydration mismatch; the `withSkeleton(lazy(...))` HOC pattern is replaced by RR7 route-level code-splitting + `HydrateFallback`/skeleton components rather than ported mechanically.
 
 ## Migration Plan
 
@@ -100,7 +101,7 @@ All existing env vars keep their names and meaning; `JWT_EXPIRATION` becomes unu
 2. Drizzle schema + init migration; reset dev DB; port bootstrap + tests; verify bootstrap logs.
 3. Auth module + login/logout routes + guards; manual verify.
 4. Port pages in order: Dashboard (loader + widgets), Data (loader + import actions); JSON-diff queries per resource; retest metrics upload.
-5. Cutover: delete `apps/backend`, `apps/frontend`, `contracts/`; flatten to root; update CLAUDE.md/README, lint/knip config; single Railway service — update start command (`drizzle-kit migrate && node ./build/server`), reset prod DB, bootstrap, re-upload CSVs.
+5. Cutover: delete `apps/backend`, `apps/frontend`, `contracts/`; flatten to root (including `docker-compose.dev.yml` and the `dev:up/down/reset/logs` scripts, which live in the backend package today); update CLAUDE.md/README, lint/knip config; single Railway service — start command just boots the Node server (migrations run programmatically in the entry), reset prod DB, bootstrap, re-upload CSVs.
 6. Archive change; follow-up list for anything deliberately deferred.
 
 Rollback: before cutover — delete `apps/web`; after cutover — git revert (old app fully in history), redeploy previous image, DB re-creatable either way.

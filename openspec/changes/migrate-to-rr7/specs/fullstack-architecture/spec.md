@@ -25,10 +25,10 @@ Route `loader` functions SHALL be the only read path for server data (queries vi
 - **WHEN** the dashboard route is requested
 - **THEN** its loader executes the aggregation queries server-side and the page renders from typed loader data, with no client fetch
 
-#### Scenario: Filter change
+#### Scenario: Data revalidates after a mutation
 
-- **WHEN** the user changes a date-range or site filter
-- **THEN** the change navigates (URL search params), the loader re-runs server-side, and the page re-renders from fresh loader data
+- **WHEN** an action completes (e.g. a CSV import)
+- **THEN** the affected loaders revalidate automatically and the page re-renders from fresh loader data, with no manual client-side cache management
 
 ### Requirement: Server-only modules are isolated
 
@@ -37,7 +37,7 @@ Database access, auth, bootstrap, env validation, and CSV import logic SHALL liv
 #### Scenario: Schema change
 
 - **WHEN** a table or column changes in the Drizzle schema
-- **THEN** `drizzle-kit generate` produces the SQL migration, applied by `drizzle-kit migrate` on startup/deploy
+- **THEN** `drizzle-kit generate` produces the SQL migration (dev-time), and the programmatic Drizzle migrator applies pending migrations in the server entry on startup/deploy
 
 ### Requirement: Cookie-session authentication with two fixed roles
 
