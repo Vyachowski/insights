@@ -2,9 +2,9 @@
 
 ## 1. Scaffold
 
-- [ ] 1.1 Scaffold RR7 framework-mode app at `apps/web` (Vite, TS, vitest) as a workspace alongside the existing apps; explicit `routes.ts`; root error boundary with Mantine SSR wiring (`ColorSchemeScript`, style injection, dark default); custom server entry (`server.ts`: Express + `@react-router/express`) since stock `react-router-serve` has no pre-listen hook
-- [ ] 1.2 Port zod env validation to `app/server/env.ts` (same vars; drop `JWT_EXPIRATION`); wire `.env` loading for dev
-- [ ] 1.3 `GET /health` route with DB connectivity check; `npm run dev -w @insights/web` serves it
+- [x] 1.1 Scaffold RR7 framework-mode app at `apps/web` (Vite, TS, vitest) as a workspace alongside the existing apps; explicit `routes.ts`; root error boundary with Mantine SSR wiring (`ColorSchemeScript`, style injection, dark default); custom server entry (`server.ts`: Express + `@react-router/express`) since stock `react-router-serve` has no pre-listen hook
+- [x] 1.2 Port zod env validation to `app/server/env.ts` (same vars; drop `JWT_EXPIRATION`); wire `.env` loading for dev
+- [x] 1.3 `GET /health` route with DB connectivity check; `npm run dev -w @insights/web` serves it
 
 ## 2. Data layer
 

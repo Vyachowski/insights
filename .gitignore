@@ -1,6 +1,6 @@
 # compiled output
 /dist
-/node_modules
+node_modules/
 /build
 
 # Logs
@@ -65,3 +65,5 @@ shared/schema/.prisma-zod-generator-manifest.json
 # Agent tooling
 .agents/
 .claude/
+.react-router/
+apps/web/build/
