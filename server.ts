@@ -45,3 +45,6 @@ app.use(
 app.listen(env.PORT, () => {
   console.log(`[web] listening on http://localhost:${env.PORT} (${env.NODE_ENV})`)
 })
+
+const { startBackupScheduler } = await import('./app/server/backup')
+startBackupScheduler()
