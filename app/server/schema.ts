@@ -1,30 +1,23 @@
 import { sql } from 'drizzle-orm'
 import {
-  date,
-  doublePrecision,
   index,
   integer,
-  numeric,
-  pgEnum,
-  pgTable,
-  serial,
+  real,
+  sqliteTable,
   text,
-  timestamp,
   uniqueIndex,
-} from 'drizzle-orm/pg-core'
+} from 'drizzle-orm/sqlite-core'
 
-export const roleEnum = pgEnum('Role', ['USER', 'ADMIN'])
-export const userStatusEnum = pgEnum('UserStatus', ['ACTIVE', 'DEACTIVATED'])
-
-const createdAt = timestamp('created_at', { precision: 3, mode: 'date' })
+const id = () => integer('id').primaryKey({ autoIncrement: true })
+const createdAt = () => integer('created_at', { mode: 'timestamp_ms' })
   .notNull()
-  .defaultNow()
-const updatedAt = timestamp('updated_at', { precision: 3, mode: 'date' })
+  .$defaultFn(() => new Date())
+const updatedAt = () => integer('updated_at', { mode: 'timestamp_ms' })
   .notNull()
-  .defaultNow()
+  .$defaultFn(() => new Date())
   .$onUpdate(() => new Date())
 
-export const users = pgTable(
+export const users = sqliteTable(
   'users',
   {
     id: text('id')
@@ -32,30 +25,32 @@ export const users = pgTable(
       .$defaultFn(() => crypto.randomUUID()),
     email: text('email').notNull().unique(),
     password: text('password').notNull(),
-    role: roleEnum('role').notNull().default('USER'),
+    role: text('role', { enum: ['USER', 'ADMIN'] }).notNull().default('USER'),
     firstName: text('first_name'),
     lastName: text('last_name'),
-    status: userStatusEnum('status').notNull().default('ACTIVE'),
-    createdAt,
-    updatedAt,
+    status: text('status', { enum: ['ACTIVE', 'DEACTIVATED'] })
+      .notNull()
+      .default('ACTIVE'),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
   table => [index('users_email_idx').on(table.email)],
 )
 
-export const cities = pgTable('cities', {
-  id: serial('id').primaryKey(),
+export const cities = sqliteTable('cities', {
+  id: id(),
   code: text('code').notNull().unique(),
   slug: text('slug').notNull(),
   name: text('name').notNull(),
   population: integer('population').notNull(),
-  createdAt,
-  updatedAt,
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
 })
 
-export const sites = pgTable(
+export const sites = sqliteTable(
   'sites',
   {
-    id: serial('id').primaryKey(),
+    id: id(),
     cityId: integer('city_id')
       .notNull()
       .references(() => cities.id, { onDelete: 'cascade' }),
@@ -66,35 +61,35 @@ export const sites = pgTable(
     googleCounterId: text('google_counter_id'),
     yandexTagManagerId: text('yandex_tag_manager_id'),
     googleTagManagerId: text('google_tag_manager_id'),
-    createdAt,
-    updatedAt,
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
   table => [index('sites_city_id_idx').on(table.cityId)],
 )
 
-export const siteMetrics = pgTable(
+export const siteMetrics = sqliteTable(
   'site_metrics',
   {
-    id: serial('id').primaryKey(),
+    id: id(),
     siteId: integer('site_id')
       .notNull()
       .references(() => sites.id, { onDelete: 'cascade' }),
-    date: date('date', { mode: 'string' }).notNull(),
+    date: text('date').notNull(),
     yandexUsers: integer('yandex_users').notNull().default(0),
     googleUsers: integer('google_users').notNull().default(0),
     otherUsers: integer('other_users').notNull().default(0),
-    visitDurationYandexInSec: doublePrecision('visit_duration_yandex_in_sec')
+    visitDurationYandexInSec: real('visit_duration_yandex_in_sec')
       .notNull()
       .default(0),
-    visitDurationGoogleInSec: doublePrecision('visit_duration_google_in_sec')
+    visitDurationGoogleInSec: real('visit_duration_google_in_sec')
       .notNull()
       .default(0),
-    visitDurationOtherInSec: doublePrecision('visit_duration_other_in_sec')
+    visitDurationOtherInSec: real('visit_duration_other_in_sec')
       .notNull()
       .default(0),
-    bounceYandex: doublePrecision('bounce_yandex').notNull().default(0),
-    bounceGoogle: doublePrecision('bounce_google').notNull().default(0),
-    bounceOther: doublePrecision('bounce_other').notNull().default(0),
+    bounceYandex: real('bounce_yandex').notNull().default(0),
+    bounceGoogle: real('bounce_google').notNull().default(0),
+    bounceOther: real('bounce_other').notNull().default(0),
     leadsYandex: integer('leads_yandex').notNull().default(0),
     leadsGoogle: integer('leads_google').notNull().default(0),
     leadsOther: integer('leads_other').notNull().default(0),
@@ -105,14 +100,14 @@ export const siteMetrics = pgTable(
   ],
 )
 
-export const callImports = pgTable(
+export const callImports = sqliteTable(
   'call_imports',
   {
-    id: serial('id').primaryKey(),
+    id: id(),
     siteId: integer('site_id')
       .notNull()
       .references(() => sites.id, { onDelete: 'cascade' }),
-    date: timestamp('date', { precision: 3, mode: 'date' }).notNull(),
+    date: integer('date', { mode: 'timestamp_ms' }).notNull(),
     src: text('src').notNull(),
     region: text('region'),
     callNumber: integer('call_number').notNull(),
@@ -123,9 +118,9 @@ export const callImports = pgTable(
     comment: text('comment'),
     redirectNumber: text('redirect_number'),
     source: text('source').notNull().default('csv'),
-    importedAt: timestamp('imported_at', { precision: 3, mode: 'date' })
+    importedAt: integer('imported_at', { mode: 'timestamp_ms' })
       .notNull()
-      .defaultNow(),
+      .$defaultFn(() => new Date()),
   },
   table => [
     index('call_imports_site_id_idx').on(table.siteId),
@@ -138,10 +133,10 @@ export const callImports = pgTable(
   ],
 )
 
-export const calls = pgTable(
+export const calls = sqliteTable(
   'calls',
   {
-    id: serial('id').primaryKey(),
+    id: id(),
     siteId: integer('site_id')
       .notNull()
       .references(() => sites.id, { onDelete: 'cascade' }),
@@ -155,13 +150,13 @@ export const calls = pgTable(
     duration: integer('duration').notNull(),
     billsec: integer('billsec').notNull(),
     callstatus: text('callstatus').notNull(),
-    date: timestamp('date', { precision: 3, mode: 'date' }).notNull(),
+    date: integer('date', { mode: 'timestamp_ms' }).notNull(),
     region: text('region').notNull(),
     callNumber: integer('call_number').notNull(),
     audio: text('audio').notNull(),
     source: text('source').notNull().default('webhook'),
-    createdAt,
-    updatedAt,
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
   table => [
     index('calls_site_id_idx').on(table.siteId),
@@ -173,42 +168,43 @@ export const calls = pgTable(
   ],
 )
 
-export const revenues = pgTable(
+// Money amounts are integer kopecks; converted to rubles at the query boundary
+export const revenues = sqliteTable(
   'revenues',
   {
-    id: serial('id').primaryKey(),
+    id: id(),
     siteId: integer('site_id').references(() => sites.id, {
       onDelete: 'cascade',
     }),
-    date: date('date', { mode: 'string' }).notNull(),
-    amount: numeric('amount', { precision: 12, scale: 2 }).notNull(),
-    createdAt,
-    updatedAt,
+    date: text('date').notNull(),
+    amount: integer('amount').notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
   table => [
     index('revenues_date_idx').on(table.date),
     uniqueIndex('revenues_date_site_id_key').on(table.date, table.siteId),
     // Composite unique treats NULL site_id rows as distinct; this partial
-    // index guards duplicate company-level rows (Prisma could not express it)
+    // index guards duplicate company-level rows
     uniqueIndex('revenue_date_null_site_idx')
       .on(table.date)
-      .where(sql`${table.siteId} IS NULL`),
+      .where(sql`site_id IS NULL`),
   ],
 )
 
-export const expenses = pgTable(
+export const expenses = sqliteTable(
   'expenses',
   {
-    id: serial('id').primaryKey(),
+    id: id(),
     siteId: integer('site_id').references(() => sites.id, {
       onDelete: 'cascade',
     }),
-    date: date('date', { mode: 'string' }).notNull(),
-    amount: numeric('amount', { precision: 12, scale: 2 }).notNull(),
+    date: text('date').notNull(),
+    amount: integer('amount').notNull(),
     type: text('type').notNull(),
     comment: text('comment'),
-    createdAt,
-    updatedAt,
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
   table => [
     index('expenses_date_idx').on(table.date),
@@ -219,6 +215,6 @@ export const expenses = pgTable(
     ),
     uniqueIndex('expenses_date_type_null_site_idx')
       .on(table.date, table.type)
-      .where(sql`${table.siteId} IS NULL`),
+      .where(sql`site_id IS NULL`),
   ],
 )

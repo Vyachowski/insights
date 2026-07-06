@@ -118,8 +118,8 @@ describe('bootstrap on a fresh database', () => {
     })
   })
 
-  it('resets identity sequences for cities and sites', () => {
-    expect(executeMock).toHaveBeenCalledTimes(2)
+  it('does not run manual sequence resets (SQLite AUTOINCREMENT handles it)', () => {
+    expect(executeMock).not.toHaveBeenCalled()
   })
 })
 

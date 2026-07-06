@@ -1,5 +1,4 @@
 import * as argon2 from 'argon2'
-import { sql } from 'drizzle-orm'
 import { z } from 'zod'
 
 import { db } from './db'
@@ -96,7 +95,6 @@ async function bootstrapCities(): Promise<string> {
   const rows = await fetchRows(url, CITY_CSV_COLUMNS)
   const values = rows.map(row => cityRowSchema.parse(row))
   const inserted = await db.insert(cities).values(values).returning()
-  await resetIdSequence('cities')
   return `created ${inserted.length} cities`
 }
 
@@ -109,7 +107,6 @@ async function bootstrapSites(): Promise<string> {
   const rows = await fetchRows(url, SITE_CSV_COLUMNS)
   const values = rows.map(row => siteRowSchema.parse(row))
   const inserted = await db.insert(sites).values(values).returning()
-  await resetIdSequence('sites')
   return `created ${inserted.length} sites`
 }
 
@@ -121,10 +118,4 @@ async function fetchRows(
   const rows = parseCsvBuffer(buffer)
   assertCsvColumns(rows, columns)
   return rows
-}
-
-async function resetIdSequence(table: 'cities' | 'sites'): Promise<void> {
-  await db.execute(
-    sql`SELECT setval(pg_get_serial_sequence(${table}, 'id'), (SELECT COALESCE(MAX(id), 1) FROM ${sql.identifier(table)}))`,
-  )
 }

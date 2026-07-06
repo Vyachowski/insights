@@ -1,9 +1,9 @@
 import { bootstrap } from './bootstrap'
-import { migrateWithRetry } from './migrate'
+import { runMigrations } from './migrate'
 
-// Startup sequence: migrate → bootstrap. Called once from server.ts
-// before the HTTP server starts listening.
+// Startup sequence: migrate → enable FKs → bootstrap. Called once from
+// server.ts before the HTTP server starts listening.
 export async function runStartup(): Promise<void> {
-  await migrateWithRetry()
+  runMigrations()
   await bootstrap()
 }

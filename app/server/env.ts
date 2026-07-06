@@ -4,18 +4,11 @@ const envSchema = z.object({
   NODE_ENV: z
     .enum(['development', 'production', 'test'])
     .default('development'),
-  DATABASE_URL: z.url(),
+  DATABASE_PATH: z.string().min(1).default('./data/insights.db'),
   JWT_SECRET: z.string().min(1),
   // Milliseconds (legacy unit); convert to seconds for cookie maxAge
   JWT_MAX_AGE: z.coerce.number().int().positive().min(1000),
   PORT: z.coerce.number().int().positive().default(3000),
-  DATABASE_CONNECT_RETRIES: z.coerce.number().int().positive().default(5),
-  DATABASE_CONNECT_DELAY: z.coerce
-    .number()
-    .int()
-    .positive()
-    .gt(1000)
-    .default(3000),
   // Startup bootstrap — each step is skipped when its vars are absent
   CITIES_CSV_URL: z.url().optional(),
   SITES_CSV_URL: z.url().optional(),

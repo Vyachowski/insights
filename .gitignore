@@ -67,3 +67,7 @@ shared/schema/.prisma-zod-generator-manifest.json
 .claude/
 .react-router/
 build/
+
+# local sqlite database (incl. -wal/-shm sidecars)
+data/*
+!data/.gitkeep
