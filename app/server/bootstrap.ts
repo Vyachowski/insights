@@ -5,6 +5,7 @@ import { db } from './db'
 import { env } from './env'
 import { assertCsvColumns, fetchUrlToBuffer, parseCsvBuffer } from './imports/csv'
 import { cities, sites, users } from './schema'
+import { getObject, isStorageConfigured } from './storage'
 
 const emptyToNull = (value: string) => (value === '' ? null : value)
 
@@ -89,10 +90,9 @@ async function bootstrapUsers(): Promise<string> {
 
 async function bootstrapCities(): Promise<string> {
   if ((await db.$count(cities)) > 0) return 'skipped (table not empty)'
-  const url = env.CITIES_CSV_URL
-  if (!url) return 'skipped (CITIES_CSV_URL not set)'
 
-  const rows = await fetchRows(url, CITY_CSV_COLUMNS)
+  const rows = await fetchRows('seed/cities.csv', env.CITIES_CSV_URL, CITY_CSV_COLUMNS)
+  if (!rows) return 'skipped (no CSV source configured)'
   const values = rows.map(row => cityRowSchema.parse(row))
   const inserted = await db.insert(cities).values(values).returning()
   return `created ${inserted.length} cities`
@@ -101,20 +101,37 @@ async function bootstrapCities(): Promise<string> {
 async function bootstrapSites(): Promise<string> {
   if ((await db.$count(sites)) > 0) return 'skipped (table not empty)'
   if ((await db.$count(cities)) === 0) return 'skipped (no cities to reference)'
-  const url = env.SITES_CSV_URL
-  if (!url) return 'skipped (SITES_CSV_URL not set)'
 
-  const rows = await fetchRows(url, SITE_CSV_COLUMNS)
+  const rows = await fetchRows('seed/sites.csv', env.SITES_CSV_URL, SITE_CSV_COLUMNS)
+  if (!rows) return 'skipped (no CSV source configured)'
   const values = rows.map(row => siteRowSchema.parse(row))
   const inserted = await db.insert(sites).values(values).returning()
   return `created ${inserted.length} sites`
 }
 
+// Source resolution: bucket (when configured) → plain URL → null (skip).
+// A bucket failure falls back to the URL so misconfiguration degrades to
+// the previous behavior, not below it.
 async function fetchRows(
-  url: string,
+  bucketKey: string,
+  fallbackUrl: string | undefined,
   columns: string[],
-): Promise<Record<string, string>[]> {
-  const buffer = await fetchUrlToBuffer(url)
+): Promise<Record<string, string>[] | null> {
+  let buffer: Buffer | null = null
+
+  if (isStorageConfigured()) {
+    try {
+      buffer = await getObject(bucketKey)
+      if (!buffer) console.warn(`[bootstrap] bucket object ${bucketKey} not found`)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      console.warn(`[bootstrap] bucket fetch failed (${message}), falling back to URL`)
+    }
+  }
+
+  if (!buffer && fallbackUrl) buffer = await fetchUrlToBuffer(fallbackUrl)
+  if (!buffer) return null
+
   const rows = parseCsvBuffer(buffer)
   assertCsvColumns(rows, columns)
   return rows

@@ -25,7 +25,10 @@ const inserted: Record<string, unknown[][]> = {}
 const executeMock = vi.fn(async () => ({ rows: [] }))
 const fetchMock = vi.fn()
 
-vi.mock('./env', () => ({ env: mockEnv }))
+vi.mock('./env', () => ({
+  env: mockEnv,
+  isStorageConfigured: () => false,
+}))
 
 vi.mock('./imports/csv', async importOriginal => ({
   ...(await importOriginal()),
