@@ -32,7 +32,9 @@ npm run drizzle:generate  # generate a migration from app/server/schema.ts
 
 Env file: `.env` at the repo root (copy from `.env.example`). Server startup order: env validation → open SQLite (WAL, busy_timeout) → Drizzle `migrate()` → enable foreign keys → bootstrap → listen.
 
-Fresh database bootstrap: users, cities, and sites are created automatically on server startup from env config (`ADMIN_*`/`USER_*` vars, `CITIES_CSV_URL`/`SITES_CSV_URL`); data CSVs (calls, revenue, expenses, metrics) are uploaded via the import UI on the Data page.
+Fresh database bootstrap: users, cities, and sites are created automatically on server startup from env config (`ADMIN_*`/`USER_*` vars; reference CSVs come from the project bucket `seed/cities.csv`+`seed/sites.csv` when `BUCKET_*` vars are set, else from `CITIES_CSV_URL`/`SITES_CSV_URL`); data CSVs (calls, revenue, expenses, metrics) are uploaded via the import UI on the Data page.
+
+Backups: when `BUCKET_*` vars are set, the server uploads one SQLite snapshot per UTC day to `backups/insights-YYYY-MM-DD.db` (hourly check + startup catch-up, 14-day retention). Manual restore: stop the service → on the volume remove `insights.db` and its `-wal`/`-shm` sidecars → place the backup file as `insights.db` → start.
 
 ## Layout
 
