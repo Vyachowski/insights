@@ -50,12 +50,12 @@ On server startup, before the app begins serving requests, the system SHALL boot
 - **Cities**: fetch a CSV from `CITIES_CSV_URL` and insert rows preserving their explicit `id` values.
 - **Sites**: fetch a CSV from `SITES_CSV_URL` (only after cities exist) and insert rows preserving their explicit `id` values.
 
-After inserting rows with explicit ids, the system SHALL reset the corresponding Postgres identity sequences so subsequent inserts do not collide.
+Explicit-id inserts SHALL leave the autoincrement state consistent so subsequent inserts do not collide (SQLite `AUTOINCREMENT` maintains this automatically; no manual sequence reset exists).
 
 #### Scenario: Fresh database
 
 - **WHEN** the server starts against an empty database with all bootstrap env vars set
-- **THEN** users, cities, and sites are created, sequences are reset, and an admin can log in and upload data CSVs immediately
+- **THEN** users, cities, and sites are created, and an admin can log in and upload data CSVs immediately
 
 #### Scenario: Populated database
 

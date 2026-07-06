@@ -24,7 +24,7 @@
 
 ## 4. Railway cutover
 
-- [ ] 4.1 User in dashboard: add Volume mounted at `/data`; set `DATABASE_PATH=/data/insights.db`; remove `DATABASE_URL`/`DATABASE_CONNECT_*` vars; set single replica + Recreate deploy strategy
-- [ ] 4.2 Push → deploy; verify migrate + bootstrap logs and `/health`; watch for volume `EACCES` (fallback: run as root/chown prestart)
-- [ ] 4.3 User uploads 4 CSVs via prod UI; dashboard spot-check
-- [ ] 4.4 Delete the Railway Postgres service (user, after verification)
+- [x] 4.1 User in dashboard: add Volume mounted at `/data`; set `DATABASE_PATH=/data/insights.db`; remove `DATABASE_URL`/`DATABASE_CONNECT_*` vars; set single replica + Recreate deploy strategy
+- [x] 4.2 Push → deploy; verify migrate + bootstrap logs and `/health`; watch for volume `EACCES` (fallback: run as root/chown prestart)
+- [x] 4.3 User uploads 4 CSVs via prod UI; dashboard spot-check
+- [x] 4.4 Delete the Railway Postgres service (user, after verification)
