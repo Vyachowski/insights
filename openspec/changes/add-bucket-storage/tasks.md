@@ -16,8 +16,8 @@
 
 ## 4. Verification and cutover
 
-- [ ] 4.1 Local with dev-bucket creds (user creates the Bucket in Railway, uploads `seed/cities.csv` + `seed/sites.csv`, shares credentials into `.env`): delete local DB → dev run → bootstrap pulls CSVs from the bucket; then force a backup tick → object appears in the bucket, second tick no-ops
+- [x] 4.1 Local with dev-bucket creds (user creates the Bucket in Railway, uploads `seed/cities.csv` + `seed/sites.csv`, shares credentials into `.env`): delete local DB → dev run → bootstrap pulls CSVs from the bucket; then force a backup tick → object appears in the bucket, second tick no-ops
 - [ ] 4.2 Prod: user wires bucket credential variables to the app service; deploy; verify logs (bootstrap skips on populated DB, first backup uploaded); check the object in the bucket UI
-- [ ] 4.3 Restore drill (local): take a backup file, stop dev server, remove db+sidecars, place backup as `insights.db`, start — app serves the restored data
-- [ ] 4.4 Update CLAUDE.md: bucket storage, backup schedule, manual restore procedure (stop → remove db+sidecars → place backup → start)
+- [x] 4.3 Restore drill (local): take a backup file, stop dev server, remove db+sidecars, place backup as `insights.db`, start — app serves the restored data
+- [x] 4.4 Update CLAUDE.md: bucket storage, backup schedule, manual restore procedure (stop → remove db+sidecars → place backup → start)
 - [ ] 4.5 Optional (user): retire the Google Drive links
