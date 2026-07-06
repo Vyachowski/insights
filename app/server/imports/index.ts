@@ -34,9 +34,10 @@ async function importRevenue(buffer: Buffer): Promise<ImportResult> {
 
   for (const row of rows) {
     const date = row['date'] ? new Date(row['date']) : null
-    const amount = Number(row['amount'])
+    const parsed = Number(row['amount'])
+    const amount = Math.round(parsed * 100) // integer kopecks
     const siteId = row['siteId'] ? Number(row['siteId']) : null
-    if (!date || isNaN(date.getTime()) || isNaN(amount) || (siteId !== null && isNaN(siteId))) {
+    if (!date || isNaN(date.getTime()) || isNaN(parsed) || (siteId !== null && isNaN(siteId))) {
       invalid++
       continue
     }
@@ -51,13 +52,13 @@ async function importRevenue(buffer: Buffer): Promise<ImportResult> {
       ))
       .limit(1)
 
-    if (existing && Number(existing.amount) === amount) {
+    if (existing && existing.amount === amount) {
       skipped++
     } else if (existing) {
-      await db.update(revenues).set({ amount: String(amount) }).where(eq(revenues.id, existing.id))
+      await db.update(revenues).set({ amount }).where(eq(revenues.id, existing.id))
       updated++
     } else {
-      await db.insert(revenues).values({ date: dateStr, siteId, amount: String(amount) })
+      await db.insert(revenues).values({ date: dateStr, siteId, amount })
       created++
     }
   }
@@ -80,9 +81,10 @@ async function importExpenses(buffer: Buffer): Promise<ImportResult> {
   for (const row of rows) {
     const date = new Date(row['date'])
     const siteId = row['siteId'] ? Number(row['siteId']) : null
-    const amount = parseFloat(row['amount'])
+    const parsed = parseFloat(row['amount'])
+    const amount = Math.round(parsed * 100) // integer kopecks
     const type = row['type']?.trim()
-    if (!type || isNaN(amount) || isNaN(date.getTime())) {
+    if (!type || isNaN(parsed) || isNaN(date.getTime())) {
       invalid++
       continue
     }
@@ -98,13 +100,13 @@ async function importExpenses(buffer: Buffer): Promise<ImportResult> {
       ))
       .limit(1)
 
-    if (existing && Number(existing.amount) === amount) {
+    if (existing && existing.amount === amount) {
       skipped++
     } else if (existing) {
-      await db.update(expenses).set({ amount: String(amount) }).where(eq(expenses.id, existing.id))
+      await db.update(expenses).set({ amount }).where(eq(expenses.id, existing.id))
       updated++
     } else {
-      await db.insert(expenses).values({ date: dateStr, siteId, amount: String(amount), type })
+      await db.insert(expenses).values({ date: dateStr, siteId, amount, type })
       created++
     }
   }
@@ -240,6 +242,9 @@ async function importCalls(buffer: Buffer): Promise<ImportResult> {
 
   let inserted = 0
   for (let i = 0; i < records.length; i += CHUNK_SIZE) {
+    // Sync driver: yield the event loop between chunks so concurrent
+    // requests are served during large imports
+    if (i > 0) await new Promise(resolve => setImmediate(resolve))
     const chunk = records.slice(i, i + CHUNK_SIZE)
     const result = await db
       .insert(callImports)

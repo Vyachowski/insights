@@ -1,7 +1,7 @@
 import { and, eq, exists, sql, sum } from 'drizzle-orm'
 
 import type { SQL } from 'drizzle-orm'
-import type { AnyPgColumn } from 'drizzle-orm/pg-core'
+import type { AnySQLiteColumn } from 'drizzle-orm/sqlite-core'
 
 import DateService from '@/lib/date.service'
 import { db } from '@/server/db'
@@ -32,16 +32,15 @@ interface DashboardPeriods {
   previousYearWeeks: Period[]
 }
 
-// Parity with the old Prisma queries: filters on DATE columns are truncated
-// to UTC calendar dates (Prisma does this for @db.Date fields), while
-// TIMESTAMP columns are compared as instants.
+// DATE-as-text columns compare lexicographically ('YYYY-MM-DD' sorts
+// correctly); timestamp columns are integer epoch-ms comparisons.
 const toUtcDate = (d: Date) => d.toISOString().slice(0, 10)
 
-const betweenDates = (column: AnyPgColumn, { start, end }: Period): SQL =>
+const betweenDates = (column: AnySQLiteColumn, { start, end }: Period): SQL =>
   sql`${column} >= ${toUtcDate(start)} AND ${column} <= ${toUtcDate(end)}`
 
-const betweenInstants = (column: AnyPgColumn, { start, end }: Period): SQL =>
-  sql`${column} >= CAST(${start} AS timestamptz) AND ${column} <= CAST(${end} AS timestamptz)`
+const betweenInstants = (column: AnySQLiteColumn, { start, end }: Period): SQL =>
+  sql`${column} >= ${start.getTime()} AND ${column} <= ${end.getTime()}`
 
 async function fetchPeriodData(period: Period): Promise<PeriodData> {
   const [[rev], [exp]] = await Promise.all([
@@ -55,8 +54,9 @@ async function fetchPeriodData(period: Period): Promise<PeriodData> {
       .where(betweenDates(expenses.date, period)),
   ])
 
-  const revenue = Number(rev?.total ?? 0)
-  const expensesTotal = Number(exp?.total ?? 0)
+  // Stored as integer kopecks; loader JSON stays in rubles
+  const revenue = Number(rev?.total ?? 0) / 100
+  const expensesTotal = Number(exp?.total ?? 0) / 100
   return { revenue, expenses: expensesTotal, profit: revenue - expensesTotal }
 }
 
@@ -130,7 +130,7 @@ async function calculateProfitShareByCities(period: Period) {
         .where(betweenDates(siteMetrics.date, period))
         .groupBy(siteMetrics.siteId),
       db
-        .select({ siteId: callImports.siteId, count: sql<number>`count(*)::int` })
+        .select({ siteId: callImports.siteId, count: sql<number>`count(*)` })
         .from(callImports)
         .where(
           and(eq(callImports.callNumber, 1), betweenInstants(callImports.date, period)),

@@ -53,14 +53,15 @@ export async function loader({ request }: Route.LoaderArgs) {
 async function fetchEntries(tab: string) {
   switch (tab) {
     case 'revenue':
+      // Stored as integer kopecks; views receive rubles
       return (await db.select().from(revenues).orderBy(revenues.id)).map(r => ({
         ...r,
-        amount: Number(r.amount),
+        amount: r.amount / 100,
       }))
     case 'expenses':
       return (await db.select().from(expenses).orderBy(expenses.id)).map(e => ({
         ...e,
-        amount: Number(e.amount),
+        amount: e.amount / 100,
       }))
     case 'calls':
       return db.select().from(callImports).orderBy(callImports.id)
