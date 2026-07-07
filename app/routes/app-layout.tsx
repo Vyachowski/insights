@@ -1,11 +1,11 @@
 import { AppShell } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
 import Header from '@ui/Header'
+import Sidebar from '@ui/Sidebar'
 import { Outlet, useLocation } from 'react-router'
 
 import type { Route } from './+types/app-layout'
 
-import Sidebar from '@/layouts/MainLayout/_components/Sidebar'
 import { menuItems } from '@/navigation'
 import { requireUser } from '@/server/auth'
 
