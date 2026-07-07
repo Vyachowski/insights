@@ -3,7 +3,7 @@ import Button from '@ui/Button'
 import Card from '@ui/Card'
 import Input from '@ui/Input'
 import Logo from '@ui/Logo'
-import { Form, redirect, useActionData, useNavigation } from 'react-router'
+import { data, Form, redirect, useNavigation } from 'react-router'
 
 import type { Route } from './+types/login'
 
@@ -21,16 +21,12 @@ export async function action({ request }: Route.ActionArgs) {
 
   const user = await verifyLogin(email, password)
   if (!user) {
-    return Response.json(
-      { error: 'Неверный email или пароль' },
-      { status: 400 },
-    )
+    return data({ error: 'Неверный email или пароль' }, { status: 400 })
   }
   return createUserSession(user.id, '/')
 }
 
-export default function LoginPage() {
-  const actionData = useActionData<{ error?: string }>()
+export default function LoginPage({ actionData }: Route.ComponentProps) {
   const navigation = useNavigation()
   const isSubmitting = navigation.state !== 'idle'
 

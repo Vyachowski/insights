@@ -1,7 +1,7 @@
 import { Container, Tabs } from '@mantine/core'
 import CsvImportModal, { type CsvImportConfig } from '@ui/CsvImportModal'
 import { useMemo, useState } from 'react'
-import { useLoaderData, useRevalidator, useSearchParams } from 'react-router'
+import { useRevalidator, useSearchParams } from 'react-router'
 
 import type { Route } from './+types/data'
 import type { RevenueDto } from '@/lib/types'
@@ -92,8 +92,7 @@ function useYearFilter<T extends { date: string | Date }>(entries: T[]) {
   return { availableYears, effectiveYear, setSelectedYear, filtered }
 }
 
-export default function DataPage() {
-  const data = useLoaderData<typeof loader>()
+export default function DataPage({ loaderData: data }: Route.ComponentProps) {
   const [searchParams, setSearchParams] = useSearchParams()
   const revalidator = useRevalidator()
   const { user } = useAuth()

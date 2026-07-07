@@ -1,5 +1,4 @@
 import { Container, Stack } from '@mantine/core'
-import { useLoaderData } from 'react-router'
 
 import type { Route } from './+types/dashboard'
 
@@ -17,9 +16,9 @@ export async function loader({ request }: Route.LoaderArgs) {
   return getDashboardSummary()
 }
 
-export default function DashboardPage() {
+export default function DashboardPage({ loaderData }: Route.ComponentProps) {
   const { businessHealth, lastWeekSummary, monthlyComparison, yearlyProfitTrend, citiesProfit }
-    = useLoaderData<typeof loader>()
+    = loaderData
   const currentFinances = useProgressiveMetrics(lastWeekSummary)
 
   return (
