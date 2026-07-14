@@ -15,7 +15,7 @@
     "lint": "eslint .",
     "knip": "knip",
     "drizzle:generate": "drizzle-kit generate",
-    "prepare": "simple-git-hooks"
+    "prepare": "node -e \"if (require('fs').existsSync('.git')) require('child_process').execSync('npx simple-git-hooks', {stdio: 'inherit'})\""
   },
   "dependencies": {
     "@mantine/core": "^9.3.2",
