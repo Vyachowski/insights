@@ -16,66 +16,67 @@ export default function handleRequest(
   responseHeaders: Headers,
   routerContext: EntryContext,
 ) {
-  // https://httpwg.org/specs/rfc9110.html#HEAD
-  if (request.method.toUpperCase() === 'HEAD') {
-    return new Response(null, {
-      status: responseStatusCode,
-      headers: responseHeaders,
-    })
+  if (isHeadRequest(request)) {
+    return new Response(null, { status: responseStatusCode, headers: responseHeaders })
   }
 
-  return new Promise((resolve, reject) => {
+  return streamAppToResponse(request, responseStatusCode, responseHeaders, routerContext)
+}
+
+function isHeadRequest(request: Request) {
+  return request.method.toUpperCase() === 'HEAD'
+}
+
+// Crawlers and SPA-mode renders need the full page in one shot; everyone
+// else gets the shell as soon as it's ready.
+function pickReadyEvent(
+  request: Request,
+  routerContext: EntryContext,
+): keyof RenderToPipeableStreamOptions {
+  const userAgent = request.headers.get('user-agent')
+  const waitForFullPage = (userAgent && isbot(userAgent)) || routerContext.isSpaMode
+  return waitForFullPage ? 'onAllReady' : 'onShellReady'
+}
+
+function toHtmlResponse(body: PassThrough, headers: Headers, status: number) {
+  const stream = createReadableStreamFromReadable(body)
+  headers.set('Content-Type', 'text/html')
+  return new Response(stream, { headers, status })
+}
+
+function streamAppToResponse(
+  request: Request,
+  responseStatusCode: number,
+  responseHeaders: Headers,
+  routerContext: EntryContext,
+) {
+  return new Promise<Response>((resolve, reject) => {
     let shellRendered = false
-    const userAgent = request.headers.get('user-agent')
-
-    // Ensure requests from bots and SPA Mode renders wait for all content to load before responding
-    // https://react.dev/reference/react-dom/server/renderToPipeableStream#waiting-for-all-content-to-load-for-crawlers-and-static-generation
-    const readyOption: keyof RenderToPipeableStreamOptions
-      = (userAgent && isbot(userAgent)) || routerContext.isSpaMode
-        ? 'onAllReady'
-        : 'onShellReady'
-
-    // Abort the rendering stream after the `streamTimeout` so it has time to
-    // flush down the rejected boundaries
-    let timeoutId: ReturnType<typeof setTimeout> | undefined = setTimeout(
-      () => abort(),
-      streamTimeout + 1000,
-    )
+    let timeoutId: ReturnType<typeof setTimeout> | undefined
+      = setTimeout(() => abort(), streamTimeout + 1000)
 
     const { pipe, abort } = renderToPipeableStream(
       <ServerRouter context={routerContext} url={request.url} />,
       {
-        [readyOption]() {
+        [pickReadyEvent(request, routerContext)]() {
           shellRendered = true
           const body = new PassThrough({
             final(callback) {
-              // Clear the timeout to prevent retaining the closure and memory leak
               clearTimeout(timeoutId)
               timeoutId = undefined
               callback()
             },
           })
-          const stream = createReadableStreamFromReadable(body)
-
-          responseHeaders.set('Content-Type', 'text/html')
-
           pipe(body)
-
-          resolve(
-            new Response(stream, {
-              headers: responseHeaders,
-              status: responseStatusCode,
-            }),
-          )
+          resolve(toHtmlResponse(body, responseHeaders, responseStatusCode))
         },
         onShellError(error: unknown) {
           reject(error)
         },
         onError(error: unknown) {
           responseStatusCode = 500
-          // Log streaming rendering errors from inside the shell.  Don't log
-          // errors encountered during initial shell rendering since they'll
-          // reject and get logged in handleDocumentRequest.
+          // Errors after the shell already resolved land here instead of
+          // rejecting the promise above, so log them explicitly.
           if (shellRendered) {
             console.error(error)
           }
@@ -85,14 +86,17 @@ export default function handleRequest(
   })
 }
 
-// Requests for paths with no matching route (bots probing /.env, /favicon.ico,
-// /wp-admin, etc.) surface as 404 route errors. They're expected traffic, not
-// server failures, so skip logging those and keep real errors (500s) visible.
 export function handleError(
   error: unknown,
   { request }: { request: Request },
 ) {
   if (request.signal.aborted) return
-  if (isRouteErrorResponse(error) && error.status === 404) return
+  if (isExpectedRouteNotFound(error)) return
   console.error(error)
+}
+
+// Bots probing dead paths (/.env, /favicon.ico, /wp-admin, ...) surface as
+// 404 route errors — expected traffic, not a server failure.
+function isExpectedRouteNotFound(error: unknown) {
+  return isRouteErrorResponse(error) && error.status === 404
 }
