@@ -6,7 +6,7 @@ import { renderToPipeableStream } from 'react-dom/server'
 import { isRouteErrorResponse, ServerRouter } from 'react-router'
 
 import type { RenderToPipeableStreamOptions } from 'react-dom/server'
-import type { AppLoadContext, EntryContext } from 'react-router'
+import type { EntryContext } from 'react-router'
 
 export const streamTimeout = 5_000
 
@@ -15,7 +15,6 @@ export default function handleRequest(
   responseStatusCode: number,
   responseHeaders: Headers,
   routerContext: EntryContext,
-  loadContext: AppLoadContext,
 ) {
   // https://httpwg.org/specs/rfc9110.html#HEAD
   if (request.method.toUpperCase() === 'HEAD') {
