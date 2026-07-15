@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react'
 import { useRevalidator, useSearchParams } from 'react-router'
 
 import type { Route } from './+types/data'
-import type { RevenueDto } from '@/lib/types'
+import type { ExpenseDto, RevenueDto } from '@/lib/types'
 
 import { useAuth } from '@/hooks/useAuth'
 import { importFile, importUrl } from '@/lib/importClient'
@@ -72,8 +72,10 @@ async function fetchEntries(tab: string) {
   }
 }
 
-function useYearFilter<T extends { date: string | Date }>(entries: T[]) {
+function usePeriodFilter<T extends { date: string | Date }>(entries: T[]) {
   const [selectedYear, setSelectedYear] = useState<number | null>(null)
+  const [selectedMonth, setSelectedMonth] = useState<number | null>(null)
+
   const availableYears = useMemo(
     () =>
       [...new Set(entries.map(e => new Date(e.date).getFullYear()))].sort(
@@ -82,14 +84,47 @@ function useYearFilter<T extends { date: string | Date }>(entries: T[]) {
     [entries],
   )
   const effectiveYear = selectedYear ?? availableYears[0] ?? null
+
+  const availableMonths = useMemo(
+    () =>
+      effectiveYear === null
+        ? []
+        : [
+          ...new Set(
+            entries
+              .filter(e => new Date(e.date).getFullYear() === effectiveYear)
+              .map(e => new Date(e.date).getMonth()),
+          ),
+        ].sort((a, b) => a - b),
+    [entries, effectiveYear],
+  )
+  // Drop a stale month when it isn't present in the newly selected year
+  const effectiveMonth
+    = selectedMonth !== null && availableMonths.includes(selectedMonth)
+      ? selectedMonth
+      : null
+
   const filtered = useMemo(
     () =>
       effectiveYear === null
         ? []
-        : entries.filter(e => new Date(e.date).getFullYear() === effectiveYear),
-    [entries, effectiveYear],
+        : entries.filter(e => {
+          const d = new Date(e.date)
+          if (d.getFullYear() !== effectiveYear) return false
+          return effectiveMonth === null || d.getMonth() === effectiveMonth
+        }),
+    [entries, effectiveYear, effectiveMonth],
   )
-  return { availableYears, effectiveYear, setSelectedYear, filtered }
+
+  return {
+    availableYears,
+    effectiveYear,
+    setSelectedYear,
+    availableMonths,
+    effectiveMonth,
+    setSelectedMonth,
+    filtered,
+  }
 }
 
 export default function DataPage({ loaderData: data }: Route.ComponentProps) {
@@ -106,7 +141,17 @@ export default function DataPage({ loaderData: data }: Route.ComponentProps) {
   const [localAdds, setLocalAdds] = useState<RevenueDto[]>([])
   const [removedIds, setRemovedIds] = useState<ReadonlySet<number>>(new Set())
 
-  const year = useYearFilter(data.entries as { date: string | Date }[])
+  const period = usePeriodFilter(data.entries as { date: string | Date }[])
+
+  // Category filter — expenses only (`type` exists only on expenses)
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+  const expenseCategories = useMemo(
+    () =>
+      activeTab === 'expenses'
+        ? [...new Set((data.entries as unknown as ExpenseDto[]).map(e => e.type))].sort()
+        : [],
+    [data.entries, activeTab],
+  )
 
   const importConfig: CsvImportConfig | null = importTarget
     ? {
@@ -120,19 +165,30 @@ export default function DataPage({ loaderData: data }: Route.ComponentProps) {
   const commonProps = {
     loading: false,
     error: null,
-    effectiveYear: year.effectiveYear,
-    availableYears: year.availableYears,
-    onYearChange: year.setSelectedYear,
+    effectiveYear: period.effectiveYear,
+    availableYears: period.availableYears,
+    onYearChange: period.setSelectedYear,
+    availableMonths: period.availableMonths,
+    effectiveMonth: period.effectiveMonth,
+    onMonthChange: period.setSelectedMonth,
   }
 
   const revenueEntries = (
     activeTab === 'revenue'
       ? [
-        ...(year.filtered as unknown as RevenueDto[]).filter(e => !removedIds.has(e.id)),
+        ...(period.filtered as unknown as RevenueDto[]).filter(e => !removedIds.has(e.id)),
         ...localAdds,
       ]
       : []
   ) as RevenueDto[]
+
+  const expenseEntries = (
+    activeTab === 'expenses'
+      ? (period.filtered as unknown as ExpenseDto[]).filter(
+        e => selectedCategory === null || e.type === selectedCategory,
+      )
+      : []
+  ) as ExpenseDto[]
 
   return (
     <Container size="xl" px={0}>
@@ -167,22 +223,25 @@ export default function DataPage({ loaderData: data }: Route.ComponentProps) {
         <Tabs.Panel value="expenses">
           <ExpensesTabView
             {...commonProps}
-            entries={year.filtered as never}
+            entries={expenseEntries as never}
             sites={data.sites}
+            categories={expenseCategories}
+            selectedCategory={selectedCategory}
+            onCategoryChange={setSelectedCategory}
             onImportClick={() => setImportTarget('expenses')}
           />
         </Tabs.Panel>
         <Tabs.Panel value="calls">
           <CallsTabView
             {...commonProps}
-            entries={year.filtered as never}
+            entries={period.filtered as never}
             onImportClick={() => setImportTarget('calls')}
           />
         </Tabs.Panel>
         <Tabs.Panel value="metrics">
           <MetricsTabView
             {...commonProps}
-            entries={year.filtered as never}
+            entries={period.filtered as never}
             sites={data.sites}
             onImportClick={() => setImportTarget('metrics')}
           />

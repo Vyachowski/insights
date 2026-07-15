@@ -1,5 +1,6 @@
 import { ActionIcon, Box, Group, Pagination, Paper, ScrollArea, Skeleton, Stack, Table, Text, Title } from '@mantine/core'
 import Button from '@ui/Button'
+import MonthSelect from '@ui/MonthSelect'
 import YearSelect from '@ui/YearSelect'
 import { Plus, Trash2, Upload } from 'lucide-react'
 import { useMemo, useState } from 'react'
@@ -34,8 +35,11 @@ interface Props {
   isAdmin: boolean
   effectiveYear: number | null
   availableYears: number[]
+  availableMonths: number[]
+  effectiveMonth: number | null
   showModal: boolean
   onYearChange: (year: number | null) => void
+  onMonthChange: (month: number | null) => void
   onImportClick: () => void
   onAddClick: () => void
   onRemove: (id: number) => void
@@ -43,7 +47,7 @@ interface Props {
   onModalAdd: (entry: Omit<Revenue, 'id'>) => void
 }
 
-export default function RevenueTabView({ loading, error, entries, sites, isAdmin, effectiveYear, availableYears, showModal, onYearChange, onImportClick, onAddClick, onRemove, onModalClose, onModalAdd }: Props) {
+export default function RevenueTabView({ loading, error, entries, sites, isAdmin, effectiveYear, availableYears, availableMonths, effectiveMonth, showModal, onYearChange, onMonthChange, onImportClick, onAddClick, onRemove, onModalClose, onModalAdd }: Props) {
   const [page, setPage] = useState(1)
 
   const sorted = useMemo(
@@ -68,6 +72,9 @@ export default function RevenueTabView({ loading, error, entries, sites, isAdmin
         <Group gap="sm">
           {availableYears.length > 0 && effectiveYear && (
             <YearSelect value={effectiveYear} onChange={onYearChange} years={availableYears} />
+          )}
+          {availableMonths.length > 0 && (
+            <MonthSelect value={effectiveMonth} onChange={onMonthChange} months={availableMonths} />
           )}
           <Button size="sm" variant="secondary" onClick={onImportClick}>
             <Upload size={15} />

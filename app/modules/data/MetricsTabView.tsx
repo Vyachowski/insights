@@ -1,5 +1,6 @@
 import { Box, Group, Pagination, Paper, ScrollArea, Skeleton, Stack, Table, Text, Title } from '@mantine/core'
 import Button from '@ui/Button'
+import MonthSelect from '@ui/MonthSelect'
 import YearSelect from '@ui/YearSelect'
 import { Upload } from 'lucide-react'
 import { useMemo, useState } from 'react'
@@ -25,11 +26,14 @@ interface Props {
   sites: Site[]
   effectiveYear: number | null
   availableYears: number[]
+  availableMonths: number[]
+  effectiveMonth: number | null
   onYearChange: (year: number | null) => void
+  onMonthChange: (month: number | null) => void
   onImportClick: () => void
 }
 
-export default function MetricsTabView({ loading, error, entries, sites, effectiveYear, availableYears, onYearChange, onImportClick }: Props) {
+export default function MetricsTabView({ loading, error, entries, sites, effectiveYear, availableYears, availableMonths, effectiveMonth, onYearChange, onMonthChange, onImportClick }: Props) {
   const [page, setPage] = useState(1)
 
   const sorted = useMemo(
@@ -53,6 +57,9 @@ export default function MetricsTabView({ loading, error, entries, sites, effecti
         <Group gap="sm">
           {availableYears.length > 0 && effectiveYear && (
             <YearSelect value={effectiveYear} onChange={onYearChange} years={availableYears} />
+          )}
+          {availableMonths.length > 0 && (
+            <MonthSelect value={effectiveMonth} onChange={onMonthChange} months={availableMonths} />
           )}
           <Button size="sm" variant="secondary" onClick={onImportClick}>
             <Upload size={15} />

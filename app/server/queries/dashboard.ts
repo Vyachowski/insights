@@ -80,6 +80,19 @@ async function getPeriodProfit(period: Period): Promise<number> {
   return profit
 }
 
+async function fetchExpensesByCategory(period: Period) {
+  const rows = await db
+    .select({ category: expenses.type, total: sum(expenses.amount) })
+    .from(expenses)
+    .where(betweenDates(expenses.date, period))
+    .groupBy(expenses.type)
+
+  // Stored as integer kopecks; loader JSON stays in rubles. Largest first.
+  return rows
+    .map(r => ({ category: r.category, amount: Number(r.total ?? 0) / 100 }))
+    .sort((a, b) => b.amount - a.amount)
+}
+
 async function getActiveSitesWithCities(period: Period) {
   return db
     .select({ id: sites.id, cityName: cities.name })
@@ -257,13 +270,14 @@ export async function getDashboardSummary() {
     previousYearWeeks: yearlyWeeks.previousYear,
   }
 
-  const [lastWeek, currentMonth, lastYearSameMonth, weeks, citiesProfit]
+  const [lastWeek, currentMonth, lastYearSameMonth, weeks, citiesProfit, expensesByCategory]
     = await Promise.all([
       fetchPeriodData(periods.lastWeek),
       fetchPeriodData(periods.currentMonth),
       fetchPeriodData(periods.lastYearSameMonth),
       fetchYearlyWeeks(periods.currentYearWeeks, periods.previousYearWeeks),
       fetchCitiesProfit(dateService),
+      fetchExpensesByCategory(periods.currentMonth),
     ])
 
   return {
@@ -276,5 +290,6 @@ export async function getDashboardSummary() {
     yearlyProfitTrend: buildYearlyTrend(weeks),
     citiesProfit,
     businessHealth: buildBusinessHealth(weeks),
+    expensesByCategory,
   }
 }

@@ -1,5 +1,7 @@
 import { Badge, Box, Group, Pagination, Paper, ScrollArea, Skeleton, Stack, Table, Text, Title } from '@mantine/core'
 import Button from '@ui/Button'
+import CategorySelect from '@ui/CategorySelect'
+import MonthSelect from '@ui/MonthSelect'
 import YearSelect from '@ui/YearSelect'
 import { Upload } from 'lucide-react'
 import { useMemo, useState } from 'react'
@@ -30,11 +32,17 @@ interface Props {
   sites: Site[]
   effectiveYear: number | null
   availableYears: number[]
+  availableMonths: number[]
+  effectiveMonth: number | null
+  categories: string[]
+  selectedCategory: string | null
   onYearChange: (year: number | null) => void
+  onMonthChange: (month: number | null) => void
+  onCategoryChange: (category: string | null) => void
   onImportClick: () => void
 }
 
-export default function ExpensesTabView({ loading, error, entries, sites, effectiveYear, availableYears, onYearChange, onImportClick }: Props) {
+export default function ExpensesTabView({ loading, error, entries, sites, effectiveYear, availableYears, availableMonths, effectiveMonth, categories, selectedCategory, onYearChange, onMonthChange, onCategoryChange, onImportClick }: Props) {
   const [page, setPage] = useState(1)
 
   const sorted = useMemo(
@@ -59,6 +67,12 @@ export default function ExpensesTabView({ loading, error, entries, sites, effect
         <Group gap="sm">
           {availableYears.length > 0 && effectiveYear && (
             <YearSelect value={effectiveYear} onChange={onYearChange} years={availableYears} />
+          )}
+          {availableMonths.length > 0 && (
+            <MonthSelect value={effectiveMonth} onChange={onMonthChange} months={availableMonths} />
+          )}
+          {categories.length > 0 && (
+            <CategorySelect value={selectedCategory} onChange={onCategoryChange} categories={categories} />
           )}
           <Button size="sm" variant="secondary" onClick={onImportClick}>
             <Upload size={15} />

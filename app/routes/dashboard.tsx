@@ -5,6 +5,7 @@ import type { Route } from './+types/dashboard'
 import useProgressiveMetrics from '@/hooks/useProgressiveMetrics'
 import BusinessHealthWidget from '@/modules/dashboard/BusinessHealthWidget'
 import CityProfitShareWidget from '@/modules/dashboard/CityProfitShareWidget'
+import ExpensesByCategoryWidget from '@/modules/dashboard/ExpensesByCategoryWidget'
 import MonthlyProfitComparisonWidget from '@/modules/dashboard/MonthlyProfitComparisonWidget'
 import WeeklyFinancialMetricsWidget from '@/modules/dashboard/WeeklyFinancialMetricsWidget'
 import YearlyProfitTrendChart from '@/modules/dashboard/YearlyProfitTrendChart'
@@ -17,7 +18,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 
 export default function DashboardPage({ loaderData }: Route.ComponentProps) {
-  const { businessHealth, lastWeekSummary, monthlyComparison, yearlyProfitTrend, citiesProfit }
+  const { businessHealth, lastWeekSummary, monthlyComparison, yearlyProfitTrend, citiesProfit, expensesByCategory }
     = loaderData
   const currentFinances = useProgressiveMetrics(lastWeekSummary)
 
@@ -27,6 +28,7 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
         <BusinessHealthWidget summary={businessHealth} />
         {currentFinances && <WeeklyFinancialMetricsWidget metrics={currentFinances} />}
         <MonthlyProfitComparisonWidget comparison={monthlyComparison} />
+        <ExpensesByCategoryWidget data={expensesByCategory} />
         <YearlyProfitTrendChart data={yearlyProfitTrend} />
         <CityProfitShareWidget metrics={citiesProfit} />
       </Stack>
