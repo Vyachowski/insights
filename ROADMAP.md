@@ -10,9 +10,8 @@ Statuses: `[ ]` not started · `[~]` in progress · `[x]` done.
 
 - [x] CSV import for revenue/expenses (Data page)
 - [x] Dashboard: business health, weekly metrics, month comparison, yearly profit trend
-- [ ] Monthly income/expenses table (month × category/site)
-- [ ] Expenses breakdown by category
-- [ ] Budget vs actual: planned monthly amounts and variance
+- [ ] Data-page table filters: period (year + month) and expense category
+- [ ] Dashboard widget: expenses by category
 
 ## V2 — (not defined)
 
