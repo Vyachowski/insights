@@ -65,6 +65,15 @@ export default function ExpensesTabView({ loading, error, entries, sites, effect
           </Text>
         </Box>
         <Group gap="sm">
+          <Button size="sm" variant="secondary" onClick={onImportClick}>
+            <Upload size={15} />
+            Импорт CSV
+          </Button>
+        </Group>
+      </Group>
+
+      {((availableYears.length > 0 && effectiveYear) || availableMonths.length > 0 || categories.length > 0) && (
+        <Group gap="sm">
           {availableYears.length > 0 && effectiveYear && (
             <YearSelect value={effectiveYear} onChange={onYearChange} years={availableYears} />
           )}
@@ -74,12 +83,8 @@ export default function ExpensesTabView({ loading, error, entries, sites, effect
           {categories.length > 0 && (
             <CategorySelect value={selectedCategory} onChange={onCategoryChange} categories={categories} />
           )}
-          <Button size="sm" variant="secondary" onClick={onImportClick}>
-            <Upload size={15} />
-            Импорт CSV
-          </Button>
         </Group>
-      </Group>
+      )}
 
       <Paper withBorder radius="md" style={{ overflow: 'hidden' }}>
         {error ? (

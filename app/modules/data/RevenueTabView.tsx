@@ -70,12 +70,6 @@ export default function RevenueTabView({ loading, error, entries, sites, isAdmin
           </Text>
         </Box>
         <Group gap="sm">
-          {availableYears.length > 0 && effectiveYear && (
-            <YearSelect value={effectiveYear} onChange={onYearChange} years={availableYears} />
-          )}
-          {availableMonths.length > 0 && (
-            <MonthSelect value={effectiveMonth} onChange={onMonthChange} months={availableMonths} />
-          )}
           <Button size="sm" variant="secondary" onClick={onImportClick}>
             <Upload size={15} />
             Импорт CSV
@@ -88,6 +82,17 @@ export default function RevenueTabView({ loading, error, entries, sites, isAdmin
           )}
         </Group>
       </Group>
+
+      {((availableYears.length > 0 && effectiveYear) || availableMonths.length > 0) && (
+        <Group gap="sm">
+          {availableYears.length > 0 && effectiveYear && (
+            <YearSelect value={effectiveYear} onChange={onYearChange} years={availableYears} />
+          )}
+          {availableMonths.length > 0 && (
+            <MonthSelect value={effectiveMonth} onChange={onMonthChange} months={availableMonths} />
+          )}
+        </Group>
+      )}
 
       <Paper withBorder radius="md" style={{ overflow: 'hidden' }}>
         {error ? (
