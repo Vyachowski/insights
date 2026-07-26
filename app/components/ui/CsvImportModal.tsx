@@ -1,9 +1,26 @@
 import { Box, Divider, Group, Modal, Stack, Text, TextInput } from '@mantine/core'
 import Button from '@ui/Button'
-import { CheckCircle, Upload, XCircle } from 'lucide-react'
+import { AlertTriangle, CheckCircle, MinusCircle, Upload, XCircle } from 'lucide-react'
 import { useRef, useState } from 'react'
 
 import type { ImportResultDto as ImportResult } from '@/lib/types'
+
+type ResultStatus = 'success' | 'ignored' | 'mixed' | 'empty'
+
+function resultStatus(r: ImportResult): ResultStatus {
+  const added = r.created + (r.updated ?? 0)
+  if (added > 0 && r.skipped > 0) return 'mixed'
+  if (added > 0) return 'success'
+  if (r.skipped > 0) return 'ignored'
+  return 'empty'
+}
+
+const STATUS_STYLE: Record<ResultStatus, { color: string, Icon: typeof CheckCircle }> = {
+  success: { color: 'teal', Icon: CheckCircle },
+  mixed: { color: 'yellow', Icon: AlertTriangle },
+  ignored: { color: 'yellow', Icon: AlertTriangle },
+  empty: { color: 'dimmed', Icon: MinusCircle },
+}
 
 export interface CsvImportConfig {
   title: string
@@ -105,18 +122,21 @@ export default function CsvImportModal({ config, onClose }: Props) {
           </Box>
           <input ref={fileInputRef} type="file" accept=".csv" hidden onChange={handleFileChange} />
 
-          {result && (
-            <Group gap="xs" c="teal">
-              <CheckCircle size={15} />
-              <Text size="sm">
-                {[
-                  result.created > 0 && `+${result.created} создано`,
-                  result.updated != null && result.updated > 0 && `${result.updated} обновлено`,
-                  result.skipped > 0 && `${result.skipped} пропущено`,
-                ].filter(Boolean).join(', ') || 'Без изменений'}
-              </Text>
-            </Group>
-          )}
+          {result && (() => {
+            const { color, Icon } = STATUS_STYLE[resultStatus(result)]
+            return (
+              <Group gap="xs" c={color}>
+                <Icon size={15} />
+                <Text size="sm">
+                  {[
+                    result.created > 0 && `+${result.created} создано`,
+                    result.updated != null && result.updated > 0 && `${result.updated} обновлено`,
+                    result.skipped > 0 && `${result.skipped} пропущено`,
+                  ].filter(Boolean).join(', ') || 'Без изменений'}
+                </Text>
+              </Group>
+            )
+          })()}
           {error && (
             <Group gap="xs" c="red">
               <XCircle size={15} />
