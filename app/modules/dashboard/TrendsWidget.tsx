@@ -36,7 +36,7 @@ export default function TrendsWidget({ trends }: { trends: TrendsDto }) {
       <Stack gap="lg">
         {rows.map(row => (
           <Group key={row.label} wrap="nowrap" gap="md">
-            <Text w={72} size="sm" c="dimmed">{row.label}</Text>
+            <Text w={72} size="sm">{row.label}</Text>
             <TargetBar
               current={row.current}
               previous={row.previous}
