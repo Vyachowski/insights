@@ -18,8 +18,8 @@ Statuses: `[ ]` not started · `[~]` in progress · `[x]` done.
 **Goal:** turn the main page into an at-a-glance summary that answers "растём или падаем, тренд или разовое, кто из городов лидирует" — not a wall of finance numbers (finances move to their own tab later).
 
 - [x] Split the combined `Данные` tab into pages: `Финансы` (доходы/расходы), `Трафик` (звонки/метрики), `Филиалы` (города/сайты)
-- [ ] Rename the main tab `Финансы` → `Сводка`; drop the old widgets (weekly metrics, month comparison, yearly profit trend chart, city profit share, expenses by category)
-- [ ] Widget **Итог**: 📉/📈 indicator «Бизнес [сильно] падает/растёт» (word «сильно» when |Δ| ≥ 20%) + hero year-over-year % with `% · абс.` toggle; tooltip shows per-year totals
-- [ ] Widget **Тренды**: Звонки / Доходы / Расходы, bar with a target line = last year's level over the same year-to-date window (red before the line, green past it; expenses inverted); `% · абс.` toggle
-- [ ] Widget **Города**: all cities by this-year calls, same "catch up to your own last year" bar; `% · абс.` toggle
-- [ ] Comparison model: goal = the analogous period of the previous year (Jan 1 → today), 100% = parity; «абс.» = cumulative total since Jan 1
+- [x] Rename the main tab `Финансы` → `Сводка`; drop the old widgets (weekly metrics, month comparison, yearly profit trend chart, city profit share, expenses by category)
+- [x] Widget **Итог**: 📉/📈 indicator «Бизнес [сильно] падает/растёт» (word «сильно» when |Δ| ≥ 20%) + hero year-over-year % with `% · абс.` toggle; tooltip shows per-year totals
+- [x] Widget **Тренды**: Звонки / Доходы / Расходы, bar with a target line = last year's level over the same year-to-date window (red before the line, green past it; expenses inverted); `% · абс.` toggle
+- [x] Widget **Города**: all cities by this-year calls, same "catch up to your own last year" bar; `% · абс.` toggle
+- [x] Comparison model: goal = the analogous period of the previous year (Jan 1 → today), 100% = parity; «абс.» = cumulative total since Jan 1
