@@ -24,4 +24,4 @@
 
 - [x] 4.1 `npm run typecheck`, `npm run lint`, `npm test`, `npm run knip` all pass (knip confirms the deleted widgets/exports are fully removed)
 - [x] 4.2 Load the page against real data and confirm each widget reads correctly (intensity qualifier, red/green thresholds, hover values, city ordering, tooltip totals)
-- [ ] 4.3 Archive the change (`openspec archive redesign-main-page-svodka`) once implemented and merged
+- [x] 4.3 Archive the change (`openspec archive redesign-main-page-svodka`) once implemented and merged
