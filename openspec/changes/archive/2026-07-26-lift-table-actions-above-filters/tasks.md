@@ -8,4 +8,4 @@
 ## 2. Verify
 
 - [x] 2.1 `npm run typecheck` and `npm run lint` pass.
-- [ ] 2.2 Manually confirm on each of the four tabs: buttons sit in the title row, filters form a strip above the table, and the strip disappears when a tab/period has no filter options.
+- [x] 2.2 Manually confirm on each of the four tabs: buttons sit in the title row, filters form a strip above the table, and the strip disappears when a tab/period has no filter options.
