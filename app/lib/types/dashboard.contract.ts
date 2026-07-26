@@ -1,15 +1,24 @@
-export interface YearlyProfitTrendDto {
-  week: number;
+export interface MetricComparisonDto {
   current: number;
   previous: number;
 }
 
-export interface CityProfitDto {
-  city: string;
-  profit: number;
+export interface VerdictDto {
+  isGrowing: boolean;
+  isStrong: boolean;
+  growthPercent: number;
+  current: number;
+  previous: number;
 }
 
-export interface YearlyCityProfitDto {
-  year: number;
-  cities: CityProfitDto[];
+export interface TrendsDto {
+  calls: MetricComparisonDto;
+  revenue: MetricComparisonDto;
+  expenses: MetricComparisonDto;
+}
+
+export interface CityCallsDto {
+  city: string;
+  current: number;
+  previous: number;
 }
