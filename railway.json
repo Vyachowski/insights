@@ -1,0 +1,6 @@
+{
+  "$schema": "https://railway.com/railway.schema.json",
+  "deploy": {
+    "startCommand": "NODE_ENV=production exec node --import tsx server.ts"
+  }
+}
