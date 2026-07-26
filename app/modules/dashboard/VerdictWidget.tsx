@@ -37,7 +37,7 @@ export default function VerdictWidget({ verdict }: { verdict: VerdictDto }) {
           </Text>
         </Group>
 
-        <Paper withBorder radius="md" p="md" miw={200} ta="center">
+        <Paper withBorder radius="md" p="md" w={260} ta="center">
           <Stack gap={2} align="center">
             <Text fz={40} fw={700} c={color}>
               {mode === 'pct' ? percentText : formatRub(current)}
