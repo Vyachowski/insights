@@ -18,4 +18,4 @@
 
 - [x] 4.1 Unit-test the amount parser, project resolver, and `ingestGudokExpenses` aggregation/idempotency using the sample rows (incl. double-post and multi-charge-same-day).
 - [x] 4.2 `npm run typecheck`, `npm run lint`, `npm test` pass.
-- [ ] 4.3 User runs the bookmarklet on the live Gudok `/history` page and confirms telephony expenses appear (and a second run creates no duplicates).
+- [x] 4.3 User runs the bookmarklet on the live Gudok `/history` page and confirms telephony expenses appear (and a second run creates no duplicates).
