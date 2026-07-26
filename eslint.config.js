@@ -14,7 +14,7 @@ import tseslint from 'typescript-eslint'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 export default defineConfig([
-  globalIgnores(['build', 'node_modules', '.react-router', 'coverage']),
+  globalIgnores(['build', 'node_modules', '.react-router', 'coverage', 'scripts/gudok-telephony-bookmarklet.js']),
   {
     files: ['**/*.{js,mjs,cjs,ts,tsx}'],
     extends: [
