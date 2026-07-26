@@ -33,8 +33,8 @@ export default function Header({
       gap="md"
       px="lg"
       py="md"
+      h="100%"
       wrap="nowrap"
-      style={{ borderBottom: '1px solid var(--mantine-color-default-border)' }}
     >
       <Group gap="md" wrap="nowrap" style={{ minWidth: 0, flex: 1 }}>
         <Burger
