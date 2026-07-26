@@ -8,6 +8,8 @@ export default [
   layout('routes/app-layout.tsx', [
     index('routes/home.tsx'),
     route('dashboard', 'routes/dashboard.tsx'),
-    route('data', 'routes/data.tsx'),
+    route('finance', 'routes/finance.tsx'),
+    route('traffic', 'routes/traffic.tsx'),
+    route('branches', 'routes/branches.tsx'),
   ]),
 ] satisfies RouteConfig

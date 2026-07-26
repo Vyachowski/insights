@@ -3,28 +3,21 @@ import CsvImportModal, { type CsvImportConfig } from '@ui/CsvImportModal'
 import { useMemo, useState } from 'react'
 import { useRevalidator, useSearchParams } from 'react-router'
 
-import type { Route } from './+types/data'
+import type { Route } from './+types/finance'
 import type { ExpenseDto, RevenueDto } from '@/lib/types'
 
 import { useAuth } from '@/hooks/useAuth'
+import { usePeriodFilter } from '@/hooks/usePeriodFilter'
 import { importFile, importUrl } from '@/lib/importClient'
-import CallsTabView from '@/modules/data/CallsTabView'
-import CitiesTabView from '@/modules/data/CitiesTabView'
 import ExpensesTabView from '@/modules/data/ExpensesTabView'
-import MetricsTabView from '@/modules/data/MetricsTabView'
 import RevenueTabView from '@/modules/data/RevenueTabView'
-import SitesTabView from '@/modules/data/SitesTabView'
 import { requireUser } from '@/server/auth'
 import { db } from '@/server/db'
-import { callImports, cities, expenses, revenues, siteMetrics, sites } from '@/server/schema'
+import { expenses, revenues, sites } from '@/server/schema'
 
 const TABS = [
   { id: 'revenue', label: 'Доходы' },
   { id: 'expenses', label: 'Расходы' },
-  { id: 'calls', label: 'Звонки' },
-  { id: 'metrics', label: 'Метрики' },
-  { id: 'cities', label: 'Города' },
-  { id: 'sites', label: 'Сайты' },
 ] as const
 
 type TabId = (typeof TABS)[number]['id']
@@ -32,8 +25,6 @@ type TabId = (typeof TABS)[number]['id']
 const IMPORT_TITLES: Record<string, string> = {
   revenue: 'Импорт доходов',
   expenses: 'Импорт расходов',
-  calls: 'Импорт звонков',
-  metrics: 'Импорт метрик',
 }
 
 export async function loader({ request }: Route.LoaderArgs) {
@@ -41,93 +32,32 @@ export async function loader({ request }: Route.LoaderArgs) {
 
   const tab = new URL(request.url).searchParams.get('tab') ?? 'revenue'
 
-  const [entries, allSites, allCities] = await Promise.all([
+  const [entries, allSites] = await Promise.all([
     fetchEntries(tab),
     db.select().from(sites).orderBy(sites.id),
-    db.select().from(cities).orderBy(cities.id),
   ])
 
-  return { tab, entries, sites: allSites, cities: allCities }
+  return { tab, entries, sites: allSites }
 }
 
 async function fetchEntries(tab: string) {
   switch (tab) {
-    case 'revenue':
-      // Stored as integer kopecks; views receive rubles
-      return (await db.select().from(revenues).orderBy(revenues.id)).map(r => ({
-        ...r,
-        amount: r.amount / 100,
-      }))
     case 'expenses':
+      // Stored as integer kopecks; views receive rubles
       return (await db.select().from(expenses).orderBy(expenses.id)).map(e => ({
         ...e,
         amount: e.amount / 100,
       }))
-    case 'calls':
-      return db.select().from(callImports).orderBy(callImports.id)
-    case 'metrics':
-      return db.select().from(siteMetrics).orderBy(siteMetrics.id)
+    case 'revenue':
     default:
-      return []
+      return (await db.select().from(revenues).orderBy(revenues.id)).map(r => ({
+        ...r,
+        amount: r.amount / 100,
+      }))
   }
 }
 
-function usePeriodFilter<T extends { date: string | Date }>(entries: T[]) {
-  const [selectedYear, setSelectedYear] = useState<number | null>(null)
-  const [selectedMonth, setSelectedMonth] = useState<number | null>(null)
-
-  const availableYears = useMemo(
-    () =>
-      [...new Set(entries.map(e => new Date(e.date).getFullYear()))].sort(
-        (a, b) => b - a,
-      ),
-    [entries],
-  )
-  const effectiveYear = selectedYear ?? availableYears[0] ?? null
-
-  const availableMonths = useMemo(
-    () =>
-      effectiveYear === null
-        ? []
-        : [
-          ...new Set(
-            entries
-              .filter(e => new Date(e.date).getFullYear() === effectiveYear)
-              .map(e => new Date(e.date).getMonth()),
-          ),
-        ].sort((a, b) => a - b),
-    [entries, effectiveYear],
-  )
-  // Drop a stale month when it isn't present in the newly selected year
-  const effectiveMonth
-    = selectedMonth !== null && availableMonths.includes(selectedMonth)
-      ? selectedMonth
-      : null
-
-  const filtered = useMemo(
-    () =>
-      effectiveYear === null
-        ? []
-        : entries.filter(e => {
-          const d = new Date(e.date)
-          if (d.getFullYear() !== effectiveYear) return false
-          return effectiveMonth === null || d.getMonth() === effectiveMonth
-        }),
-    [entries, effectiveYear, effectiveMonth],
-  )
-
-  return {
-    availableYears,
-    effectiveYear,
-    setSelectedYear,
-    availableMonths,
-    effectiveMonth,
-    setSelectedMonth,
-    filtered,
-  }
-}
-
-export default function DataPage({ loaderData: data }: Route.ComponentProps) {
+export default function FinancePage({ loaderData: data }: Route.ComponentProps) {
   const [searchParams, setSearchParams] = useSearchParams()
   const revalidator = useRevalidator()
   const { user } = useAuth()
@@ -230,27 +160,6 @@ export default function DataPage({ loaderData: data }: Route.ComponentProps) {
             onCategoryChange={setSelectedCategory}
             onImportClick={() => setImportTarget('expenses')}
           />
-        </Tabs.Panel>
-        <Tabs.Panel value="calls">
-          <CallsTabView
-            {...commonProps}
-            entries={period.filtered as never}
-            onImportClick={() => setImportTarget('calls')}
-          />
-        </Tabs.Panel>
-        <Tabs.Panel value="metrics">
-          <MetricsTabView
-            {...commonProps}
-            entries={period.filtered as never}
-            sites={data.sites}
-            onImportClick={() => setImportTarget('metrics')}
-          />
-        </Tabs.Panel>
-        <Tabs.Panel value="cities">
-          <CitiesTabView cities={data.cities} />
-        </Tabs.Panel>
-        <Tabs.Panel value="sites">
-          <SitesTabView sites={data.sites} cities={data.cities} />
         </Tabs.Panel>
       </Tabs>
 
