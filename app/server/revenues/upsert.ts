@@ -2,6 +2,7 @@ import { and, eq, isNull } from 'drizzle-orm'
 
 import { db } from '@/server/db'
 import { revenues } from '@/server/schema'
+import { isUniqueViolation } from '@/server/sqlite-errors'
 
 export interface UpsertRevenueInput {
   /** `YYYY-MM-DD` */
@@ -23,13 +24,15 @@ export async function upsertRevenue({
   siteId,
   amount,
 }: UpsertRevenueInput): Promise<UpsertRevenueOutcome> {
+  const match = and(
+    eq(revenues.date, date),
+    siteId === null ? isNull(revenues.siteId) : eq(revenues.siteId, siteId),
+  )
+
   const [existing] = await db
     .select({ id: revenues.id, amount: revenues.amount })
     .from(revenues)
-    .where(and(
-      eq(revenues.date, date),
-      siteId === null ? isNull(revenues.siteId) : eq(revenues.siteId, siteId),
-    ))
+    .where(match)
     .limit(1)
 
   if (existing && existing.amount === amount) return 'skipped'
@@ -37,6 +40,14 @@ export async function upsertRevenue({
     await db.update(revenues).set({ amount }).where(eq(revenues.id, existing.id))
     return 'updated'
   }
-  await db.insert(revenues).values({ date, siteId, amount })
-  return 'created'
+  try {
+    await db.insert(revenues).values({ date, siteId, amount })
+    return 'created'
+  } catch (err) {
+    if (!isUniqueViolation(err)) throw err
+    // Lost an insert race against a concurrent add for the same (date, siteId);
+    // a row exists now — overwrite its amount to stay idempotent.
+    await db.update(revenues).set({ amount }).where(match)
+    return 'updated'
+  }
 }

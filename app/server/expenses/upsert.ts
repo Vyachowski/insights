@@ -2,6 +2,7 @@ import { and, eq, isNull } from 'drizzle-orm'
 
 import { db } from '@/server/db'
 import { expenses } from '@/server/schema'
+import { isUniqueViolation } from '@/server/sqlite-errors'
 
 // Manual (non-import) expense category. Hosting is billed once a year per
 // site; a single `hosting` expense per (date, siteId) mirrors the unique
@@ -30,14 +31,16 @@ export async function upsertExpense({
   type,
   amount,
 }: UpsertExpenseInput): Promise<UpsertExpenseOutcome> {
+  const match = and(
+    eq(expenses.date, date),
+    eq(expenses.type, type),
+    siteId === null ? isNull(expenses.siteId) : eq(expenses.siteId, siteId),
+  )
+
   const [existing] = await db
     .select({ id: expenses.id, amount: expenses.amount })
     .from(expenses)
-    .where(and(
-      eq(expenses.date, date),
-      eq(expenses.type, type),
-      siteId === null ? isNull(expenses.siteId) : eq(expenses.siteId, siteId),
-    ))
+    .where(match)
     .limit(1)
 
   if (existing && existing.amount === amount) return 'skipped'
@@ -45,6 +48,14 @@ export async function upsertExpense({
     await db.update(expenses).set({ amount }).where(eq(expenses.id, existing.id))
     return 'updated'
   }
-  await db.insert(expenses).values({ date, siteId, amount, type })
-  return 'created'
+  try {
+    await db.insert(expenses).values({ date, siteId, amount, type })
+    return 'created'
+  } catch (err) {
+    if (!isUniqueViolation(err)) throw err
+    // Lost an insert race against a concurrent add for the same (date, siteId,
+    // type); a row exists now — overwrite its amount to stay idempotent.
+    await db.update(expenses).set({ amount }).where(match)
+    return 'updated'
+  }
 }
