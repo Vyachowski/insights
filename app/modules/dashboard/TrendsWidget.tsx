@@ -29,7 +29,7 @@ export default function TrendsWidget({ trends }: { trends: TrendsDto }) {
   return (
     <Card>
       <Group justify="space-between" mb="lg">
-        <Text tt="uppercase" size="xs" c="dimmed" fw={600}>Тренды</Text>
+        <Text fz="xl" fw={700}>Тренды</Text>
         <ValueModeToggle value={mode} onChange={setMode} />
       </Group>
 

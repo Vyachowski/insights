@@ -15,7 +15,7 @@ export default function CallsByCityWidget({ cities }: { cities: CityCallsDto[] }
   return (
     <Card>
       <Group justify="space-between" mb="lg">
-        <Text tt="uppercase" size="xs" c="dimmed" fw={600}>Звонки по городам</Text>
+        <Text fz="xl" fw={700}>Звонки по городам</Text>
         <ValueModeToggle value={mode} onChange={setMode} />
       </Group>
 

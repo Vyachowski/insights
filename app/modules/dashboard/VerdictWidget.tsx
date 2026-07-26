@@ -23,7 +23,7 @@ export default function VerdictWidget({ verdict }: { verdict: VerdictDto }) {
   return (
     <Card>
       <Group justify="space-between" mb="md">
-        <Text tt="uppercase" size="xs" c="dimmed" fw={600}>Итог</Text>
+        <Text fz="xl" fw={700}>Итог</Text>
         <ValueModeToggle value={mode} onChange={setMode} />
       </Group>
 
