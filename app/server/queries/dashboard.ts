@@ -1,4 +1,5 @@
-import { and, eq, sql, sum } from 'drizzle-orm'
+import { and, eq, isNotNull, sql, sum } from 'drizzle-orm'
+import { unionAll } from 'drizzle-orm/sqlite-core'
 
 import { computeVerdict, mergeCallsByCity } from './dashboard.calc'
 
@@ -8,7 +9,7 @@ import type { AnySQLiteColumn } from 'drizzle-orm/sqlite-core'
 
 import DateService from '@/lib/date.service'
 import { db } from '@/server/db'
-import { callImports, cities, expenses, revenues, sites } from '@/server/schema'
+import { callImports, calls, cities, expenses, revenues, sites } from '@/server/schema'
 
 export interface Period {
   start: Date
@@ -49,35 +50,53 @@ async function fetchPeriodData(period: Period): Promise<PeriodData> {
   return { revenue, expenses: expensesTotal, profit: revenue - expensesTotal }
 }
 
-// A call is counted once per unique call (callNumber === 1 is the primary row).
+// First calls (callNumber === 1) unioned across both sources — imported CSV rows
+// and live webhook rows — so a unique caller counts once even if present in both.
+// Webhook rows without a matched site are dropped. Callers are deduplicated by `src`
+// via COUNT(DISTINCT src) at the count sites below.
+const firstCalls = (period: Period) =>
+  unionAll(
+    db
+      .select({ src: callImports.src, siteId: callImports.siteId })
+      .from(callImports)
+      .where(
+        and(eq(callImports.callNumber, 1), betweenInstants(callImports.date, period)),
+      ),
+    db
+      // siteId is non-null here (filtered below); cast to match the imports branch.
+      .select({ src: calls.src, siteId: sql<number>`${calls.siteId}` })
+      .from(calls)
+      .where(
+        and(
+          eq(calls.callNumber, 1),
+          isNotNull(calls.siteId),
+          betweenInstants(calls.date, period),
+        ),
+      ),
+  ).as('first_calls')
+
 async function fetchCallsTotal(period: Period): Promise<number> {
+  const fc = firstCalls(period)
   const [row] = await db
-    .select({ total: sql<number>`count(*)` })
-    .from(callImports)
-    .where(
-      and(eq(callImports.callNumber, 1), betweenInstants(callImports.date, period)),
-    )
+    .select({ total: sql<number>`count(distinct ${fc.src})` })
+    .from(fc)
   return Number(row?.total ?? 0)
 }
 
 async function fetchCallsByCity(current: Period, previous: Period) {
-  const callsForPeriod = (period: Period) =>
-    db
+  const callsForPeriod = (period: Period) => {
+    const fc = firstCalls(period)
+    return db
       .select({
         cityId: cities.id,
         city: cities.name,
-        count: sql<number>`count(*)`,
+        count: sql<number>`count(distinct ${fc.src})`,
       })
-      .from(callImports)
-      .innerJoin(sites, eq(callImports.siteId, sites.id))
+      .from(fc)
+      .innerJoin(sites, eq(fc.siteId, sites.id))
       .innerJoin(cities, eq(sites.cityId, cities.id))
-      .where(
-        and(
-          eq(callImports.callNumber, 1),
-          betweenInstants(callImports.date, period),
-        ),
-      )
       .groupBy(cities.id)
+  }
 
   const [currentRows, previousRows, allCities] = await Promise.all([
     callsForPeriod(current),
