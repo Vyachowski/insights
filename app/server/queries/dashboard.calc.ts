@@ -37,5 +37,6 @@ export function mergeCallsByCity(
       current: currentByCity.get(city.id) ?? 0,
       previous: previousByCity.get(city.id) ?? 0,
     }))
+    .filter(c => c.current !== 0 || c.previous !== 0)
     .sort((a, b) => b.current - a.current)
 }

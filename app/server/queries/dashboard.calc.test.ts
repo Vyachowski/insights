@@ -47,13 +47,21 @@ describe('mergeCallsByCity', () => {
       ],
       [{ cityId: 2, city: 'Казань', count: 800 }],
     )
-    expect(result.map(r => r.city)).toEqual(['Казань', 'Москва', 'Пермь'])
+    expect(result.map(r => r.city)).toEqual(['Казань', 'Москва'])
   })
 
-  it('fills missing periods with zero for every city', () => {
+  it('excludes cities with no calls in either year', () => {
     const result = mergeCallsByCity(cities, [], [])
-    expect(result).toHaveLength(3)
-    expect(result.every(r => r.current === 0 && r.previous === 0)).toBe(true)
+    expect(result).toEqual([])
+  })
+
+  it('keeps a city with calls in only the previous year', () => {
+    const result = mergeCallsByCity(
+      cities,
+      [],
+      [{ cityId: 3, city: 'Пермь', count: 120 }],
+    )
+    expect(result).toEqual([{ city: 'Пермь', current: 0, previous: 120 }])
   })
 
   it('keeps both current and previous counts per city', () => {
