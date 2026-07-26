@@ -2,7 +2,7 @@ import { and, eq, sql, sum } from 'drizzle-orm'
 
 import { computeVerdict, mergeCallsByCity } from './dashboard.calc'
 
-import type { MonthlyRevenueDto } from '@/lib/types'
+import type { MonthlyProfitDto } from '@/lib/types'
 import type { SQL } from 'drizzle-orm'
 import type { AnySQLiteColumn } from 'drizzle-orm/sqlite-core'
 
@@ -92,13 +92,17 @@ async function fetchCallsByCity(current: Period, previous: Period) {
   )
 }
 
-// Per-month revenue for a single year, keyed by month number (1..12), in rubles.
-async function fetchMonthlyTotals(year: number): Promise<Map<number, number>> {
-  const monthExpr = sql<string>`substr(${revenues.date}, 6, 2)`
+// Per-month totals of a date/amount table for one year, keyed by month (1..12),
+// in rubles. Works for both `revenues` and `expenses` (same date/amount shape).
+async function fetchMonthlyTotals(
+  table: typeof revenues | typeof expenses,
+  year: number,
+): Promise<Map<number, number>> {
+  const monthExpr = sql<string>`substr(${table.date}, 6, 2)`
   const rows = await db
-    .select({ month: monthExpr, total: sum(revenues.amount) })
-    .from(revenues)
-    .where(sql`${revenues.date} >= ${`${year}-01-01`} AND ${revenues.date} <= ${`${year}-12-31`}`)
+    .select({ month: monthExpr, total: sum(table.amount) })
+    .from(table)
+    .where(sql`${table.date} >= ${`${year}-01-01`} AND ${table.date} <= ${`${year}-12-31`}`)
     .groupBy(monthExpr)
 
   const map = new Map<number, number>()
@@ -106,35 +110,49 @@ async function fetchMonthlyTotals(year: number): Promise<Map<number, number>> {
   return map
 }
 
-async function fetchMonthlyRevenue(
+async function fetchMonthlyProfit(
   currentYearNum: number,
   previousYearNum: number,
-): Promise<MonthlyRevenueDto> {
-  const [cur, prev] = await Promise.all([
-    fetchMonthlyTotals(currentYearNum),
-    fetchMonthlyTotals(previousYearNum),
+): Promise<MonthlyProfitDto> {
+  const [curRev, curExp, prevRev, prevExp] = await Promise.all([
+    fetchMonthlyTotals(revenues, currentYearNum),
+    fetchMonthlyTotals(expenses, currentYearNum),
+    fetchMonthlyTotals(revenues, previousYearNum),
+    fetchMonthlyTotals(expenses, previousYearNum),
   ])
+
+  // Profit = revenue − expenses per calendar month (no amortization), so the
+  // monthly totals sum back to the yearly profit shown in «Итог».
+  const profitAt = (rev: Map<number, number>, exp: Map<number, number>, m: number) =>
+    (rev.get(m) ?? 0) - (exp.get(m) ?? 0)
 
   const months = Array.from({ length: 12 }, (_, i) => {
     const month = i + 1
-    return { month, current: cur.get(month) ?? 0, previous: prev.get(month) ?? 0 }
+    return {
+      month,
+      current: profitAt(curRev, curExp, month),
+      previous: profitAt(prevRev, prevExp, month),
+    }
   })
 
-  // Elapsed = latest month with current-year revenue; before any data lands,
-  // fall back to the current calendar month so the average denominator is sane.
-  const lastWithData = months.reduce((max, m) => (m.current > 0 ? m.month : max), 0)
+  // Elapsed = latest current-year month with any revenue or expense; before any
+  // data lands, fall back to the current calendar month.
+  let lastWithData = 0
+  for (let m = 1; m <= 12; m++) {
+    if ((curRev.get(m) ?? 0) !== 0 || (curExp.get(m) ?? 0) !== 0) lastWithData = m
+  }
   const elapsedMonths = lastWithData || new Date().getMonth() + 1
 
-  const sumThrough = (map: Map<number, number>) => {
+  const averageThrough = (rev: Map<number, number>, exp: Map<number, number>) => {
     let total = 0
-    for (let m = 1; m <= elapsedMonths; m++) total += map.get(m) ?? 0
-    return total
+    for (let m = 1; m <= elapsedMonths; m++) total += profitAt(rev, exp, m)
+    return total / elapsedMonths
   }
 
   return {
     months,
-    averageCurrent: sumThrough(cur) / elapsedMonths,
-    averagePrevious: sumThrough(prev) / elapsedMonths,
+    averageCurrent: averageThrough(curRev, curExp),
+    averagePrevious: averageThrough(prevRev, prevExp),
     elapsedMonths,
   }
 }
@@ -144,14 +162,14 @@ export async function getDashboardSummary() {
   const currentYearNum = currentYear.start.getFullYear()
   const previousYearNum = previousYear.start.getFullYear()
 
-  const [current, previous, callsCurrent, callsPrevious, callsByCity, monthlyRevenue]
+  const [current, previous, callsCurrent, callsPrevious, callsByCity, monthlyProfit]
     = await Promise.all([
       fetchPeriodData(currentYear),
       fetchPeriodData(previousYear),
       fetchCallsTotal(currentYear),
       fetchCallsTotal(previousYear),
       fetchCallsByCity(currentYear, previousYear),
-      fetchMonthlyRevenue(currentYearNum, previousYearNum),
+      fetchMonthlyProfit(currentYearNum, previousYearNum),
     ])
 
   return {
@@ -162,6 +180,6 @@ export async function getDashboardSummary() {
       expenses: { current: current.expenses, previous: previous.expenses },
     },
     callsByCity,
-    monthlyRevenue,
+    monthlyProfit,
   }
 }

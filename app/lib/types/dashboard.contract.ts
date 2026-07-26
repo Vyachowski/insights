@@ -23,14 +23,14 @@ export interface CityCallsDto {
   previous: number;
 }
 
-export interface MonthlyRevenuePointDto {
+export interface MonthlyProfitPointDto {
   month: number; // 1..12
   current: number;
   previous: number;
 }
 
-export interface MonthlyRevenueDto {
-  months: MonthlyRevenuePointDto[]; // always 12, Jan..Dec
+export interface MonthlyProfitDto {
+  months: MonthlyProfitPointDto[]; // always 12, Jan..Dec
   averageCurrent: number;
   averagePrevious: number;
   elapsedMonths: number;
