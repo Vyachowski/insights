@@ -3,7 +3,7 @@ import Button from '@ui/Button'
 import CategorySelect from '@ui/CategorySelect'
 import MonthSelect from '@ui/MonthSelect'
 import YearSelect from '@ui/YearSelect'
-import { Upload } from 'lucide-react'
+import { Plus, Upload } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
 import type { ApiError, ExpenseDto as Expense, SiteDto as Site } from '@/lib/types'
@@ -30,6 +30,7 @@ interface Props {
   error: ApiError | null
   entries: Expense[]
   sites: Site[]
+  isAdmin: boolean
   effectiveYear: number | null
   availableYears: number[]
   availableMonths: number[]
@@ -40,9 +41,10 @@ interface Props {
   onMonthChange: (month: number | null) => void
   onCategoryChange: (category: string | null) => void
   onImportClick: () => void
+  onAddClick: () => void
 }
 
-export default function ExpensesTabView({ loading, error, entries, sites, effectiveYear, availableYears, availableMonths, effectiveMonth, categories, selectedCategory, onYearChange, onMonthChange, onCategoryChange, onImportClick }: Props) {
+export default function ExpensesTabView({ loading, error, entries, sites, isAdmin, effectiveYear, availableYears, availableMonths, effectiveMonth, categories, selectedCategory, onYearChange, onMonthChange, onCategoryChange, onImportClick, onAddClick }: Props) {
   const [page, setPage] = useState(1)
 
   const sorted = useMemo(
@@ -69,6 +71,12 @@ export default function ExpensesTabView({ loading, error, entries, sites, effect
             <Upload size={15} />
             Импорт CSV
           </Button>
+          {isAdmin && (
+            <Button size="sm" onClick={onAddClick}>
+              <Plus size={16} />
+              Добавить
+            </Button>
+          )}
         </Group>
       </Group>
 

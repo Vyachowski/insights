@@ -1,10 +1,12 @@
 import '@mantine/core/styles.css'
+import '@mantine/notifications/styles.css'
 
 import {
   ColorSchemeScript,
   MantineProvider,
   mantineHtmlProps,
 } from '@mantine/core'
+import { Notifications } from '@mantine/notifications'
 import {
   isRouteErrorResponse,
   Links,
@@ -31,6 +33,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <MantineProvider theme={theme} defaultColorScheme="dark">
+          <Notifications />
           {children}
         </MantineProvider>
         <ScrollRestoration />

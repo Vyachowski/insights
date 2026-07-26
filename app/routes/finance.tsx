@@ -1,7 +1,8 @@
 import { Container, Tabs } from '@mantine/core'
+import { notifications } from '@mantine/notifications'
 import CsvImportModal, { type CsvImportConfig } from '@ui/CsvImportModal'
-import { useMemo, useState } from 'react'
-import { useRevalidator, useSearchParams } from 'react-router'
+import { useEffect, useMemo, useState } from 'react'
+import { useFetcher, useRevalidator, useSearchParams } from 'react-router'
 
 import type { Route } from './+types/finance'
 import type { ExpenseDto, RevenueDto } from '@/lib/types'
@@ -9,10 +10,12 @@ import type { ExpenseDto, RevenueDto } from '@/lib/types'
 import { useAuth } from '@/hooks/useAuth'
 import { usePeriodFilter } from '@/hooks/usePeriodFilter'
 import { importFile, importUrl } from '@/lib/importClient'
+import AddHostingModal from '@/modules/data/AddHostingModal'
 import ExpensesTabView from '@/modules/data/ExpensesTabView'
 import RevenueTabView from '@/modules/data/RevenueTabView'
-import { requireUser } from '@/server/auth'
+import { requireAdmin, requireUser } from '@/server/auth'
 import { db } from '@/server/db'
+import { HOSTING_TYPE, upsertExpense } from '@/server/expenses/upsert'
 import { expenses, revenues, sites } from '@/server/schema'
 
 const TABS = [
@@ -38,6 +41,40 @@ export async function loader({ request }: Route.LoaderArgs) {
   ])
 
   return { tab, entries, sites: allSites }
+}
+
+export async function action({ request }: Route.ActionArgs) {
+  await requireAdmin(request)
+
+  const form = await request.formData()
+  const intent = String(form.get('intent') ?? '')
+  if (intent !== 'add-hosting') {
+    return Response.json({ error: 'Неизвестное действие' }, { status: 400 })
+  }
+
+  const year = Number(form.get('year'))
+  const siteIdRaw = String(form.get('siteId') ?? '')
+  const siteId = siteIdRaw ? Number(siteIdRaw) : null
+  const amountRubles = Number(form.get('amount'))
+
+  if (!Number.isInteger(year) || year < 2000 || year > 2100) {
+    return Response.json({ error: 'Укажите год' }, { status: 400 })
+  }
+  if (!Number.isFinite(amountRubles) || amountRubles <= 0) {
+    return Response.json({ error: 'Укажите сумму больше нуля' }, { status: 400 })
+  }
+  if (siteId !== null && !Number.isInteger(siteId)) {
+    return Response.json({ error: 'Некорректный сайт' }, { status: 400 })
+  }
+
+  const outcome = await upsertExpense({
+    date: `${year}-01-01`,
+    siteId,
+    type: HOSTING_TYPE,
+    amount: Math.round(amountRubles * 100), // integer kopecks
+  })
+
+  return Response.json({ ok: true, outcome })
 }
 
 async function fetchEntries(tab: string) {
@@ -66,6 +103,28 @@ export default function FinancePage({ loaderData: data }: Route.ComponentProps) 
   const activeTab = (searchParams.get('tab') ?? 'revenue') as TabId
   const [importTarget, setImportTarget] = useState<string | null>(null)
   const [showAddModal, setShowAddModal] = useState(false)
+  const [showAddHosting, setShowAddHosting] = useState(false)
+
+  // Hosting is added via the route action; the fetcher persists it and we
+  // revalidate + toast on the result.
+  const hostingFetcher = useFetcher<{ ok?: boolean, outcome?: string, error?: string }>()
+  useEffect(() => {
+    if (hostingFetcher.state !== 'idle' || !hostingFetcher.data) return
+    const { ok, outcome, error } = hostingFetcher.data
+    if (ok) {
+      revalidator.revalidate()
+      notifications.show({
+        color: outcome === 'created' ? 'teal' : outcome === 'updated' ? 'blue' : 'gray',
+        message: outcome === 'created'
+          ? 'Хостинг добавлен'
+          : outcome === 'updated'
+            ? 'Сумма хостинга обновлена'
+            : 'Запись уже актуальна',
+      })
+    } else if (error) {
+      notifications.show({ color: 'red', message: error })
+    }
+  }, [hostingFetcher.state, hostingFetcher.data, revalidator])
 
   // Old behavior parity: add/remove revenue were client-local only
   const [localAdds, setLocalAdds] = useState<RevenueDto[]>([])
@@ -155,16 +214,33 @@ export default function FinancePage({ loaderData: data }: Route.ComponentProps) 
             {...commonProps}
             entries={expenseEntries as never}
             sites={data.sites}
+            isAdmin={isAdmin}
             categories={expenseCategories}
             selectedCategory={selectedCategory}
             onCategoryChange={setSelectedCategory}
             onImportClick={() => setImportTarget('expenses')}
+            onAddClick={() => setShowAddHosting(true)}
           />
         </Tabs.Panel>
       </Tabs>
 
       {importConfig && (
         <CsvImportModal config={importConfig} onClose={() => setImportTarget(null)} />
+      )}
+
+      {isAdmin && showAddHosting && (
+        <AddHostingModal
+          sites={data.sites}
+          submitting={hostingFetcher.state !== 'idle'}
+          onClose={() => setShowAddHosting(false)}
+          onSubmit={values => {
+            hostingFetcher.submit(
+              { intent: 'add-hosting', ...values },
+              { method: 'post' },
+            )
+            setShowAddHosting(false)
+          }}
+        />
       )}
     </Container>
   )
