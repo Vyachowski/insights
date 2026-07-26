@@ -17,7 +17,7 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
   const { verdict, trends, callsByCity } = loaderData
 
   return (
-    <Container size="xl" px={0}>
+    <Container size={900} px={0}>
       <Stack gap="xl">
         <VerdictWidget verdict={verdict} />
         <TrendsWidget trends={trends} />
