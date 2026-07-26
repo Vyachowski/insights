@@ -42,9 +42,33 @@ app.use(
   }),
 )
 
-app.listen(env.PORT, () => {
+const server = app.listen(env.PORT, () => {
   console.log(`[web] listening on http://localhost:${env.PORT} (${env.NODE_ENV})`)
 })
 
 const { startBackupScheduler } = await import('./app/server/backup')
 startBackupScheduler()
+
+// Graceful shutdown: Railway sends SIGTERM on every redeploy/stop. Close the
+// HTTP server and exit 0 so a normal stop doesn't surface as an "npm error
+// signal SIGTERM" (a non-zero exit that reads like a crash in the logs).
+let shuttingDown = false
+function shutdown(signal: string) {
+  if (shuttingDown) return
+  shuttingDown = true
+  console.log(`[web] ${signal} received, shutting down`)
+  server.close(() => process.exit(0))
+  // Safety net if connections don't drain in time.
+  setTimeout(() => process.exit(0), 10_000).unref()
+}
+process.on('SIGTERM', () => shutdown('SIGTERM'))
+process.on('SIGINT', () => shutdown('SIGINT'))
+
+// Leave a clear trace if a real crash ever happens (instead of silent death).
+process.on('uncaughtException', err => {
+  console.error('[web] uncaughtException:', err)
+  process.exit(1)
+})
+process.on('unhandledRejection', reason => {
+  console.error('[web] unhandledRejection:', reason)
+})
