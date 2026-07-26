@@ -1,7 +1,7 @@
 import { Container, Tabs } from '@mantine/core'
 import { notifications } from '@mantine/notifications'
 import CsvImportModal, { type CsvImportConfig } from '@ui/CsvImportModal'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useFetcher, useRevalidator, useSearchParams } from 'react-router'
 
 import type { Route } from './+types/finance'
@@ -128,10 +128,14 @@ export default function FinancePage({ loaderData: data }: Route.ComponentProps) 
   const [showAddHosting, setShowAddHosting] = useState(false)
 
   // Hosting is added via the route action; the fetcher persists it and we
-  // revalidate + toast on the result.
+  // revalidate + toast on the result — once per settled result. The ref guard
+  // stops the effect looping when revalidate() changes the revalidator identity.
   const hostingFetcher = useFetcher<{ ok?: boolean, outcome?: string, error?: string }>()
+  const hostingHandled = useRef<unknown>(null)
   useEffect(() => {
     if (hostingFetcher.state !== 'idle' || !hostingFetcher.data) return
+    if (hostingHandled.current === hostingFetcher.data) return
+    hostingHandled.current = hostingFetcher.data
     const { ok, outcome, error } = hostingFetcher.data
     if (ok) {
       revalidator.revalidate()
@@ -146,13 +150,18 @@ export default function FinancePage({ loaderData: data }: Route.ComponentProps) 
     } else if (error) {
       notifications.show({ color: 'red', message: error })
     }
-  }, [hostingFetcher.state, hostingFetcher.data, revalidator])
+    // revalidator is intentionally excluded: its identity changes on revalidate,
+    // which would re-run this effect and loop the toast.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hostingFetcher.state, hostingFetcher.data])
 
-  // Revenue is added via the route action; the fetcher persists it and we
-  // revalidate + toast on the result.
+  // Revenue is added via the route action; same once-per-result handling.
   const revenueFetcher = useFetcher<{ ok?: boolean, outcome?: string, error?: string }>()
+  const revenueHandled = useRef<unknown>(null)
   useEffect(() => {
     if (revenueFetcher.state !== 'idle' || !revenueFetcher.data) return
+    if (revenueHandled.current === revenueFetcher.data) return
+    revenueHandled.current = revenueFetcher.data
     const { ok, outcome, error } = revenueFetcher.data
     if (ok) {
       revalidator.revalidate()
@@ -167,7 +176,8 @@ export default function FinancePage({ loaderData: data }: Route.ComponentProps) 
     } else if (error) {
       notifications.show({ color: 'red', message: error })
     }
-  }, [revenueFetcher.state, revenueFetcher.data, revalidator])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [revenueFetcher.state, revenueFetcher.data])
 
   // Old behavior parity: remove revenue is client-local only
   const [removedIds, setRemovedIds] = useState<ReadonlySet<number>>(new Set())
