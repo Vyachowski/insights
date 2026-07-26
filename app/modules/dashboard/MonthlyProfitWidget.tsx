@@ -24,17 +24,24 @@ export default function MonthlyProfitWidget({ monthly }: { monthly: MonthlyProfi
   const hasPrevious = averagePrevious !== 0
   const deltaColor = averageCurrent >= averagePrevious ? 'teal' : 'red'
 
+  // Only reserve space below the zero line when there are actual losses; otherwise
+  // the chart collapses to its positive half and the month labels sit right under the bars.
+  const hasLoss = months.some(m => m.current < 0 || m.previous < 0)
+  const negHalf = hasLoss ? CHART_HALF : 0
+
   const bar = (value: number, isCurrent: boolean) => {
     const len = barLen(value)
     const positive = value >= 0
     return (
-      <Box style={{ width: 9, height: CHART_HALF * 2, display: 'flex', flexDirection: 'column' }}>
+      <Box style={{ width: 9, height: CHART_HALF + negHalf, display: 'flex', flexDirection: 'column' }}>
         <Box style={{ height: CHART_HALF, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
           {positive && <Box style={{ height: len, background: barColor(value, isCurrent), borderRadius: '2px 2px 0 0' }} />}
         </Box>
-        <Box style={{ height: CHART_HALF, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
-          {!positive && <Box style={{ height: len, background: barColor(value, isCurrent), borderRadius: '0 0 2px 2px' }} />}
-        </Box>
+        {negHalf > 0 && (
+          <Box style={{ height: negHalf, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
+            {!positive && <Box style={{ height: len, background: barColor(value, isCurrent), borderRadius: '0 0 2px 2px' }} />}
+          </Box>
+        )}
       </Box>
     )
   }
@@ -56,49 +63,52 @@ export default function MonthlyProfitWidget({ monthly }: { monthly: MonthlyProfi
         </Paper>
       </Group>
 
-      <Group align="stretch" gap="xs" wrap="nowrap">
-        {months.map(m => {
-          const future = m.month > elapsedMonths && m.current === 0 && m.previous === 0
-          return (
-            <Tooltip
-              key={m.month}
-              withArrow
-              position="top"
-              events={{ hover: true, focus: true, touch: true }}
-              label={
-                <Stack gap={2}>
-                  <Text size="xs" fw={600}>{MONTH_LABELS[m.month - 1]}</Text>
-                  <Text size="xs">{CURRENT_YEAR}: {formatRub(m.current)}</Text>
-                  <Text size="xs">{PREVIOUS_YEAR}: {formatRub(m.previous)}</Text>
-                  {m.previous !== 0 && (
-                    <Text size="xs" c="dimmed">{formatDeltaPercent(m.current, m.previous)} к {PREVIOUS_YEAR}</Text>
-                  )}
+      <Box pos="relative">
+        {/* Zero axis: one continuous line across the whole plot, behind the bars. */}
+        <Box
+          style={{
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            top: CHART_HALF,
+            borderTop: '1px solid var(--mantine-color-default-border)',
+            pointerEvents: 'none',
+          }}
+        />
+        <Group align="stretch" gap="xs" wrap="nowrap">
+          {months.map(m => {
+            const future = m.month > elapsedMonths && m.current === 0 && m.previous === 0
+            return (
+              <Tooltip
+                key={m.month}
+                withArrow
+                position="top"
+                events={{ hover: true, focus: true, touch: true }}
+                label={
+                  <Stack gap={2}>
+                    <Text size="xs" fw={600}>{MONTH_LABELS[m.month - 1]}</Text>
+                    <Text size="xs">{CURRENT_YEAR}: {formatRub(m.current)}</Text>
+                    <Text size="xs">{PREVIOUS_YEAR}: {formatRub(m.previous)}</Text>
+                    {m.previous !== 0 && (
+                      <Text size="xs" c="dimmed">{formatDeltaPercent(m.current, m.previous)} к {PREVIOUS_YEAR}</Text>
+                    )}
+                  </Stack>
+                }
+              >
+                <Stack gap={6} align="center" style={{ flex: 1, minWidth: 0 }}>
+                  <Box style={{ display: 'flex', justifyContent: 'center', gap: 3 }}>
+                    {bar(m.current, true)}
+                    {bar(m.previous, false)}
+                  </Box>
+                  <Text size="9px" c={future ? 'dimmed' : undefined} style={{ opacity: future ? 0.5 : 1 }}>
+                    {MONTH_LABELS[m.month - 1]}
+                  </Text>
                 </Stack>
-              }
-            >
-              <Stack gap={6} align="center" style={{ flex: 1, minWidth: 0 }}>
-                <Box pos="relative" style={{ display: 'flex', justifyContent: 'center', gap: 3 }}>
-                  {bar(m.current, true)}
-                  {bar(m.previous, false)}
-                  <Box
-                    style={{
-                      position: 'absolute',
-                      left: 0,
-                      right: 0,
-                      top: CHART_HALF,
-                      borderTop: '1px dashed var(--mantine-color-default-border)',
-                      pointerEvents: 'none',
-                    }}
-                  />
-                </Box>
-                <Text size="9px" c={future ? 'dimmed' : undefined} style={{ opacity: future ? 0.5 : 1 }}>
-                  {MONTH_LABELS[m.month - 1]}
-                </Text>
-              </Stack>
-            </Tooltip>
-          )
-        })}
-      </Group>
+              </Tooltip>
+            )
+          })}
+        </Group>
+      </Box>
 
       <Group gap="lg" mt="md" justify="center">
         <Group gap={6}>
