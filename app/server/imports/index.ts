@@ -8,8 +8,9 @@ import {
   parseCsvBuffer,
 } from './csv'
 
+import { loadCityToSiteId, resolveProjectTitle } from '@/server/calls/resolve-site'
 import { db } from '@/server/db'
-import { callImports, expenses, revenues, siteMetrics, sites, cities } from '@/server/schema'
+import { callImports, expenses, revenues, siteMetrics } from '@/server/schema'
 
 export { CsvValidationError, fetchUrlToBuffer }
 
@@ -166,29 +167,6 @@ async function importMetrics(buffer: Buffer): Promise<ImportResult> {
 
 // ---------------------------------------------------------------- calls
 
-// City name aliases used to resolve Gudok project titles to canonical city names
-const CITY_ALIASES: Record<string, string[]> = {
-  новосибирск: ['нск'],
-  'санкт-петербург': ['спб', 'петербург'],
-  'нижний новгород': ['нижний'],
-  екатеринбург: ['екб'],
-  'ростов-на-дону': ['ростов'],
-  'набережные челны': ['челны'],
-}
-
-function resolveProjectTitle(raw: string): string {
-  const cleaned = raw
-    .replace(/^Дезинсекция – /, '')
-    .replace(/ – Дезинсекция$/, '')
-    .trim()
-    .toLowerCase()
-
-  for (const [canonical, aliases] of Object.entries(CITY_ALIASES)) {
-    if (aliases.includes(cleaned)) return canonical
-  }
-  return cleaned
-}
-
 function parseGudokDate(raw: string): Date | null {
   // Format: "31.12.25 12:05" → dd.MM.yy HH:mm
   const match = raw.match(/^(\d{2})\.(\d{2})\.(\d{2}) (\d{2}):(\d{2})$/)
@@ -203,11 +181,7 @@ async function importCalls(buffer: Buffer): Promise<ImportResult> {
   const rows = parseCsvBuffer(buffer)
   assertCsvColumns(rows, ['Дата', 'Кто звонил', '№', 'Проект', 'Куда звонил'])
 
-  const siteRows = await db
-    .select({ id: sites.id, cityName: cities.name })
-    .from(sites)
-    .innerJoin(cities, eq(sites.cityId, cities.id))
-  const cityToSiteId = new Map(siteRows.map(s => [s.cityName.toLowerCase(), s.id]))
+  const cityToSiteId = await loadCityToSiteId()
 
   let invalidCount = 0
   const records: (typeof callImports.$inferInsert)[] = []

@@ -27,6 +27,9 @@ const envSchema = z.object({
   USER_PASSWORD: z.string().min(1).optional(),
   USER_NAME: z.string().optional(),
   USER_LASTNAME: z.string().optional(),
+  // Shared secret for the Gudok call webhook. Sent in the URL path
+  // (/webhooks/gudok/<secret>); the endpoint is disabled when unset
+  GUDOK_WEBHOOK_SECRET: z.string().min(1).optional(),
 })
 
 type Env = z.infer<typeof envSchema>

@@ -36,6 +36,8 @@ Fresh database bootstrap: users, cities, and sites are created automatically on 
 
 Backups: when `BUCKET_*` vars are set, the server uploads one SQLite snapshot per UTC day to `backups/insights-YYYY-MM-DD.db` (hourly check + startup catch-up, 14-day retention). Manual restore: stop the service → on the volume remove `insights.db` and its `-wal`/`-shm` sidecars → place the backup file as `insights.db` → start.
 
+Gudok call webhooks: `POST`/`GET /webhooks/gudok/:secret` (`app/routes/webhooks.gudok.$secret.ts`) ingests every call-completion event into the `calls` table (`app/server/calls/gudok-webhook.ts`), best-effort site resolution (null when unmatched), full payload kept in `calls.raw`, idempotent on `gudokId`. Gudok exposes only a URL + method, so the shared secret rides in the path; set `GUDOK_WEBHOOK_SECRET` and configure Gudok's project webhook URL to `<APP_URL>/webhooks/gudok/<secret>`, method POST. Wrong/unset secret → 404. Test-delivery cleanup: after using Gudok's built-in "test" button, find the sample row(s) — `SELECT id, gudok_id, src, callstatus, date, raw FROM calls ORDER BY created_at DESC LIMIT 5;` — and remove them by id: `DELETE FROM calls WHERE gudok_id IN (...);`.
+
 ## Layout
 
 - `app/routes/` — route modules (loader/action + component); `app/routes.ts` is the explicit route config

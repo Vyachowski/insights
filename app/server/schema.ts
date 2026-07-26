@@ -137,9 +137,11 @@ export const calls = sqliteTable(
   'calls',
   {
     id: id(),
-    siteId: integer('site_id')
-      .notNull()
-      .references(() => sites.id, { onDelete: 'cascade' }),
+    // Nullable: webhook calls whose project can't be matched to a site are
+    // still stored (collect-all), with the full payload kept in `raw`
+    siteId: integer('site_id').references(() => sites.id, {
+      onDelete: 'cascade',
+    }),
     gudokId: integer('gudok_id').notNull().unique(),
     projectId: integer('project_id').notNull(),
     projectTitle: text('project_title').notNull(),
@@ -155,6 +157,9 @@ export const calls = sqliteTable(
     callNumber: integer('call_number').notNull(),
     audio: text('audio').notNull(),
     source: text('source').notNull().default('webhook'),
+    // Full original Gudok webhook payload (JSON string) — nothing delivered
+    // is lost even if a column mapping changes later
+    raw: text('raw'),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
