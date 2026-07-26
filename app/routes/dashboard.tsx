@@ -3,6 +3,7 @@ import { Container, Stack } from '@mantine/core'
 import type { Route } from './+types/dashboard'
 
 import CallsByCityWidget from '@/modules/dashboard/CallsByCityWidget'
+import MonthlyRevenueWidget from '@/modules/dashboard/MonthlyRevenueWidget'
 import TrendsWidget from '@/modules/dashboard/TrendsWidget'
 import VerdictWidget from '@/modules/dashboard/VerdictWidget'
 import { requireUser } from '@/server/auth'
@@ -14,13 +15,14 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 
 export default function DashboardPage({ loaderData }: Route.ComponentProps) {
-  const { verdict, trends, callsByCity } = loaderData
+  const { verdict, trends, callsByCity, monthlyRevenue } = loaderData
 
   return (
     <Container size={900} px={0}>
       <Stack gap="xl">
         <VerdictWidget verdict={verdict} />
         <TrendsWidget trends={trends} />
+        <MonthlyRevenueWidget monthly={monthlyRevenue} />
         <CallsByCityWidget cities={callsByCity} />
       </Stack>
     </Container>

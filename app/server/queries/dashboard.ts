@@ -2,6 +2,7 @@ import { and, eq, sql, sum } from 'drizzle-orm'
 
 import { computeVerdict, mergeCallsByCity } from './dashboard.calc'
 
+import type { MonthlyRevenueDto } from '@/lib/types'
 import type { SQL } from 'drizzle-orm'
 import type { AnySQLiteColumn } from 'drizzle-orm/sqlite-core'
 
@@ -91,16 +92,66 @@ async function fetchCallsByCity(current: Period, previous: Period) {
   )
 }
 
+// Per-month revenue for a single year, keyed by month number (1..12), in rubles.
+async function fetchMonthlyTotals(year: number): Promise<Map<number, number>> {
+  const monthExpr = sql<string>`substr(${revenues.date}, 6, 2)`
+  const rows = await db
+    .select({ month: monthExpr, total: sum(revenues.amount) })
+    .from(revenues)
+    .where(sql`${revenues.date} >= ${`${year}-01-01`} AND ${revenues.date} <= ${`${year}-12-31`}`)
+    .groupBy(monthExpr)
+
+  const map = new Map<number, number>()
+  for (const r of rows) map.set(Number(r.month), Number(r.total ?? 0) / 100)
+  return map
+}
+
+async function fetchMonthlyRevenue(
+  currentYearNum: number,
+  previousYearNum: number,
+): Promise<MonthlyRevenueDto> {
+  const [cur, prev] = await Promise.all([
+    fetchMonthlyTotals(currentYearNum),
+    fetchMonthlyTotals(previousYearNum),
+  ])
+
+  const months = Array.from({ length: 12 }, (_, i) => {
+    const month = i + 1
+    return { month, current: cur.get(month) ?? 0, previous: prev.get(month) ?? 0 }
+  })
+
+  // Elapsed = latest month with current-year revenue; before any data lands,
+  // fall back to the current calendar month so the average denominator is sane.
+  const lastWithData = months.reduce((max, m) => (m.current > 0 ? m.month : max), 0)
+  const elapsedMonths = lastWithData || new Date().getMonth() + 1
+
+  const sumThrough = (map: Map<number, number>) => {
+    let total = 0
+    for (let m = 1; m <= elapsedMonths; m++) total += map.get(m) ?? 0
+    return total
+  }
+
+  return {
+    months,
+    averageCurrent: sumThrough(cur) / elapsedMonths,
+    averagePrevious: sumThrough(prev) / elapsedMonths,
+    elapsedMonths,
+  }
+}
+
 export async function getDashboardSummary() {
   const { currentYear, previousYear } = new DateService().getComparablePeriods()
+  const currentYearNum = currentYear.start.getFullYear()
+  const previousYearNum = previousYear.start.getFullYear()
 
-  const [current, previous, callsCurrent, callsPrevious, callsByCity]
+  const [current, previous, callsCurrent, callsPrevious, callsByCity, monthlyRevenue]
     = await Promise.all([
       fetchPeriodData(currentYear),
       fetchPeriodData(previousYear),
       fetchCallsTotal(currentYear),
       fetchCallsTotal(previousYear),
       fetchCallsByCity(currentYear, previousYear),
+      fetchMonthlyRevenue(currentYearNum, previousYearNum),
     ])
 
   return {
@@ -111,5 +162,6 @@ export async function getDashboardSummary() {
       expenses: { current: current.expenses, previous: previous.expenses },
     },
     callsByCity,
+    monthlyRevenue,
   }
 }
