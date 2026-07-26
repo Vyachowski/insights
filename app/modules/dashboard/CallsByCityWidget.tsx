@@ -7,7 +7,7 @@ import ValueModeToggle, { type ValueMode } from './ValueModeToggle'
 
 import type { CityCallsDto } from '@/lib/types'
 
-import { formatDeltaPercent, formatNumber } from '@/lib/utils'
+import { formatNumber, formatYoyDelta } from '@/lib/utils'
 
 export default function CallsByCityWidget({ cities }: { cities: CityCallsDto[] }) {
   const [mode, setMode] = useState<ValueMode>('pct')
@@ -30,7 +30,7 @@ export default function CallsByCityWidget({ cities }: { cities: CityCallsDto[] }
                 showYearLabel={index === 0}
                 tooltip={
                   mode === 'pct'
-                    ? `${formatDeltaPercent(city.current, city.previous)} к 2025`
+                    ? formatYoyDelta(city.current, city.previous)
                     : `${formatNumber(city.current)} звонков`
                 }
               />

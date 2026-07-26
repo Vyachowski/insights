@@ -3,7 +3,7 @@ import Card from '@ui/Card'
 
 import type { MonthlyProfitDto } from '@/lib/types'
 
-import { formatDeltaPercent, formatRub } from '@/lib/utils'
+import { formatRub, formatYoyDelta } from '@/lib/utils'
 
 const CURRENT_YEAR = new Date().getFullYear()
 const PREVIOUS_YEAR = CURRENT_YEAR - 1
@@ -57,7 +57,7 @@ export default function MonthlyProfitWidget({ monthly }: { monthly: MonthlyProfi
           <Text size="xs" c="dimmed">
             за {elapsedMonths} мес ·{' '}
             {hasPrevious
-              ? <Text span c={deltaColor} fw={600}>{formatDeltaPercent(averageCurrent, averagePrevious)} к {PREVIOUS_YEAR}</Text>
+              ? <Text span c={deltaColor} fw={600}>{formatYoyDelta(averageCurrent, averagePrevious)}</Text>
               : '—'}
           </Text>
         </Paper>
@@ -90,7 +90,7 @@ export default function MonthlyProfitWidget({ monthly }: { monthly: MonthlyProfi
                     <Text size="xs">{CURRENT_YEAR}: {formatRub(m.current)}</Text>
                     <Text size="xs">{PREVIOUS_YEAR}: {formatRub(m.previous)}</Text>
                     {m.previous !== 0 && (
-                      <Text size="xs" c="dimmed">{formatDeltaPercent(m.current, m.previous)} к {PREVIOUS_YEAR}</Text>
+                      <Text size="xs" c="dimmed">{formatYoyDelta(m.current, m.previous)}</Text>
                     )}
                   </Stack>
                 }

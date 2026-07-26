@@ -7,7 +7,7 @@ import ValueModeToggle, { type ValueMode } from './ValueModeToggle'
 
 import type { TrendsDto } from '@/lib/types'
 
-import { formatDeltaPercent, formatNumber, formatRub } from '@/lib/utils'
+import { formatNumber, formatRub, formatYoyDelta } from '@/lib/utils'
 
 interface Row {
   label: string
@@ -44,7 +44,7 @@ export default function TrendsWidget({ trends }: { trends: TrendsDto }) {
               showYearLabel
               tooltip={
                 mode === 'pct'
-                  ? `${formatDeltaPercent(row.current, row.previous)} к 2025`
+                  ? formatYoyDelta(row.current, row.previous)
                   : row.format(row.current)
               }
             />
