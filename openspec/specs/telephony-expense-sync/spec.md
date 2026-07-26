@@ -1,7 +1,7 @@
 # telephony-expense-sync Specification
 
 ## Purpose
-TBD - created by archiving change sync-gudok-telephony-expenses. Update Purpose after archive.
+Get Gudok telephony charges (number-renewal списания) into the `expenses` table as `type = 'telephony'` even though Gudok has no API or export — the charges exist only in its authenticated `/history` page. A bookmarklet scrapes that page in the user's own session and posts the charge rows to secret-gated endpoints, which aggregate per (date, site) and upsert idempotently. Reuses the `expenses` table, the `GUDOK_WEBHOOK_SECRET`, and the shared project→site resolver; no Gudok credentials are stored.
 ## Requirements
 ### Requirement: Gudok operation charges ingest into expenses
 
