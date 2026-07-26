@@ -38,16 +38,17 @@ interface Props {
   availableMonths: number[]
   effectiveMonth: number | null
   showModal: boolean
+  submitting: boolean
   onYearChange: (year: number | null) => void
   onMonthChange: (month: number | null) => void
   onImportClick: () => void
   onAddClick: () => void
   onRemove: (id: number) => void
   onModalClose: () => void
-  onModalAdd: (entry: Omit<Revenue, 'id'>) => void
+  onModalSubmit: (values: { date: string, siteId: string, amount: string }) => void
 }
 
-export default function RevenueTabView({ loading, error, entries, sites, isAdmin, effectiveYear, availableYears, availableMonths, effectiveMonth, showModal, onYearChange, onMonthChange, onImportClick, onAddClick, onRemove, onModalClose, onModalAdd }: Props) {
+export default function RevenueTabView({ loading, error, entries, sites, isAdmin, effectiveYear, availableYears, availableMonths, effectiveMonth, showModal, submitting, onYearChange, onMonthChange, onImportClick, onAddClick, onRemove, onModalClose, onModalSubmit }: Props) {
   const [page, setPage] = useState(1)
 
   const sorted = useMemo(
@@ -163,7 +164,7 @@ export default function RevenueTabView({ loading, error, entries, sites, isAdmin
       </Paper>
 
       {isAdmin && showModal && (
-        <AddRevenueModal onClose={onModalClose} onAdd={onModalAdd} sites={sites} />
+        <AddRevenueModal onClose={onModalClose} onSubmit={onModalSubmit} submitting={submitting} sites={sites} />
       )}
     </Stack>
   )

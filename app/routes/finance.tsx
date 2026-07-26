@@ -16,6 +16,7 @@ import RevenueTabView from '@/modules/data/RevenueTabView'
 import { requireAdmin, requireUser } from '@/server/auth'
 import { db } from '@/server/db'
 import { HOSTING_TYPE, upsertExpense } from '@/server/expenses/upsert'
+import { upsertRevenue } from '@/server/revenues/upsert'
 import { expenses, revenues, sites } from '@/server/schema'
 
 const TABS = [
@@ -48,18 +49,11 @@ export async function action({ request }: Route.ActionArgs) {
 
   const form = await request.formData()
   const intent = String(form.get('intent') ?? '')
-  if (intent !== 'add-hosting') {
-    return Response.json({ error: 'Неизвестное действие' }, { status: 400 })
-  }
 
-  const year = Number(form.get('year'))
   const siteIdRaw = String(form.get('siteId') ?? '')
   const siteId = siteIdRaw ? Number(siteIdRaw) : null
   const amountRubles = Number(form.get('amount'))
 
-  if (!Number.isInteger(year) || year < 2000 || year > 2100) {
-    return Response.json({ error: 'Укажите год' }, { status: 400 })
-  }
   if (!Number.isFinite(amountRubles) || amountRubles <= 0) {
     return Response.json({ error: 'Укажите сумму больше нуля' }, { status: 400 })
   }
@@ -67,14 +61,34 @@ export async function action({ request }: Route.ActionArgs) {
     return Response.json({ error: 'Некорректный сайт' }, { status: 400 })
   }
 
-  const outcome = await upsertExpense({
-    date: `${year}-01-01`,
-    siteId,
-    type: HOSTING_TYPE,
-    amount: Math.round(amountRubles * 100), // integer kopecks
-  })
+  if (intent === 'add-hosting') {
+    const year = Number(form.get('year'))
+    if (!Number.isInteger(year) || year < 2000 || year > 2100) {
+      return Response.json({ error: 'Укажите год' }, { status: 400 })
+    }
+    const outcome = await upsertExpense({
+      date: `${year}-01-01`,
+      siteId,
+      type: HOSTING_TYPE,
+      amount: Math.round(amountRubles * 100), // integer kopecks
+    })
+    return Response.json({ ok: true, outcome })
+  }
 
-  return Response.json({ ok: true, outcome })
+  if (intent === 'add-revenue') {
+    const date = String(form.get('date') ?? '')
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      return Response.json({ error: 'Укажите дату' }, { status: 400 })
+    }
+    const outcome = await upsertRevenue({
+      date,
+      siteId,
+      amount: Math.round(amountRubles * 100), // integer kopecks
+    })
+    return Response.json({ ok: true, outcome })
+  }
+
+  return Response.json({ error: 'Неизвестное действие' }, { status: 400 })
 }
 
 async function fetchEntries(tab: string) {
@@ -126,8 +140,28 @@ export default function FinancePage({ loaderData: data }: Route.ComponentProps) 
     }
   }, [hostingFetcher.state, hostingFetcher.data, revalidator])
 
-  // Old behavior parity: add/remove revenue were client-local only
-  const [localAdds, setLocalAdds] = useState<RevenueDto[]>([])
+  // Revenue is added via the route action; the fetcher persists it and we
+  // revalidate + toast on the result.
+  const revenueFetcher = useFetcher<{ ok?: boolean, outcome?: string, error?: string }>()
+  useEffect(() => {
+    if (revenueFetcher.state !== 'idle' || !revenueFetcher.data) return
+    const { ok, outcome, error } = revenueFetcher.data
+    if (ok) {
+      revalidator.revalidate()
+      notifications.show({
+        color: outcome === 'created' ? 'teal' : outcome === 'updated' ? 'blue' : 'gray',
+        message: outcome === 'created'
+          ? 'Доход добавлен'
+          : outcome === 'updated'
+            ? 'Сумма дохода обновлена'
+            : 'Запись уже актуальна',
+      })
+    } else if (error) {
+      notifications.show({ color: 'red', message: error })
+    }
+  }, [revenueFetcher.state, revenueFetcher.data, revalidator])
+
+  // Old behavior parity: remove revenue is client-local only
   const [removedIds, setRemovedIds] = useState<ReadonlySet<number>>(new Set())
 
   const period = usePeriodFilter(data.entries as { date: string | Date }[])
@@ -164,10 +198,7 @@ export default function FinancePage({ loaderData: data }: Route.ComponentProps) 
 
   const revenueEntries = (
     activeTab === 'revenue'
-      ? [
-        ...(period.filtered as unknown as RevenueDto[]).filter(e => !removedIds.has(e.id)),
-        ...localAdds,
-      ]
+      ? (period.filtered as unknown as RevenueDto[]).filter(e => !removedIds.has(e.id))
       : []
   ) as RevenueDto[]
 
@@ -199,13 +230,17 @@ export default function FinancePage({ loaderData: data }: Route.ComponentProps) 
             sites={data.sites}
             isAdmin={isAdmin}
             showModal={showAddModal}
+            submitting={revenueFetcher.state !== 'idle'}
             onImportClick={() => setImportTarget('revenue')}
             onAddClick={() => setShowAddModal(true)}
             onRemove={id => setRemovedIds(prev => new Set(prev).add(id))}
             onModalClose={() => setShowAddModal(false)}
-            onModalAdd={entry => {
-              const tempId = -(Date.now() * 1000 + Math.floor(Math.random() * 1000))
-              setLocalAdds(prev => [...prev, { ...entry, id: tempId }])
+            onModalSubmit={values => {
+              revenueFetcher.submit(
+                { intent: 'add-revenue', ...values },
+                { method: 'post' },
+              )
+              setShowAddModal(false)
             }}
           />
         </Tabs.Panel>

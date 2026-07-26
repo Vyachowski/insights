@@ -3,19 +3,26 @@ import Button from '@ui/Button'
 import Input from '@ui/Input'
 import { useState } from 'react'
 
-import type { RevenueDto as Revenue, SiteDto as Site } from '@/lib/types'
+import type { SiteDto as Site } from '@/lib/types'
+
+interface RevenueValues {
+  date: string
+  siteId: string
+  amount: string
+}
 
 interface AddRevenueModalProps {
   sites: Site[]
+  submitting: boolean
   onClose: () => void
-  onAdd: (entry: Omit<Revenue, 'id'>) => void
+  onSubmit: (values: RevenueValues) => void
 }
 
 function siteLabel(url: string) {
   try { return new URL(url).hostname } catch { return url }
 }
 
-export default function AddRevenueModal({ sites, onClose, onAdd }: AddRevenueModalProps) {
+export default function AddRevenueModal({ sites, submitting, onClose, onSubmit }: AddRevenueModalProps) {
   const [date, setDate] = useState('')
   const [siteId, setSiteId] = useState<string>('')
   const [amount, setAmount] = useState('')
@@ -37,12 +44,7 @@ export default function AddRevenueModal({ sites, onClose, onAdd }: AddRevenueMod
     e.preventDefault()
     const errs = validate()
     if (Object.keys(errs).length > 0) { setErrors(errs); return }
-    onAdd({
-      date,
-      siteId: siteId ? Number(siteId) : null,
-      amount: Number(amount),
-    })
-    onClose()
+    onSubmit({ date, siteId, amount })
   }
 
   return (
@@ -81,8 +83,8 @@ export default function AddRevenueModal({ sites, onClose, onAdd }: AddRevenueMod
             <Button type="button" variant="secondary" onClick={onClose}>
               Отмена
             </Button>
-            <Button type="submit">
-              Добавить
+            <Button type="submit" disabled={submitting}>
+              {submitting ? 'Сохранение…' : 'Добавить'}
             </Button>
           </Group>
         </Stack>
