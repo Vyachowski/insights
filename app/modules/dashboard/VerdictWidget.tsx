@@ -1,4 +1,4 @@
-import { Group, Paper, SimpleGrid, Stack, Text, ThemeIcon, Tooltip } from '@mantine/core'
+import { Group, Paper, Stack, Text, ThemeIcon, Tooltip } from '@mantine/core'
 import Card from '@ui/Card'
 import { TrendingDown, TrendingUp } from 'lucide-react'
 import { useState } from 'react'
@@ -38,28 +38,19 @@ export default function VerdictWidget({ verdict }: { verdict: VerdictDto }) {
         </Group>
 
         <Paper withBorder radius="md" p="md" miw={200} ta="center">
-          {mode === 'pct'
-            ? (
-              <Stack gap={2} align="center">
-                <Text fz={40} fw={700} c={color}>{percentText}</Text>
-                <Tooltip
-                  withArrow
-                  label={`${CURRENT_YEAR}: ${formatRub(current)} · ${PREVIOUS_YEAR}: ${formatRub(previous)}`}
-                >
-                  <Text size="sm" c="dimmed" style={{ textDecoration: 'underline dotted', cursor: 'help' }}>
-                    в этом году
-                  </Text>
-                </Tooltip>
-              </Stack>
-            )
-            : (
-              <SimpleGrid cols={2} spacing={4} verticalSpacing={2}>
-                <Text c="dimmed" ta="left">{CURRENT_YEAR}</Text>
-                <Text ff="monospace" fw={700} ta="right">{formatRub(current)}</Text>
-                <Text c="dimmed" ta="left">{PREVIOUS_YEAR}</Text>
-                <Text ff="monospace" fw={600} c="dimmed" ta="right">{formatRub(previous)}</Text>
-              </SimpleGrid>
-            )}
+          <Stack gap={2} align="center">
+            <Text fz={40} fw={700} c={color}>
+              {mode === 'pct' ? percentText : formatRub(current)}
+            </Text>
+            <Tooltip
+              withArrow
+              label={`${CURRENT_YEAR}: ${formatRub(current)} · ${PREVIOUS_YEAR}: ${formatRub(previous)}`}
+            >
+              <Text size="sm" c="dimmed" style={{ textDecoration: 'underline dotted', cursor: 'help' }}>
+                в этом году
+              </Text>
+            </Tooltip>
+          </Stack>
         </Paper>
       </Group>
     </Card>
