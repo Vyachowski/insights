@@ -47,7 +47,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
               key={item.id}
               to={item.id}
               onClick={onClose}
-              style={{ textDecoration: 'none' }}
+              style={{ textDecoration: 'none', color: 'inherit' }}
             >
               {({ isActive }) => (
                 <NavLink
