@@ -2,7 +2,6 @@
 
 ## Purpose
 The main page («Сводка») — an at-a-glance summary that answers "are we growing or shrinking, is it a trend or a one-off, and which cities lead". It replaces the former finance-widget stack with three widgets (Verdict, Trends, Calls-by-City) sharing one comparison model: the current year-to-date window against the same calendar window of the previous year, where parity equals 100%.
-
 ## Requirements
 ### Requirement: Summary page identity
 
@@ -38,7 +37,7 @@ Each summary widget SHALL provide a toggle offering two value modes, percent and
 
 ### Requirement: Verdict widget
 
-The Verdict widget SHALL show a growth indicator and a hero figure for average weekly profit compared year-over-year. The indicator SHALL read «Бизнес растёт» when profit is up and «Бизнес падает» when down, with a 📈/📉 icon. When the absolute year-over-year swing is at least 20%, the qualifier «сильно» SHALL be inserted («Бизнес сильно растёт/падает»); below 20% it SHALL be omitted. The hero figure in percent mode SHALL be the year-over-year percentage with a «в этом году» label whose tooltip lists each year's total; in absolute mode it SHALL show this year's and last year's totals.
+The Verdict widget SHALL show a growth indicator and a hero figure for average weekly profit compared year-over-year. The indicator SHALL read «Бизнес растёт» when profit is up and «Бизнес падает» when down, with a 📈/📉 icon. When the absolute year-over-year swing is at least 20%, the qualifier «сильно» SHALL be inserted («Бизнес сильно растёт/падает»); below 20% it SHALL be omitted. The hero figure in percent mode SHALL be the year-over-year percentage; in absolute mode it SHALL be this year's absolute total. In both modes the hero figure SHALL carry a «в среднем за год» label whose tooltip lists each year's total, one year per line with the amounts aligned for comparison.
 
 #### Scenario: Strong decline
 
@@ -50,10 +49,15 @@ The Verdict widget SHALL show a growth indicator and a hero figure for average w
 - **WHEN** average weekly profit is 8% above last year
 - **THEN** the indicator reads «Бизнес растёт» (no «сильно») with the 📈 icon
 
+#### Scenario: Hero label
+
+- **WHEN** the widget renders in either percent or absolute mode
+- **THEN** the hero figure is labeled «в среднем за год»
+
 #### Scenario: Tooltip totals
 
-- **WHEN** the user hovers the «в этом году» label
-- **THEN** a tooltip shows this year's and last year's totals for the comparable window
+- **WHEN** the user hovers the «в среднем за год» label
+- **THEN** a tooltip shows this year's and last year's totals for the comparable window, each year on its own line with the amounts aligned so their magnitudes are easy to compare
 
 ### Requirement: Trends widget
 
@@ -92,3 +96,4 @@ The Calls-by-City widget SHALL list every city, ranked by this year's call count
 
 - **WHEN** the portfolio has more cities than fit on screen
 - **THEN** the widget lists all of them in a scrollable container
+

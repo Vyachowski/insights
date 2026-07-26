@@ -44,10 +44,21 @@ export default function VerdictWidget({ verdict }: { verdict: VerdictDto }) {
             </Text>
             <Tooltip
               withArrow
-              label={`${CURRENT_YEAR}: ${formatRub(current)} · ${PREVIOUS_YEAR}: ${formatRub(previous)}`}
+              label={(
+                <Stack gap={2} miw={140}>
+                  <Group justify="space-between" gap="lg" wrap="nowrap">
+                    <Text size="xs">{CURRENT_YEAR}</Text>
+                    <Text size="xs" fw={600}>{formatRub(current)}</Text>
+                  </Group>
+                  <Group justify="space-between" gap="lg" wrap="nowrap">
+                    <Text size="xs">{PREVIOUS_YEAR}</Text>
+                    <Text size="xs">{formatRub(previous)}</Text>
+                  </Group>
+                </Stack>
+              )}
             >
               <Text size="sm" c="dimmed" style={{ textDecoration: 'underline dotted', cursor: 'help' }}>
-                в этом году
+                в среднем за год
               </Text>
             </Tooltip>
           </Stack>
