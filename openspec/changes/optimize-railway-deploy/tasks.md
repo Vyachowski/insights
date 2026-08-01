@@ -12,6 +12,6 @@
 
 ## 3. Deploy and verify
 
-- [ ] 3.1 Commit both files to `main` and push
-- [ ] 3.2 Watch the Railway build log (`railway logs --build`) for the appended `npm prune --omit=dev` step (with `removed` lines) and a clean server boot
-- [ ] 3.3 Confirm the deployed app serves pages and `/health` returns 200
+- [x] 3.1 Commit both files to `main` and push
+- [x] 3.2 Watch the Railway build log (`railway logs --build`) for the appended `npm prune --omit=dev` step (with `removed` lines) and a clean server boot
+- [x] 3.3 Confirm the deployed app serves pages and `/health` returns 200
