@@ -9,6 +9,10 @@ const HOUR_MS = 60 * 60 * 1000
 export const RETENTION_DAYS = 14
 
 let isBackingUp = false
+let timer: NodeJS.Timeout | null = null
+
+/** A snapshot is mid-flight; closing the DB now would race `sqlite.backup()`. */
+export const isBackupInFlight = (): boolean => isBackingUp
 
 const dayKey = (d: Date) => `backups/insights-${d.toISOString().slice(0, 10)}.db`
 const daysAgo = (n: number) => new Date(Date.now() - n * 24 * HOUR_MS)
@@ -19,8 +23,14 @@ export function startBackupScheduler(): void {
     return
   }
   void runCycle()
-  setInterval(() => void runCycle(), HOUR_MS)
+  timer = setInterval(() => void runCycle(), HOUR_MS)
   console.log(`[backup] scheduler started (hourly check, retention ${RETENTION_DAYS}d)`)
+}
+
+/** Clear the hourly timer so no new cycle starts. Idempotent; safe before start. */
+export function stopBackupScheduler(): void {
+  if (timer) clearInterval(timer)
+  timer = null
 }
 
 async function runCycle(): Promise<void> {

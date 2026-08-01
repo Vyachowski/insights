@@ -46,8 +46,12 @@ const server = app.listen(env.PORT, () => {
   console.log(`[web] listening on http://localhost:${env.PORT} (${env.NODE_ENV})`)
 })
 
-const { startBackupScheduler } = await import('./app/server/backup')
+const { startBackupScheduler, stopBackupScheduler, isBackupInFlight } = await import(
+  './app/server/backup'
+)
 startBackupScheduler()
+
+const { sqlite } = await import('./app/server/db')
 
 // Graceful shutdown: Railway sends SIGTERM on every redeploy/stop. Close the
 // HTTP server and exit 0 so a normal stop doesn't surface as an "npm error
@@ -57,7 +61,20 @@ function shutdown(signal: string) {
   if (shuttingDown) return
   shuttingDown = true
   console.log(`[web] ${signal} received, shutting down`)
-  server.close(() => process.exit(0))
+  server.close(() => {
+    // Release stateful resources in order: stop the backup timer so no new
+    // cycle starts, then close the DB. Skip close() if a snapshot is still
+    // copying (it uses the same connection) — the safety net below covers it.
+    stopBackupScheduler()
+    if (!isBackupInFlight()) {
+      try {
+        sqlite.close()
+      } catch (err) {
+        console.error('[web] sqlite.close() failed:', err)
+      }
+    }
+    process.exit(0)
+  })
   // Safety net if connections don't drain in time.
   setTimeout(() => process.exit(0), 10_000).unref()
 }
