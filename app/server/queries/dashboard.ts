@@ -192,7 +192,11 @@ export async function getDashboardSummary() {
     ])
 
   return {
-    verdict: computeVerdict(current.profit, previous.profit),
+    verdict: {
+      ...computeVerdict(current.profit, previous.profit),
+      monthlyCurrent: monthlyProfit.averageCurrent,
+      monthlyPrevious: monthlyProfit.averagePrevious,
+    },
     trends: {
       calls: { current: callsCurrent, previous: callsPrevious },
       revenue: { current: current.revenue, previous: previous.revenue },

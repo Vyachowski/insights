@@ -9,6 +9,8 @@ export interface VerdictDto {
   growthPercent: number;
   current: number;
   previous: number;
+  monthlyCurrent: number;
+  monthlyPrevious: number;
 }
 
 export interface TrendsDto {

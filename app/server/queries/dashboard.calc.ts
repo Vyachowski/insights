@@ -4,7 +4,10 @@ import type { CityCallsDto, VerdictDto } from '@/lib/types'
 // at or above it the «сильно» qualifier is added.
 export const STRONG_SWING_PERCENT = 20
 
-export function computeVerdict(current: number, previous: number): VerdictDto {
+export function computeVerdict(
+  current: number,
+  previous: number,
+): Omit<VerdictDto, 'monthlyCurrent' | 'monthlyPrevious'> {
   const growthPercent
     = previous !== 0 ? ((current - previous) / Math.abs(previous)) * 100 : 0
 

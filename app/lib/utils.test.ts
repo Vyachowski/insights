@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { formatYoyDelta } from './utils'
+import { formatRub, formatRubDelta, formatYoyDelta } from './utils'
 
 describe('formatYoyDelta', () => {
   const prevYear = new Date().getFullYear() - 1
@@ -17,5 +17,16 @@ describe('formatYoyDelta', () => {
 
   it('reads «—» when both years are zero', () => {
     expect(formatYoyDelta(0, 0)).toBe('—')
+  })
+})
+
+describe('formatRubDelta', () => {
+  it('shows a signed ruble difference', () => {
+    expect(formatRubDelta(112_000, 100_000)).toBe(`+${formatRub(12_000)}`)
+    expect(formatRubDelta(95_000, 100_000)).toBe(`−${formatRub(5_000)}`)
+  })
+
+  it('has no sign when the difference is zero', () => {
+    expect(formatRubDelta(100_000, 100_000)).toBe(formatRub(0))
   })
 })

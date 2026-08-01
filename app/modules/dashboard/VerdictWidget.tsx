@@ -7,18 +7,19 @@ import ValueModeToggle, { type ValueMode } from './ValueModeToggle'
 
 import type { VerdictDto } from '@/lib/types'
 
-import { formatRub } from '@/lib/utils'
+import { formatRub, formatRubDelta } from '@/lib/utils'
 
 const CURRENT_YEAR = new Date().getFullYear()
 const PREVIOUS_YEAR = CURRENT_YEAR - 1
 
 export default function VerdictWidget({ verdict }: { verdict: VerdictDto }) {
   const [mode, setMode] = useState<ValueMode>('pct')
-  const { isGrowing, isStrong, growthPercent, current, previous } = verdict
+  const { isGrowing, isStrong, growthPercent, current, previous, monthlyCurrent, monthlyPrevious } = verdict
   const color = isGrowing ? 'teal' : 'red'
 
   const sign = growthPercent > 0 ? '+' : growthPercent < 0 ? '−' : ''
   const percentText = `${sign}${Math.abs(growthPercent)}%`
+  const monthlyDelta = `${formatRubDelta(monthlyCurrent, monthlyPrevious)}/мес`
 
   return (
     <Card>
@@ -39,8 +40,14 @@ export default function VerdictWidget({ verdict }: { verdict: VerdictDto }) {
 
         <Paper withBorder radius="md" p="md" w={260} ta="center">
           <Stack gap={2} align="center">
-            <Text fz={40} fw={700} c={color}>
-              {mode === 'pct' ? percentText : formatRub(current)}
+            <Text
+              fz={mode === 'pct' ? 40 : 26}
+              fw={700}
+              c={color}
+              h={48}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', whiteSpace: 'nowrap', lineHeight: 1 }}
+            >
+              {mode === 'pct' ? percentText : monthlyDelta}
             </Text>
             <Tooltip
               withArrow
@@ -53,6 +60,10 @@ export default function VerdictWidget({ verdict }: { verdict: VerdictDto }) {
                   <Group justify="space-between" gap="lg" wrap="nowrap">
                     <Text size="xs">{PREVIOUS_YEAR}</Text>
                     <Text size="xs">{formatRub(previous)}</Text>
+                  </Group>
+                  <Group justify="space-between" gap="lg" wrap="nowrap">
+                    <Text size="xs" c="dimmed">в среднем</Text>
+                    <Text size="xs" fw={600} c={color}>{monthlyDelta}</Text>
                   </Group>
                 </Stack>
               )}
