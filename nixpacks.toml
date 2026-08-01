@@ -1,7 +1,0 @@
-# Prune devDependencies from the runtime image after the build.
-# The build phase must keep vite / @react-router/dev present, so `npm run build`
-# runs first; `npm prune --omit=dev` then strips build-only tooling before the
-# image is finalized. Runtime deps (tsx, drizzle-orm, better-sqlite3, express,
-# @react-router/express, …) live under `dependencies` and survive the prune.
-[phases.build]
-cmds = ["npm run build", "npm prune --omit=dev"]
