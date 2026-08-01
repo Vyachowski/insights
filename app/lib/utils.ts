@@ -12,6 +12,14 @@ export const formatRubDelta = (current: number, previous: number) => {
   return `${sign}${formatRub(Math.abs(diff))}`
 }
 
+// Signed count difference of `current` against `previous` (e.g. «+3», «−12»).
+// Uses U+2212 for the minus, matching the ruble-delta sign; a zero difference has no sign.
+export const formatNumberDelta = (current: number, previous: number) => {
+  const rounded = Math.round(current - previous)
+  const sign = rounded > 0 ? '+' : rounded < 0 ? '−' : ''
+  return `${sign}${formatNumber(Math.abs(rounded))}`
+}
+
 // Year-over-year change of `current` against `previous`, as a full label with the
 // previous year in the suffix. With no prior-year baseline a percentage is undefined,
 // so report «новый» (appeared this year) or «—» (no data either year) instead of a

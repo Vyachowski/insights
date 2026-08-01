@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { formatRub, formatRubDelta, formatYoyDelta } from './utils'
+import { formatNumber, formatNumberDelta, formatRub, formatRubDelta, formatYoyDelta } from './utils'
 
 describe('formatYoyDelta', () => {
   const prevYear = new Date().getFullYear() - 1
@@ -28,5 +28,20 @@ describe('formatRubDelta', () => {
 
   it('has no sign when the difference is zero', () => {
     expect(formatRubDelta(100_000, 100_000)).toBe(formatRub(0))
+  })
+})
+
+describe('formatNumberDelta', () => {
+  it('shows a signed count difference', () => {
+    expect(formatNumberDelta(112, 100)).toBe(`+${formatNumber(12)}`)
+    expect(formatNumberDelta(95, 100)).toBe(`−${formatNumber(5)}`)
+  })
+
+  it('rounds fractional per-month differences', () => {
+    expect(formatNumberDelta(10.4, 7)).toBe(`+${formatNumber(3)}`)
+  })
+
+  it('has no sign when the rounded difference is zero', () => {
+    expect(formatNumberDelta(100, 100)).toBe(formatNumber(0))
   })
 })

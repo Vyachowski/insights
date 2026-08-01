@@ -21,9 +21,9 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
     <Container size={900} px={0}>
       <Stack gap="xl">
         <VerdictWidget verdict={verdict} />
-        <TrendsWidget trends={trends} />
+        <TrendsWidget trends={trends} elapsedMonths={monthlyProfit.elapsedMonths} />
         <MonthlyProfitWidget monthly={monthlyProfit} />
-        <CallsByCityWidget cities={callsByCity} />
+        <CallsByCityWidget cities={callsByCity} elapsedMonths={monthlyProfit.elapsedMonths} />
       </Stack>
     </Container>
   )

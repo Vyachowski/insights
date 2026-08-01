@@ -7,10 +7,11 @@ import ValueModeToggle, { type ValueMode } from './ValueModeToggle'
 
 import type { CityCallsDto } from '@/lib/types'
 
-import { formatNumber, formatYoyDelta } from '@/lib/utils'
+import { formatNumberDelta, formatYoyDelta } from '@/lib/utils'
 
-export default function CallsByCityWidget({ cities }: { cities: CityCallsDto[] }) {
+export default function CallsByCityWidget({ cities, elapsedMonths }: { cities: CityCallsDto[], elapsedMonths: number }) {
   const [mode, setMode] = useState<ValueMode>('pct')
+  const months = elapsedMonths || 1
 
   return (
     <Card>
@@ -31,7 +32,7 @@ export default function CallsByCityWidget({ cities }: { cities: CityCallsDto[] }
                 tooltip={
                   mode === 'pct'
                     ? formatYoyDelta(city.current, city.previous)
-                    : `${formatNumber(city.current)} звонков`
+                    : `${formatNumberDelta(city.current / months, city.previous / months)}/мес`
                 }
               />
             </Group>
