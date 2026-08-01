@@ -1,0 +1,10 @@
+# Files never used at runtime — kept out of the Railway deploy context.
+# Do NOT add app/, build/, drizzle/, public/, data/, package.json, railway.json,
+# or nixpacks.toml here — those are required to build and run.
+openspec/
+.agents/
+scripts/
+README.md
+ROADMAP.md
+**/*.test.ts
+**/*.test.tsx
