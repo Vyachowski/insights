@@ -1,4 +1,4 @@
-import { and, eq, isNull, sql } from 'drizzle-orm'
+import { and, eq, isNull } from 'drizzle-orm'
 
 import {
   assertCsvColumns,
@@ -8,9 +8,8 @@ import {
   parseCsvBuffer,
 } from './csv'
 
-import { loadCityToSiteId, resolveProjectTitle } from '@/server/calls/resolve-site'
 import { db } from '@/server/db'
-import { callImports, expenses, revenues, siteMetrics } from '@/server/schema'
+import { expenses, revenues, siteMetrics } from '@/server/schema'
 
 export { CsvValidationError, fetchUrlToBuffer }
 
@@ -167,69 +166,12 @@ async function importMetrics(buffer: Buffer): Promise<ImportResult> {
 
 // ---------------------------------------------------------------- calls
 
-function parseGudokDate(raw: string): Date | null {
-  // Format: "31.12.25 12:05" → dd.MM.yy HH:mm
-  const match = raw.match(/^(\d{2})\.(\d{2})\.(\d{2}) (\d{2}):(\d{2})$/)
-  if (!match) return null
-  const [, dd, mm, yy, hh, min] = match
-  return new Date(`20${yy}-${mm}-${dd}T${hh}:${min}:00`)
-}
-
-const CHUNK_SIZE = 1000
-
-async function importCalls(buffer: Buffer): Promise<ImportResult> {
-  const rows = parseCsvBuffer(buffer)
-  assertCsvColumns(rows, ['Дата', 'Кто звонил', '№', 'Проект', 'Куда звонил'])
-
-  const cityToSiteId = await loadCityToSiteId()
-
-  let invalidCount = 0
-  const records: (typeof callImports.$inferInsert)[] = []
-
-  for (const row of rows) {
-    const date = parseGudokDate(row['Дата'] ?? '')
-    const src = row['Кто звонил']?.trim()
-    const callNumber = Number(row['№'])
-    const projectTitle = resolveProjectTitle(row['Проект'] ?? '')
-    const siteId = cityToSiteId.get(projectTitle)
-
-    if (!date || !src || isNaN(callNumber) || siteId === undefined) {
-      invalidCount++
-      continue
-    }
-
-    records.push({
-      siteId,
-      date,
-      src,
-      callNumber,
-      projectTitle,
-      region: row['Откуда']?.trim() || null,
-      class: row['Класс']?.trim() || null,
-      advChannelName: row['Куда звонил']?.trim() ?? '',
-      billsec: 0,
-      comment: row['Комментарий']?.trim() || null,
-      redirectNumber: row['Вызов завершен']?.replace(/\D/g, '') || null,
-      source: 'csv',
-    })
-  }
-
-  let inserted = 0
-  for (let i = 0; i < records.length; i += CHUNK_SIZE) {
-    // Sync driver: yield the event loop between chunks so concurrent
-    // requests are served during large imports
-    if (i > 0) await new Promise(resolve => setImmediate(resolve))
-    const chunk = records.slice(i, i + CHUNK_SIZE)
-    const result = await db
-      .insert(callImports)
-      .values(chunk)
-      .onConflictDoNothing()
-      .returning({ id: sql<number>`1` })
-    inserted += result.length
-  }
-
-  assertSkipRate(records.length, invalidCount)
-  return { created: inserted, skipped: records.length - inserted }
+// Switched off until the new import lands: the old one wrote to a table that
+// no longer exists.
+async function importCalls(): Promise<ImportResult> {
+  throw new CsvValidationError(
+    'Импорт звонков временно отключён: звонки перенесены в новую таблицу. Новые звонки приходят через вебхук.',
+  )
 }
 
 // ---------------------------------------------------------------- dispatch

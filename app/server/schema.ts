@@ -2,6 +2,7 @@ import { sql } from 'drizzle-orm'
 import {
   index,
   integer,
+  primaryKey,
   real,
   sqliteTable,
   text,
@@ -61,6 +62,7 @@ export const sites = sqliteTable(
     googleCounterId: text('google_counter_id'),
     yandexTagManagerId: text('yandex_tag_manager_id'),
     googleTagManagerId: text('google_tag_manager_id'),
+    gudokProjectId: integer('gudok_project_id'),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
@@ -100,36 +102,23 @@ export const siteMetrics = sqliteTable(
   ],
 )
 
-export const callImports = sqliteTable(
-  'call_imports',
+export const phoneNumbers = sqliteTable(
+  'phone_numbers',
   {
-    id: id(),
-    siteId: integer('site_id')
-      .notNull()
-      .references(() => sites.id, { onDelete: 'cascade' }),
-    date: integer('date', { mode: 'timestamp_ms' }).notNull(),
-    src: text('src').notNull(),
-    region: text('region'),
-    callNumber: integer('call_number').notNull(),
-    class: text('class'),
-    projectTitle: text('project_title').notNull(),
-    advChannelName: text('adv_channel_name').notNull(),
-    billsec: integer('billsec').notNull(),
-    comment: text('comment'),
-    redirectNumber: text('redirect_number'),
-    source: text('source').notNull().default('csv'),
-    importedAt: integer('imported_at', { mode: 'timestamp_ms' })
-      .notNull()
-      .$defaultFn(() => new Date()),
+    provider: text('provider').notNull(),
+    // For Gudok this is `adv_channel_id`; removed channels use a temporary `csv:` ID
+    providerNumberId: text('provider_number_id').notNull(),
+    number: text('number').unique(),
+    siteId: integer('site_id').references(() => sites.id, {
+      onDelete: 'cascade',
+    }),
+    name: text('name'),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
   table => [
-    index('call_imports_site_id_idx').on(table.siteId),
-    uniqueIndex('call_imports_site_id_date_src_call_number_key').on(
-      table.siteId,
-      table.date,
-      table.src,
-      table.callNumber,
-    ),
+    primaryKey({ columns: [table.provider, table.providerNumberId] }),
+    index('phone_numbers_site_id_idx').on(table.siteId),
   ],
 )
 
@@ -137,38 +126,37 @@ export const calls = sqliteTable(
   'calls',
   {
     id: id(),
-    // Nullable: webhook calls whose project can't be matched to a site are
-    // still stored (collect-all), with the full payload kept in `raw`
+    // Nullable: a call whose site can't be resolved is still stored
     siteId: integer('site_id').references(() => sites.id, {
       onDelete: 'cascade',
     }),
-    gudokId: integer('gudok_id').notNull().unique(),
-    projectId: integer('project_id').notNull(),
-    projectTitle: text('project_title').notNull(),
-    dst: text('dst').notNull(),
-    advChannelId: text('adv_channel_id').notNull(),
-    advChannelName: text('adv_channel_name').notNull(),
+    provider: text('provider').notNull(),
+    // No foreign key to phone_numbers: a number failure must not reject a call
+    providerNumberId: text('provider_number_id'),
+    providerCallId: text('provider_call_id'),
     src: text('src').notNull(),
-    duration: integer('duration').notNull(),
-    billsec: integer('billsec').notNull(),
-    callstatus: text('callstatus').notNull(),
-    date: integer('date', { mode: 'timestamp_ms' }).notNull(),
-    region: text('region').notNull(),
     callNumber: integer('call_number').notNull(),
-    audio: text('audio').notNull(),
-    source: text('source').notNull().default('webhook'),
-    // Full original Gudok webhook payload (JSON string) — nothing delivered
-    // is lost even if a column mapping changes later
-    raw: text('raw'),
+    date: integer('date', { mode: 'timestamp_ms' }).notNull(),
+    callstatus: text('callstatus'),
+    billsec: integer('billsec'),
+    region: text('region'),
+    source: text('source').notNull(),
+    // Full source record (JSON string): webhook payload or CSV row
+    raw: text('raw').notNull(),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
   table => [
     index('calls_site_id_idx').on(table.siteId),
-    uniqueIndex('calls_site_id_date_src_key').on(
+    uniqueIndex('calls_provider_provider_call_id_key').on(
+      table.provider,
+      table.providerCallId,
+    ),
+    uniqueIndex('calls_site_id_src_call_number_date_key').on(
       table.siteId,
-      table.date,
       table.src,
+      table.callNumber,
+      table.date,
     ),
   ],
 )

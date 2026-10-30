@@ -1,9 +1,10 @@
+import { and, eq } from 'drizzle-orm'
 import { z } from 'zod'
 
-import { resolveSiteIdByProjectTitle } from './resolve-site'
+import { resolveSiteIdByGudokProject, resolveSiteIdByProjectTitle } from './resolve-site'
 
 import { db } from '@/server/db'
-import { calls } from '@/server/schema'
+import { calls, phoneNumbers } from '@/server/schema'
 
 export class GudokPayloadError extends Error {}
 
@@ -23,12 +24,10 @@ const payloadSchema = z.object({
   adv_channel_id: str.default(''),
   adv_channel_name: str.default(''),
   src: str.default(''),
-  duration: num.default(0),
   billsec: num.default(0),
   callstatus: str.default(''),
   region: str.default(''),
   call_number: num.default(0),
-  audio: str.default(''),
 })
 
 /** Parse a Gudok `date` (UTC) into a Date; accepts ISO or epoch seconds/ms. */
@@ -44,6 +43,56 @@ function parseGudokDate(raw: string): Date | null {
   return isNaN(date.getTime()) ? null : date
 }
 
+type GudokPayload = z.infer<typeof payloadSchema>
+
+const PROVIDER = 'gudok'
+
+async function resolveSiteId(p: GudokPayload): Promise<number | null> {
+  return (await resolveSiteIdByGudokProject(p.project_id))
+    ?? (await resolveSiteIdByProjectTitle(p.project_title))
+}
+
+/**
+ * Create the call's number, or update `number` and `name` on a known one.
+ * `site_id` of a known number changes by hand only, so a project edit in Gudok
+ * can't move calls. Returns the site the call belongs to.
+ */
+async function syncPhoneNumber(p: GudokPayload): Promise<number | null> {
+  // The call is stored whatever happens here, so failures are only logged
+  let siteId: number | null = null
+  try {
+    if (!p.adv_channel_id) return await resolveSiteId(p)
+
+    const key = and(
+      eq(phoneNumbers.provider, PROVIDER),
+      eq(phoneNumbers.providerNumberId, p.adv_channel_id),
+    )
+    const [known] = await db.select().from(phoneNumbers).where(key)
+    siteId = known ? known.siteId : await resolveSiteId(p)
+
+    const number = p.dst.replace(/\D/g, '') || null
+    const name = p.adv_channel_name || null
+    if (!known) {
+      await db.insert(phoneNumbers).values({
+        provider: PROVIDER,
+        providerNumberId: p.adv_channel_id,
+        number,
+        siteId,
+        name,
+      })
+    } else if ((number && number !== known.number) || (name && name !== known.name)) {
+      await db
+        .update(phoneNumbers)
+        .set({ number: number ?? known.number, name: name ?? known.name })
+        .where(key)
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    console.error(`[gudok-webhook] number ${p.adv_channel_id} failed: ${message}`)
+  }
+  return siteId
+}
+
 export interface IngestResult {
   stored: boolean
   duplicate: boolean
@@ -52,8 +101,8 @@ export interface IngestResult {
 }
 
 /**
- * Validate a raw Gudok webhook payload, resolve its site best-effort, and
- * store it in `calls`. Idempotent on `gudokId`: a repeated delivery is a no-op.
+ * Validate a raw Gudok webhook payload, keep its number up to date, and store
+ * it in `calls`. Idempotent: a repeated delivery stores nothing new.
  * Throws GudokPayloadError when the payload is unusable (missing id/date).
  */
 export async function ingestGudokCall(
@@ -69,30 +118,26 @@ export async function ingestGudokCall(
     throw new GudokPayloadError('Invalid Gudok date')
   }
 
-  const siteId = await resolveSiteIdByProjectTitle(p.project_title)
+  const siteId = await syncPhoneNumber(p)
 
   const inserted = await db
     .insert(calls)
     .values({
       siteId,
-      gudokId: p.id,
-      projectId: p.project_id,
-      projectTitle: p.project_title,
-      dst: p.dst,
-      advChannelId: p.adv_channel_id,
-      advChannelName: p.adv_channel_name,
+      provider: PROVIDER,
+      providerNumberId: p.adv_channel_id || null,
+      providerCallId: String(p.id),
       src: p.src,
-      duration: p.duration,
-      billsec: p.billsec,
-      callstatus: p.callstatus,
-      date,
-      region: p.region,
       callNumber: p.call_number,
-      audio: p.audio,
+      date,
+      callstatus: p.callstatus,
+      billsec: p.billsec,
+      region: p.region,
       source: 'webhook',
       raw: JSON.stringify(raw),
     })
-    .onConflictDoNothing({ target: calls.gudokId })
+    // No target: a CSV row already holding this call is also a duplicate
+    .onConflictDoNothing()
     .returning({ id: calls.id })
 
   return {
