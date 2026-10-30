@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { applyMigrations } from './test-migrations'
 
 const NEW = '0002_switch_to_new_call_tables'
+const DROP = '0003_drop_old_call_tables'
 const HOUR = 60 * 60 * 1000
 const CSV_DATE = Date.UTC(2026, 5, 1, 12, 0)
 
@@ -45,14 +46,14 @@ beforeEach(() => {
 
 describe(NEW, () => {
   it('runs on a fresh empty database', () => {
-    applyMigrations(sqlite, { from: NEW })
+    applyMigrations(sqlite, { from: NEW, to: NEW })
     expect(newCalls()).toEqual([])
     expect(sqlite.prepare('SELECT count(*) AS c FROM phone_numbers').get()).toEqual({ c: 0 })
   })
 
   it('leaves no helper tables and frees the old index names', () => {
     seedSites()
-    applyMigrations(sqlite, { from: NEW })
+    applyMigrations(sqlite, { from: NEW, to: NEW })
 
     const tables = sqlite
       .prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name LIKE '\\_\\_calls%' ESCAPE '\\'")
@@ -67,7 +68,7 @@ describe(NEW, () => {
 
   it('seeds numbers and projects for existing sites only', () => {
     seedSites()
-    applyMigrations(sqlite, { from: NEW })
+    applyMigrations(sqlite, { from: NEW, to: NEW })
 
     expect(sqlite.prepare('SELECT id, gudok_project_id AS p FROM sites ORDER BY id').all()).toEqual([
       { id: 1, p: 8171 },
@@ -81,7 +82,7 @@ describe(NEW, () => {
   it('moves CSV history with the shift, the map, raw and null billsec', () => {
     seedSites()
     insertCsv({ name: 'Самара' })
-    applyMigrations(sqlite, { from: NEW })
+    applyMigrations(sqlite, { from: NEW, to: NEW })
 
     const [row] = newCalls()
     expect(row).toMatchObject({
@@ -108,7 +109,7 @@ describe(NEW, () => {
   it('moves webhook rows unchanged', () => {
     seedSites()
     insertWebhook({ id: 77, src: '79990000002', date: CSV_DATE + 25_000, callNumber: 1 })
-    applyMigrations(sqlite, { from: NEW })
+    applyMigrations(sqlite, { from: NEW, to: NEW })
 
     expect(newCalls()[0]).toMatchObject({
       site_id: 1,
@@ -126,7 +127,7 @@ describe(NEW, () => {
   it('links a removed channel to its temporary number', () => {
     seedSites()
     insertCsv({ name: 'СЭС – Самара' })
-    applyMigrations(sqlite, { from: NEW })
+    applyMigrations(sqlite, { from: NEW, to: NEW })
     expect(newCalls()[0].provider_number_id).toBe('csv:ses-samara')
   })
 
@@ -134,7 +135,7 @@ describe(NEW, () => {
     seedSites()
     insertCsv({ name: 'Слава – Питер' })
     insertCsv({ name: 'Самара', src: '79990000003' })
-    applyMigrations(sqlite, { from: NEW })
+    applyMigrations(sqlite, { from: NEW, to: NEW })
     expect(newCalls().map(row => row.src)).toEqual(['79990000003'])
   })
 
@@ -142,7 +143,7 @@ describe(NEW, () => {
     seedSites()
     insertCsv({ name: 'Самара', date: CSV_DATE, callNumber: 2 })
     insertWebhook({ id: 77, src: '79990000001', date: CSV_DATE - 3 * HOUR + 25_000, callNumber: 2 })
-    applyMigrations(sqlite, { from: NEW })
+    applyMigrations(sqlite, { from: NEW, to: NEW })
 
     const rows = newCalls()
     expect(rows).toHaveLength(1)
@@ -153,7 +154,7 @@ describe(NEW, () => {
     seedSites()
     insertCsv({ name: 'Самара', date: CSV_DATE, callNumber: 2 })
     insertWebhook({ id: 77, src: '79990000001', date: CSV_DATE - 3 * HOUR + 60_000, callNumber: 2 })
-    applyMigrations(sqlite, { from: NEW })
+    applyMigrations(sqlite, { from: NEW, to: NEW })
     expect(newCalls()).toHaveLength(2)
   })
 
@@ -161,7 +162,7 @@ describe(NEW, () => {
     seedSites()
     insertCsv({ name: 'Неизвестный канал' })
 
-    expect(() => applyMigrations(sqlite, { from: NEW })).toThrow(/no_unmapped_channel_names/)
+    expect(() => applyMigrations(sqlite, { from: NEW, to: NEW })).toThrow(/no_unmapped_channel_names/)
     expect(sqlite.prepare('SELECT count(*) AS c FROM call_imports').get()).toEqual({ c: 1 })
     expect(
       sqlite.prepare("SELECT name FROM sqlite_master WHERE name IN ('phone_numbers', 'calls_old')").all(),
@@ -177,7 +178,36 @@ describe(NEW, () => {
       'WHERE 0 AND c.`id` NOT IN',
     )
 
-    expect(() => applyMigrations(sqlite, { from: NEW, patch })).toThrow(/row_count_matches/)
+    expect(() => applyMigrations(sqlite, { from: NEW, to: NEW, patch })).toThrow(/row_count_matches/)
     expect(sqlite.prepare('SELECT count(*) AS c FROM call_imports').get()).toEqual({ c: 1 })
+  })
+})
+
+describe(DROP, () => {
+  const oldTables = () =>
+    sqlite.prepare("SELECT name FROM sqlite_master WHERE name LIKE '%\\_old' ESCAPE '\\' ORDER BY name").all()
+  const numbers = () =>
+    sqlite.prepare('SELECT * FROM phone_numbers ORDER BY provider, provider_number_id').all()
+
+  it('runs on a fresh empty database', () => {
+    applyMigrations(sqlite, { from: NEW })
+    expect(oldTables()).toEqual([])
+  })
+
+  it('drops the old tables and leaves calls and numbers as they were', () => {
+    seedSites()
+    insertCsv({ name: 'Самара' })
+    insertWebhook({ id: 77, src: '79990000002', date: CSV_DATE + 25_000, callNumber: 1 })
+    applyMigrations(sqlite, { from: NEW, to: NEW })
+    expect(oldTables()).toEqual([{ name: 'call_imports_old' }, { name: 'calls_old' }])
+    const callsBefore = newCalls()
+    const numbersBefore = numbers()
+    expect(callsBefore).toHaveLength(2)
+
+    applyMigrations(sqlite, { from: DROP })
+
+    expect(oldTables()).toEqual([])
+    expect(newCalls()).toEqual(callsBefore)
+    expect(numbers()).toEqual(numbersBefore)
   })
 })
