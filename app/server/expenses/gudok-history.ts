@@ -7,7 +7,7 @@ import { expenses } from '@/server/schema'
 // Telephony charges scraped from Gudok's /history (Операции) page. Only
 // "Списание" (charge) rows are recorded, aggregated per (date, site) into one
 // expense row of this type so re-posting the same days upserts instead of
-// duplicating. See openspec change sync-gudok-telephony-expenses.
+// duplicating.
 // Matches the existing expense category already loaded on prod (lowercase
 // Latin), so the sync upserts against those rows instead of duplicating.
 export const TELEPHONY_TYPE = 'telephony'
