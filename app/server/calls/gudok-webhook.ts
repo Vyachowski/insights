@@ -1,4 +1,4 @@
-import { and, eq } from 'drizzle-orm'
+import { and, eq, sql } from 'drizzle-orm'
 import { z } from 'zod'
 
 import { resolveSiteIdByGudokProject, resolveSiteIdByProjectTitle } from './resolve-site'
@@ -118,32 +118,60 @@ export async function ingestGudokCall(
     throw new GudokPayloadError('Invalid Gudok date')
   }
 
-  const siteId = await syncPhoneNumber(p)
-
-  const inserted = await db
-    .insert(calls)
-    .values({
-      siteId,
-      provider: PROVIDER,
-      providerNumberId: p.adv_channel_id || null,
-      providerCallId: String(p.id),
-      src: p.src,
-      callNumber: p.call_number,
-      date,
-      callstatus: p.callstatus,
-      billsec: p.billsec,
-      region: p.region,
-      source: 'webhook',
-      raw: JSON.stringify(raw),
-    })
-    // No target: a CSV row already holding this call is also a duplicate
-    .onConflictDoNothing()
-    .returning({ id: calls.id })
-
-  return {
-    stored: inserted.length > 0,
-    duplicate: inserted.length === 0,
-    gudokId: p.id,
-    siteId,
+  // Checked first: a replayed old delivery must not touch the number either
+  const [seen] = await db
+    .select({ siteId: calls.siteId })
+    .from(calls)
+    .where(and(eq(calls.provider, PROVIDER), eq(calls.providerCallId, String(p.id))))
+  if (seen) {
+    return { stored: false, duplicate: true, gudokId: p.id, siteId: seen.siteId }
   }
+
+  const siteId = await syncPhoneNumber(p)
+  const row = {
+    siteId,
+    provider: PROVIDER,
+    providerNumberId: p.adv_channel_id || null,
+    providerCallId: String(p.id),
+    src: p.src,
+    callNumber: p.call_number,
+    date,
+    callstatus: p.callstatus,
+    billsec: p.billsec,
+    region: p.region,
+    source: 'webhook',
+    raw: JSON.stringify(raw),
+  }
+  const stored = await storeCall(row)
+
+  return { stored, duplicate: !stored, gudokId: p.id, siteId: row.siteId }
+}
+
+/**
+ * Store a webhook call. A CSV row holding the same call takes the webhook's
+ * data, since the webhook is the authoritative source. Another webhook call on
+ * that key can't be told apart, so this one is kept with a null site.
+ */
+async function storeCall(row: typeof calls.$inferInsert): Promise<boolean> {
+  const { siteId: _siteId, ...webhookFields } = row
+  const written = await db
+    .insert(calls)
+    .values(row)
+    .onConflictDoNothing({ target: [calls.provider, calls.providerCallId] })
+    .onConflictDoUpdate({
+      target: [calls.siteId, calls.src, calls.callNumber, calls.date],
+      set: { ...webhookFields, updatedAt: new Date() },
+      setWhere: sql`${calls.providerCallId} IS NULL`,
+    })
+    .returning({ id: calls.id })
+  if (written.length > 0) return true
+
+  console.error(`[gudok-webhook] call ${row.providerCallId} clashes with another call, stored without a site`)
+  row.siteId = null
+  const kept = await db
+    .insert(calls)
+    .values(row)
+    .onConflictDoNothing({ target: [calls.provider, calls.providerCallId] })
+    .returning({ id: calls.id })
+  return kept.length > 0
 }

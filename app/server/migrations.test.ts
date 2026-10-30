@@ -92,11 +92,14 @@ describe(NEW, () => {
       date: CSV_DATE - 3 * HOUR,
       billsec: null,
       callstatus: null,
+      region: null,
       source: 'csv',
       created_at: 123,
     })
     expect(JSON.parse(row.raw as string)).toMatchObject({
       class: 'Спам',
+      region: 'Самарская обл.',
+      billsec: 0,
       adv_channel_name: 'Самара',
       date: CSV_DATE,
     })
