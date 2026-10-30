@@ -1,5 +1,3 @@
-import { and, eq, isNull } from 'drizzle-orm'
-
 import {
   assertCsvColumns,
   assertSkipRate,
@@ -10,7 +8,9 @@ import {
 
 import { importCallsCsv } from '@/server/calls/csv-import'
 import { db } from '@/server/db'
-import { expenses, revenues, siteMetrics } from '@/server/schema'
+import { upsertExpense } from '@/server/expenses/upsert'
+import { upsertRevenue } from '@/server/revenues/upsert'
+import { siteMetrics, sites } from '@/server/schema'
 
 export { CsvValidationError, fetchUrlToBuffer }
 
@@ -20,100 +20,82 @@ export interface ImportResult {
   updated?: number
 }
 
+type CsvRow = Record<string, string>
+type SiteIds = ReadonlySet<number>
+
 const toUtcDate = (d: Date) => d.toISOString().slice(0, 10)
 
+function parseDate(raw: string | undefined): string | null {
+  const date = raw ? new Date(raw) : null
+  return date && !isNaN(date.getTime()) ? toUtcDate(date) : null
+}
+
+/** An empty cell is a company-level row; `undefined` marks an unusable cell. */
+function parseSiteId(raw: string | undefined, siteIds: SiteIds): number | null | undefined {
+  if (!raw) return null
+  const siteId = Number(raw)
+  return siteIds.has(siteId) ? siteId : undefined
+}
+
+function parseKopecks(raw: string | undefined): number | null {
+  const rubles = raw ? Number(raw) : NaN
+  return Number.isFinite(rubles) ? Math.round(rubles * 100) : null // integer kopecks
+}
+
+async function loadSiteIds(): Promise<SiteIds> {
+  const rows = await db.select({ id: sites.id }).from(sites)
+  return new Set(rows.map(({ id }) => id))
+}
+
+/** Parses every row, then writes: a rejected file must leave the table as it was. */
+async function upsertRows<T>(
+  rows: CsvRow[],
+  parseRow: (row: CsvRow) => T | null,
+  upsert: (value: T) => Promise<'created' | 'updated' | 'skipped'>,
+): Promise<ImportResult> {
+  const values = rows.map(parseRow).filter(value => value !== null)
+  assertSkipRate(values.length, rows.length - values.length)
+
+  const result = { created: 0, updated: 0, skipped: 0 }
+  for (const value of values) result[await upsert(value)]++
+  return result
+}
+
 // ---------------------------------------------------------------- revenue
+
+function parseRevenueRow(row: CsvRow, siteIds: SiteIds) {
+  const date = parseDate(row['date'])
+  const siteId = parseSiteId(row['siteId'], siteIds)
+  const amount = parseKopecks(row['amount'])
+  if (date === null || siteId === undefined || amount === null) return null
+  return { date, siteId, amount }
+}
 
 async function importRevenue(buffer: Buffer): Promise<ImportResult> {
   const rows = parseCsvBuffer(buffer)
   assertCsvColumns(rows, ['date', 'siteId', 'amount'])
 
-  let created = 0
-  let updated = 0
-  let skipped = 0
-  let invalid = 0
-
-  for (const row of rows) {
-    const date = row['date'] ? new Date(row['date']) : null
-    const parsed = Number(row['amount'])
-    const amount = Math.round(parsed * 100) // integer kopecks
-    const siteId = row['siteId'] ? Number(row['siteId']) : null
-    if (!date || isNaN(date.getTime()) || isNaN(parsed) || (siteId !== null && isNaN(siteId))) {
-      invalid++
-      continue
-    }
-
-    const dateStr = toUtcDate(date)
-    const [existing] = await db
-      .select({ id: revenues.id, amount: revenues.amount })
-      .from(revenues)
-      .where(and(
-        eq(revenues.date, dateStr),
-        siteId === null ? isNull(revenues.siteId) : eq(revenues.siteId, siteId),
-      ))
-      .limit(1)
-
-    if (existing && existing.amount === amount) {
-      skipped++
-    } else if (existing) {
-      await db.update(revenues).set({ amount }).where(eq(revenues.id, existing.id))
-      updated++
-    } else {
-      await db.insert(revenues).values({ date: dateStr, siteId, amount })
-      created++
-    }
-  }
-
-  assertSkipRate(created + updated + skipped, invalid)
-  return { created, updated, skipped }
+  const siteIds = await loadSiteIds()
+  return upsertRows(rows, row => parseRevenueRow(row, siteIds), upsertRevenue)
 }
 
 // ---------------------------------------------------------------- expenses
+
+function parseExpenseRow(row: CsvRow, siteIds: SiteIds) {
+  const date = parseDate(row['date'])
+  const siteId = parseSiteId(row['siteId'], siteIds)
+  const amount = parseKopecks(row['amount'])
+  const type = row['type']?.trim()
+  if (date === null || siteId === undefined || amount === null || !type) return null
+  return { date, siteId, amount, type }
+}
 
 async function importExpenses(buffer: Buffer): Promise<ImportResult> {
   const rows = parseCsvBuffer(buffer)
   assertCsvColumns(rows, ['date', 'type', 'siteId', 'amount'])
 
-  let created = 0
-  let updated = 0
-  let skipped = 0
-  let invalid = 0
-
-  for (const row of rows) {
-    const date = new Date(row['date'])
-    const siteId = row['siteId'] ? Number(row['siteId']) : null
-    const parsed = parseFloat(row['amount'])
-    const amount = Math.round(parsed * 100) // integer kopecks
-    const type = row['type']?.trim()
-    if (!type || isNaN(parsed) || isNaN(date.getTime())) {
-      invalid++
-      continue
-    }
-
-    const dateStr = toUtcDate(date)
-    const [existing] = await db
-      .select({ id: expenses.id, amount: expenses.amount })
-      .from(expenses)
-      .where(and(
-        eq(expenses.date, dateStr),
-        eq(expenses.type, type),
-        siteId === null ? isNull(expenses.siteId) : eq(expenses.siteId, siteId),
-      ))
-      .limit(1)
-
-    if (existing && existing.amount === amount) {
-      skipped++
-    } else if (existing) {
-      await db.update(expenses).set({ amount }).where(eq(expenses.id, existing.id))
-      updated++
-    } else {
-      await db.insert(expenses).values({ date: dateStr, siteId, amount, type })
-      created++
-    }
-  }
-
-  assertSkipRate(created + updated + skipped, invalid)
-  return { created, updated, skipped }
+  const siteIds = await loadSiteIds()
+  return upsertRows(rows, row => parseExpenseRow(row, siteIds), upsertExpense)
 }
 
 // ---------------------------------------------------------------- metrics
@@ -133,36 +115,38 @@ const METRIC_NUMBER_COLUMNS = [
   'leadsOther',
 ] as const
 
+function parseMetricRow(row: CsvRow, siteIds: SiteIds) {
+  const siteId = parseSiteId(row['siteId'], siteIds)
+  const date = parseDate(row['date'])
+  if (!siteId || date === null) return null
+
+  const data = Object.fromEntries(
+    METRIC_NUMBER_COLUMNS.map(col => [col, Number(row[col] ?? 0) || 0]),
+  )
+  return { siteId, date, data }
+}
+
 async function importMetrics(buffer: Buffer): Promise<ImportResult> {
   const rows = parseCsvBuffer(buffer)
   assertCsvColumns(rows, ['siteId', 'date', ...METRIC_NUMBER_COLUMNS])
 
-  let created = 0
-  let skipped = 0
+  const siteIds = await loadSiteIds()
+  const values = rows
+    .map(row => parseMetricRow(row, siteIds))
+    .filter(value => value !== null)
+  const skipped = rows.length - values.length
+  assertSkipRate(values.length, skipped)
 
-  for (const row of rows) {
-    const siteId = Number(row['siteId'])
-    const date = row['date'] ? new Date(row['date']) : null
-    if (!siteId || isNaN(siteId) || !date || isNaN(date.getTime())) {
-      skipped++
-      continue
-    }
-
-    const data = Object.fromEntries(
-      METRIC_NUMBER_COLUMNS.map(col => [col, Number(row[col] ?? 0) || 0]),
-    )
+  for (const { siteId, date, data } of values) {
     await db
       .insert(siteMetrics)
-      .values({ siteId, date: toUtcDate(date), ...data })
+      .values({ siteId, date, ...data })
       .onConflictDoUpdate({
         target: [siteMetrics.siteId, siteMetrics.date],
         set: data,
       })
-    created++
   }
-
-  assertSkipRate(created, skipped)
-  return { created, skipped }
+  return { created: values.length, skipped }
 }
 
 // ---------------------------------------------------------------- dispatch
