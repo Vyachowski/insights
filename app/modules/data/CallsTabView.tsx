@@ -1,6 +1,8 @@
 import { Badge, Box, Group, Pagination, Paper, ScrollArea, Skeleton, Stack, Table, Text, Title } from '@mantine/core'
+import Button from '@ui/Button'
 import MonthSelect from '@ui/MonthSelect'
 import YearSelect from '@ui/YearSelect'
+import { Upload } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
 import type { ApiError, CallDto } from '@/lib/types'
@@ -21,9 +23,10 @@ interface Props {
   effectiveMonth: number | null
   onYearChange: (year: number | null) => void
   onMonthChange: (month: number | null) => void
+  onImportClick: () => void
 }
 
-export default function CallsTabView({ loading, error, entries, effectiveYear, availableYears, availableMonths, effectiveMonth, onYearChange, onMonthChange }: Props) {
+export default function CallsTabView({ loading, error, entries, effectiveYear, availableYears, availableMonths, effectiveMonth, onYearChange, onMonthChange, onImportClick }: Props) {
   const [page, setPage] = useState(1)
 
   const sorted = useMemo(
@@ -44,7 +47,12 @@ export default function CallsTabView({ loading, error, entries, effectiveYear, a
             {loading ? 'Загрузка...' : `${entries.length} записей`}
           </Text>
         </Box>
-        <Text c="dimmed" size="sm">Импорт CSV временно отключён</Text>
+        <Group gap="sm">
+          <Button size="sm" variant="secondary" onClick={onImportClick}>
+            <Upload size={15} />
+            Импорт CSV
+          </Button>
+        </Group>
       </Group>
 
       {((availableYears.length > 0 && effectiveYear) || availableMonths.length > 0) && (
