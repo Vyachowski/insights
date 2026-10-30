@@ -97,6 +97,51 @@ describe('ingestGudokCall', () => {
     expect(numbers()).toEqual([before])
   })
 
+  it('ignores a replay of an old call after the number was renamed', async () => {
+    await ingestGudokCall(basePayload)
+    await ingestGudokCall({ ...basePayload, id: 1007, call_number: 2, dst: '+79000000001', adv_channel_name: 'Новое имя' })
+
+    const result = await ingestGudokCall(basePayload)
+
+    expect(result).toMatchObject({ stored: false, duplicate: true, siteId: 5 })
+    expect(numbers()[0]).toMatchObject({ number: '79000000001', name: 'Новое имя' })
+  })
+
+  it('fills a CSV row holding the same call with the webhook data', async () => {
+    const date = new Date('2026-07-26T10:00:00Z').getTime()
+    sqlite
+      .prepare(`INSERT INTO calls (site_id, provider, src, call_number, date, source, raw, created_at, updated_at)
+        VALUES (5, 'gudok', ?, 1, ?, 'csv', '{"csv":true}', 1, 1)`)
+      .run(basePayload.src, date)
+
+    const result = await ingestGudokCall(basePayload)
+
+    expect(result).toMatchObject({ stored: true, duplicate: false })
+    expect(rows()).toHaveLength(1)
+    expect(rows()[0]).toMatchObject({
+      provider_call_id: '1001',
+      source: 'webhook',
+      billsec: 30,
+      created_at: 1,
+    })
+    expect(JSON.parse(rows()[0].raw as string).id).toBe(1001)
+  })
+
+  it('keeps a second call on the same key with a null site', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+    await ingestGudokCall(basePayload)
+
+    const result = await ingestGudokCall({ ...basePayload, id: 1008 })
+
+    expect(result).toMatchObject({ stored: true, siteId: null })
+    expect(rows().map(row => [row.provider_call_id, row.site_id])).toEqual([
+      ['1001', 5],
+      ['1008', null],
+    ])
+    expect(error).toHaveBeenCalledOnce()
+    error.mockRestore()
+  })
+
   it('creates a new number, taking the site from the project', async () => {
     await ingestGudokCall(basePayload)
     expect(numbers()).toEqual([

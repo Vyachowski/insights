@@ -63,7 +63,7 @@ CREATE TABLE `__calls_number_seed` (
 	`name` text NOT NULL
 );
 --> statement-breakpoint
--- Source: .scratch/calls-automation/migration-data.md
+-- Fixed list from the Gudok projects response and prod counts, 2026-10-30.
 INSERT INTO `__calls_number_seed` VALUES
 	(1, 8171, '4635', '78463794173', 'Самара'),
 	(2, 8184, '4255', '78482943075', 'Тольятти'),
@@ -182,12 +182,12 @@ WHERE c.`adv_channel_name` <> 'Слава – Питер';
 INSERT INTO `calls` (`site_id`, `provider`, `provider_number_id`, `provider_call_id`, `src`, `call_number`, `date`, `callstatus`, `billsec`, `region`, `source`, `raw`, `created_at`, `updated_at`)
 SELECT
 	c.`site_id`, 'gudok', m.`provider_number_id`, NULL, c.`src`, c.`call_number`,
-	c.`date` - 10800000, NULL, NULL, c.`region`, 'csv',
+	c.`date` - 10800000, NULL, NULL, NULL, 'csv',
 	json_object(
 		'id', c.`id`, 'site_id', c.`site_id`, 'date', c.`date`, 'src', c.`src`,
 		'region', c.`region`, 'call_number', c.`call_number`, 'class', c.`class`,
 		'project_title', c.`project_title`, 'adv_channel_name', c.`adv_channel_name`,
-		'comment', c.`comment`, 'redirect_number', c.`redirect_number`,
+		'billsec', c.`billsec`, 'comment', c.`comment`, 'redirect_number', c.`redirect_number`,
 		'source', c.`source`, 'imported_at', c.`imported_at`
 	),
 	c.`imported_at`, c.`imported_at`
