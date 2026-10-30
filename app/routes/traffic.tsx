@@ -22,6 +22,7 @@ const TABS = [
 type TabId = (typeof TABS)[number]['id']
 
 const IMPORT_TITLES: Record<string, string> = {
+  calls: 'Импорт звонков',
   metrics: 'Импорт метрик',
 }
 
@@ -94,6 +95,7 @@ export default function TrafficPage({ loaderData: data }: Route.ComponentProps) 
           <CallsTabView
             {...commonProps}
             entries={period.filtered as never}
+            onImportClick={() => setImportTarget('calls')}
           />
         </Tabs.Panel>
         <Tabs.Panel value="metrics">

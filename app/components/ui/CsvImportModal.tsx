@@ -1,18 +1,32 @@
 import { Box, Divider, Group, Modal, Stack, Text, TextInput } from '@mantine/core'
 import Button from '@ui/Button'
-import { AlertTriangle, CheckCircle, MinusCircle, Upload, XCircle } from 'lucide-react'
+import { AlertTriangle, CheckCircle, Download, MinusCircle, Upload, XCircle } from 'lucide-react'
 import { useRef, useState } from 'react'
 
 import type { ImportResultDto as ImportResult } from '@/lib/types'
+
+import { downloadCsv } from '@/lib/importClient'
 
 type ResultStatus = 'success' | 'ignored' | 'mixed' | 'empty'
 
 function resultStatus(r: ImportResult): ResultStatus {
   const added = r.created + (r.updated ?? 0)
-  if (added > 0 && r.skipped > 0) return 'mixed'
+  const left = r.skipped + (r.disputed ?? 0)
+  if (added > 0 && left > 0) return 'mixed'
   if (added > 0) return 'success'
-  if (r.skipped > 0) return 'ignored'
+  if (left > 0) return 'ignored'
   return 'empty'
+}
+
+function resultSummary(r: ImportResult) {
+  if (r.disputed != null) {
+    return `Новых: ${r.created}, дублей: ${r.skipped}, спорных: ${r.disputed}`
+  }
+  return [
+    r.created > 0 && `+${r.created} создано`,
+    r.updated != null && r.updated > 0 && `${r.updated} обновлено`,
+    r.skipped > 0 && `${r.skipped} пропущено`,
+  ].filter(Boolean).join(', ') || 'Без изменений'
 }
 
 const STATUS_STYLE: Record<ResultStatus, { color: string, Icon: typeof CheckCircle }> = {
@@ -127,16 +141,20 @@ export default function CsvImportModal({ config, onClose }: Props) {
             return (
               <Group gap="xs" c={color}>
                 <Icon size={15} />
-                <Text size="sm">
-                  {[
-                    result.created > 0 && `+${result.created} создано`,
-                    result.updated != null && result.updated > 0 && `${result.updated} обновлено`,
-                    result.skipped > 0 && `${result.skipped} пропущено`,
-                  ].filter(Boolean).join(', ') || 'Без изменений'}
-                </Text>
+                <Text size="sm">{resultSummary(result)}</Text>
               </Group>
             )
           })()}
+          {result?.disputedCsv && (
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => downloadCsv('disputed-calls.csv', result.disputedCsv!)}
+            >
+              <Download size={15} />
+              Скачать спорные строки
+            </Button>
+          )}
           {error && (
             <Group gap="xs" c="red">
               <XCircle size={15} />
