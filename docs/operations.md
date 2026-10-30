@@ -30,9 +30,29 @@ Env validation → open SQLite (WAL, busy_timeout) → Drizzle `migrate()` → e
 - After using Gudok's built-in "test" button, find the sample rows and remove them:
 
 ```sql
-SELECT id, gudok_id, src, callstatus, date, raw FROM calls ORDER BY created_at DESC LIMIT 5;
-DELETE FROM calls WHERE gudok_id IN (...);
+SELECT id, provider_call_id, src, callstatus, date, raw FROM calls ORDER BY created_at DESC LIMIT 5;
+DELETE FROM calls WHERE provider = 'gudok' AND provider_call_id IN (...);
 ```
+
+The test call also creates or updates a row in `phone_numbers`. The query above does not remove it.
+
+### Numbers
+
+- The webhook finds the number by `provider + provider_number_id` (`adv_channel_id` for Gudok), or creates it. A delivery with no `adv_channel_id` creates no number, and the site comes from the project.
+- A new number gets its site from `project_id` through `sites.gudok_project_id`, then from the project title. With no match `site_id` stays empty.
+- A known number updates `number` and `name` only. Its `site_id` changes by hand only, directly in the database.
+- The call is always stored. A number failure is logged, and the call stays idempotent on `provider + provider_call_id`.
+- Open question: whether Gudok retries failed deliveries is unknown.
+
+### Rollback of the calls migration
+
+Migration `0003_drop_old_call_tables` removed `calls_old` and `call_imports_old`, so the only way back is a backup taken before that migration. Take a fresh one right before deploying `0003`. To go back:
+
+1. Stop the service.
+2. Point it at an image from before `0003`. The current image would drop the tables again at startup.
+3. Follow the restore steps in [Backups](#backups).
+
+Calls received after that backup are not in it. Recover them from a Gudok CSV export.
 
 ## Gudok telephony expenses
 

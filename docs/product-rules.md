@@ -39,11 +39,29 @@ Rules the code cannot explain on its own. UI labels stay in Russian, exactly as 
 
 ## Call counting
 
-- Summary counts are unique first-time callers across imported and webhook calls.
+- Summary counts are unique first-time callers in the `calls` table, which holds webhook and CSV rows alike.
 - A row is eligible only when its Gudok call number is 1 and it falls inside the window.
-- Rows from both sources are deduplicated by phone number, so one number counts once.
-- Webhook calls with no matched site are left out of every count.
+- Rows are deduplicated by the caller's phone number, so one caller counts once.
+- Calls with no site are left out of every count.
 - Storage is broader than counting: every webhook call is kept regardless of `callstatus`, with the full payload in `calls.raw`, and an unmatched call is stored with a null `siteId`.
+
+## Number ownership
+
+- A `phone_numbers` row belongs to one site, and its `siteId` may be empty. A site has one number at a time and any number over its history.
+- The webhook sets the site only when it creates a number. After that `siteId` changes by hand only, so a project edit in Gudok cannot move calls.
+- A call keeps its own `siteId`, so moving a number does not change past figures. An old number keeps its site, so old CSV rows still resolve.
+- Numbers have no start or end dates. The active number is the one with the latest call.
+
+## Calls CSV import
+
+- CSV time is always read as `Europe/Moscow`, on any server.
+- The number is found by `phone_numbers.name`, from the `Куда звонил` column.
+- The match key is `siteId + src + callNumber`, compared strictly to the minute. Stored seconds are dropped, because CSV has none.
+- Every row lands in one of three groups, and the result reports all three counts:
+  - New: no stored call on the key. Written at once.
+  - Duplicate: the key and minute match. Skipped, and the stored row stays unchanged.
+  - Disputed: not written, and offered as a download with the reason in the `Причина` column.
+- A row is disputed when the key matches with another minute, the number is unknown, the name fits several numbers, the number has no site, or the row is invalid.
 
 ## Money and portfolio
 
@@ -53,10 +71,10 @@ Rules the code cannot explain on its own. UI labels stay in Russian, exactly as 
 
 ## Writing data
 
-- Writes are idempotent. CSV import skips duplicates, webhooks key on `gudokId`.
+- Writes are idempotent. Calls CSV import never changes stored rows and skips duplicates, so re-uploading a file is safe. Webhooks key on `provider + providerCallId`.
 - Manual entry and telephony sync overwrite the amount for the same key: revenue `(date, siteId)`, expenses `(date, siteId, type)`.
 - Annual hosting is stored as `type = 'hosting'` dated `YYYY-01-01`.
-- CSV import fails when required columns are missing or more than 50% of rows are invalid. Extra columns are ignored, because real Gudok exports carry more columns than we use.
+- CSV import fails when required columns are missing or more than 50% of rows are invalid. Extra columns are allowed, because real Gudok exports carry more columns than we use. A calls import keeps the whole row in `calls.raw`.
 - Import, manual entry and other writes are admin-only. A write shows exactly one result toast; revalidation must not repeat it.
 
 ## Roles
