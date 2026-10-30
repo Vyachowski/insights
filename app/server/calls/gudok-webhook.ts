@@ -45,7 +45,7 @@ function parseGudokDate(raw: string): Date | null {
 
 type GudokPayload = z.infer<typeof payloadSchema>
 
-const PROVIDER = 'gudok'
+export const PROVIDER = 'gudok'
 
 async function resolveSiteId(p: GudokPayload): Promise<number | null> {
   return (await resolveSiteIdByGudokProject(p.project_id))

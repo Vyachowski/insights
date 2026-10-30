@@ -8,6 +8,7 @@ import {
   parseCsvBuffer,
 } from './csv'
 
+import { importCallsCsv } from '@/server/calls/csv-import'
 import { db } from '@/server/db'
 import { expenses, revenues, siteMetrics } from '@/server/schema'
 
@@ -164,23 +165,13 @@ async function importMetrics(buffer: Buffer): Promise<ImportResult> {
   return { created, skipped }
 }
 
-// ---------------------------------------------------------------- calls
-
-// Switched off until the new import lands: the old one wrote to a table that
-// no longer exists.
-async function importCalls(): Promise<ImportResult> {
-  throw new CsvValidationError(
-    'Импорт звонков временно отключён: звонки перенесены в новую таблицу. Новые звонки приходят через вебхук.',
-  )
-}
-
 // ---------------------------------------------------------------- dispatch
 
 export const importers = {
   revenue: importRevenue,
   expenses: importExpenses,
   metrics: importMetrics,
-  calls: importCalls,
+  calls: importCallsCsv,
 } as const
 
 export type ImportResource = keyof typeof importers
