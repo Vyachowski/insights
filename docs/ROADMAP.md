@@ -29,9 +29,9 @@ Statuses: `[ ]` not started · `[~]` in progress · `[x]` done.
 
 **Goal:** calls collect themselves: the webhook is the single live source and imports only fill gaps.
 
-- [ ] Phone number table: `cities → sites → phone_numbers`
-- [ ] One `calls` table for webhook and CSV rows
-- [ ] Webhook finds or creates the number, then always stores the call
-- [ ] CSV import splits rows into new, duplicate and disputed, with a download for disputed rows
-- [ ] Migrate history in one night deploy, keeping `*_old` tables until verified
-- [ ] Load one fresh CSV to close the period since 2026-07-26 and verify the webhook
+- [x] Phone number table: `cities → sites → phone_numbers`
+- [x] One `calls` table for webhook and CSV rows
+- [x] Webhook finds or creates the number, then always stores the call
+- [x] CSV import splits rows into new, duplicate and disputed, with a download for disputed rows
+- [x] Migrate history in one night deploy, keeping `*_old` tables until verified
+- [x] Load one fresh CSV to close the period since 2026-07-26 and verify the webhook
