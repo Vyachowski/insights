@@ -20,8 +20,8 @@ It is **not** token-golf and **not** broken/caveman grammar — it's relevance a
 ## Git
 
 - Solo project: commit directly to `main`. Create a branch only when asked.
-- Conventional Commits (`type(scope): short description`), one atomic, non-breaking change per commit.
-- Keep commits, PRs and all other text free of AI attribution: no `Co-Authored-By: Claude`, no "Generated with Claude Code", no 🤖 markers.
+- One atomic, non-breaking change per commit.
+- Keep PRs and all other text free of AI attribution. The `commit-msg` hook rejects it in commits.
 
 ## Building
 
