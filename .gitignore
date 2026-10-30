@@ -71,3 +71,6 @@ build/
 # local sqlite database (incl. -wal/-shm sidecars)
 data/*
 !data/.gitkeep
+
+# Local issue tracker
+.scratch/
