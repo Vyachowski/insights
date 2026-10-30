@@ -103,7 +103,8 @@ export default defineConfig([
     },
   },
   {
-    files: ['**/*.tsx'],
+    // describe() callbacks hold whole test suites, so length says nothing there
+    files: ['**/*.tsx', '**/*.test.{js,ts}'],
     rules: {
       'max-lines-per-function': 'off',
     },
