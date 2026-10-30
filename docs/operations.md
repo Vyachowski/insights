@@ -19,8 +19,9 @@ Env validation → open SQLite (WAL, busy_timeout) → Drizzle `migrate()` → e
 
 ## Backups
 
-- With `BUCKET_*` set, the server uploads one snapshot per UTC day to `backups/insights-YYYY-MM-DD.db`. It checks hourly and at startup, and keeps 14 days.
-- A backup failure is logged and retried; it never affects the app.
+- With `BUCKET_*` set, the server uploads one snapshot per UTC day to `backups/insights-YYYY-MM-DD.db`. It checks hourly and at startup, and keeps 14 days. Backups under any other name are never pruned.
+- A backup failure is logged and retried; it never affects the app. After a day of failures admins see a red alert in the app. The count starts again when the service restarts.
+- Open question: from 2026-10-14 to 2026-10-16 and from 2026-10-22 to 2026-10-29 no daily backup was made. Logs from 2026-10-23 show `S3 HEAD ...: 403` every hour until the 2026-10-30 redeploy fixed it. The cause is unknown.
 - Restore: stop the service → on the volume remove `insights.db` and its `-wal`/`-shm` sidecars → place the backup file as `insights.db` → start.
 
 ## Gudok call webhook

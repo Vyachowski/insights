@@ -47,6 +47,15 @@ export async function putObject(key: string, body: Buffer): Promise<void> {
   if (!res.ok) throw new Error(`S3 PUT ${key}: ${res.status}`)
 }
 
+/** Keys under a prefix, up to the 1000 of one S3 page. */
+export async function listObjectKeys(prefix: string): Promise<string[]> {
+  const query = new URLSearchParams({ 'list-type': '2', prefix })
+  const res = await getClient().fetch(`${env.BUCKET_ENDPOINT}/${env.BUCKET_NAME}?${query}`)
+  if (!res.ok) throw new Error(`S3 LIST ${prefix}: ${res.status}`)
+  const xml = await res.text()
+  return [...xml.matchAll(/<Key>(.*?)<\/Key>/g)].map(match => match[1])
+}
+
 /** Deleting a missing object is a no-op; other failures throw. */
 export async function deleteObject(key: string): Promise<void> {
   const res = await getClient().fetch(objectUrl(key), { method: 'DELETE' })

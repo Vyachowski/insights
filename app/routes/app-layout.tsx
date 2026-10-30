@@ -1,20 +1,22 @@
-import { AppShell } from '@mantine/core'
+import { Alert, AppShell } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
 import Header from '@ui/Header'
 import Sidebar from '@ui/Sidebar'
-import { Outlet, useLocation } from 'react-router'
+import { Outlet, useLoaderData, useLocation } from 'react-router'
 
 import type { Route } from './+types/app-layout'
 
 import { menuItems } from '@/navigation'
 import { requireUser } from '@/server/auth'
+import { isBackupOverdue } from '@/server/backup'
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await requireUser(request)
-  return { user }
+  return { user, backupOverdue: user.role === 'ADMIN' && isBackupOverdue() }
 }
 
 export default function AppLayout() {
+  const { backupOverdue } = useLoaderData<typeof loader>()
   const { pathname } = useLocation()
   const [opened, { toggle, close }] = useDisclosure(false)
 
@@ -39,6 +41,11 @@ export default function AppLayout() {
       </AppShell.Navbar>
 
       <AppShell.Main>
+        {backupOverdue && (
+          <Alert color="red" mb="md" title="Бэкапы не работают">
+            Больше суток не удаётся сохранить копию базы. Причина в логах сервиса, строки [backup].
+          </Alert>
+        )}
         <Outlet context={activePageId} />
       </AppShell.Main>
     </AppShell>
