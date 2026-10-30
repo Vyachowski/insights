@@ -1,44 +1,57 @@
 # Insights
 
-[![Status](https://img.shields.io/badge/status-in%20development-yellow)](https://github.com)
-[![License](https://img.shields.io/badge/license-private-red)](https://github.com)
+A private analytics dashboard for a portfolio of sites grouped by city: revenue, expenses, calls and SEO metrics. Its main page answers one question: is the business growing compared with last year?
 
-Insights is a business analytics dashboard for site owners and analysts. It helps teams track performance across multiple properties, review financial and SEO signals, and stay on top of recurring reporting without stitching together spreadsheets and scattered exports.
+Stack: React Router 7, Mantine, Drizzle + SQLite, one Node server on Railway.
 
-## What it does
+## How we work
 
-- Centralizes revenue, expense, and profitability data
-- Tracks SEO and traffic-related metrics
-- Supports recurring reviews for business performance
-- Helps teams monitor multiple sites and cities from one place
+1. **Plan:** add the feature to the current version in [docs/ROADMAP.md](docs/ROADMAP.md).
+2. **Clarify:** run `/grill-me` until the feature is clear.
+3. **Slice:** run `/to-tickets` to cut it into tasks under `.scratch/<feature>/issues/`. Add `/to-spec` first if the feature is large. Skip this step for a small feature.
+4. **Build:** run `/implement`, one task per clean session.
+5. **Finish:** mark the feature `[x]` in the roadmap and move its folder to `.scratch/archive/`.
 
-## Demo
+Commit directly to `main`. A `pre-push` hook runs typecheck and tests.
 
-A short product demo will be added here soon.
+## Where things live
 
-<!-- Add screenshot, GIF, or video walkthrough here -->
+| Path | Reader | What it holds |
+| --- | --- | --- |
+| `README.md` | you | how we work |
+| `AGENTS.md` | agents | the single entry point: rules and pointers |
+| `docs/ROADMAP.md` | you | versions and features |
+| `docs/product-rules.md` | both | rules the code cannot explain |
+| `docs/operations.md` | both | deploy, backups, Gudok setup |
+| `docs/adr/` | both | key architecture decisions |
+| `docs/agents/` | agents | setup for the engineering skills |
+| `.scratch/` | agents | temporary specs and tasks, hidden from git |
 
-## Workflow
+Add new documents only when one is needed. `GLOSSARY.md` and `CODING_STANDARDS.md` do not exist yet: create the glossary when terms get confused, and coding standards when a review misses a mistake no linter could catch.
 
-Strategic direction lives in [ROADMAP.md](ROADMAP.md), grouped by version. Building a feature follows this flow:
+## Which skill when
 
-1. **Roadmap** — the version's goal and feature list are set in [ROADMAP.md](ROADMAP.md).
-2. **Spec** — a roadmap item becomes an OpenSpec change proposal in `openspec/changes/`.
-3. **Code** — the change is implemented; once done it's archived and folded into `openspec/specs/`.
-4. **Stabilization** — between tasks, a round of test writing/hardening keeps the codebase solid before picking up the next item.
+| Situation | Skill |
+| --- | --- |
+| Don't know which skill fits | `/ask-matt` |
+| Idea is fuzzy | `/grill-me` |
+| Feature takes several sessions | `/to-spec`, then `/to-tickets` |
+| Ready to build a task | `/implement` |
+| Building one behavior test-first | `/tdd` |
+| Something is broken | `/diagnosing-bugs` |
+| Need a check before shipping | `/code-review` |
+| A build went badly | `/retro` |
+| Code feels hard to change | `/improve-codebase-architecture` |
 
-## More information
+## Run it
 
-For a closer look at the product direction, architecture, and technical implementation, see:
+```bash
+cp .env.example .env
+npm install
+npm run dev
+```
 
-- [openspec/specs/](openspec/specs/) — capability specs: app layout & data model, fullstack architecture, data import, development workflow.
-
-## Agents guidance
-
-This repository also includes guidance files for AI-assisted development and project-specific conventions:
-
-- [AGENTS.md](AGENTS.md) — explains preferred communication style.
-- [CLAUDE.md](CLAUDE.md) — provides project-specific developer context, commands, and constraints for Claude.
+Other commands are in `package.json`.
 
 ## License
 
