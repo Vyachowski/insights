@@ -11,7 +11,8 @@ import CallsTabView from '@/modules/data/CallsTabView'
 import MetricsTabView from '@/modules/data/MetricsTabView'
 import { requireUser } from '@/server/auth'
 import { db } from '@/server/db'
-import { callImports, siteMetrics, sites } from '@/server/schema'
+import { listCalls } from '@/server/queries/calls'
+import { siteMetrics, sites } from '@/server/schema'
 
 const TABS = [
   { id: 'calls', label: 'Звонки' },
@@ -21,7 +22,6 @@ const TABS = [
 type TabId = (typeof TABS)[number]['id']
 
 const IMPORT_TITLES: Record<string, string> = {
-  calls: 'Импорт звонков',
   metrics: 'Импорт метрик',
 }
 
@@ -44,7 +44,7 @@ async function fetchEntries(tab: string) {
       return db.select().from(siteMetrics).orderBy(siteMetrics.id)
     case 'calls':
     default:
-      return db.select().from(callImports).orderBy(callImports.id)
+      return listCalls()
   }
 }
 
@@ -94,7 +94,6 @@ export default function TrafficPage({ loaderData: data }: Route.ComponentProps) 
           <CallsTabView
             {...commonProps}
             entries={period.filtered as never}
-            onImportClick={() => setImportTarget('calls')}
           />
         </Tabs.Panel>
         <Tabs.Panel value="metrics">

@@ -29,6 +29,18 @@ export function resolveProjectTitle(raw: string): string {
   return cleaned
 }
 
+/** Resolve a Gudok project ID to a siteId, or null when no site has it. */
+export async function resolveSiteIdByGudokProject(
+  projectId: number,
+): Promise<number | null> {
+  const [site] = await db
+    .select({ id: sites.id })
+    .from(sites)
+    .where(eq(sites.gudokProjectId, projectId))
+    .limit(1)
+  return site?.id ?? null
+}
+
 /** Load a lowercased-city-name → siteId map for the whole portfolio. */
 export async function loadCityToSiteId(): Promise<Map<string, number>> {
   const siteRows = await db

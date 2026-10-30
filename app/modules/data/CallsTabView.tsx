@@ -1,11 +1,9 @@
 import { Badge, Box, Group, Pagination, Paper, ScrollArea, Skeleton, Stack, Table, Text, Title } from '@mantine/core'
-import Button from '@ui/Button'
 import MonthSelect from '@ui/MonthSelect'
 import YearSelect from '@ui/YearSelect'
-import { Upload } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
-import type { ApiError, CallImportDto as CallImport } from '@/lib/types'
+import type { ApiError, CallDto } from '@/lib/types'
 
 const PAGE_SIZE = 20
 
@@ -16,17 +14,16 @@ function formatDate(dateStr: string | Date) {
 interface Props {
   loading: boolean
   error: ApiError | null
-  entries: CallImport[]
+  entries: CallDto[]
   effectiveYear: number | null
   availableYears: number[]
   availableMonths: number[]
   effectiveMonth: number | null
   onYearChange: (year: number | null) => void
   onMonthChange: (month: number | null) => void
-  onImportClick: () => void
 }
 
-export default function CallsTabView({ loading, error, entries, effectiveYear, availableYears, availableMonths, effectiveMonth, onYearChange, onMonthChange, onImportClick }: Props) {
+export default function CallsTabView({ loading, error, entries, effectiveYear, availableYears, availableMonths, effectiveMonth, onYearChange, onMonthChange }: Props) {
   const [page, setPage] = useState(1)
 
   const sorted = useMemo(
@@ -47,12 +44,7 @@ export default function CallsTabView({ loading, error, entries, effectiveYear, a
             {loading ? 'Загрузка...' : `${entries.length} записей`}
           </Text>
         </Box>
-        <Group gap="sm">
-          <Button size="sm" variant="secondary" onClick={onImportClick}>
-            <Upload size={15} />
-            Импорт CSV
-          </Button>
-        </Group>
+        <Text c="dimmed" size="sm">Импорт CSV временно отключён</Text>
       </Group>
 
       {((availableYears.length > 0 && effectiveYear) || availableMonths.length > 0) && (
@@ -104,8 +96,12 @@ export default function CallsTabView({ loading, error, entries, effectiveYear, a
                       <Table.Tr key={entry.id}>
                         <Table.Td style={{ whiteSpace: 'nowrap' }}>{formatDate(entry.date)}</Table.Td>
                         <Table.Td ff="monospace">{entry.src}</Table.Td>
-                        <Table.Td><Badge variant="light" color="gray" size="sm" tt="capitalize">{entry.projectTitle}</Badge></Table.Td>
-                        <Table.Td c="dimmed">{entry.advChannelName || '—'}</Table.Td>
+                        <Table.Td>
+                          {entry.city
+                            ? <Badge variant="light" color="gray" size="sm" tt="capitalize">{entry.city}</Badge>
+                            : <Text c="dimmed" size="sm">—</Text>}
+                        </Table.Td>
+                        <Table.Td c="dimmed">{entry.channel || '—'}</Table.Td>
                         <Table.Td ta="right" c="dimmed">{entry.callNumber}</Table.Td>
                       </Table.Tr>
                     ))

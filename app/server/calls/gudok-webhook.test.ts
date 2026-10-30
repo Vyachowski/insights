@@ -1,11 +1,9 @@
-import fs from 'node:fs'
-import path from 'node:path'
-
 import Database from 'better-sqlite3'
 import { drizzle } from 'drizzle-orm/better-sqlite3'
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import * as schema from '@/server/schema'
+import { applyMigrations } from '@/server/test-migrations'
 
 // Real in-memory SQLite built from the committed migrations, shared with the
 // module under test via the db mock below.
@@ -14,19 +12,6 @@ const testDb = drizzle(sqlite, { schema })
 
 vi.mock('@/server/db', () => ({ db: testDb }))
 
-function applyMigrations() {
-  const dir = path.resolve(__dirname, '../../../drizzle')
-  const files = fs.readdirSync(dir).filter(f => f.endsWith('.sql')).sort()
-  sqlite.exec('PRAGMA foreign_keys=OFF;')
-  for (const file of files) {
-    const sql = fs.readFileSync(path.join(dir, file), 'utf8')
-    for (const stmt of sql.split('--> statement-breakpoint')) {
-      const trimmed = stmt.trim()
-      if (trimmed) sqlite.exec(trimmed)
-    }
-  }
-}
-
 const { ingestGudokCall, GudokPayloadError } = await import('./gudok-webhook')
 
 const basePayload = {
@@ -34,8 +19,8 @@ const basePayload = {
   project_id: 7,
   project_title: 'Дезинсекция – Самара',
   dst: '+79000000000',
-  adv_channel_id: 'ch1',
-  adv_channel_name: 'Yandex',
+  adv_channel_id: '4635',
+  adv_channel_name: 'Самара',
   src: '+79111111111',
   duration: 42,
   billsec: 30,
@@ -47,21 +32,25 @@ const basePayload = {
 }
 
 beforeAll(() => {
-  applyMigrations()
+  applyMigrations(sqlite)
 })
 
 beforeEach(() => {
-  sqlite.exec('DELETE FROM calls; DELETE FROM sites; DELETE FROM cities;')
+  sqlite.exec('DELETE FROM calls; DELETE FROM phone_numbers; DELETE FROM sites; DELETE FROM cities;')
   sqlite.exec(
-    "INSERT INTO cities (id, code, slug, name, population, created_at, updated_at) VALUES (1, 'SAM', 'samara', 'Самара', 100, 0, 0);",
+    "INSERT INTO cities (id, code, slug, name, population, created_at, updated_at) VALUES (1, 'SAM', 'samara', 'Самара', 100, 0, 0), (2, 'KZN', 'kazan', 'Казань', 100, 0, 0);",
   )
   sqlite.exec(
-    "INSERT INTO sites (id, city_id, url, yandex_counter_id, created_at, updated_at) VALUES (5, 1, 'https://samara.example.com/', '111', 0, 0);",
+    "INSERT INTO sites (id, city_id, url, yandex_counter_id, gudok_project_id, created_at, updated_at) VALUES (5, 1, 'https://samara.example.com/', '111', 7, 0, 0), (6, 2, 'https://kazan.example.com/', '222', 8, 0, 0);",
   )
 })
 
 function rows() {
   return sqlite.prepare('SELECT * FROM calls').all() as Record<string, unknown>[]
+}
+
+function numbers() {
+  return sqlite.prepare('SELECT * FROM phone_numbers').all() as Record<string, unknown>[]
 }
 
 describe('ingestGudokCall', () => {
@@ -72,10 +61,13 @@ describe('ingestGudokCall', () => {
     const [row] = rows()
     expect(row).toMatchObject({
       site_id: 5,
-      gudok_id: 1001,
-      project_id: 7,
+      provider: 'gudok',
+      provider_number_id: '4635',
+      provider_call_id: '1001',
       src: '+79111111111',
       callstatus: 'ANSWERED',
+      billsec: 30,
+      region: 'Самарская область',
       call_number: 1,
       source: 'webhook',
     })
@@ -90,17 +82,83 @@ describe('ingestGudokCall', () => {
   })
 
   it('stores unresolved projects with a null site', async () => {
-    const result = await ingestGudokCall({ ...basePayload, id: 1003, project_title: 'Неизвестный город' })
+    const result = await ingestGudokCall({ ...basePayload, id: 1003, project_id: 99, project_title: 'Неизвестный город' })
     expect(result.siteId).toBeNull()
     expect(rows()[0].site_id).toBeNull()
     expect(rows()[0].raw).toBeTruthy()
   })
 
-  it('is idempotent on gudokId (duplicate delivery is a no-op)', async () => {
+  it('is idempotent on the call id (duplicate delivery is a no-op)', async () => {
     await ingestGudokCall(basePayload)
+    const [before] = numbers()
     const result = await ingestGudokCall(basePayload)
     expect(result).toMatchObject({ stored: false, duplicate: true })
     expect(rows()).toHaveLength(1)
+    expect(numbers()).toEqual([before])
+  })
+
+  it('creates a new number, taking the site from the project', async () => {
+    await ingestGudokCall(basePayload)
+    expect(numbers()).toEqual([
+      expect.objectContaining({
+        provider: 'gudok',
+        provider_number_id: '4635',
+        number: '79000000000',
+        site_id: 5,
+        name: 'Самара',
+      }),
+    ])
+  })
+
+  it('falls back to the project title for a new number', async () => {
+    const result = await ingestGudokCall({ ...basePayload, project_id: 99 })
+    expect(result.siteId).toBe(5)
+    expect(numbers()[0].site_id).toBe(5)
+  })
+
+  it('updates number and name on a known number but never its site', async () => {
+    await ingestGudokCall(basePayload)
+    const result = await ingestGudokCall({
+      ...basePayload,
+      id: 1004,
+      call_number: 2,
+      project_id: 8,
+      dst: '+79000000001',
+      adv_channel_name: 'Новое имя',
+    })
+
+    expect(result.siteId).toBe(5)
+    expect(numbers()).toEqual([
+      expect.objectContaining({ number: '79000000001', name: 'Новое имя', site_id: 5 }),
+    ])
+    expect(rows().map(row => row.site_id)).toEqual([5, 5])
+  })
+
+  it('keeps a known number with no site empty, and its calls too', async () => {
+    await ingestGudokCall({ ...basePayload, project_id: 99, project_title: 'Неизвестный город' })
+    const result = await ingestGudokCall({ ...basePayload, id: 1005 })
+    expect(result.siteId).toBeNull()
+    expect(numbers()[0].site_id).toBeNull()
+  })
+
+  it('stores the call and keeps its site when the number step fails', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+    await ingestGudokCall(basePayload)
+    // Another channel already owns this phone: UNIQUE(number) rejects the insert
+    const result = await ingestGudokCall({ ...basePayload, id: 1006, adv_channel_id: '9999', call_number: 2 })
+
+    expect(result).toMatchObject({ stored: true, siteId: 5 })
+    expect(rows()).toHaveLength(2)
+    expect(numbers()).toHaveLength(1)
+    expect(error).toHaveBeenCalledOnce()
+    error.mockRestore()
+  })
+
+  it('stores a call with no channel id and creates no number', async () => {
+    const result = await ingestGudokCall({ ...basePayload, adv_channel_id: '' })
+    expect(result).toMatchObject({ stored: true, siteId: 5 })
+    expect(rows()[0].provider_number_id).toBeNull()
+    expect(numbers()).toHaveLength(0)
   })
 
   it('rejects a payload missing id', async () => {
