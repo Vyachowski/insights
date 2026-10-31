@@ -19,7 +19,8 @@ Env validation → open SQLite (WAL, busy_timeout) → Drizzle `migrate()` → e
 
 ## Backups
 
-- With `BUCKET_*` set, the server uploads one snapshot per UTC day to `backups/insights-YYYY-MM-DD.db`. It checks hourly and at startup, and keeps 14 days. Backups under any other name are never pruned.
+- With `NODE_ENV=production` and `BUCKET_*` set, the server uploads one snapshot per UTC day to `backups/insights-YYYY-MM-DD.db`. It checks hourly and at startup, and keeps 14 days. Backups under any other name are never pruned.
+- Outside production the server logs that backups are off and sets no timer, so a local run cannot take the day's backup. Seed reads from the bucket work in every environment.
 - A backup failure is logged and retried; it never affects the app. After a day of failures admins see a red alert in the app. The count starts again when the service restarts.
 - No daily backup was made from 2026-10-22 to 2026-10-29. Logs from 2026-10-23 show `S3 HEAD ...: 403` every hour until the 2026-10-30 redeploy. The likely cause: Railway rolled all bucket credentials after its [October 2026 security incident](https://blog.railway.com/p/preliminary-report-october-security-incident), and the running process kept the old ones. After a credential change, redeploy the service.
 - Open question: the cause of the earlier gap, from 2026-10-14 to 2026-10-16, is unknown. It ended without a restart.

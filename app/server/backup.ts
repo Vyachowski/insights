@@ -28,6 +28,11 @@ const dayKey = (d: Date) => `backups/insights-${d.toISOString().slice(0, 10)}.db
 const daysAgo = (n: number) => new Date(Date.now() - n * 24 * HOUR_MS)
 
 export function startBackupScheduler(): void {
+  // A local env holds working bucket keys, and a local snapshot would take the day's key
+  if (env.NODE_ENV !== 'production') {
+    console.log(`[backup] NODE_ENV is ${env.NODE_ENV} — backups off`)
+    return
+  }
   if (!isStorageConfigured()) {
     console.log('[backup] bucket storage not configured — backups disabled')
     return
