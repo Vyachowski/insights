@@ -25,7 +25,7 @@ It is **not** token-golf and **not** broken/caveman grammar — it's relevance a
 
 ## Building
 
-- Data changes go in order: schema and migration → query in `app/server/` → route loader or action → component.
+- Data changes go in order: schema and migration → query in `app/server/db/` → logic in `app/server/core/` → service in `app/server/services/` → route loader or action → screen.
 - Tests sit beside the source as `*.test.ts`. Server logic is the main test surface.
 
 ## Where to look
@@ -33,7 +33,7 @@ It is **not** token-golf and **not** broken/caveman grammar — it's relevance a
 - Planning a feature: `docs/ROADMAP.md`.
 - Changing dashboard numbers, call counting or data writes: `docs/product-rules.md`.
 - Deploy, backups, bootstrap or Gudok setup: `docs/operations.md`.
-- Changing architecture: `docs/adr/`.
+- Changing architecture or layers: `docs/architecture.md`.
 - A task or temporary spec: `.scratch/<feature>/`.
 
 ## Agent skills
@@ -48,4 +48,4 @@ Default vocabulary: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-
 
 ### Domain docs
 
-Single-context: one `GLOSSARY.md` and `docs/adr/` at the repo root. See `docs/agents/domain.md`.
+Single-context: one `GLOSSARY.md` at the repo root and key decisions in `docs/architecture.md`. See `docs/agents/domain.md`.
