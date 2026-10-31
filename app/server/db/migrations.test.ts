@@ -217,11 +217,11 @@ describe(AUTO, () => {
   const count = (table: string) => sqlite.prepare(`SELECT count(*) AS c FROM ${table}`).get()
   const storedExpenses = () =>
     sqlite.prepare('SELECT * FROM expenses ORDER BY id').all() as Record<string, unknown>[]
-  const insertSchedule = () =>
+  const insertSchedule = (numberId = '4635') =>
     sqlite
       .prepare(`INSERT INTO charge_schedules (provider, provider_number_id, next_date, amount, created_at, updated_at)
-        VALUES ('gudok', '4635', '2026-11-26', 87000, 0, 0)`)
-      .run()
+        VALUES ('gudok', ?, '2026-11-26', 87000, 0, 0)`)
+      .run(numberId)
 
   function migrateWithNumbers() {
     seedSites()
@@ -276,26 +276,21 @@ describe(AUTO, () => {
     migrateWithNumbers()
     insertSchedule()
 
-    expect(insertSchedule).toThrow(/UNIQUE/)
+    expect(() => insertSchedule()).toThrow(/UNIQUE/)
   })
 
   it('refuses a schedule for an unknown number', () => {
     migrateWithNumbers()
     sqlite.pragma('foreign_keys = ON')
-    sqlite.exec("UPDATE phone_numbers SET provider_number_id = '1' WHERE provider_number_id = '4635'")
 
-    expect(insertSchedule).toThrow(/FOREIGN KEY/)
+    expect(() => insertSchedule('unknown')).toThrow(/FOREIGN KEY/)
   })
 
   it('deletes a schedule with its number and keeps the others', () => {
     migrateWithNumbers()
     sqlite.pragma('foreign_keys = ON')
     insertSchedule()
-    sqlite
-      .prepare(`INSERT INTO charge_schedules (provider, provider_number_id, next_date, amount, created_at, updated_at)
-        SELECT provider, provider_number_id, '2026-11-26', 87000, 0, 0 FROM phone_numbers
-        WHERE provider_number_id <> '4635' LIMIT 1`)
-      .run()
+    insertSchedule('4255')
     expect(count('charge_schedules')).toEqual({ c: 2 })
 
     sqlite.exec("DELETE FROM phone_numbers WHERE provider = 'gudok' AND provider_number_id = '4635'")
