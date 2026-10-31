@@ -83,6 +83,36 @@ describe('ingestGudokExpenses', () => {
   })
 })
 
+describe('ingestGudokExpenses over an estimate', () => {
+  const seedEstimate = () => sqlite.exec(
+    'INSERT INTO expenses (date, site_id, amount, type, comment, is_estimate, created_at, updated_at) '
+    + "VALUES ('2026-07-26', 5, 87000, 'telephony', 'Оценка', 1, 0, 0);",
+  )
+  const realComment = 'Гудок: Продление: Гудок-номер +7 844 260 69 54'
+
+  it('replaces the estimate and its comment at the same amount', async () => {
+    seedEstimate()
+    const result = await ingestGudokExpenses([charge()])
+    expect(result).toEqual({ created: 0, updated: 1, skipped: 0 })
+    expect(expenseRows()).toMatchObject([{ amount: 87000, comment: realComment, is_estimate: 0 }])
+  })
+
+  it('replaces the estimate and its comment at a different amount', async () => {
+    seedEstimate()
+    const result = await ingestGudokExpenses([charge({ amount: '-900,000' })])
+    expect(result).toEqual({ created: 0, updated: 1, skipped: 0 })
+    expect(expenseRows()).toMatchObject([{ amount: 90000, comment: realComment, is_estimate: 0 }])
+  })
+
+  it('skips a repeated run once the estimate is replaced', async () => {
+    seedEstimate()
+    await ingestGudokExpenses([charge()])
+    const result = await ingestGudokExpenses([charge()])
+    expect(result).toEqual({ created: 0, updated: 0, skipped: 1 })
+    expect(expenseRows()).toMatchObject([{ is_estimate: 0 }])
+  })
+})
+
 describe('latestTelephonyDate', () => {
   it('returns null when empty and the max date otherwise', async () => {
     expect(await latestTelephonyDate()).toBeNull()

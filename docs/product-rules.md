@@ -73,6 +73,7 @@ Rules the code cannot explain on its own. UI labels stay in Russian, exactly as 
 
 - Writes are idempotent. Calls CSV import never changes stored rows and skips duplicates, so re-uploading a file is safe. Webhooks key on `provider + providerCallId`.
 - Manual entry, revenue and expense CSV import, and telephony sync overwrite the amount for the same key: revenue `(date, siteId)`, expenses `(date, siteId, type)`.
+- Any real write on the expense key replaces an estimate and clears `is_estimate`, even at the same amount, and reports `updated`. This covers manual entry, expense CSV import and telephony sync. A repeated real write with the same amount reports `skipped`.
 - Annual hosting is stored as `type = 'hosting'` dated `YYYY-01-01`.
 - CSV import fails when required columns are missing or more than 50% of rows are invalid. A failed file writes nothing. Extra columns are allowed, because real Gudok exports carry more columns than we use. A calls import keeps the whole row in `calls.raw`.
 - In revenue, expense and metrics CSVs a row is invalid when its date or amount can't be read or its `siteId` is not a stored site. An empty `siteId` means `Общий`, except in metrics, where it is required.

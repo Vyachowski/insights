@@ -1,6 +1,6 @@
-import { beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { sqlite } from '@/server/db/client'
+import { db, sqlite } from '@/server/db/client'
 
 const { upsertExpense } = await import('./expenses')
 const { HOSTING_TYPE } = await import('@/server/core/finance')
@@ -15,8 +15,19 @@ beforeEach(() => {
   )
 })
 
+afterEach(() => {
+  vi.restoreAllMocks()
+})
+
 function expenseRows() {
   return sqlite.prepare('SELECT * FROM expenses ORDER BY date, site_id').all() as Record<string, unknown>[]
+}
+
+function seedEstimate(siteId: number | null = 5) {
+  sqlite.prepare(
+    'INSERT INTO expenses (date, site_id, amount, type, comment, is_estimate, created_at, updated_at) '
+    + "VALUES ('2026-01-01', ?, 87000, 'telephony', 'Оценка', 1, 0, 0)",
+  ).run(siteId)
 }
 
 describe('upsertExpense', () => {
@@ -69,5 +80,58 @@ describe('upsertExpense', () => {
     expect(rows).toHaveLength(2)
     const nullRow = rows.find(r => r.site_id === null)
     expect(nullRow?.amount).toBe(400000)
+  })
+})
+
+describe('upsertExpense over an estimate', () => {
+  it('replaces the estimate at the same amount', async () => {
+    seedEstimate()
+    const outcome = await upsertExpense({ date: '2026-01-01', siteId: 5, type: 'telephony', amount: 87000, comment: 'Гудок: 1' })
+    expect(outcome).toBe('updated')
+    expect(expenseRows()).toMatchObject([{ amount: 87000, comment: 'Гудок: 1', is_estimate: 0 }])
+  })
+
+  it('replaces the estimate at a different amount', async () => {
+    seedEstimate()
+    const outcome = await upsertExpense({ date: '2026-01-01', siteId: 5, type: 'telephony', amount: 90000, comment: 'Гудок: 1' })
+    expect(outcome).toBe('updated')
+    expect(expenseRows()).toMatchObject([{ amount: 90000, comment: 'Гудок: 1', is_estimate: 0 }])
+  })
+
+  it('replaces a company-wide estimate', async () => {
+    seedEstimate(null)
+    const outcome = await upsertExpense({ date: '2026-01-01', siteId: null, type: 'telephony', amount: 87000 })
+    expect(outcome).toBe('updated')
+    expect(expenseRows()).toMatchObject([{ site_id: null, is_estimate: 0 }])
+  })
+
+  it('skips a repeated real write once the estimate is replaced', async () => {
+    seedEstimate()
+    const write = { date: '2026-01-01', siteId: 5, type: 'telephony', amount: 87000 }
+    await upsertExpense(write)
+    expect(await upsertExpense(write)).toBe('skipped')
+    expect(expenseRows()).toMatchObject([{ is_estimate: 0 }])
+  })
+
+  it('clears the mark when an insert race meets an estimate', async () => {
+    seedEstimate()
+    const noRowFound = { from: () => ({ where: () => ({ limit: async () => [] }) }) }
+    vi.spyOn(db, 'select').mockReturnValueOnce(noRowFound as never)
+
+    const outcome = await upsertExpense({ date: '2026-01-01', siteId: 5, type: 'telephony', amount: 87000 })
+
+    expect(outcome).toBe('updated')
+    expect(expenseRows()).toMatchObject([{ amount: 87000, is_estimate: 0 }])
+  })
+
+  it('keeps an existing real row real', async () => {
+    const write = { date: '2026-01-01', siteId: 5, type: 'telephony', amount: 87000 }
+    await upsertExpense(write)
+
+    expect(await upsertExpense(write)).toBe('skipped')
+    expect(expenseRows()).toMatchObject([{ amount: 87000, is_estimate: 0 }])
+
+    expect(await upsertExpense({ ...write, amount: 90000 })).toBe('updated')
+    expect(expenseRows()).toMatchObject([{ amount: 90000, is_estimate: 0 }])
   })
 })

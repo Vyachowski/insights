@@ -27,6 +27,8 @@ export function listExpenses() {
  * Idempotent upsert of a single expense keyed by (date, siteId, type) — the
  * same matching used by CSV import and the Gudok telephony ingest. Same amount
  * is a no-op; a different amount overwrites; otherwise a new row is inserted.
+ * Every write here is real: over an estimate it overwrites and clears the mark,
+ * even at the same amount.
  */
 export async function upsertExpense({
   date,
@@ -42,14 +44,14 @@ export async function upsertExpense({
   )
 
   const [existing] = await db
-    .select({ id: expenses.id, amount: expenses.amount })
+    .select({ id: expenses.id, amount: expenses.amount, isEstimate: expenses.isEstimate })
     .from(expenses)
     .where(match)
     .limit(1)
 
-  if (existing && existing.amount === amount) return 'skipped'
+  if (existing && existing.amount === amount && !existing.isEstimate) return 'skipped'
   if (existing) {
-    await db.update(expenses).set({ amount, comment }).where(eq(expenses.id, existing.id))
+    await db.update(expenses).set({ amount, comment, isEstimate: false }).where(eq(expenses.id, existing.id))
     return 'updated'
   }
   try {
@@ -59,7 +61,7 @@ export async function upsertExpense({
     if (!isUniqueViolation(err)) throw err
     // Lost an insert race against a concurrent add for the same (date, siteId,
     // type); a row exists now — overwrite its amount to stay idempotent.
-    await db.update(expenses).set({ amount, comment }).where(match)
+    await db.update(expenses).set({ amount, comment, isEstimate: false }).where(match)
     return 'updated'
   }
 }
