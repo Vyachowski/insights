@@ -105,6 +105,18 @@ describe('upsertExpense over an estimate', () => {
     expect(expenseRows()).toMatchObject([{ site_id: null, is_estimate: 0 }])
   })
 
+  it('clears the estimate comment when none is passed, at the same amount', async () => {
+    seedEstimate()
+    await upsertExpense({ date: '2026-01-01', siteId: 5, type: 'telephony', amount: 87000 })
+    expect(expenseRows()).toMatchObject([{ amount: 87000, comment: null, is_estimate: 0 }])
+  })
+
+  it('clears the estimate comment when none is passed, at a different amount', async () => {
+    seedEstimate()
+    await upsertExpense({ date: '2026-01-01', siteId: 5, type: 'telephony', amount: 90000 })
+    expect(expenseRows()).toMatchObject([{ amount: 90000, comment: null, is_estimate: 0 }])
+  })
+
   it('skips a repeated real write once the estimate is replaced', async () => {
     seedEstimate()
     const write = { date: '2026-01-01', siteId: 5, type: 'telephony', amount: 87000 }
@@ -121,7 +133,7 @@ describe('upsertExpense over an estimate', () => {
     const outcome = await upsertExpense({ date: '2026-01-01', siteId: 5, type: 'telephony', amount: 87000 })
 
     expect(outcome).toBe('updated')
-    expect(expenseRows()).toMatchObject([{ amount: 87000, is_estimate: 0 }])
+    expect(expenseRows()).toMatchObject([{ amount: 87000, comment: null, is_estimate: 0 }])
   })
 
   it('keeps an existing real row real', async () => {

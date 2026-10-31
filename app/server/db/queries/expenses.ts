@@ -1,4 +1,4 @@
-import { and, eq, isNull, max } from 'drizzle-orm'
+import { and, eq, isNull, max, sql } from 'drizzle-orm'
 
 import { db } from '../client'
 import { expenses } from '../schema'
@@ -13,11 +13,18 @@ export interface UpsertExpenseInput {
   type: string
   /** integer kopecks */
   amount: number
-  /** Left as stored when omitted */
+  /** Left as stored when omitted, except that an estimate's comment is cleared */
   comment?: string
 }
 
 export type UpsertExpenseOutcome = 'created' | 'updated' | 'skipped'
+
+/** The `CASE` reads the row as it was before the write. */
+const realWrite = (amount: number, comment?: string) => ({
+  amount,
+  comment: comment ?? sql`CASE WHEN ${expenses.isEstimate} THEN NULL ELSE ${expenses.comment} END`,
+  isEstimate: false,
+})
 
 export function listExpenses() {
   return db.select().from(expenses).orderBy(expenses.id)
@@ -51,7 +58,7 @@ export async function upsertExpense({
 
   if (existing && existing.amount === amount && !existing.isEstimate) return 'skipped'
   if (existing) {
-    await db.update(expenses).set({ amount, comment, isEstimate: false }).where(eq(expenses.id, existing.id))
+    await db.update(expenses).set(realWrite(amount, comment)).where(eq(expenses.id, existing.id))
     return 'updated'
   }
   try {
@@ -61,7 +68,7 @@ export async function upsertExpense({
     if (!isUniqueViolation(err)) throw err
     // Lost an insert race against a concurrent add for the same (date, siteId,
     // type); a row exists now — overwrite its amount to stay idempotent.
-    await db.update(expenses).set({ amount, comment, isEstimate: false }).where(match)
+    await db.update(expenses).set(realWrite(amount, comment)).where(match)
     return 'updated'
   }
 }
