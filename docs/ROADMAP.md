@@ -35,3 +35,20 @@ Statuses: `[ ]` not started · `[~]` in progress · `[x]` done.
 - [x] CSV import splits rows into new, duplicate and disputed, with a download for disputed rows
 - [x] Migrate history in one night deploy, keeping `*_old` tables until verified
 - [x] Load one fresh CSV to close the period since 2026-07-26 and verify the webhook
+
+## V2.2 — Автосписания
+
+**Goal:** telephony expenses write themselves, so profit is close to right every day, and Gudok confirms them once a quarter.
+
+- [ ] Schedule table and an estimate mark on `expenses`
+- [ ] Hourly job writes estimated charges every 30 days, catching up after downtime
+- [ ] `Номера` tab in `Филиалы`: switch auto charge on per number, one per site
+- [ ] Bookmarklet reconciliation replaces estimates in the period it loaded
+- [ ] `Сверено с Гудком до DD.MM` under `Расходы`
+- [ ] Admin alerts: no Gudok charge, reconciliation over 90 days old, webhook silent over 24 hours
+
+## V2.3 — Хостинг
+
+**Goal:** hosting costs reach the dashboard through the same auto charge.
+
+- [ ] Hosting entity linked to sites, with one auto charge per hosting
