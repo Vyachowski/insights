@@ -2,8 +2,8 @@ import type { Route } from './+types/branches'
 
 import BranchesScreen from '@/screens/branches/BranchesScreen'
 import { requireUser } from '@/server/auth'
-import { listCities } from '@/server/db/cities'
-import { listSites } from '@/server/db/sites'
+import { listCities } from '@/server/db/queries/cities'
+import { listSites } from '@/server/db/queries/sites'
 
 export async function loader({ request }: Route.LoaderArgs) {
   await requireUser(request)

@@ -2,8 +2,8 @@ import { Anchor, Box, Group, Paper, ScrollArea, Stack, Table, Text, Title } from
 import Button from '@ui/Button'
 import { Globe, Plus } from 'lucide-react'
 
-import type { City } from '@/server/db/cities'
-import type { Site } from '@/server/db/sites'
+import type { City } from '@/server/db/queries/cities'
+import type { Site } from '@/server/db/queries/sites'
 
 function getHostname(url: string) {
   try { return new URL(url).hostname } catch { return url }

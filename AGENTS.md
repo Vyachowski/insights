@@ -25,7 +25,7 @@ It is **not** token-golf and **not** broken/caveman grammar — it's relevance a
 
 ## Building
 
-- Data changes go in order: schema and migration → query in `app/server/db/` → logic in `app/server/core/` → service in `app/server/services/` → route loader or action → screen.
+- Data changes go in order: schema and migration → query in `app/server/db/queries/` → logic in `app/server/core/` → service in `app/server/services/` → route loader or action → screen.
 - Tests sit beside the source as `*.test.ts`. Server logic is the main test surface.
 
 ## Where to look

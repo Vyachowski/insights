@@ -6,8 +6,8 @@ import TablePager from '@ui/TablePager'
 import { Plus, Upload } from 'lucide-react'
 
 import type { PeriodFilter } from '@/hooks/usePeriodFilter'
-import type { Expense } from '@/server/db/expenses'
-import type { Site } from '@/server/db/sites'
+import type { Expense } from '@/server/db/queries/expenses'
+import type { Site } from '@/server/db/queries/sites'
 
 import { useTable } from '@/hooks/useTable'
 import { formatAmount, formatDate, getSiteName } from '@/lib/utils'

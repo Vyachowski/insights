@@ -1,10 +1,10 @@
-import type { Period } from '@/server/db/period'
+import type { Period } from '@/server/db/queries/period'
 
 import { buildDashboardSummary, type YearTotals } from '@/server/core/dashboard'
 import { getComparablePeriods } from '@/server/core/periods'
-import { countFirstCalls, countFirstCallsByCity } from '@/server/db/calls'
-import { listCities } from '@/server/db/cities'
-import { sumExpenses, sumExpensesByMonth, sumRevenue, sumRevenueByMonth } from '@/server/db/totals'
+import { countFirstCalls, countFirstCallsByCity } from '@/server/db/queries/calls'
+import { listCities } from '@/server/db/queries/cities'
+import { sumExpenses, sumExpensesByMonth, sumRevenue, sumRevenueByMonth } from '@/server/db/queries/totals'
 
 async function loadYear(period: Period): Promise<YearTotals> {
   const year = period.start.getFullYear()

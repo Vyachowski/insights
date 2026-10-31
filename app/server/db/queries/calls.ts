@@ -1,10 +1,10 @@
 import { and, eq, isNotNull, sql } from 'drizzle-orm'
 
-import { db } from './client'
+import { db } from '../client'
 import { betweenInstants, type Period } from './period'
-import { calls, cities, phoneNumbers, sites } from './schema'
+import { calls, cities, phoneNumbers, sites } from '../schema'
 
-import type { Tx } from './transaction'
+import type { Tx } from '../transaction'
 
 type NewCall = typeof calls.$inferInsert
 

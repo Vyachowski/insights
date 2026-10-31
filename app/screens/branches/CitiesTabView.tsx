@@ -2,7 +2,7 @@ import { Box, Code, Group, Paper, ScrollArea, Stack, Table, Text, Title } from '
 import Button from '@ui/Button'
 import { MapPin, Plus } from 'lucide-react'
 
-import type { City } from '@/server/db/cities'
+import type { City } from '@/server/db/queries/cities'
 
 function formatPopulation(n: number) {
   return new Intl.NumberFormat('ru-RU').format(n)

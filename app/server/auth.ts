@@ -1,7 +1,7 @@
 import * as argon2 from 'argon2'
 import { createCookieSessionStorage, redirect } from 'react-router'
 
-import { findUserByEmail, findUserById, type User } from './db/users'
+import { findUserByEmail, findUserById, type User } from './db/queries/users'
 import { env, sessionMaxAgeSeconds } from './env'
 
 export type SessionUser = Omit<User, 'password'>

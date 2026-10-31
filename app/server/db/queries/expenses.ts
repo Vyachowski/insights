@@ -1,7 +1,7 @@
 import { and, eq, isNull, max } from 'drizzle-orm'
 
-import { db } from './client'
-import { expenses } from './schema'
+import { db } from '../client'
+import { expenses } from '../schema'
 import { isUniqueViolation } from './sqlite-errors'
 
 export type Expense = typeof expenses.$inferSelect

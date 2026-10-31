@@ -3,7 +3,7 @@ import Button from '@ui/Button'
 import Input from '@ui/Input'
 import { useState } from 'react'
 
-import type { Site } from '@/server/db/sites'
+import type { Site } from '@/server/db/queries/sites'
 
 interface HostingValues {
   year: string

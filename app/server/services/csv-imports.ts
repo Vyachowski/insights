@@ -14,10 +14,10 @@ import {
   parseMetricRow,
   parseRevenueRow,
 } from '@/server/core/csv-rows'
-import { upsertExpense } from '@/server/db/expenses'
-import { upsertMetric } from '@/server/db/metrics'
-import { upsertRevenue } from '@/server/db/revenues'
-import { listSiteIds } from '@/server/db/sites'
+import { upsertExpense } from '@/server/db/queries/expenses'
+import { upsertMetric } from '@/server/db/queries/metrics'
+import { upsertRevenue } from '@/server/db/queries/revenues'
+import { listSiteIds } from '@/server/db/queries/sites'
 
 export { CsvValidationError, fetchUrlToBuffer }
 

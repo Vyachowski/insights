@@ -7,8 +7,8 @@ import { Plus, Trash2, Upload } from 'lucide-react'
 import AddRevenueModal from './AddRevenueModal'
 
 import type { PeriodFilter } from '@/hooks/usePeriodFilter'
-import type { Revenue } from '@/server/db/revenues'
-import type { Site } from '@/server/db/sites'
+import type { Revenue } from '@/server/db/queries/revenues'
+import type { Site } from '@/server/db/queries/sites'
 
 import { useTable } from '@/hooks/useTable'
 import { formatAmount, formatDate, getSiteName } from '@/lib/utils'

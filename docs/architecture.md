@@ -11,16 +11,34 @@ Key decisions in one place. Product rules live in `docs/product-rules.md`.
 ## Layers
 
 ```text
-route module → service → core
-                       → db
+Request
+   │
+   ▼
+┌─ Route module ───────────────────────────────────┐
+│ HTTP, access check, renders one screen           │
+└──────────────────────────────────────────────────┘
+   │ calls
+   ▼
+┌─ Service ────────────────────────────────────────┐
+│ runs one operation step by step                  │
+│                                                  │
+│ ┌─ core ─────────────┐   ┌─ db ────────────────┐ │
+│ │ pure logic         │   │ reads and writes    │ │
+│ │ data in, data out  │   │ SQL only            │ │
+│ └────────────────────┘   └─────────────────────┘ │
+│                                                  │
+│ core and db never call each other                │
+└──────────────────────────────────────────────────┘
 ```
+
+A service holds the steps of an operation and uses `core` and `db` inside them. A plain read with no logic and no money skips the service: loader → `db`.
 
 | Layer | Folder | Does | Never does |
 |---|---|---|---|
 | Route module | `app/routes/` | HTTP, access check, renders one screen | business rules, queries beyond a plain `db` read |
 | Service | `app/server/services/` | runs one operation step by step, owns transactions | SQL, HTTP |
 | Core | `app/server/core/` | pure functions: parsing, checks, calculations | database, network, files, the current time |
-| Db | `app/server/db/` | schema, connection, reads and writes | business decisions, rubles, CSV, Gudok, HTTP |
+| Db | `app/server/db/` (queries in `queries/`) | schema, connection, reads and writes | business decisions, rubles, CSV, Gudok, HTTP |
 | Screen | `app/screens/` | layout and screen state | calculations, server calls beyond route data |
 
 Functional core, imperative shell: `core` is the pure centre, everything else is the shell.

@@ -1,8 +1,8 @@
 import { sql, sum } from 'drizzle-orm'
 
-import { db } from './client'
+import { db } from '../client'
 import { betweenDates, type Period } from './period'
-import { expenses, revenues } from './schema'
+import { expenses, revenues } from '../schema'
 
 type AmountTable = typeof revenues | typeof expenses
 

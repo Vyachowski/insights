@@ -7,9 +7,9 @@ import {
   toNumberDetails,
 } from '@/server/core/gudok-calls'
 import { resolveProjectTitle } from '@/server/core/site-matching'
-import { findCallByProviderId, saveCallWithoutSite, saveWebhookCall } from '@/server/db/calls'
-import { createPhoneNumber, findPhoneNumber, updatePhoneNumber } from '@/server/db/phone-numbers'
-import { findSiteIdByGudokProject, loadCityToSiteId } from '@/server/db/sites'
+import { findCallByProviderId, saveCallWithoutSite, saveWebhookCall } from '@/server/db/queries/calls'
+import { createPhoneNumber, findPhoneNumber, updatePhoneNumber } from '@/server/db/queries/phone-numbers'
+import { findSiteIdByGudokProject, loadCityToSiteId } from '@/server/db/queries/sites'
 
 export { GudokPayloadError }
 

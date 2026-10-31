@@ -1,5 +1,5 @@
-import { db } from './client'
-import { cities } from './schema'
+import { db } from '../client'
+import { cities } from '../schema'
 
 export type City = typeof cities.$inferSelect
 

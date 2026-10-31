@@ -1,6 +1,6 @@
 import { groupCharges, type GudokOperationRow, TELEPHONY_TYPE } from '@/server/core/gudok-history'
-import { latestExpenseDate, upsertExpense } from '@/server/db/expenses'
-import { loadCityToSiteId } from '@/server/db/sites'
+import { latestExpenseDate, upsertExpense } from '@/server/db/queries/expenses'
+import { loadCityToSiteId } from '@/server/db/queries/sites'
 
 export type { GudokOperationRow }
 

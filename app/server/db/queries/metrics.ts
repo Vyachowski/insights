@@ -1,5 +1,5 @@
-import { db } from './client'
-import { siteMetrics } from './schema'
+import { db } from '../client'
+import { siteMetrics } from '../schema'
 
 export type SiteMetric = typeof siteMetrics.$inferSelect
 

@@ -1,7 +1,7 @@
 import { parseEntryForm, withRubles } from '@/server/core/finance'
-import { listExpenses, upsertExpense } from '@/server/db/expenses'
-import { listRevenues, upsertRevenue } from '@/server/db/revenues'
-import { listSites } from '@/server/db/sites'
+import { listExpenses, upsertExpense } from '@/server/db/queries/expenses'
+import { listRevenues, upsertRevenue } from '@/server/db/queries/revenues'
+import { listSites } from '@/server/db/queries/sites'
 
 /** Only the open tab's rows are loaded. Amounts are in rubles. */
 export async function getFinancePage(tab: string | null) {

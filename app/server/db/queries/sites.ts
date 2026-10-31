@@ -1,7 +1,7 @@
 import { eq } from 'drizzle-orm'
 
-import { db } from './client'
-import { cities, sites } from './schema'
+import { db } from '../client'
+import { cities, sites } from '../schema'
 
 export type Site = typeof sites.$inferSelect
 

@@ -6,9 +6,9 @@ import { useRevalidator, useSearchParams } from 'react-router'
 import CallsTabView from './CallsTabView'
 import MetricsTabView from './MetricsTabView'
 
-import type { CallListRow } from '@/server/db/calls'
-import type { SiteMetric } from '@/server/db/metrics'
-import type { Site } from '@/server/db/sites'
+import type { CallListRow } from '@/server/db/queries/calls'
+import type { SiteMetric } from '@/server/db/queries/metrics'
+import type { Site } from '@/server/db/queries/sites'
 
 import { usePeriodFilter } from '@/hooks/usePeriodFilter'
 import { importFile, importUrl } from '@/lib/importClient'

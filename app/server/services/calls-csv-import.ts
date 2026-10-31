@@ -9,8 +9,8 @@ import {
 } from '@/server/core/calls-csv'
 import { assertCsvColumns, assertSkipRate, type CsvRow, parseCsvBuffer } from '@/server/core/csv'
 import { PROVIDER } from '@/server/core/gudok-calls'
-import { findCallDates, insertCall } from '@/server/db/calls'
-import { listPhoneNumbers } from '@/server/db/phone-numbers'
+import { findCallDates, insertCall } from '@/server/db/queries/calls'
+import { listPhoneNumbers } from '@/server/db/queries/phone-numbers'
 import { transaction } from '@/server/db/transaction'
 
 export interface CallsImportResult {

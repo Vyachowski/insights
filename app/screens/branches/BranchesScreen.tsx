@@ -4,8 +4,8 @@ import { useSearchParams } from 'react-router'
 import CitiesTabView from './CitiesTabView'
 import SitesTabView from './SitesTabView'
 
-import type { City } from '@/server/db/cities'
-import type { Site } from '@/server/db/sites'
+import type { City } from '@/server/db/queries/cities'
+import type { Site } from '@/server/db/queries/sites'
 
 const TABS = [
   { id: 'cities', label: 'Города' },

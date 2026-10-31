@@ -1,7 +1,7 @@
 import { and, eq } from 'drizzle-orm'
 
-import { db } from './client'
-import { phoneNumbers } from './schema'
+import { db } from '../client'
+import { phoneNumbers } from '../schema'
 
 const byId = (provider: string, providerNumberId: string) => and(
   eq(phoneNumbers.provider, provider),
