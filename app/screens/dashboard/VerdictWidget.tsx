@@ -1,0 +1,80 @@
+import { Group, Paper, Stack, Text, ThemeIcon, Tooltip } from '@mantine/core'
+import Card from '@ui/Card'
+import { TrendingDown, TrendingUp } from 'lucide-react'
+import { useState } from 'react'
+
+import ValueModeToggle, { type ValueMode } from './ValueModeToggle'
+
+import type { DashboardSummary } from '@/server/core/dashboard'
+
+import { formatRub, formatRubDelta } from '@/lib/utils'
+
+const CURRENT_YEAR = new Date().getFullYear()
+const PREVIOUS_YEAR = CURRENT_YEAR - 1
+
+export default function VerdictWidget({ verdict }: { verdict: DashboardSummary['verdict'] }) {
+  const [mode, setMode] = useState<ValueMode>('pct')
+  const { isGrowing, isStrong, growthPercent, current, previous, monthlyCurrent, monthlyPrevious } = verdict
+  const color = isGrowing ? 'teal' : 'red'
+
+  const sign = growthPercent > 0 ? '+' : growthPercent < 0 ? '−' : ''
+  const percentText = `${sign}${Math.abs(growthPercent)}%`
+  const monthlyDelta = `${formatRubDelta(monthlyCurrent, monthlyPrevious)}/мес`
+
+  return (
+    <Card>
+      <Group justify="space-between" mb="md">
+        <Text fz="xl" fw={700}>Итог</Text>
+        <ValueModeToggle value={mode} onChange={setMode} />
+      </Group>
+
+      <Group justify="space-between" align="center" wrap="wrap" gap="xl">
+        <Group gap="lg" wrap="nowrap">
+          <ThemeIcon size={96} radius="md" variant="light" color={color}>
+            {isGrowing ? <TrendingUp size={46} /> : <TrendingDown size={46} />}
+          </ThemeIcon>
+          <Text fz={32} fw={700}>
+            Бизнес {isStrong && 'сильно '}{isGrowing ? 'растёт' : 'падает'}
+          </Text>
+        </Group>
+
+        <Paper withBorder radius="md" p="md" w={260} ta="center">
+          <Stack gap={2} align="center">
+            <Text
+              fz={mode === 'pct' ? 40 : 26}
+              fw={700}
+              c={color}
+              h={48}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', whiteSpace: 'nowrap', lineHeight: 1 }}
+            >
+              {mode === 'pct' ? percentText : monthlyDelta}
+            </Text>
+            <Tooltip
+              withArrow
+              label={(
+                <Stack gap={2} miw={140}>
+                  <Group justify="space-between" gap="lg" wrap="nowrap">
+                    <Text size="xs">{CURRENT_YEAR}</Text>
+                    <Text size="xs" fw={600}>{formatRub(current)}</Text>
+                  </Group>
+                  <Group justify="space-between" gap="lg" wrap="nowrap">
+                    <Text size="xs">{PREVIOUS_YEAR}</Text>
+                    <Text size="xs">{formatRub(previous)}</Text>
+                  </Group>
+                  <Group justify="space-between" gap="lg" wrap="nowrap">
+                    <Text size="xs" c="dimmed">в среднем</Text>
+                    <Text size="xs" fw={600} c={color}>{monthlyDelta}</Text>
+                  </Group>
+                </Stack>
+              )}
+            >
+              <Text size="sm" c="dimmed" style={{ textDecoration: 'underline dotted', cursor: 'help' }}>
+                в среднем за год
+              </Text>
+            </Tooltip>
+          </Stack>
+        </Paper>
+      </Group>
+    </Card>
+  )
+}

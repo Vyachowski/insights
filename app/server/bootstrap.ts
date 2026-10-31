@@ -1,10 +1,12 @@
 import * as argon2 from 'argon2'
 import { z } from 'zod'
 
-import { db } from './db'
+import { assertCsvColumns, parseCsvBuffer } from './core/csv'
+import { countCities, insertCities } from './db/cities'
+import { countSites, insertSites } from './db/sites'
+import { countUsers, insertUsers } from './db/users'
 import { env } from './env'
-import { assertCsvColumns, fetchUrlToBuffer, parseCsvBuffer } from './imports/csv'
-import { cities, sites, users } from './schema'
+import { fetchUrlToBuffer } from './services/fetch-file'
 import { getObject, isStorageConfigured } from './storage'
 
 const emptyToNull = (value: string) => (value === '' ? null : value)
@@ -72,7 +74,7 @@ function readUserConfig(prefix: 'ADMIN' | 'USER', role: 'ADMIN' | 'USER') {
 }
 
 async function bootstrapUsers(): Promise<string> {
-  if ((await db.$count(users)) > 0) return 'skipped (table not empty)'
+  if ((await countUsers()) > 0) return 'skipped (table not empty)'
 
   const admin = readUserConfig('ADMIN', 'ADMIN')
   const user = readUserConfig('USER', 'USER')
@@ -84,29 +86,26 @@ async function bootstrapUsers(): Promise<string> {
       password: await argon2.hash(u.password),
     })),
   )
-  const inserted = await db.insert(users).values(values).returning()
-  return `created ${inserted.length} users`
+  return `created ${await insertUsers(values)} users`
 }
 
 async function bootstrapCities(): Promise<string> {
-  if ((await db.$count(cities)) > 0) return 'skipped (table not empty)'
+  if ((await countCities()) > 0) return 'skipped (table not empty)'
 
   const rows = await fetchRows('seed/cities.csv', env.CITIES_CSV_URL, CITY_CSV_COLUMNS)
   if (!rows) return 'skipped (no CSV source configured)'
   const values = rows.map(row => cityRowSchema.parse(row))
-  const inserted = await db.insert(cities).values(values).returning()
-  return `created ${inserted.length} cities`
+  return `created ${await insertCities(values)} cities`
 }
 
 async function bootstrapSites(): Promise<string> {
-  if ((await db.$count(sites)) > 0) return 'skipped (table not empty)'
-  if ((await db.$count(cities)) === 0) return 'skipped (no cities to reference)'
+  if ((await countSites()) > 0) return 'skipped (table not empty)'
+  if ((await countCities()) === 0) return 'skipped (no cities to reference)'
 
   const rows = await fetchRows('seed/sites.csv', env.SITES_CSV_URL, SITE_CSV_COLUMNS)
   if (!rows) return 'skipped (no CSV source configured)'
   const values = rows.map(row => siteRowSchema.parse(row))
-  const inserted = await db.insert(sites).values(values).returning()
-  return `created ${inserted.length} sites`
+  return `created ${await insertSites(values)} sites`
 }
 
 // Source resolution: bucket (when configured) → plain URL → null (skip).

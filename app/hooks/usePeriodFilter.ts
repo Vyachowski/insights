@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 
-export function usePeriodFilter<T extends { date: string | Date }>(entries: T[]) {
+export function usePeriodFilter(entries: { date: string | Date }[]) {
   const [selectedYear, setSelectedYear] = useState<number | null>(null)
   const [selectedMonth, setSelectedMonth] = useState<number | null>(null)
 
@@ -32,17 +32,11 @@ export function usePeriodFilter<T extends { date: string | Date }>(entries: T[])
       ? selectedMonth
       : null
 
-  const filtered = useMemo(
-    () =>
-      effectiveYear === null
-        ? []
-        : entries.filter(e => {
-          const d = new Date(e.date)
-          if (d.getFullYear() !== effectiveYear) return false
-          return effectiveMonth === null || d.getMonth() === effectiveMonth
-        }),
-    [entries, effectiveYear, effectiveMonth],
-  )
+  const matches = (entry: { date: string | Date }) => {
+    const d = new Date(entry.date)
+    if (d.getFullYear() !== effectiveYear) return false
+    return effectiveMonth === null || d.getMonth() === effectiveMonth
+  }
 
   return {
     availableYears,
@@ -51,6 +45,8 @@ export function usePeriodFilter<T extends { date: string | Date }>(entries: T[])
     availableMonths,
     effectiveMonth,
     setSelectedMonth,
-    filtered,
+    matches,
   }
 }
+
+export type PeriodFilter = ReturnType<typeof usePeriodFilter>

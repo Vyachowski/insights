@@ -52,7 +52,7 @@ const { startBackupScheduler, stopBackupScheduler, isBackupInFlight } = await im
 )
 startBackupScheduler()
 
-const { sqlite } = await import('./app/server/db')
+const { sqlite } = await import('./app/server/db/client')
 
 // Graceful shutdown: Railway sends SIGTERM on every redeploy/stop. Close the
 // HTTP server and exit 0 so a normal stop doesn't surface as an "npm error

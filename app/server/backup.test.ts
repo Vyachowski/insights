@@ -12,7 +12,7 @@ const storage = vi.hoisted(() => ({
   putObject: vi.fn(),
 }))
 
-vi.mock('./db', () => ({
+vi.mock('./db/client', () => ({
   sqlite: {
     backup: vi.fn(async (target: string) => fs.writeFileSync(target, 'snapshot')),
   },

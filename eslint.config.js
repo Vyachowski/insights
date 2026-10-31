@@ -13,6 +13,12 @@ import tseslint from 'typescript-eslint'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
+const restrictImports = (files, patterns, ignores = []) => ({
+  files,
+  ignores: ['**/*.test.{ts,tsx}', ...ignores],
+  rules: { '@typescript-eslint/no-restricted-imports': ['error', { patterns }] },
+})
+
 export default defineConfig([
   globalIgnores(['build', 'node_modules', '.react-router', 'coverage', 'scripts/gudok-telephony-bookmarklet.js']),
   {
@@ -112,11 +118,27 @@ export default defineConfig([
   {
     // railpack.json prunes devDependencies, so the production path must not import them
     files: ['app/**', 'server.ts'],
-    ignores: ['**/*.test.{ts,tsx}', 'app/server/test-migrations.ts'],
+    ignores: ['**/*.test.{ts,tsx}', 'app/server/db/test-migrations.ts', 'app/server/db/test-setup.ts'],
     rules: {
       'import/no-extraneous-dependencies': ['error', { devDependencies: false }],
     },
   },
+  // Layer rules: see docs/architecture.md
+  restrictImports(['app/server/core/**'], [
+    { group: ['@/server/db/*', '@/server/services/*', 'drizzle-orm', 'drizzle-orm/*'], message: 'core stays pure: no database and no services.' },
+  ]),
+  restrictImports(['app/server/db/**'], [
+    { group: ['@/server/core/*', '@/server/services/*'], message: 'db holds no logic: a service joins db and core.' },
+  ]),
+  restrictImports(['app/server/services/**'], [
+    { group: ['@/server/db/client', '@/server/db/schema', 'drizzle-orm', 'drizzle-orm/*'], message: 'Services call db functions, not queries.' },
+  ]),
+  restrictImports(['app/routes/**'], [
+    { group: ['@/server/db/client', '@/server/db/schema', 'drizzle-orm', 'drizzle-orm/*'], message: 'Routes call db functions or services, not queries.' },
+  ], ['app/routes/health.tsx']),
+  restrictImports(['app/screens/**', 'app/components/**', 'app/hooks/**', 'app/lib/**'], [
+    { group: ['@/server/*', 'drizzle-orm', 'drizzle-orm/*'], allowTypeImports: true, message: 'UI sees the server through route data: type imports only.' },
+  ]),
   {
     // Route modules legitimately export loaders/actions alongside components
     files: ['app/routes/**', 'app/root.tsx'],

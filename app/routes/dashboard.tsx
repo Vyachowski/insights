@@ -1,13 +1,8 @@
-import { Container, Stack } from '@mantine/core'
-
 import type { Route } from './+types/dashboard'
 
-import CallsByCityWidget from '@/modules/dashboard/CallsByCityWidget'
-import MonthlyProfitWidget from '@/modules/dashboard/MonthlyProfitWidget'
-import TrendsWidget from '@/modules/dashboard/TrendsWidget'
-import VerdictWidget from '@/modules/dashboard/VerdictWidget'
+import DashboardScreen from '@/screens/dashboard/DashboardScreen'
 import { requireUser } from '@/server/auth'
-import { getDashboardSummary } from '@/server/queries/dashboard'
+import { getDashboardSummary } from '@/server/services/dashboard'
 
 export async function loader({ request }: Route.LoaderArgs) {
   await requireUser(request)
@@ -15,16 +10,5 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 
 export default function DashboardPage({ loaderData }: Route.ComponentProps) {
-  const { verdict, trends, callsByCity, monthlyProfit } = loaderData
-
-  return (
-    <Container size={900} px={0}>
-      <Stack gap="xl">
-        <VerdictWidget verdict={verdict} />
-        <TrendsWidget trends={trends} elapsedMonths={monthlyProfit.elapsedMonths} />
-        <MonthlyProfitWidget monthly={monthlyProfit} />
-        <CallsByCityWidget cities={callsByCity} elapsedMonths={monthlyProfit.elapsedMonths} />
-      </Stack>
-    </Container>
-  )
+  return <DashboardScreen {...loaderData} />
 }

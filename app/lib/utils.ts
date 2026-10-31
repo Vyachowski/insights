@@ -3,6 +3,19 @@ export const formatNumber = (num: number) =>
 
 export const formatRub = (num: number) => `${formatNumber(Math.round(num))} ₽`
 
+export const formatAmount = (amount: number) =>
+  new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 }).format(amount)
+
+export const formatDate = (date: string | Date) =>
+  new Date(date).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' })
+
+export function getSiteName(siteId: number | null, sites: { id: number, url: string }[]) {
+  if (siteId === null) return null
+  const site = sites.find(s => s.id === siteId)
+  if (!site) return `Сайт #${siteId}`
+  try { return new URL(site.url).hostname } catch { return site.url }
+}
+
 // Signed ruble difference of `current` against `previous` (e.g. «+12 400 ₽», «−3 500 ₽»).
 // Uses U+2212 for the minus, matching the percent-delta sign; a zero difference has no sign.
 export const formatRubDelta = (current: number, previous: number) => {

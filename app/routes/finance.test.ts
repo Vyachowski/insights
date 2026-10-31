@@ -1,14 +1,7 @@
-import Database from 'better-sqlite3'
-import { drizzle } from 'drizzle-orm/better-sqlite3'
-import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import * as schema from '@/server/schema'
-import { applyMigrations } from '@/server/test-migrations'
+import { sqlite } from '@/server/db/client'
 
-const sqlite = new Database(':memory:')
-const testDb = drizzle(sqlite, { schema })
-
-vi.mock('@/server/db', () => ({ db: testDb }))
 vi.mock('@/server/auth', () => ({ requireAdmin: async () => undefined, requireUser: async () => undefined }))
 
 const { action, loader } = await import('./finance')
@@ -25,10 +18,6 @@ const callLoader = (tab: string) => loader({
 } as Parameters<typeof loader>[0])
 
 const rows = (table: string) => sqlite.prepare(`SELECT * FROM ${table}`).all()
-
-beforeAll(() => {
-  applyMigrations(sqlite)
-})
 
 beforeEach(() => {
   sqlite.exec(`
@@ -82,8 +71,7 @@ describe('finance loader', () => {
 
     const data = await callLoader('revenue')
 
-    expect(data.tab).toBe('revenue')
-    expect(data.entries).toMatchObject([{ amount: 123.45 }])
+    expect(data.revenues).toMatchObject([{ amount: 123.45 }])
     expect(data.sites).toMatchObject([{ id: 5 }])
   })
 
@@ -92,6 +80,6 @@ describe('finance loader', () => {
 
     const data = await callLoader('expenses')
 
-    expect(data.entries).toMatchObject([{ amount: 5, type: 'ads' }])
+    expect(data.expenses).toMatchObject([{ amount: 5, type: 'ads' }])
   })
 })

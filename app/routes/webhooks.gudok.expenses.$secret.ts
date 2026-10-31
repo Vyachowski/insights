@@ -1,7 +1,7 @@
 import type { Route } from './+types/webhooks.gudok.expenses.$secret'
 
 import { env } from '@/server/env'
-import { ingestGudokExpenses, type GudokOperationRow } from '@/server/expenses/gudok-history'
+import { ingestGudokExpenses, type GudokOperationRow } from '@/server/services/gudok-expenses'
 
 // Secret-gated ingest for Gudok /history charges, posted by the bookmarklet
 // running on https://in.gudok.tel. The bookmarklet posts a JSON string with a

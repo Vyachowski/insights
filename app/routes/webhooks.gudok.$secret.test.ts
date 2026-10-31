@@ -4,13 +4,13 @@ const mockEnv: { GUDOK_WEBHOOK_SECRET?: string } = {}
 const ingestMock = vi.fn()
 
 vi.mock('@/server/env', () => ({ env: mockEnv }))
-vi.mock('@/server/calls/gudok-webhook', async () => {
+vi.mock('@/server/services/gudok-calls', async () => {
   class GudokPayloadError extends Error {}
   return { GudokPayloadError, ingestGudokCall: (p: unknown) => ingestMock(p) }
 })
 
 const { action, loader } = await import('./webhooks.gudok.$secret')
-const { GudokPayloadError } = await import('@/server/calls/gudok-webhook')
+const { GudokPayloadError } = await import('@/server/services/gudok-calls')
 
 const SECRET = 'top-secret'
 // The handlers only touch request + params.secret; cast past the fuller

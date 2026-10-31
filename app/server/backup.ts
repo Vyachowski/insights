@@ -1,7 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 
-import { sqlite } from './db'
+import { sqlite } from './db/client'
 import { env, isStorageConfigured } from './env'
 import { deleteObject, headObject, listObjectKeys, putObject } from './storage'
 
