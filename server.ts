@@ -16,6 +16,7 @@ const isProduction = env.NODE_ENV === 'production'
 
 const viteDevServer = isProduction
   ? undefined
+  // eslint-disable-next-line import/no-extraneous-dependencies -- dev only, never loaded in production
   : await import('vite').then(vite =>
     vite.createServer({ server: { middlewareMode: true } }),
   )

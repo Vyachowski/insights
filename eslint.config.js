@@ -110,6 +110,14 @@ export default defineConfig([
     },
   },
   {
+    // railpack.json prunes devDependencies, so the production path must not import them
+    files: ['app/**', 'server.ts'],
+    ignores: ['**/*.test.{ts,tsx}', 'app/server/test-migrations.ts'],
+    rules: {
+      'import/no-extraneous-dependencies': ['error', { devDependencies: false }],
+    },
+  },
+  {
     // Route modules legitimately export loaders/actions alongside components
     files: ['app/routes/**', 'app/root.tsx'],
     rules: {
