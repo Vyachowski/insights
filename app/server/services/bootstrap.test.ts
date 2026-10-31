@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { sqlite } from './db/client'
+import { sqlite } from '@/server/db/client'
 
 const CITIES_CSV = 'id,code,slug,name,population\n1,SAM,samara,Самара,100\n'
 const SITES_CSV
@@ -23,12 +23,12 @@ const FULL_ENV = {
 const mockEnv: Record<string, string | undefined> = {}
 const fetchMock = vi.fn()
 
-vi.mock('./env', () => ({
+vi.mock('@/server/env', () => ({
   env: mockEnv,
   isStorageConfigured: () => false,
 }))
 
-vi.mock('./services/fetch-file', () => ({
+vi.mock('./fetch-file', () => ({
   fetchUrlToBuffer: (url: string) => fetchMock(url),
 }))
 

@@ -4,7 +4,7 @@ import { listRevenues, upsertRevenue } from '@/server/db/queries/revenues'
 import { listSites } from '@/server/db/queries/sites'
 
 /** Only the open tab's rows are loaded. Amounts are in rubles. */
-export async function getFinancePage(tab: string | null) {
+export async function getFinancePage(tab: 'revenue' | 'expenses') {
   const isExpenses = tab === 'expenses'
   const [revenues, expenses, sites] = await Promise.all([
     isExpenses ? [] : listRevenues(),

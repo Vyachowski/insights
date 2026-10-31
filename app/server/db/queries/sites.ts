@@ -23,13 +23,11 @@ export async function findSiteIdByGudokProject(projectId: number): Promise<numbe
   return site?.id ?? null
 }
 
-/** Load a lowercased-city-name → siteId map for the whole portfolio. */
-export async function loadCityToSiteId(): Promise<Map<string, number>> {
-  const rows = await db
+export function listSiteCities() {
+  return db
     .select({ id: sites.id, cityName: cities.name })
     .from(sites)
     .innerJoin(cities, eq(sites.cityId, cities.id))
-  return new Map(rows.map(s => [s.cityName.toLowerCase(), s.id]))
 }
 
 export function countSites() {

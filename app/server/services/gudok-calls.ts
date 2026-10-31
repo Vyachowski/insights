@@ -1,22 +1,23 @@
 import {
   type GudokPayload,
   GudokPayloadError,
+  hasNewDetails,
   parseGudokPayload,
   PROVIDER,
   toCallRow,
   toNumberDetails,
 } from '@/server/core/gudok-calls'
-import { resolveProjectTitle } from '@/server/core/site-matching'
+import { resolveProjectTitle, toCityToSiteId } from '@/server/core/site-matching'
 import { findCallByProviderId, saveCallWithoutSite, saveWebhookCall } from '@/server/db/queries/calls'
 import { createPhoneNumber, findPhoneNumber, updatePhoneNumber } from '@/server/db/queries/phone-numbers'
-import { findSiteIdByGudokProject, loadCityToSiteId } from '@/server/db/queries/sites'
+import { findSiteIdByGudokProject, listSiteCities } from '@/server/db/queries/sites'
 
 export { GudokPayloadError }
 
 async function resolveSiteId(p: GudokPayload): Promise<number | null> {
   const siteId = await findSiteIdByGudokProject(p.project_id)
   if (siteId !== null) return siteId
-  const cityToSiteId = await loadCityToSiteId()
+  const cityToSiteId = toCityToSiteId(await listSiteCities())
   return cityToSiteId.get(resolveProjectTitle(p.project_title)) ?? null
 }
 
@@ -34,7 +35,8 @@ async function syncPhoneNumber(p: GudokPayload): Promise<number | null> {
     const known = await findPhoneNumber(PROVIDER, p.adv_channel_id)
     siteId = known ? known.siteId : await resolveSiteId(p)
 
-    const { number, name } = toNumberDetails(p)
+    const details = toNumberDetails(p)
+    const { number, name } = details
     if (!known) {
       await createPhoneNumber({
         provider: PROVIDER,
@@ -43,7 +45,7 @@ async function syncPhoneNumber(p: GudokPayload): Promise<number | null> {
         siteId,
         name,
       })
-    } else if ((number && number !== known.number) || (name && name !== known.name)) {
+    } else if (hasNewDetails(known, details)) {
       await updatePhoneNumber(PROVIDER, p.adv_channel_id, {
         number: number ?? known.number,
         name: name ?? known.name,

@@ -1,5 +1,4 @@
 import { importCallsCsv } from './calls-csv-import'
-import { fetchUrlToBuffer } from './fetch-file'
 
 import {
   assertCsvColumns,
@@ -19,7 +18,7 @@ import { upsertMetric } from '@/server/db/queries/metrics'
 import { upsertRevenue } from '@/server/db/queries/revenues'
 import { listSiteIds } from '@/server/db/queries/sites'
 
-export { CsvValidationError, fetchUrlToBuffer }
+export { CsvValidationError }
 
 export interface ImportResult {
   created: number

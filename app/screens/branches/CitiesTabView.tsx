@@ -4,9 +4,7 @@ import { MapPin, Plus } from 'lucide-react'
 
 import type { City } from '@/server/db/queries/cities'
 
-function formatPopulation(n: number) {
-  return new Intl.NumberFormat('ru-RU').format(n)
-}
+import { formatNumber } from '@/lib/utils'
 
 export default function CitiesTabView({ cities }: { cities: City[] }) {
   return (
@@ -51,7 +49,7 @@ export default function CitiesTabView({ cities }: { cities: City[] }) {
                       </Group>
                     </Table.Td>
                     <Table.Td><Code>{city.code}</Code></Table.Td>
-                    <Table.Td ta="right" c="dimmed">{formatPopulation(city.population)}</Table.Td>
+                    <Table.Td ta="right" c="dimmed">{formatNumber(city.population)}</Table.Td>
                   </Table.Tr>
                 ))
               )}

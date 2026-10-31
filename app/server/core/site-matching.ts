@@ -9,6 +9,11 @@ const CITY_ALIASES: Record<string, string[]> = {
   'набережные челны': ['челны'],
 }
 
+/** Build a lowercased-city-name → siteId map for the whole portfolio. */
+export function toCityToSiteId(sites: { id: number, cityName: string }[]) {
+  return new Map(sites.map(s => [s.cityName.toLowerCase(), s.id]))
+}
+
 /** Normalize a raw Gudok project title to a canonical, lowercased city name. */
 export function resolveProjectTitle(raw: string): string {
   const cleaned = raw

@@ -3,10 +3,10 @@ import type { Route } from './+types/import'
 import { requireAdmin } from '@/server/auth'
 import {
   CsvValidationError,
-  fetchUrlToBuffer,
   importers,
   type ImportResource,
 } from '@/server/services/csv-imports'
+import { fetchUrlToBuffer } from '@/server/services/fetch-file'
 
 // Resource route: the single mutation endpoint for CSV imports.
 // Accepts multipart form data: `intent` = resource name, plus either

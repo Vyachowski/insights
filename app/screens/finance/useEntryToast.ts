@@ -2,14 +2,18 @@ import { notifications } from '@mantine/notifications'
 import { useEffect, useRef } from 'react'
 import { useRevalidator, type useFetcher } from 'react-router'
 
-export type ActionResult = { ok?: boolean, outcome?: string, error?: string }
+import type { addFinanceEntry } from '@/server/services/finance'
+
+export type EntryResult = Awaited<ReturnType<typeof addFinanceEntry>>
+
+const OUTCOME_COLORS = { created: 'teal', updated: 'blue', skipped: 'gray' }
 
 /**
  * Revalidates and shows one toast per settled action result. The ref guard
  * stops the effect looping when revalidate() changes the revalidator identity.
  */
-export function useActionToast(
-  fetcher: ReturnType<typeof useFetcher<ActionResult>>,
+export function useEntryToast(
+  fetcher: ReturnType<typeof useFetcher<EntryResult>>,
   messages: { created: string, updated: string },
 ) {
   const revalidator = useRevalidator()
@@ -19,20 +23,16 @@ export function useActionToast(
     if (fetcher.state !== 'idle' || !fetcher.data) return
     if (handled.current === fetcher.data) return
     handled.current = fetcher.data
-    const { ok, outcome, error } = fetcher.data
-    if (ok) {
-      revalidator.revalidate()
-      notifications.show({
-        color: outcome === 'created' ? 'teal' : outcome === 'updated' ? 'blue' : 'gray',
-        message: outcome === 'created'
-          ? messages.created
-          : outcome === 'updated'
-            ? messages.updated
-            : 'Запись уже актуальна',
-      })
-    } else if (error) {
-      notifications.show({ color: 'red', message: error })
+    const result = fetcher.data
+    if ('error' in result) {
+      notifications.show({ color: 'red', message: result.error })
+      return
     }
+    revalidator.revalidate()
+    notifications.show({
+      color: OUTCOME_COLORS[result.outcome],
+      message: { ...messages, skipped: 'Запись уже актуальна' }[result.outcome],
+    })
     // revalidator is intentionally excluded: its identity changes on revalidate,
     // which would re-run this effect and loop the toast.
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -8,3 +8,5 @@ README.md
 AGENTS.md
 **/*.test.ts
 **/*.test.tsx
+app/server/db/test-migrations.ts
+app/server/db/test-setup.ts

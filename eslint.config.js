@@ -13,6 +13,9 @@ import tseslint from 'typescript-eslint'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
+const DRIZZLE = ['drizzle-orm', 'drizzle-orm/*']
+const QUERY_INTERNALS = ['**/db/client', '**/db/schema', ...DRIZZLE]
+
 const restrictImports = (files, patterns, ignores = []) => ({
   files,
   ignores: ['**/*.test.{ts,tsx}', ...ignores],
@@ -125,19 +128,20 @@ export default defineConfig([
   },
   // Layer rules: see docs/architecture.md
   restrictImports(['app/server/core/**'], [
-    { group: ['@/server/db/*', '@/server/services/*', 'drizzle-orm', 'drizzle-orm/*'], message: 'core stays pure: no database and no services.' },
+    { group: ['**/db/**', '**/services/**', ...DRIZZLE], message: 'core stays pure: no database and no services.' },
   ]),
   restrictImports(['app/server/db/**'], [
-    { group: ['@/server/core/*', '@/server/services/*'], message: 'db holds no logic: a service joins db and core.' },
+    { group: ['**/core/**', '**/services/**'], message: 'db holds no logic: a service joins db and core.' },
   ]),
   restrictImports(['app/server/services/**'], [
-    { group: ['@/server/db/client', '@/server/db/schema', 'drizzle-orm', 'drizzle-orm/*'], message: 'Services call db functions, not queries.' },
+    { group: QUERY_INTERNALS, message: 'Services call db functions, not queries.' },
   ]),
   restrictImports(['app/routes/**'], [
-    { group: ['@/server/db/client', '@/server/db/schema', 'drizzle-orm', 'drizzle-orm/*'], message: 'Routes call db functions or services, not queries.' },
+    { group: QUERY_INTERNALS, message: 'Routes call db functions or services, not queries.' },
   ], ['app/routes/health.tsx']),
   restrictImports(['app/screens/**', 'app/components/**', 'app/hooks/**', 'app/lib/**'], [
-    { group: ['@/server/*', 'drizzle-orm', 'drizzle-orm/*'], allowTypeImports: true, message: 'UI sees the server through route data: type imports only.' },
+    { group: [...QUERY_INTERNALS, '**/server/env', '**/server/storage', '**/server/backup'], message: 'UI never touches server internals, not even for types.' },
+    { group: ['**/server/auth', '**/server/core/**', '**/server/db/queries/**', '**/server/services/**'], allowTypeImports: true, message: 'UI sees the server through route data: type imports only.' },
   ]),
   {
     // Route modules legitimately export loaders/actions alongside components

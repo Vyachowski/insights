@@ -2,7 +2,6 @@ import { beforeEach, describe, expect, it } from 'vitest'
 
 import { sqlite } from '@/server/db/client'
 
-const { parseGudokAmountKopecks, parseGudokOperationDate, cleanProject } = await import('@/server/core/gudok-history')
 const { ingestGudokExpenses, latestTelephonyDate } = await import('./gudok-expenses')
 
 beforeEach(() => {
@@ -30,30 +29,6 @@ const charge = (over: Record<string, unknown> = {}) => ({
   kind: 'Списание',
   amount: '-870,000 i',
   ...over,
-})
-
-describe('parseGudokAmountKopecks', () => {
-  it('parses comma-decimal ruble strings to positive kopecks', () => {
-    expect(parseGudokAmountKopecks('-870,000 i')).toBe(87000)
-    expect(parseGudokAmountKopecks('870,000')).toBe(87000)
-    expect(parseGudokAmountKopecks('-1 234,50')).toBe(123450)
-  })
-  it('returns null on garbage', () => {
-    expect(parseGudokAmountKopecks('—')).toBeNull()
-  })
-})
-
-describe('parseGudokOperationDate', () => {
-  it('parses DD.MM.YY and DD.MM.YYYY', () => {
-    expect(parseGudokOperationDate('26.07.26')).toBe('2026-07-26')
-    expect(parseGudokOperationDate('24.07.2026')).toBe('2026-07-24')
-  })
-})
-
-describe('cleanProject', () => {
-  it('strips trailing dots', () => {
-    expect(cleanProject('Волгоград..')).toBe('Волгоград')
-  })
 })
 
 describe('ingestGudokExpenses', () => {

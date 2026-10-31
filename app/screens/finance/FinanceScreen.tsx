@@ -1,18 +1,18 @@
 import { Container, Tabs } from '@mantine/core'
-import CsvImportModal, { type CsvImportConfig } from '@ui/CsvImportModal'
-import { useMemo, useState } from 'react'
-import { useFetcher, useRevalidator, useSearchParams } from 'react-router'
+import CsvImportModal from '@ui/CsvImportModal'
+import { useCallback, useMemo, useState } from 'react'
+import { useFetcher, useSearchParams } from 'react-router'
 
 import AddHostingModal from './AddHostingModal'
 import ExpensesTabView from './ExpensesTabView'
 import RevenueTabView from './RevenueTabView'
+import { type EntryResult, useEntryToast } from './useEntryToast'
 
 import type { getFinancePage } from '@/server/services/finance'
 
-import { type ActionResult, useActionToast } from '@/hooks/useActionToast'
 import { useAuth } from '@/hooks/useAuth'
-import { usePeriodFilter } from '@/hooks/usePeriodFilter'
-import { importFile, importUrl } from '@/lib/importClient'
+import { useCsvImport } from '@/hooks/useCsvImport'
+import { usePeriodFilter, usePeriodRows } from '@/hooks/usePeriodFilter'
 
 const TABS = [
   { id: 'revenue', label: 'Доходы' },
@@ -21,27 +21,26 @@ const TABS = [
 
 type TabId = (typeof TABS)[number]['id']
 
-const IMPORT_TITLES: Record<string, string> = {
+const IMPORT_TITLES = {
   revenue: 'Импорт доходов',
   expenses: 'Импорт расходов',
 }
 
 export default function FinanceScreen({ revenues, expenses, sites }: Awaited<ReturnType<typeof getFinancePage>>) {
   const [searchParams, setSearchParams] = useSearchParams()
-  const revalidator = useRevalidator()
   const { user } = useAuth()
   const isAdmin = user?.isAdmin ?? false
 
   const activeTab = (searchParams.get('tab') ?? 'revenue') as TabId
-  const [importTarget, setImportTarget] = useState<string | null>(null)
+  const csvImport = useCsvImport(IMPORT_TITLES)
   const [showAddModal, setShowAddModal] = useState(false)
   const [showAddHosting, setShowAddHosting] = useState(false)
 
-  const hostingFetcher = useFetcher<ActionResult>()
-  useActionToast(hostingFetcher, { created: 'Хостинг добавлен', updated: 'Сумма хостинга обновлена' })
+  const hostingFetcher = useFetcher<EntryResult>()
+  useEntryToast(hostingFetcher, { created: 'Хостинг добавлен', updated: 'Сумма хостинга обновлена' })
 
-  const revenueFetcher = useFetcher<ActionResult>()
-  useActionToast(revenueFetcher, { created: 'Доход добавлен', updated: 'Сумма дохода обновлена' })
+  const revenueFetcher = useFetcher<EntryResult>()
+  useEntryToast(revenueFetcher, { created: 'Доход добавлен', updated: 'Сумма дохода обновлена' })
 
   // Old behavior parity: remove revenue is client-local only
   const [removedIds, setRemovedIds] = useState<ReadonlySet<number>>(new Set())
@@ -55,19 +54,14 @@ export default function FinanceScreen({ revenues, expenses, sites }: Awaited<Ret
     [expenses],
   )
 
-  const importConfig: CsvImportConfig | null = importTarget
-    ? {
-      title: IMPORT_TITLES[importTarget],
-      onImportFile: file => importFile(importTarget, file),
-      onImportUrl: url => importUrl(importTarget, url),
-      onSuccess: () => revalidator.revalidate(),
-    }
-    : null
+  const isShownRevenue = useCallback((e: { id: number }) => !removedIds.has(e.id), [removedIds])
+  const revenueEntries = usePeriodRows(revenues, period, isShownRevenue)
 
-  const revenueEntries = revenues.filter(e => period.matches(e) && !removedIds.has(e.id))
-  const expenseEntries = expenses.filter(
-    e => period.matches(e) && (selectedCategory === null || e.type === selectedCategory),
+  const isShownExpense = useCallback(
+    (e: { type: string }) => selectedCategory === null || e.type === selectedCategory,
+    [selectedCategory],
   )
+  const expenseEntries = usePeriodRows(expenses, period, isShownExpense)
 
   return (
     <Container size="xl" px={0}>
@@ -90,7 +84,7 @@ export default function FinanceScreen({ revenues, expenses, sites }: Awaited<Ret
             isAdmin={isAdmin}
             showModal={showAddModal}
             submitting={revenueFetcher.state !== 'idle'}
-            onImportClick={() => setImportTarget('revenue')}
+            onImportClick={() => csvImport.open('revenue')}
             onAddClick={() => setShowAddModal(true)}
             onRemove={id => setRemovedIds(prev => new Set(prev).add(id))}
             onModalClose={() => setShowAddModal(false)}
@@ -112,14 +106,14 @@ export default function FinanceScreen({ revenues, expenses, sites }: Awaited<Ret
             categories={expenseCategories}
             selectedCategory={selectedCategory}
             onCategoryChange={setSelectedCategory}
-            onImportClick={() => setImportTarget('expenses')}
+            onImportClick={() => csvImport.open('expenses')}
             onAddClick={() => setShowAddHosting(true)}
           />
         </Tabs.Panel>
       </Tabs>
 
-      {importConfig && (
-        <CsvImportModal config={importConfig} onClose={() => setImportTarget(null)} />
+      {csvImport.config && (
+        <CsvImportModal config={csvImport.config} onClose={csvImport.close} />
       )}
 
       {isAdmin && showAddHosting && (

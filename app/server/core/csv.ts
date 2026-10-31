@@ -32,11 +32,11 @@ export function assertCsvColumns(
   }
 }
 
-export function assertSkipRate(created: number, skipped: number): void {
-  const total = created + skipped
-  if (total > 0 && skipped / total > 0.5) {
+export function assertSkipRate(valid: number, invalid: number): void {
+  const total = valid + invalid
+  if (total > 0 && invalid / total > 0.5) {
     throw new CsvValidationError(
-      `Too many invalid rows: ${skipped} of ${total} could not be imported. Check the file format.`,
+      `Too many invalid rows: ${invalid} of ${total} could not be imported. Check the file format.`,
     )
   }
 }

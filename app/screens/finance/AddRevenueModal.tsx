@@ -5,6 +5,8 @@ import { useState } from 'react'
 
 import type { Site } from '@/server/db/queries/sites'
 
+import { getHostname } from '@/lib/utils'
+
 interface RevenueValues {
   date: string
   siteId: string
@@ -18,10 +20,6 @@ interface AddRevenueModalProps {
   onSubmit: (values: RevenueValues) => void
 }
 
-function siteLabel(url: string) {
-  try { return new URL(url).hostname } catch { return url }
-}
-
 export default function AddRevenueModal({ sites, submitting, onClose, onSubmit }: AddRevenueModalProps) {
   const [date, setDate] = useState('')
   const [siteId, setSiteId] = useState<string>('')
@@ -30,7 +28,7 @@ export default function AddRevenueModal({ sites, submitting, onClose, onSubmit }
 
   const siteOptions = [
     { value: '', label: 'Общий (компания)' },
-    ...sites.map(site => ({ value: String(site.id), label: siteLabel(site.url) })),
+    ...sites.map(site => ({ value: String(site.id), label: getHostname(site.url) })),
   ]
 
   function validate() {

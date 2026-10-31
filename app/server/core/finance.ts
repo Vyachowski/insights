@@ -7,6 +7,11 @@ export const HOSTING_TYPE = 'hosting'
 
 type EntryForm = Record<string, FormDataEntryValue | undefined>
 
+type ParsedEntry =
+  | { error: string }
+  | { expense: { date: string, siteId: number | null, type: string, amount: number } }
+  | { revenue: { date: string, siteId: number | null, amount: number } }
+
 // Shape check plus a round-trip so calendar-invalid dates like 2024-02-30 or
 // 2024-13-01 are rejected regardless of the engine's date-parsing leniency.
 function isValidIsoDate(value: string): boolean {
@@ -15,7 +20,7 @@ function isValidIsoDate(value: string): boolean {
   return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === value
 }
 
-function parseHosting(form: EntryForm, siteId: number | null, amount: number) {
+function parseHosting(form: EntryForm, siteId: number | null, amount: number): ParsedEntry {
   const year = Number(form.year)
   if (!Number.isInteger(year) || year < 2000 || year > 2100) {
     return { error: 'Укажите год' }
@@ -23,13 +28,13 @@ function parseHosting(form: EntryForm, siteId: number | null, amount: number) {
   return { expense: { date: `${year}-01-01`, siteId, type: HOSTING_TYPE, amount } }
 }
 
-function parseRevenue(form: EntryForm, siteId: number | null, amount: number) {
+function parseRevenue(form: EntryForm, siteId: number | null, amount: number): ParsedEntry {
   const date = String(form.date ?? '')
   if (!isValidIsoDate(date)) return { error: 'Укажите дату' }
   return { revenue: { date, siteId, amount } }
 }
 
-export function parseEntryForm(form: EntryForm) {
+export function parseEntryForm(form: EntryForm): ParsedEntry {
   const siteIdRaw = String(form.siteId ?? '')
   const siteId = siteIdRaw ? Number(siteIdRaw) : null
   const amountRubles = Number(form.amount)

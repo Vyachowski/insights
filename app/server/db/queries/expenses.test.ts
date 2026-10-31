@@ -44,6 +44,22 @@ describe('upsertExpense', () => {
     expect(expenseRows()).toHaveLength(1)
   })
 
+  it('writes the comment on create and overwrite', async () => {
+    await upsertExpense({ date: '2026-01-01', siteId: 5, type: 'telephony', amount: 100, comment: 'Гудок: 1' })
+    expect(expenseRows()).toMatchObject([{ comment: 'Гудок: 1' }])
+
+    await upsertExpense({ date: '2026-01-01', siteId: 5, type: 'telephony', amount: 200, comment: 'Гудок: 2' })
+    expect(expenseRows()).toMatchObject([{ amount: 200, comment: 'Гудок: 2' }])
+  })
+
+  it('keeps the stored comment when none is passed', async () => {
+    await upsertExpense({ date: '2026-01-01', siteId: 5, type: 'telephony', amount: 100, comment: 'Гудок: 1' })
+
+    await upsertExpense({ date: '2026-01-01', siteId: 5, type: 'telephony', amount: 200 })
+
+    expect(expenseRows()).toMatchObject([{ amount: 200, comment: 'Гудок: 1' }])
+  })
+
   it('handles the company-wide null siteId branch independently of site rows', async () => {
     await upsertExpense({ date: '2026-01-01', siteId: null, type: HOSTING_TYPE, amount: 300000 })
     await upsertExpense({ date: '2026-01-01', siteId: 5, type: HOSTING_TYPE, amount: 500000 })

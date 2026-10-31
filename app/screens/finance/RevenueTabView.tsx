@@ -11,7 +11,7 @@ import type { Revenue } from '@/server/db/queries/revenues'
 import type { Site } from '@/server/db/queries/sites'
 
 import { useTable } from '@/hooks/useTable'
-import { formatAmount, formatDate, getSiteName } from '@/lib/utils'
+import { formatAmount, formatDate, getSiteName, sumAmounts } from '@/lib/utils'
 
 interface Props {
   entries: Revenue[]
@@ -29,7 +29,7 @@ interface Props {
 
 export default function RevenueTabView({ entries, sites, isAdmin, period, showModal, submitting, onImportClick, onAddClick, onRemove, onModalClose, onModalSubmit }: Props) {
   const table = useTable(entries)
-  const total = entries.reduce((sum, e) => sum + e.amount, 0)
+  const total = sumAmounts(entries)
 
   return (
     <Stack gap="md">

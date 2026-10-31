@@ -5,6 +5,8 @@ import { useState } from 'react'
 
 import type { Site } from '@/server/db/queries/sites'
 
+import { getHostname } from '@/lib/utils'
+
 interface HostingValues {
   year: string
   siteId: string
@@ -18,10 +20,6 @@ interface AddHostingModalProps {
   onSubmit: (values: HostingValues) => void
 }
 
-function siteLabel(url: string) {
-  try { return new URL(url).hostname } catch { return url }
-}
-
 // Hosting is billed once a year, so the date is a plain year picker.
 const YEARS = Array.from({ length: 7 }, (_, i) => String(new Date().getFullYear() + 1 - i))
 
@@ -33,7 +31,7 @@ export default function AddHostingModal({ sites, submitting, onClose, onSubmit }
 
   const siteOptions = [
     { value: '', label: 'Общий (компания)' },
-    ...sites.map(site => ({ value: String(site.id), label: siteLabel(site.url) })),
+    ...sites.map(site => ({ value: String(site.id), label: getHostname(site.url) })),
   ]
 
   function validate() {

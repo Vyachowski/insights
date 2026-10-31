@@ -1,4 +1,6 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
+
+const keepAll = () => true
 
 export function usePeriodFilter(entries: { date: string | Date }[]) {
   const [selectedYear, setSelectedYear] = useState<number | null>(null)
@@ -32,11 +34,11 @@ export function usePeriodFilter(entries: { date: string | Date }[]) {
       ? selectedMonth
       : null
 
-  const matches = (entry: { date: string | Date }) => {
+  const matches = useCallback((entry: { date: string | Date }) => {
     const d = new Date(entry.date)
     if (d.getFullYear() !== effectiveYear) return false
     return effectiveMonth === null || d.getMonth() === effectiveMonth
-  }
+  }, [effectiveYear, effectiveMonth])
 
   return {
     availableYears,
@@ -50,3 +52,12 @@ export function usePeriodFilter(entries: { date: string | Date }[]) {
 }
 
 export type PeriodFilter = ReturnType<typeof usePeriodFilter>
+
+/** Rows of the selected period; `keep` must be stable, so wrap it in useCallback. */
+export function usePeriodRows<T extends { date: string | Date }>(
+  rows: T[],
+  { matches }: PeriodFilter,
+  keep: (row: T) => boolean = keepAll,
+) {
+  return useMemo(() => rows.filter(row => matches(row) && keep(row)), [rows, matches, keep])
+}

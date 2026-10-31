@@ -1,6 +1,7 @@
 import { groupCharges, type GudokOperationRow, TELEPHONY_TYPE } from '@/server/core/gudok-history'
+import { toCityToSiteId } from '@/server/core/site-matching'
 import { latestExpenseDate, upsertExpense } from '@/server/db/queries/expenses'
-import { loadCityToSiteId } from '@/server/db/queries/sites'
+import { listSiteCities } from '@/server/db/queries/sites'
 
 export type { GudokOperationRow }
 
@@ -19,7 +20,7 @@ export interface ExpenseIngestResult {
 export async function ingestGudokExpenses(
   rows: GudokOperationRow[],
 ): Promise<ExpenseIngestResult> {
-  const charges = groupCharges(rows, await loadCityToSiteId())
+  const charges = groupCharges(rows, toCityToSiteId(await listSiteCities()))
 
   const result = { created: 0, updated: 0, skipped: 0 }
   for (const charge of charges) result[await upsertExpense(charge)]++

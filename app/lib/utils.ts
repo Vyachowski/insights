@@ -9,12 +9,21 @@ export const formatAmount = (amount: number) =>
 export const formatDate = (date: string | Date) =>
   new Date(date).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' })
 
+export function getHostname(url: string) {
+  try { return new URL(url).hostname } catch { return url }
+}
+
 export function getSiteName(siteId: number | null, sites: { id: number, url: string }[]) {
   if (siteId === null) return null
   const site = sites.find(s => s.id === siteId)
-  if (!site) return `Сайт #${siteId}`
-  try { return new URL(site.url).hostname } catch { return site.url }
+  return site ? getHostname(site.url) : `Сайт #${siteId}`
 }
+
+export const sumAmounts = (rows: { amount: number }[]) =>
+  rows.reduce((sum, row) => sum + row.amount, 0)
+
+export const totalLeads = (metric: { leadsYandex: number, leadsGoogle: number, leadsOther: number }) =>
+  metric.leadsYandex + metric.leadsGoogle + metric.leadsOther
 
 // Signed ruble difference of `current` against `previous` (e.g. «+12 400 ₽», «−3 500 ₽»).
 // Uses U+2212 for the minus, matching the percent-delta sign; a zero difference has no sign.

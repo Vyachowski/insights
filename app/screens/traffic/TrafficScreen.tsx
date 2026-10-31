@@ -1,7 +1,6 @@
 import { Container, Tabs } from '@mantine/core'
-import CsvImportModal, { type CsvImportConfig } from '@ui/CsvImportModal'
-import { useState } from 'react'
-import { useRevalidator, useSearchParams } from 'react-router'
+import CsvImportModal from '@ui/CsvImportModal'
+import { useSearchParams } from 'react-router'
 
 import CallsTabView from './CallsTabView'
 import MetricsTabView from './MetricsTabView'
@@ -10,8 +9,8 @@ import type { CallListRow } from '@/server/db/queries/calls'
 import type { SiteMetric } from '@/server/db/queries/metrics'
 import type { Site } from '@/server/db/queries/sites'
 
-import { usePeriodFilter } from '@/hooks/usePeriodFilter'
-import { importFile, importUrl } from '@/lib/importClient'
+import { useCsvImport } from '@/hooks/useCsvImport'
+import { usePeriodFilter, usePeriodRows } from '@/hooks/usePeriodFilter'
 
 const TABS = [
   { id: 'calls', label: 'Звонки' },
@@ -20,7 +19,7 @@ const TABS = [
 
 type TabId = (typeof TABS)[number]['id']
 
-const IMPORT_TITLES: Record<string, string> = {
+const IMPORT_TITLES = {
   calls: 'Импорт звонков',
   metrics: 'Импорт метрик',
 }
@@ -33,21 +32,14 @@ interface Props {
 
 export default function TrafficScreen({ calls, metrics, sites }: Props) {
   const [searchParams, setSearchParams] = useSearchParams()
-  const revalidator = useRevalidator()
 
   const activeTab = (searchParams.get('tab') ?? 'calls') as TabId
-  const [importTarget, setImportTarget] = useState<string | null>(null)
+  const csvImport = useCsvImport(IMPORT_TITLES)
 
   const period = usePeriodFilter(activeTab === 'metrics' ? metrics : calls)
 
-  const importConfig: CsvImportConfig | null = importTarget
-    ? {
-      title: IMPORT_TITLES[importTarget],
-      onImportFile: file => importFile(importTarget, file),
-      onImportUrl: url => importUrl(importTarget, url),
-      onSuccess: () => revalidator.revalidate(),
-    }
-    : null
+  const callEntries = usePeriodRows(calls, period)
+  const metricEntries = usePeriodRows(metrics, period)
 
   return (
     <Container size="xl" px={0}>
@@ -65,22 +57,22 @@ export default function TrafficScreen({ calls, metrics, sites }: Props) {
         <Tabs.Panel value="calls">
           <CallsTabView
             period={period}
-            entries={calls.filter(period.matches)}
-            onImportClick={() => setImportTarget('calls')}
+            entries={callEntries}
+            onImportClick={() => csvImport.open('calls')}
           />
         </Tabs.Panel>
         <Tabs.Panel value="metrics">
           <MetricsTabView
             period={period}
-            entries={metrics.filter(period.matches)}
+            entries={metricEntries}
             sites={sites}
-            onImportClick={() => setImportTarget('metrics')}
+            onImportClick={() => csvImport.open('metrics')}
           />
         </Tabs.Panel>
       </Tabs>
 
-      {importConfig && (
-        <CsvImportModal config={importConfig} onClose={() => setImportTarget(null)} />
+      {csvImport.config && (
+        <CsvImportModal config={csvImport.config} onClose={csvImport.close} />
       )}
     </Container>
   )

@@ -61,6 +61,15 @@ export function toNumberDetails(p: GudokPayload) {
   }
 }
 
+interface NumberDetails {
+  number: string | null
+  name: string | null
+}
+
+export function hasNewDetails(known: NumberDetails, { number, name }: NumberDetails) {
+  return Boolean((number && number !== known.number) || (name && name !== known.name))
+}
+
 export function toCallRow(
   p: GudokPayload,
   date: Date,

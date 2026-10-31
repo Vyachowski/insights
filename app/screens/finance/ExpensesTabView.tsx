@@ -10,7 +10,7 @@ import type { Expense } from '@/server/db/queries/expenses'
 import type { Site } from '@/server/db/queries/sites'
 
 import { useTable } from '@/hooks/useTable'
-import { formatAmount, formatDate, getSiteName } from '@/lib/utils'
+import { formatAmount, formatDate, getSiteName, sumAmounts } from '@/lib/utils'
 
 interface Props {
   entries: Expense[]
@@ -26,7 +26,7 @@ interface Props {
 
 export default function ExpensesTabView({ entries, sites, isAdmin, period, categories, selectedCategory, onCategoryChange, onImportClick, onAddClick }: Props) {
   const table = useTable(entries)
-  const total = entries.reduce((sum, e) => sum + e.amount, 0)
+  const total = sumAmounts(entries)
 
   return (
     <Stack gap="md">

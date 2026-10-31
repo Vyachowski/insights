@@ -9,7 +9,7 @@ import type { SiteMetric } from '@/server/db/queries/metrics'
 import type { Site } from '@/server/db/queries/sites'
 
 import { useTable } from '@/hooks/useTable'
-import { formatDate, getSiteName } from '@/lib/utils'
+import { formatDate, formatNumber, getSiteName, totalLeads } from '@/lib/utils'
 
 interface Props {
   entries: SiteMetric[]
@@ -65,12 +65,12 @@ export default function MetricsTabView({ entries, sites, period, onImportClick }
                   <Table.Tr key={entry.id}>
                     <Table.Td style={{ whiteSpace: 'nowrap' }}>{formatDate(entry.date)}</Table.Td>
                     <Table.Td>{getSiteName(entry.siteId, sites)}</Table.Td>
-                    <Table.Td ta="right">{entry.yandexUsers.toLocaleString('ru-RU')}</Table.Td>
-                    <Table.Td ta="right">{entry.googleUsers.toLocaleString('ru-RU')}</Table.Td>
-                    <Table.Td ta="right" c="dimmed">{entry.otherUsers.toLocaleString('ru-RU')}</Table.Td>
+                    <Table.Td ta="right">{formatNumber(entry.yandexUsers)}</Table.Td>
+                    <Table.Td ta="right">{formatNumber(entry.googleUsers)}</Table.Td>
+                    <Table.Td ta="right" c="dimmed">{formatNumber(entry.otherUsers)}</Table.Td>
                     <Table.Td ta="right">
                       <Text span c="teal" fw={500}>
-                        {entry.leadsYandex + entry.leadsGoogle + entry.leadsOther}
+                        {totalLeads(entry)}
                       </Text>
                     </Table.Td>
                   </Table.Tr>
