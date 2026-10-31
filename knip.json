@@ -1,4 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": ["server.ts"],
+  "ignore": ["scripts/gudok-telephony-bookmarklet.js"],
   "ignoreExportsUsedInFile": true
 }

@@ -12,7 +12,7 @@ Stack: React Router 7, Mantine, Drizzle + SQLite, one Node server on Railway.
 4. **Build:** run `/implement`, one task per clean session.
 5. **Finish:** mark the feature `[x]` in the roadmap and move its folder to `.scratch/archive/`.
 
-Commit directly to `main`. A `pre-push` hook runs typecheck and tests.
+Commit directly to `main`. `npm run check` runs types, lint, tests, knip and the build. The `pre-push` hook runs it.
 
 ## Where things live
 

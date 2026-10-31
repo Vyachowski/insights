@@ -23,7 +23,7 @@ const restrictImports = (files, patterns, ignores = []) => ({
 })
 
 export default defineConfig([
-  globalIgnores(['build', 'node_modules', '.react-router', 'coverage', 'scripts/gudok-telephony-bookmarklet.js']),
+  globalIgnores(['build', 'node_modules', '.claude', '.react-router', 'coverage', 'scripts/gudok-telephony-bookmarklet.js']),
   {
     files: ['**/*.{js,mjs,cjs,ts,tsx}'],
     extends: [
