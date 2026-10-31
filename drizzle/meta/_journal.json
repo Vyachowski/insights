@@ -29,6 +29,13 @@
       "when": 1793373384635,
       "tag": "0003_drop_old_call_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1793472818333,
+      "tag": "0004_add_auto_charge_storage",
+      "breakpoints": true
     }
   ]
 }

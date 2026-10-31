@@ -1,5 +1,6 @@
 import { sql } from 'drizzle-orm'
 import {
+  foreignKey,
   index,
   integer,
   primaryKey,
@@ -196,6 +197,9 @@ export const expenses = sqliteTable(
     amount: integer('amount').notNull(),
     type: text('type').notNull(),
     comment: text('comment'),
+    isEstimate: integer('is_estimate', { mode: 'boolean' })
+      .notNull()
+      .default(false),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
@@ -211,3 +215,40 @@ export const expenses = sqliteTable(
       .where(sql`site_id IS NULL`),
   ],
 )
+
+// A number with no row here has auto charge off
+export const chargeSchedules = sqliteTable(
+  'charge_schedules',
+  {
+    id: id(),
+    provider: text('provider').notNull(),
+    providerNumberId: text('provider_number_id').notNull(),
+    enabled: integer('enabled', { mode: 'boolean' }).notNull().default(false),
+    nextDate: text('next_date').notNull(),
+    amount: integer('amount').notNull(),
+    intervalDays: integer('interval_days').notNull().default(30),
+    // End of the checked period in which the number had no real charge
+    noChargePeriodEnd: text('no_charge_period_end'),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  table => [
+    foreignKey({
+      columns: [table.provider, table.providerNumberId],
+      foreignColumns: [phoneNumbers.provider, phoneNumbers.providerNumberId],
+    }).onDelete('cascade'),
+    uniqueIndex('charge_schedules_provider_provider_number_id_key').on(
+      table.provider,
+      table.providerNumberId,
+    ),
+  ],
+)
+
+export const reconciliationRuns = sqliteTable('reconciliation_runs', {
+  id: id(),
+  periodStart: text('period_start').notNull(),
+  periodEnd: text('period_end').notNull(),
+  ranAt: integer('ran_at', { mode: 'timestamp_ms' })
+    .notNull()
+    .$defaultFn(() => new Date()),
+})

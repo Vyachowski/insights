@@ -5,6 +5,7 @@ import { applyMigrations } from './test-migrations'
 
 const NEW = '0002_switch_to_new_call_tables'
 const DROP = '0003_drop_old_call_tables'
+const AUTO = '0004_add_auto_charge_storage'
 const HOUR = 60 * 60 * 1000
 const CSV_DATE = Date.UTC(2026, 5, 1, 12, 0)
 
@@ -209,5 +210,108 @@ describe(DROP, () => {
     expect(oldTables()).toEqual([])
     expect(newCalls()).toEqual(callsBefore)
     expect(numbers()).toEqual(numbersBefore)
+  })
+})
+
+describe(AUTO, () => {
+  const count = (table: string) => sqlite.prepare(`SELECT count(*) AS c FROM ${table}`).get()
+  const storedExpenses = () =>
+    sqlite.prepare('SELECT * FROM expenses ORDER BY id').all() as Record<string, unknown>[]
+  const insertSchedule = () =>
+    sqlite
+      .prepare(`INSERT INTO charge_schedules (provider, provider_number_id, next_date, amount, created_at, updated_at)
+        VALUES ('gudok', '4635', '2026-11-26', 87000, 0, 0)`)
+      .run()
+
+  function migrateWithNumbers() {
+    seedSites()
+    applyMigrations(sqlite, { from: NEW })
+  }
+
+  it('runs on a fresh empty database', () => {
+    applyMigrations(sqlite, { from: NEW })
+
+    expect(count('expenses')).toEqual({ c: 0 })
+    expect(count('charge_schedules')).toEqual({ c: 0 })
+    expect(count('reconciliation_runs')).toEqual({ c: 0 })
+  })
+
+  it('keeps stored expenses and leaves them real', () => {
+    seedSites()
+    applyMigrations(sqlite, { from: NEW, to: DROP })
+    sqlite.exec(`
+      INSERT INTO expenses (site_id, date, amount, type, comment, created_at, updated_at)
+        VALUES (1, '2026-07-26', 87000, 'telephony', 'Самара', 5, 6),
+               (NULL, '2026-07-27', 150050, 'hosting', NULL, 7, 8);
+    `)
+    const before = storedExpenses()
+    expect(before).toHaveLength(2)
+
+    applyMigrations(sqlite, { from: AUTO })
+
+    expect(storedExpenses()).toEqual(before.map(row => ({ ...row, is_estimate: 0 })))
+  })
+
+  it('seeds no schedule for an existing number', () => {
+    migrateWithNumbers()
+
+    expect(count('phone_numbers')).not.toEqual({ c: 0 })
+    expect(count('charge_schedules')).toEqual({ c: 0 })
+  })
+
+  it('starts a schedule off, every 30 days, with no checked period', () => {
+    migrateWithNumbers()
+    insertSchedule()
+
+    expect(sqlite.prepare('SELECT * FROM charge_schedules').get()).toMatchObject({
+      enabled: 0,
+      next_date: '2026-11-26',
+      amount: 87000,
+      interval_days: 30,
+      no_charge_period_end: null,
+    })
+  })
+
+  it('holds one schedule per number', () => {
+    migrateWithNumbers()
+    insertSchedule()
+
+    expect(insertSchedule).toThrow(/UNIQUE/)
+  })
+
+  it('refuses a schedule for an unknown number', () => {
+    migrateWithNumbers()
+    sqlite.pragma('foreign_keys = ON')
+    sqlite.exec("UPDATE phone_numbers SET provider_number_id = '1' WHERE provider_number_id = '4635'")
+
+    expect(insertSchedule).toThrow(/FOREIGN KEY/)
+  })
+
+  it('deletes a schedule with its number and keeps the others', () => {
+    migrateWithNumbers()
+    sqlite.pragma('foreign_keys = ON')
+    insertSchedule()
+    sqlite
+      .prepare(`INSERT INTO charge_schedules (provider, provider_number_id, next_date, amount, created_at, updated_at)
+        SELECT provider, provider_number_id, '2026-11-26', 87000, 0, 0 FROM phone_numbers
+        WHERE provider_number_id <> '4635' LIMIT 1`)
+      .run()
+    expect(count('charge_schedules')).toEqual({ c: 2 })
+
+    sqlite.exec("DELETE FROM phone_numbers WHERE provider = 'gudok' AND provider_number_id = '4635'")
+
+    expect(count('charge_schedules')).toEqual({ c: 1 })
+  })
+
+  it('logs a reconciliation run', () => {
+    applyMigrations(sqlite, { from: NEW })
+    sqlite.exec(`
+      INSERT INTO reconciliation_runs (period_start, period_end, ran_at)
+        VALUES ('2026-07-26', '2026-10-31', 123);
+    `)
+
+    expect(sqlite.prepare('SELECT * FROM reconciliation_runs').all()).toEqual([
+      { id: 1, period_start: '2026-07-26', period_end: '2026-10-31', ran_at: 123 },
+    ])
   })
 })
