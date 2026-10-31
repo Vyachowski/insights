@@ -8,7 +8,7 @@
 
 ## Startup
 
-Env validation → open SQLite (WAL, busy_timeout) → Drizzle `migrate()` → enable foreign keys → bootstrap → listen. Migrations are in `drizzle/`, generated with `npm run drizzle:generate` from `app/server/schema.ts`.
+Env validation → open SQLite (WAL, busy_timeout) → Drizzle `migrate()` → enable foreign keys → bootstrap → listen. Migrations are in `drizzle/`, generated with `npm run drizzle:generate` from `app/server/db/schema.ts`.
 
 ## Bootstrap
 

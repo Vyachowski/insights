@@ -1,4 +1,4 @@
-import { pingDb } from '@/server/db'
+import { pingDb } from '@/server/db/client'
 
 export async function loader() {
   try {

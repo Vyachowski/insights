@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { sqlite } from './db/client'
+
 const CITIES_CSV = 'id,code,slug,name,population\n1,SAM,samara,Самара,100\n'
 const SITES_CSV
   = 'id,cityId,name,group,url,yandexCounterId,googleCounterId,yandexTagManagerId,googleTagManagerId\n'
@@ -19,10 +21,6 @@ const FULL_ENV = {
 }
 
 const mockEnv: Record<string, string | undefined> = {}
-
-const counts = { users: 0, cities: 0, sites: 0 }
-const inserted: Record<string, unknown[][]> = {}
-const executeMock = vi.fn(async () => ({ rows: [] }))
 const fetchMock = vi.fn()
 
 vi.mock('./env', () => ({
@@ -30,110 +28,65 @@ vi.mock('./env', () => ({
   isStorageConfigured: () => false,
 }))
 
-vi.mock('./imports/csv', async importOriginal => ({
-  ...(await importOriginal()),
+vi.mock('./services/fetch-file', () => ({
   fetchUrlToBuffer: (url: string) => fetchMock(url),
 }))
 
-vi.mock('./db', async () => {
-  const schema = await import('./schema')
-  const tableName = (table: unknown) => {
-    if (table === schema.users) return 'users'
-    if (table === schema.cities) return 'cities'
-    return 'sites'
-  }
-  return {
-    db: {
-      $count: vi.fn(async (table: unknown) => counts[tableName(table) as keyof typeof counts]),
-      insert: vi.fn((table: unknown) => ({
-        values: (rows: unknown[]) => ({
-          returning: async () => {
-            const name = tableName(table)
-            inserted[name] = inserted[name] ?? []
-            inserted[name].push(rows)
-            return rows
-          },
-        }),
-      })),
-      execute: executeMock,
-    },
-  }
-})
-
 const { bootstrap } = await import('./bootstrap')
 
-function insertedRows(table: string): Record<string, unknown>[] {
-  return (inserted[table]?.[0] ?? []) as Record<string, unknown>[]
-}
+const rows = (table: string) =>
+  sqlite.prepare(`SELECT * FROM ${table}`).all() as Record<string, unknown>[]
+
+const fetchCsv = (url: string) =>
+  Promise.resolve(Buffer.from(url.includes('cities') ? CITIES_CSV : SITES_CSV))
 
 beforeEach(() => {
   fetchMock.mockReset()
-  executeMock.mockClear()
-  counts.users = 0
-  counts.cities = 0
-  counts.sites = 0
-  for (const key of Object.keys(inserted)) delete inserted[key]
+  sqlite.exec('DELETE FROM sites; DELETE FROM cities; DELETE FROM users;')
   for (const key of Object.keys(mockEnv)) delete mockEnv[key]
   Object.assign(mockEnv, FULL_ENV)
 })
 
 describe('bootstrap on a fresh database', () => {
   beforeEach(async () => {
-    fetchMock.mockImplementation((url: string) =>
-      Promise.resolve(Buffer.from(url.includes('cities') ? CITIES_CSV : SITES_CSV)))
-    let cityCountCalls = 0
-    // cities step sees 0, sites step (after insert) sees 1
-    counts.cities = 0
-    const { db } = await import('./db')
-    const countMock = db.$count as unknown as ReturnType<typeof vi.fn>
-    countMock.mockImplementation(async (table: unknown) => {
-      const schema = await import('./schema')
-      if (table === schema.cities) return cityCountCalls++ === 0 ? 0 : 1
-      if (table === schema.users) return counts.users
-      return counts.sites
-    })
+    fetchMock.mockImplementation(fetchCsv)
     await bootstrap()
   })
 
   it('creates both users with hashed passwords and roles', () => {
-    const rows = insertedRows('users')
-    expect(rows).toHaveLength(2)
-    expect(rows[0]).toMatchObject({ email: 'admin@test.com', role: 'ADMIN' })
-    expect(rows[1]).toMatchObject({ email: 'user@test.com', role: 'USER' })
-    expect(rows[0].password).not.toBe('secret')
-    expect(String(rows[0].password)).toMatch(/^\$argon2/)
+    const users = rows('users')
+    expect(users).toHaveLength(2)
+    expect(users[0]).toMatchObject({ email: 'admin@test.com', role: 'ADMIN' })
+    expect(users[1]).toMatchObject({ email: 'user@test.com', role: 'USER' })
+    expect(users[0].password).not.toBe('secret')
+    expect(String(users[0].password)).toMatch(/^\$argon2/)
   })
 
   it('inserts cities preserving explicit ids', () => {
-    expect(insertedRows('cities')[0]).toMatchObject({
-      id: 1,
-      code: 'SAM',
-      population: 100,
-    })
+    expect(rows('cities')[0]).toMatchObject({ id: 1, code: 'SAM', population: 100 })
   })
 
   it('inserts sites with empty optionals as null', () => {
-    expect(insertedRows('sites')[0]).toMatchObject({
+    expect(rows('sites')[0]).toMatchObject({
       id: 1,
-      cityId: 1,
-      yandexCounterId: '111',
-      googleCounterId: null,
+      city_id: 1,
+      yandex_counter_id: '111',
+      google_counter_id: null,
     })
-  })
-
-  it('does not run manual sequence resets (SQLite AUTOINCREMENT handles it)', () => {
-    expect(executeMock).not.toHaveBeenCalled()
   })
 })
 
 describe('bootstrap on a populated database', () => {
   it('skips every step and never fetches', async () => {
-    counts.users = 2
-    counts.cities = 40
-    counts.sites = 40
+    fetchMock.mockImplementation(fetchCsv)
+    await bootstrap()
+    fetchMock.mockClear()
+
     await bootstrap()
 
-    expect(inserted).toEqual({})
+    expect(rows('users')).toHaveLength(2)
+    expect(rows('cities')).toHaveLength(1)
+    expect(rows('sites')).toHaveLength(1)
     expect(fetchMock).not.toHaveBeenCalled()
   })
 })
@@ -143,7 +96,8 @@ describe('bootstrap with missing env vars', () => {
     for (const key of Object.keys(mockEnv)) delete mockEnv[key]
     await bootstrap()
 
-    expect(inserted).toEqual({})
+    expect(rows('users')).toEqual([])
+    expect(rows('cities')).toEqual([])
     expect(fetchMock).not.toHaveBeenCalled()
   })
 
@@ -153,7 +107,7 @@ describe('bootstrap with missing env vars', () => {
     mockEnv.ADMIN_PASSWORD = FULL_ENV.ADMIN_PASSWORD
     await bootstrap()
 
-    expect(inserted['users']).toBeUndefined()
+    expect(rows('users')).toEqual([])
   })
 })
 
@@ -162,8 +116,8 @@ describe('bootstrap with a failing fetch', () => {
     fetchMock.mockRejectedValue(new Error('Failed to fetch URL: 404'))
 
     await expect(bootstrap()).resolves.toBeUndefined()
-    expect(insertedRows('users')).toHaveLength(2)
-    expect(inserted['cities']).toBeUndefined()
-    expect(inserted['sites']).toBeUndefined()
+    expect(rows('users')).toHaveLength(2)
+    expect(rows('cities')).toEqual([])
+    expect(rows('sites')).toEqual([])
   })
 })

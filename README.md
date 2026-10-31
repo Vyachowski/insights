@@ -23,7 +23,7 @@ Commit directly to `main`. A `pre-push` hook runs typecheck and tests.
 | `docs/ROADMAP.md` | you | versions and features |
 | `docs/product-rules.md` | both | rules the code cannot explain |
 | `docs/operations.md` | both | deploy, backups, Gudok setup |
-| `docs/adr/` | both | key architecture decisions |
+| `docs/architecture.md` | both | layers and key decisions |
 | `docs/agents/` | agents | setup for the engineering skills |
 | `.scratch/` | agents | temporary specs and tasks, hidden from git |
 

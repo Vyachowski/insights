@@ -1,5 +1,5 @@
 import { bootstrap } from './bootstrap'
-import { runMigrations } from './migrate'
+import { runMigrations } from './db/migrate'
 
 // Startup sequence: migrate → enable FKs → bootstrap. Called once from
 // server.ts before the HTTP server starts listening.

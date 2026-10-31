@@ -1,6 +1,6 @@
-import type { ImportResultDto } from '@/lib/types'
+import type { ImportResult } from '@/server/services/csv-imports'
 
-async function postImport(form: FormData): Promise<ImportResultDto> {
+async function postImport(form: FormData): Promise<ImportResult> {
   const res = await fetch('/import', { method: 'POST', body: form })
   const body: unknown = await res.json().catch(() => null)
   if (!res.ok) {
@@ -10,7 +10,7 @@ async function postImport(form: FormData): Promise<ImportResultDto> {
         : `Import failed: ${res.status}`
     throw { message }
   }
-  return body as ImportResultDto
+  return body as ImportResult
 }
 
 export function downloadCsv(filename: string, content: string) {

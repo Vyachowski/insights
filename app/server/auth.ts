@@ -1,12 +1,10 @@
 import * as argon2 from 'argon2'
-import { eq } from 'drizzle-orm'
 import { createCookieSessionStorage, redirect } from 'react-router'
 
-import { db } from './db'
+import { findUserByEmail, findUserById, type User } from './db/users'
 import { env, sessionMaxAgeSeconds } from './env'
-import { users } from './schema'
 
-export type SessionUser = Omit<typeof users.$inferSelect, 'password'>
+export type SessionUser = Omit<User, 'password'>
 
 const sessionStorage = createCookieSessionStorage({
   cookie: {
@@ -25,11 +23,7 @@ export async function verifyLogin(
   email: string,
   password: string,
 ): Promise<SessionUser | null> {
-  const [user] = await db
-    .select()
-    .from(users)
-    .where(eq(users.email, email))
-    .limit(1)
+  const user = await findUserByEmail(email)
 
   if (!user || user.status !== 'ACTIVE') return null
   if (!(await argon2.verify(user.password, password))) return null
@@ -57,11 +51,7 @@ export async function getUser(request: Request): Promise<SessionUser | null> {
   const userId: unknown = session.get('userId')
   if (typeof userId !== 'string') return null
 
-  const [user] = await db
-    .select()
-    .from(users)
-    .where(eq(users.id, userId))
-    .limit(1)
+  const user = await findUserById(userId)
   if (!user || user.status !== 'ACTIVE') return null
 
   const { password: _password, ...sessionUser } = user

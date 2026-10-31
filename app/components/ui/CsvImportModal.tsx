@@ -3,7 +3,7 @@ import Button from '@ui/Button'
 import { AlertTriangle, CheckCircle, Download, MinusCircle, Upload, XCircle } from 'lucide-react'
 import { useRef, useState } from 'react'
 
-import type { ImportResultDto as ImportResult } from '@/lib/types'
+import type { ImportResult } from '@/server/services/csv-imports'
 
 import { downloadCsv } from '@/lib/importClient'
 
