@@ -1,3 +1,4 @@
+import { type ReconciliationDates, reconciledUntil } from './auto-charges'
 import { toRubles } from './money'
 
 // Below this absolute year-over-year swing the verdict reads as gradual;
@@ -51,12 +52,6 @@ export interface YearTotals {
   monthlyExpenses: Map<number, number>
 }
 
-/** The dates that say how far expenses are exact, `YYYY-MM-DD` or null. */
-export interface ReconciliationDates {
-  lastRunEnd: string | null
-  lastRealDay: string | null
-}
-
 function toPeriodData({ revenue, expenses }: YearTotals) {
   const revenueRubles = toRubles(revenue)
   const expensesRubles = toRubles(expenses)
@@ -105,7 +100,7 @@ export function buildDashboardSummary(
   previous: YearTotals,
   cities: { id: number; name: string }[],
   now: Date,
-  { lastRunEnd, lastRealDay }: ReconciliationDates,
+  dates: ReconciliationDates,
 ) {
   const currentPeriod = toPeriodData(current)
   const previousPeriod = toPeriodData(previous)
@@ -127,8 +122,7 @@ export function buildDashboardSummary(
       calls: withMonthly({ current: current.calls, previous: previous.calls }),
       revenue: withMonthly({ current: currentPeriod.revenue, previous: previousPeriod.revenue }),
       expenses: withMonthly({ current: currentPeriod.expenses, previous: previousPeriod.expenses }),
-      // The log starts after the first Gudok runs, so older runs leave only their rows
-      reconciledUntil: lastRunEnd ?? lastRealDay,
+      reconciledUntil: reconciledUntil(dates),
     },
     callsByCity: mergeCallsByCity(cities, current.callsByCity, previous.callsByCity).map(withMonthly),
     monthlyProfit,

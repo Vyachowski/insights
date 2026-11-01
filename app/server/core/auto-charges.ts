@@ -58,6 +58,15 @@ export function reconciledSchedule(
   }
 }
 
+/** The dates that say how far expenses are exact, `YYYY-MM-DD` or null. */
+export interface ReconciliationDates {
+  lastRunEnd: string | null
+  lastRealDay: string | null
+}
+
+// The log starts after the first Gudok runs, so older runs leave only their rows
+export const reconciledUntil = ({ lastRunEnd, lastRealDay }: ReconciliationDates) => lastRunEnd ?? lastRealDay
+
 /**
  * A number as `Номера` shows it: one that is off has no next charge and no
  * no-charge mark, and the amount is in rubles. `offer` comes from the site's
