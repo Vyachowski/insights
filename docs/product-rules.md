@@ -69,6 +69,15 @@ Rules the code cannot explain on its own. UI labels stay in Russian, exactly as 
 - A revenue or expense row with a null `siteId` is a company-level entry (`Общий`).
 - Telephony expenses come from Gudok `/history`: only `Списание` rows count, summed into one `telephony` row per date and site.
 
+## Auto charges
+
+- Between Gudok runs the server writes an estimated `telephony` charge for each enabled schedule. The row has `is_estimate` set and no comment.
+- A check writes every date due up to today, then moves the next date past today by the schedule's interval, 30 days by default. Missed dates are written after downtime.
+- Today is the `Europe/Moscow` day on any server.
+- An estimate never changes a stored row: when the key `(date, siteId, type)` is taken, the row stays as it is and the date counts as done. A repeated check adds nothing.
+- A number with no site is skipped and its next date stays. Once the number has a site, the missed dates are written.
+- All schedules start off, and a number with no schedule has no auto charge.
+
 ## Writing data
 
 - Writes are idempotent. Calls CSV import never changes stored rows and skips duplicates, so re-uploading a file is safe. Webhooks key on `provider + providerCallId`.

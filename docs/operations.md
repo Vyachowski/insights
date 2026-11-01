@@ -12,7 +12,7 @@
 
 ## Startup
 
-Env validation → open SQLite (WAL, busy_timeout) → Drizzle `migrate()` → enable foreign keys → bootstrap → listen. Migrations are in `drizzle/`, generated with `npm run drizzle:generate` from `app/server/db/schema.ts`.
+Env validation → open SQLite (WAL, busy_timeout) → Drizzle `migrate()` → enable foreign keys → bootstrap → listen → start the backup and auto charge schedulers. Migrations are in `drizzle/`, generated with `npm run drizzle:generate` from `app/server/db/schema.ts`.
 
 ## Bootstrap
 
@@ -30,6 +30,13 @@ Env validation → open SQLite (WAL, busy_timeout) → Drizzle `migrate()` → e
 - No daily backup was made from 2026-10-22 to 2026-10-29. Logs from 2026-10-23 show `S3 HEAD ...: 403` every hour until the 2026-10-30 redeploy. The likely cause: Railway rolled all bucket credentials after its [October 2026 security incident](https://blog.railway.com/p/preliminary-report-october-security-incident), and the running process kept the old ones. After a credential change, redeploy the service.
 - Open question: the cause of the earlier gap, from 2026-10-14 to 2026-10-16, is unknown. It ended without a restart.
 - Restore: stop the service → on the volume remove `insights.db` and its `-wal`/`-shm` sidecars → place the backup file as `insights.db` → start.
+
+## Auto charges
+
+- The server checks for due estimates at startup and then hourly, in every environment. The job has its own scheduler, because the backup one does not start without bucket storage.
+- Each check logs `[auto-charges] schedules checked: N, estimates written: M`. `checked` counts enabled schedules whose number has a site.
+- One check is one transaction. A failure logs `[auto-charges] check failed: ...`, writes nothing, and the next tick repeats it. The app keeps working.
+- Shutdown stops the timer before the database closes. A check is synchronous, so it cannot be cut off halfway.
 
 ## Gudok call webhook
 
