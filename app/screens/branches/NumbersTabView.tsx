@@ -2,9 +2,9 @@ import { Badge, Box, Paper, ScrollArea, Stack, Table, Text, Title } from '@manti
 import { useState } from 'react'
 import { useFetcher } from 'react-router'
 
+import { CHARGE_TOASTS } from './charge-toasts'
 import ChargeActions from './ChargeActions'
 import ChargeModal from './ChargeModal'
-import { CHARGE_TOASTS } from './chargeToasts'
 
 import type { Site } from '@/server/db/queries/sites'
 import type { NumberCharge, NumberChargeResult } from '@/server/services/auto-charges'

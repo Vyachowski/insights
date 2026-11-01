@@ -23,7 +23,7 @@ export const addDays = (date: string, days: number) =>
   new Date(Date.parse(`${date}T00:00:00Z`) + days * DAY_MS).toISOString().slice(0, 10)
 
 /** A date keeps its day, and in a month too short for it falls on the last day. */
-export function addMonths(date: string, months: number) {
+function addMonths(date: string, months: number) {
   const next = new Date(`${date}T00:00:00Z`)
   const day = next.getUTCDate()
   next.setUTCMonth(next.getUTCMonth() + months)
@@ -36,14 +36,16 @@ type ChargeInterval = { intervalDays: number } | { intervalMonths: number }
 
 /** Every date owed up to `today`, and the first next date past it. */
 export function chargesDue(schedule: { nextDate: string } & ChargeInterval, today: string) {
-  const interval = 'intervalDays' in schedule ? schedule.intervalDays : schedule.intervalMonths
+  const [interval, step] = 'intervalDays' in schedule
+    ? [schedule.intervalDays, addDays]
+    : [schedule.intervalMonths, addMonths]
   if (interval < 1) throw new RangeError(`Bad charge interval: ${interval}`)
 
   const dates: string[] = []
   let date = schedule.nextDate
   while (date <= today) {
     dates.push(date)
-    date = 'intervalDays' in schedule ? addDays(date, interval) : addMonths(date, interval)
+    date = step(date, interval)
   }
   return { dates, nextDate: date }
 }
