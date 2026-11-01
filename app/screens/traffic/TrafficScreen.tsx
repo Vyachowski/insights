@@ -1,5 +1,4 @@
 import { Container, Tabs } from '@mantine/core'
-import CsvImportModal from '@ui/CsvImportModal'
 import { useSearchParams } from 'react-router'
 
 import CallsTabView from './CallsTabView'
@@ -9,6 +8,7 @@ import type { CallListRow } from '@/server/db/queries/calls'
 import type { SiteMetric } from '@/server/db/queries/metrics'
 import type { Site } from '@/server/db/queries/sites'
 
+import CsvImportModal from '@/components/CsvImportModal'
 import { useCsvImport } from '@/hooks/useCsvImport'
 import { usePeriodFilter, usePeriodRows } from '@/hooks/usePeriodFilter'
 

@@ -1,13 +1,13 @@
 import { Box, Group, Paper, ScrollArea, Stack, Table, Text, Title } from '@mantine/core'
-import Button from '@ui/Button'
-import PeriodFilters from '@ui/PeriodFilters'
-import TablePager from '@ui/TablePager'
 import { Upload } from 'lucide-react'
 
 import type { PeriodFilter } from '@/hooks/usePeriodFilter'
 import type { SiteMetric } from '@/server/db/queries/metrics'
 import type { Site } from '@/server/db/queries/sites'
 
+import Button from '@/components/Button'
+import PeriodFilters from '@/components/PeriodFilters'
+import TablePager from '@/components/TablePager'
 import { useTable } from '@/hooks/useTable'
 import { formatDate, formatNumber, getSiteName } from '@/lib/format'
 import { totalLeads } from '@/lib/totals'

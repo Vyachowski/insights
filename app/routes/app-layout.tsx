@@ -1,11 +1,11 @@
 import { Alert, AppShell } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
-import Header from '@ui/Header'
-import Sidebar from '@ui/Sidebar'
 import { Outlet, useLoaderData, useLocation } from 'react-router'
 
 import type { Route } from './+types/app-layout'
 
+import Header from '@/components/Header'
+import Sidebar from '@/components/Sidebar'
 import { menuItems } from '@/menu-items'
 import { requireUser } from '@/routes/helpers/auth'
 import { isBackupOverdue } from '@/server/jobs/backup'

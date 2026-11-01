@@ -21,8 +21,7 @@
     "types": ["@react-router/node", "vite/client"],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./app/*"],
-      "@ui/*": ["./app/components/*"]
+      "@/*": ["./app/*"]
     }
   }
 }

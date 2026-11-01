@@ -1,12 +1,12 @@
 import { Badge, Box, Group, Paper, ScrollArea, Stack, Table, Text, Title } from '@mantine/core'
-import Button from '@ui/Button'
-import PeriodFilters from '@ui/PeriodFilters'
-import TablePager from '@ui/TablePager'
 import { Upload } from 'lucide-react'
 
 import type { PeriodFilter } from '@/hooks/usePeriodFilter'
 import type { CallListRow } from '@/server/db/queries/calls'
 
+import Button from '@/components/Button'
+import PeriodFilters from '@/components/PeriodFilters'
+import TablePager from '@/components/TablePager'
 import { useTable } from '@/hooks/useTable'
 import { formatDate } from '@/lib/format'
 

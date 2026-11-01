@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { useRevalidator } from 'react-router'
 
+import type { CsvImportConfig } from '@/components/CsvImportModal'
 import type { ImportResource } from '@/server/services/csv-imports'
-import type { CsvImportConfig } from '@ui/CsvImportModal'
 
 import { importFile, importUrl } from '@/lib/import-client'
 

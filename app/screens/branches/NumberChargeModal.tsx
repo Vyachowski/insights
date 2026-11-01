@@ -1,9 +1,10 @@
 import { Group, Modal, Stack, Text } from '@mantine/core'
-import Button from '@ui/Button'
-import Input from '@ui/Input'
 import { useState } from 'react'
 
 import type { NumberCharge } from '@/server/services/auto-charges'
+
+import Button from '@/components/Button'
+import Input from '@/components/Input'
 
 interface NumberChargeModalProps {
   row: NumberCharge

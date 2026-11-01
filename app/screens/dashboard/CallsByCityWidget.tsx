@@ -1,5 +1,4 @@
 import { Group, ScrollArea, Stack, Text } from '@mantine/core'
-import Card from '@ui/Card'
 import { useState } from 'react'
 
 import TargetBar from './TargetBar'
@@ -7,6 +6,7 @@ import ValueModeToggle, { type ValueMode } from './ValueModeToggle'
 
 import type { DashboardSummary } from '@/server/core/dashboard'
 
+import Card from '@/components/Card'
 import { formatNumberDelta, formatYoyDelta } from '@/lib/format'
 
 export default function CallsByCityWidget({ cities }: { cities: DashboardSummary['callsByCity'] }) {

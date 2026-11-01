@@ -1,9 +1,10 @@
 import { Group } from '@mantine/core'
-import MonthSelect from '@ui/MonthSelect'
-import YearSelect from '@ui/YearSelect'
 
 import type { PeriodFilter } from '@/hooks/usePeriodFilter'
 import type { ReactNode } from 'react'
+
+import MonthSelect from '@/components/MonthSelect'
+import YearSelect from '@/components/YearSelect'
 
 export default function PeriodFilters({ period, children }: { period: PeriodFilter, children?: ReactNode }) {
   const { availableYears, effectiveYear, setSelectedYear, availableMonths, effectiveMonth, setSelectedMonth } = period

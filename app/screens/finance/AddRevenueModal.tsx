@@ -1,10 +1,10 @@
 import { Group, Modal, Select, Stack } from '@mantine/core'
-import Button from '@ui/Button'
-import Input from '@ui/Input'
 import { useState } from 'react'
 
 import type { Site } from '@/server/db/queries/sites'
 
+import Button from '@/components/Button'
+import Input from '@/components/Input'
 import { getHostname } from '@/lib/format'
 
 interface RevenueValues {

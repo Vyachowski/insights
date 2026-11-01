@@ -1,10 +1,10 @@
 import { Box, Divider, Group, Modal, Stack, Text, TextInput } from '@mantine/core'
-import Button from '@ui/Button'
 import { AlertTriangle, CheckCircle, Download, MinusCircle, Upload, XCircle } from 'lucide-react'
 import { useRef, useState } from 'react'
 
 import type { ImportResult } from '@/server/services/csv-imports'
 
+import Button from '@/components/Button'
 import { downloadCsv } from '@/lib/import-client'
 
 type ResultStatus = 'success' | 'ignored' | 'mixed' | 'empty'

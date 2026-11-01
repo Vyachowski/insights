@@ -1,5 +1,4 @@
 import { Container, Tabs } from '@mantine/core'
-import CsvImportModal from '@ui/CsvImportModal'
 import { useCallback, useMemo, useState } from 'react'
 import { useFetcher, useSearchParams } from 'react-router'
 
@@ -10,6 +9,7 @@ import { type EntryResult, useEntryToast } from './useEntryToast'
 
 import type { getFinancePage } from '@/server/services/finance'
 
+import CsvImportModal from '@/components/CsvImportModal'
 import { useAuth } from '@/hooks/useAuth'
 import { useCsvImport } from '@/hooks/useCsvImport'
 import { usePeriodFilter, usePeriodRows } from '@/hooks/usePeriodFilter'

@@ -1,5 +1,4 @@
 import { Group, Stack, Text } from '@mantine/core'
-import Card from '@ui/Card'
 import { useState } from 'react'
 
 import TargetBar from './TargetBar'
@@ -7,6 +6,7 @@ import ValueModeToggle, { type ValueMode } from './ValueModeToggle'
 
 import type { DashboardSummary } from '@/server/core/dashboard'
 
+import Card from '@/components/Card'
 import { formatDayMonth, formatNumberDelta, formatRubDelta, formatYoyDelta } from '@/lib/format'
 
 export default function TrendsWidget({ trends }: { trends: DashboardSummary['trends'] }) {

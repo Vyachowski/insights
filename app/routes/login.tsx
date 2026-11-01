@@ -1,12 +1,12 @@
 import { Alert, Box, Center, Stack, Text, Title } from '@mantine/core'
-import Button from '@ui/Button'
-import Card from '@ui/Card'
-import Input from '@ui/Input'
-import Logo from '@ui/Logo'
 import { data, Form, redirect, useNavigation } from 'react-router'
 
 import type { Route } from './+types/login'
 
+import Button from '@/components/Button'
+import Card from '@/components/Card'
+import Input from '@/components/Input'
+import Logo from '@/components/Logo'
 import { createUserSession, getUser } from '@/routes/helpers/auth'
 import { verifyLogin } from '@/server/services/auth'
 

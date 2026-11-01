@@ -1,5 +1,4 @@
 import { Group, Paper, Stack, Text, ThemeIcon, Tooltip } from '@mantine/core'
-import Card from '@ui/Card'
 import { TrendingDown, TrendingUp } from 'lucide-react'
 import { useState } from 'react'
 
@@ -7,6 +6,7 @@ import ValueModeToggle, { type ValueMode } from './ValueModeToggle'
 
 import type { DashboardSummary } from '@/server/core/dashboard'
 
+import Card from '@/components/Card'
 import { formatRub, formatRubDelta } from '@/lib/format'
 
 const CURRENT_YEAR = new Date().getFullYear()
