@@ -276,6 +276,20 @@ describe('changeNumberCharge', () => {
     expect(schedules()).toMatchObject([{ no_charge_period_end: '2026-10-31' }])
   })
 
+  it('clears the no-charge mark on switching off, and keeps the date and amount', () => {
+    seedSchedule({ nextDate: '2026-11-26' })
+    sqlite.exec("UPDATE charge_schedules SET no_charge_period_end = '2026-10-31'")
+
+    switchOff()
+
+    expect(schedules()).toMatchObject([{
+      enabled: 0,
+      next_date: '2026-11-26',
+      amount: 87000,
+      no_charge_period_end: null,
+    }])
+  })
+
   it('refuses a second enabled number on a site and writes nothing', () => {
     seedSchedule()
     seedNumber('2', 5)

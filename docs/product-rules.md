@@ -86,7 +86,7 @@ Rules the code cannot explain on its own. UI labels stay in Russian, exactly as 
 - The next date must be a real `YYYY-MM-DD` date and the amount above zero. The interval is not edited: a stored interval below 1 is refused, because one bad schedule stops the check for all numbers. Switching off still works on such a schedule.
 - A number with no site cannot be switched on. A site has one enabled number: a second one is refused, and the check runs inside the write transaction.
 - Switching off stops new estimates. The schedule row stays, and rows already written stay until a reconciliation run.
-- Switching on clears the stored no-charge period end. An edit keeps it.
+- Switching on or off clears the stored no-charge period end. An edit keeps it.
 
 ## Reconciliation
 
