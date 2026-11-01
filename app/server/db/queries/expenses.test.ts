@@ -2,8 +2,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { db, sqlite } from '@/server/db/client'
 
-const { upsertExpense } = await import('./expenses')
+const { oldestEstimateDate, upsertExpense } = await import('./expenses')
 const { HOSTING_TYPE } = await import('@/server/core/finance')
+const { transaction } = await import('../transaction')
 
 beforeEach(() => {
   sqlite.exec('DELETE FROM expenses; DELETE FROM sites; DELETE FROM cities;')
@@ -23,11 +24,11 @@ function expenseRows() {
   return sqlite.prepare('SELECT * FROM expenses ORDER BY date, site_id').all() as Record<string, unknown>[]
 }
 
-function seedEstimate(siteId: number | null = 5) {
+function seedEstimate(siteId: number | null = 5, date = '2026-01-01', type = 'telephony') {
   sqlite.prepare(
     'INSERT INTO expenses (date, site_id, amount, type, comment, is_estimate, created_at, updated_at) '
-    + "VALUES ('2026-01-01', ?, 87000, 'telephony', 'Оценка', 1, 0, 0)",
-  ).run(siteId)
+    + "VALUES (?, ?, 87000, ?, 'Оценка', 1, 0, 0)",
+  ).run(date, siteId, type)
 }
 
 describe('upsertExpense', () => {
@@ -156,5 +157,26 @@ describe('upsertExpense over an estimate', () => {
 
     expect(await upsertExpense({ ...write, amount: 90000 })).toBe('updated')
     expect(expenseRows()).toMatchObject([{ amount: 90000, is_estimate: 0 }])
+  })
+})
+
+describe('oldestEstimateDate', () => {
+  const oldest = () => transaction(tx => oldestEstimateDate(tx, 'telephony'))
+
+  it('is null with no estimates, whatever real rows exist', async () => {
+    await upsertExpense({ date: '2025-12-01', siteId: 5, type: 'telephony', amount: 87000 })
+    expect(oldest()).toBeNull()
+  })
+
+  it('returns the oldest estimate, not an older real row', async () => {
+    await upsertExpense({ date: '2025-12-01', siteId: 5, type: 'telephony', amount: 87000 })
+    seedEstimate(5, '2026-02-01')
+    seedEstimate(5, '2026-01-01')
+    expect(oldest()).toBe('2026-01-01')
+  })
+
+  it('skips estimates of another type', () => {
+    seedEstimate(5, '2026-01-01', HOSTING_TYPE)
+    expect(oldest()).toBeNull()
   })
 })
