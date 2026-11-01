@@ -81,6 +81,17 @@ describe('upsertExpense', () => {
     const nullRow = rows.find(r => r.site_id === null)
     expect(nullRow?.amount).toBe(400000)
   })
+
+  it.each([5, null])('overwrites the row when an insert race is lost, siteId %j', async siteId => {
+    await upsertExpense({ date: '2026-01-01', siteId, type: HOSTING_TYPE, amount: 500000 })
+    const noRowFound = { from: () => ({ where: () => ({ limit: async () => [] }) }) }
+    vi.spyOn(db, 'select').mockReturnValueOnce(noRowFound as never)
+
+    const outcome = await upsertExpense({ date: '2026-01-01', siteId, type: HOSTING_TYPE, amount: 750000 })
+
+    expect(outcome).toBe('updated')
+    expect(expenseRows()).toMatchObject([{ site_id: siteId, type: 'hosting', amount: 750000 }])
+  })
 })
 
 describe('upsertExpense over an estimate', () => {
