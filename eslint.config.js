@@ -15,11 +15,19 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const DRIZZLE = ['drizzle-orm', 'drizzle-orm/*']
 const QUERY_INTERNALS = ['**/db/client', '**/db/schema', ...DRIZZLE]
+const SCREEN_RULE = 'Screens total rows and format values with app/lib.'
+const CORE_RULE = 'core stays pure: a service passes this in.'
 
 const restrictImports = (files, patterns, ignores = []) => ({
   files,
   ignores: ['**/*.test.{ts,tsx}', ...ignores],
   rules: { '@typescript-eslint/no-restricted-imports': ['error', { patterns }] },
+})
+
+const restrictCode = (files, rules) => ({
+  files,
+  ignores: ['**/*.test.{ts,tsx}'],
+  rules,
 })
 
 export default defineConfig([
@@ -143,6 +151,22 @@ export default defineConfig([
     { group: [...QUERY_INTERNALS, '**/server/env', '**/server/storage', '**/server/backup'], message: 'UI never touches server internals, not even for types.' },
     { group: ['**/server/auth', '**/server/core/**', '**/server/db/queries/**', '**/server/services/**'], allowTypeImports: true, message: 'UI sees the server through route data: type imports only.' },
   ]),
+  restrictCode(['app/screens/**'], {
+    'no-restricted-syntax': ['error',
+      { selector: "MemberExpression[property.name='reduce']", message: SCREEN_RULE },
+      { selector: "MemberExpression[property.name='toLocaleString']", message: SCREEN_RULE },
+      { selector: "MemberExpression[object.name='Intl']", message: SCREEN_RULE },
+    ],
+  }),
+  restrictCode(['app/server/core/**'], {
+    'no-restricted-globals': ['error',
+      ...['fetch', 'console', 'process'].map(name => ({ name, message: CORE_RULE })),
+    ],
+    'no-restricted-syntax': ['error',
+      { selector: "NewExpression[callee.name='Date'][arguments.length=0]", message: CORE_RULE },
+      { selector: "MemberExpression[object.name='Date'][property.name='now']", message: CORE_RULE },
+    ],
+  }),
   {
     // Route modules legitimately export loaders/actions alongside components
     files: ['app/routes/**', 'app/root.tsx'],
