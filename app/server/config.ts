@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-const envSchema = z.object({
+const configSchema = z.object({
   NODE_ENV: z
     .enum(['development', 'production', 'test'])
     .default('development'),
@@ -35,17 +35,17 @@ const envSchema = z.object({
   RAILWAY_GIT_COMMIT_SHA: z.string().optional(),
 })
 
-type Env = z.infer<typeof envSchema>
+type Config = z.infer<typeof configSchema>
 
-export const env: Env = envSchema.parse(process.env)
+export const config: Config = configSchema.parse(process.env)
 
-export const sessionMaxAgeSeconds = Math.floor(env.JWT_MAX_AGE / 1000)
+export const sessionMaxAgeSeconds = Math.floor(config.JWT_MAX_AGE / 1000)
 
 export function isStorageConfigured(): boolean {
   return Boolean(
-    env.BUCKET_ENDPOINT
-    && env.BUCKET_NAME
-    && env.BUCKET_ACCESS_KEY_ID
-    && env.BUCKET_SECRET_ACCESS_KEY,
+    config.BUCKET_ENDPOINT
+    && config.BUCKET_NAME
+    && config.BUCKET_ACCESS_KEY_ID
+    && config.BUCKET_SECRET_ACCESS_KEY,
   )
 }

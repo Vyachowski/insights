@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-const mockEnv: { GUDOK_WEBHOOK_SECRET?: string } = {}
+const mockConfig: { GUDOK_WEBHOOK_SECRET?: string } = {}
 const ingestMock = vi.fn()
 
-vi.mock('@/server/config', () => ({ env: mockEnv }))
+vi.mock('@/server/config', () => ({ config: mockConfig }))
 vi.mock('@/server/services/gudok-calls', async () => {
   class GudokPayloadError extends Error {}
   return { GudokPayloadError, ingestGudokCall: (p: unknown) => ingestMock(p) }
@@ -20,7 +20,7 @@ const call = (fn: unknown, request: Request, secret?: string) =>
   (fn as Handler)({ request, params: { secret } })
 
 beforeEach(() => {
-  mockEnv.GUDOK_WEBHOOK_SECRET = SECRET
+  mockConfig.GUDOK_WEBHOOK_SECRET = SECRET
   ingestMock.mockReset()
   ingestMock.mockResolvedValue({ stored: true, duplicate: false, gudokId: 1, siteId: 5 })
 })
@@ -58,7 +58,7 @@ describe('gudok webhook route', () => {
   })
 
   it('secret unset → 404', async () => {
-    mockEnv.GUDOK_WEBHOOK_SECRET = undefined
+    mockConfig.GUDOK_WEBHOOK_SECRET = undefined
     const req = new Request('http://x/webhooks/gudok/top-secret', { method: 'POST' })
     await expect(call(action, req, SECRET)).rejects.toMatchObject({ status: 404 })
   })

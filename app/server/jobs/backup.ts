@@ -1,7 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 
-import { env, isStorageConfigured } from '../config'
+import { config, isStorageConfigured } from '../config'
 import { sqlite } from '../db/client'
 import { deleteObject, headObject, listObjectKeys, putObject } from '../storage'
 
@@ -29,8 +29,8 @@ const daysAgo = (n: number) => new Date(Date.now() - n * 24 * HOUR_MS)
 
 export function startBackupScheduler(): void {
   // A local env holds working bucket keys, and a local snapshot would take the day's key
-  if (env.NODE_ENV !== 'production') {
-    console.log(`[backup] NODE_ENV is ${env.NODE_ENV} — backups off`)
+  if (config.NODE_ENV !== 'production') {
+    console.log(`[backup] NODE_ENV is ${config.NODE_ENV} — backups off`)
     return
   }
   if (!isStorageConfigured()) {
@@ -79,7 +79,7 @@ async function pruneExpired(): Promise<void> {
 }
 
 async function uploadSnapshot(key: string): Promise<void> {
-  const tempPath = path.join(path.dirname(env.DATABASE_PATH), 'backup.tmp')
+  const tempPath = path.join(path.dirname(config.DATABASE_PATH), 'backup.tmp')
   fs.rmSync(tempPath, { force: true })
   try {
     await sqlite.backup(tempPath)

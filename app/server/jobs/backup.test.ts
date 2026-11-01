@@ -2,7 +2,7 @@ import fs from 'node:fs'
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-// backup.ts pulls in the real DB/env/storage on import; stub them so the module
+// backup.ts pulls in the real DB/config/storage on import; stub them so the module
 // loads without opening SQLite or validating env.
 const storage = vi.hoisted(() => ({
   configured: false,
@@ -19,7 +19,7 @@ vi.mock('../db/client', () => ({
   },
 }))
 vi.mock('../config', () => ({
-  env: runtime,
+  config: runtime,
   isStorageConfigured: () => storage.configured,
 }))
 vi.mock('../storage', () => storage)

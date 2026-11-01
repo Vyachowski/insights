@@ -20,11 +20,11 @@ const FULL_ENV = {
   SITES_CSV_URL: 'https://drive.example.com/sites',
 }
 
-const mockEnv: Record<string, string | undefined> = {}
+const mockConfig: Record<string, string | undefined> = {}
 const fetchMock = vi.fn()
 
 vi.mock('@/server/config', () => ({
-  env: mockEnv,
+  config: mockConfig,
   isStorageConfigured: () => false,
 }))
 
@@ -43,8 +43,8 @@ const fetchCsv = (url: string) =>
 beforeEach(() => {
   fetchMock.mockReset()
   sqlite.exec('DELETE FROM sites; DELETE FROM cities; DELETE FROM users;')
-  for (const key of Object.keys(mockEnv)) delete mockEnv[key]
-  Object.assign(mockEnv, FULL_ENV)
+  for (const key of Object.keys(mockConfig)) delete mockConfig[key]
+  Object.assign(mockConfig, FULL_ENV)
 })
 
 describe('bootstrap on a fresh database', () => {
@@ -93,7 +93,7 @@ describe('bootstrap on a populated database', () => {
 
 describe('bootstrap with missing env vars', () => {
   it('skips all steps without fetching or inserting', async () => {
-    for (const key of Object.keys(mockEnv)) delete mockEnv[key]
+    for (const key of Object.keys(mockConfig)) delete mockConfig[key]
     await bootstrap()
 
     expect(rows('users')).toEqual([])
@@ -102,9 +102,9 @@ describe('bootstrap with missing env vars', () => {
   })
 
   it('skips users when only admin vars are set', async () => {
-    for (const key of Object.keys(mockEnv)) delete mockEnv[key]
-    mockEnv.ADMIN_EMAIL = FULL_ENV.ADMIN_EMAIL
-    mockEnv.ADMIN_PASSWORD = FULL_ENV.ADMIN_PASSWORD
+    for (const key of Object.keys(mockConfig)) delete mockConfig[key]
+    mockConfig.ADMIN_EMAIL = FULL_ENV.ADMIN_EMAIL
+    mockConfig.ADMIN_PASSWORD = FULL_ENV.ADMIN_PASSWORD
     await bootstrap()
 
     expect(rows('users')).toEqual([])

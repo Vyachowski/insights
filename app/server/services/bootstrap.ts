@@ -2,7 +2,7 @@ import * as argon2 from 'argon2'
 
 import { fetchUrlToBuffer } from './fetch-file'
 
-import { env } from '@/server/config'
+import { config } from '@/server/config'
 import { assertCsvColumns, parseCsvBuffer } from '@/server/core/csv'
 import { CITY_CSV_COLUMNS, cityRowSchema, SITE_CSV_COLUMNS, siteRowSchema } from '@/server/core/seed-rows'
 import { countCities, insertCities } from '@/server/db/queries/cities'
@@ -26,15 +26,15 @@ async function runStep(step: string, fn: () => Promise<string>): Promise<void> {
 }
 
 function readUserConfig(prefix: 'ADMIN' | 'USER', role: 'ADMIN' | 'USER') {
-  const email = env[`${prefix}_EMAIL`]
-  const password = env[`${prefix}_PASSWORD`]
+  const email = config[`${prefix}_EMAIL`]
+  const password = config[`${prefix}_PASSWORD`]
   if (!email || !password) return null
   return {
     email,
     password,
     role,
-    firstName: env[`${prefix}_NAME`] ?? null,
-    lastName: env[`${prefix}_LASTNAME`] ?? null,
+    firstName: config[`${prefix}_NAME`] ?? null,
+    lastName: config[`${prefix}_LASTNAME`] ?? null,
   }
 }
 
@@ -57,7 +57,7 @@ async function bootstrapUsers(): Promise<string> {
 async function bootstrapCities(): Promise<string> {
   if ((await countCities()) > 0) return 'skipped (table not empty)'
 
-  const rows = await fetchRows('seed/cities.csv', env.CITIES_CSV_URL, CITY_CSV_COLUMNS)
+  const rows = await fetchRows('seed/cities.csv', config.CITIES_CSV_URL, CITY_CSV_COLUMNS)
   if (!rows) return 'skipped (no CSV source configured)'
   const values = rows.map(row => cityRowSchema.parse(row))
   return `created ${await insertCities(values)} cities`
@@ -67,7 +67,7 @@ async function bootstrapSites(): Promise<string> {
   if ((await countSites()) > 0) return 'skipped (table not empty)'
   if ((await countCities()) === 0) return 'skipped (no cities to reference)'
 
-  const rows = await fetchRows('seed/sites.csv', env.SITES_CSV_URL, SITE_CSV_COLUMNS)
+  const rows = await fetchRows('seed/sites.csv', config.SITES_CSV_URL, SITE_CSV_COLUMNS)
   if (!rows) return 'skipped (no CSV source configured)'
   const values = rows.map(row => siteRowSchema.parse(row))
   return `created ${await insertSites(values)} sites`

@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-const mockEnv: { GUDOK_WEBHOOK_SECRET?: string } = {}
+const mockConfig: { GUDOK_WEBHOOK_SECRET?: string } = {}
 const sinceMock = vi.fn()
 
-vi.mock('@/server/config', () => ({ env: mockEnv }))
+vi.mock('@/server/config', () => ({ config: mockConfig }))
 vi.mock('@/server/services/gudok-expenses', () => ({
   telephonySince: () => sinceMock(),
 }))
@@ -17,7 +17,7 @@ type Handler = (a: { params: { secret?: string } }) => Promise<Response>
 const call = (secret?: string) => (loader as unknown as Handler)({ params: { secret } })
 
 beforeEach(() => {
-  mockEnv.GUDOK_WEBHOOK_SECRET = SECRET
+  mockConfig.GUDOK_WEBHOOK_SECRET = SECRET
   sinceMock.mockReset()
   sinceMock.mockReturnValue('2026-10-31')
 })
@@ -38,7 +38,7 @@ describe('gudok expenses since route', () => {
   })
 
   it('secret unset → 404, no read', async () => {
-    mockEnv.GUDOK_WEBHOOK_SECRET = undefined
+    mockConfig.GUDOK_WEBHOOK_SECRET = undefined
     expect((await call(SECRET)).status).toBe(404)
     expect(sinceMock).not.toHaveBeenCalled()
   })

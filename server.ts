@@ -6,15 +6,15 @@ import { createRequestHandler } from '@react-router/express'
 import express from 'express'
 
 // Validates env on import — fail fast before anything else
-const { env } = await import('./app/server/config')
+const { config } = await import('./app/server/config')
 
-// Startup order (design decision 7): env → migrate → bootstrap → listen.
+// Startup order (design decision 7): config → migrate → bootstrap → listen.
 // migrate/bootstrap are wired by the data-layer tasks; placeholders keep
 // the sequence explicit.
 const { runStartup } = await import('./app/server/startup')
 await runStartup()
 
-const isProduction = env.NODE_ENV === 'production'
+const isProduction = config.NODE_ENV === 'production'
 
 const viteDevServer = isProduction
   ? undefined
@@ -28,7 +28,7 @@ const viteDevServer = isProduction
       server: {
         middlewareMode: true,
         // Vite's default HMR port is fixed, so a second copy could not bind it
-        hmr: { port: env.PORT + 10_000 },
+        hmr: { port: config.PORT + 10_000 },
         fs: { allow: ['.', realpathSync('node_modules')] },
       },
     }),
@@ -56,8 +56,8 @@ app.use(
   }),
 )
 
-const server = app.listen(env.PORT, () => {
-  console.log(`[web] listening on http://localhost:${env.PORT} (${env.NODE_ENV})`)
+const server = app.listen(config.PORT, () => {
+  console.log(`[web] listening on http://localhost:${config.PORT} (${config.NODE_ENV})`)
 })
 
 const { startBackupScheduler, stopBackupScheduler, isBackupInFlight } = await import(
