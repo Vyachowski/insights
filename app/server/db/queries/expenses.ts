@@ -137,3 +137,12 @@ export function latestExpenseDate(tx: Tx, type: string): string | null {
     .get()
   return row?.d ?? null
 }
+
+/** Latest date (`YYYY-MM-DD`) of a real expense of this type, or null. */
+export async function latestRealExpenseDate(type: string): Promise<string | null> {
+  const [row] = await db
+    .select({ d: max(expenses.date) })
+    .from(expenses)
+    .where(and(eq(expenses.type, type), eq(expenses.isEstimate, false)))
+  return row?.d ?? null
+}
