@@ -1,6 +1,6 @@
 import * as argon2 from 'argon2'
 
-import { fetchUrlToBuffer } from './helpers/fetch-csv'
+import { fetchCsvBuffer } from './helpers/fetch-csv'
 
 import { config } from '@/server/config'
 import { assertCsvColumns, parseCsvBuffer } from '@/server/core/csv'
@@ -93,7 +93,7 @@ async function fetchRows(
     }
   }
 
-  if (!buffer && fallbackUrl) buffer = await fetchUrlToBuffer(fallbackUrl)
+  if (!buffer && fallbackUrl) buffer = await fetchCsvBuffer(fallbackUrl)
   if (!buffer) return null
 
   const rows = parseCsvBuffer(buffer)

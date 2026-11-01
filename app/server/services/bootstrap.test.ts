@@ -29,7 +29,7 @@ vi.mock('@/server/config', () => ({
 }))
 
 vi.mock('./helpers/fetch-csv', () => ({
-  fetchUrlToBuffer: (url: string) => fetchMock(url),
+  fetchCsvBuffer: (url: string) => fetchMock(url),
 }))
 
 const { bootstrap } = await import('./bootstrap')

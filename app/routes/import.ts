@@ -6,7 +6,7 @@ import {
   importers,
   type ImportResource,
 } from '@/server/services/csv-imports'
-import { fetchUrlToBuffer } from '@/server/services/helpers/fetch-csv'
+import { fetchCsvBuffer } from '@/server/services/helpers/fetch-csv'
 
 // Resource route: the single mutation endpoint for CSV imports.
 // Accepts multipart form data: `intent` = resource name, plus either
@@ -39,7 +39,7 @@ async function readCsvBuffer(form: FormData): Promise<Buffer> {
   }
   const url = form.get('url')
   if (typeof url === 'string' && url.length > 0) {
-    return fetchUrlToBuffer(url)
+    return fetchCsvBuffer(url)
   }
   throw new CsvValidationError('Provide a CSV file or a URL')
 }
