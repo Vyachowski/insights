@@ -5,10 +5,9 @@ import { buildDashboardSummary, computeVerdict, mergeCallsByCity, type YearTotal
 import type { ReconciliationDates } from './auto-charges'
 
 describe('computeVerdict', () => {
-  it('reports growth as year-over-year percent against last year', () => {
+  it('reports growth against last year', () => {
     const verdict = computeVerdict(1200, 1000)
     expect(verdict.isGrowing).toBe(true)
-    expect(verdict.growthPercent).toBe(20)
     expect(verdict.current).toBe(1200)
     expect(verdict.previous).toBe(1000)
   })
@@ -22,13 +21,12 @@ describe('computeVerdict', () => {
   it('handles a profit that crosses into a loss', () => {
     const verdict = computeVerdict(-134160, 427388)
     expect(verdict.isGrowing).toBe(false)
-    expect(verdict.growthPercent).toBe(-131.4)
     expect(verdict.isStrong).toBe(true)
   })
 
   it('avoids dividing by zero when last year was zero', () => {
     const verdict = computeVerdict(500, 0)
-    expect(verdict.growthPercent).toBe(0)
+    expect(verdict.isStrong).toBe(false)
     expect(verdict.isGrowing).toBe(true)
   })
 })

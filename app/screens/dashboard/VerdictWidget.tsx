@@ -7,18 +7,14 @@ import ValueModeToggle, { type ValueMode } from './ValueModeToggle'
 import type { DashboardSummary } from '@/server/core/dashboard'
 
 import Card from '@/components/Card'
-import { formatRub, formatRubDelta } from '@/lib/format'
-
-const CURRENT_YEAR = new Date().getFullYear()
-const PREVIOUS_YEAR = CURRENT_YEAR - 1
+import { formatRub, formatRubDelta, formatYoyDelta } from '@/lib/format'
 
 export default function VerdictWidget({ verdict }: { verdict: DashboardSummary['verdict'] }) {
   const [mode, setMode] = useState<ValueMode>('pct')
-  const { isGrowing, isStrong, growthPercent, current, previous, monthlyCurrent, monthlyPrevious } = verdict
+  const { isGrowing, isStrong, current, previous, monthlyCurrent, monthlyPrevious } = verdict
   const color = isGrowing ? 'teal' : 'red'
+  const currentYear = new Date().getFullYear()
 
-  const sign = growthPercent > 0 ? '+' : growthPercent < 0 ? '−' : ''
-  const percentText = `${sign}${Math.abs(growthPercent)}%`
   const monthlyDelta = `${formatRubDelta(monthlyCurrent, monthlyPrevious)}/мес`
 
   return (
@@ -41,24 +37,24 @@ export default function VerdictWidget({ verdict }: { verdict: DashboardSummary['
         <Paper withBorder radius="md" p="md" w={260} ta="center">
           <Stack gap={2} align="center">
             <Text
-              fz={mode === 'pct' ? 40 : 26}
+              fz={26}
               fw={700}
               c={color}
               h={48}
               style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', whiteSpace: 'nowrap', lineHeight: 1 }}
             >
-              {mode === 'pct' ? percentText : monthlyDelta}
+              {mode === 'pct' ? formatYoyDelta(current, previous) : monthlyDelta}
             </Text>
             <Tooltip
               withArrow
               label={(
                 <Stack gap={2} miw={140}>
                   <Group justify="space-between" gap="lg" wrap="nowrap">
-                    <Text size="xs">{CURRENT_YEAR}</Text>
+                    <Text size="xs">{currentYear}</Text>
                     <Text size="xs" fw={600}>{formatRub(current)}</Text>
                   </Group>
                   <Group justify="space-between" gap="lg" wrap="nowrap">
-                    <Text size="xs">{PREVIOUS_YEAR}</Text>
+                    <Text size="xs">{currentYear - 1}</Text>
                     <Text size="xs">{formatRub(previous)}</Text>
                   </Group>
                   <Group justify="space-between" gap="lg" wrap="nowrap">
