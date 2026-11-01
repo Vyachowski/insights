@@ -129,10 +129,11 @@ export function oldestEstimateDate(tx: Tx, type: string): string | null {
 }
 
 /** Latest date (`YYYY-MM-DD`) of an expense of this type, or null. */
-export async function latestExpenseDate(type: string): Promise<string | null> {
-  const [row] = await db
+export function latestExpenseDate(tx: Tx, type: string): string | null {
+  const row = tx
     .select({ d: max(expenses.date) })
     .from(expenses)
     .where(eq(expenses.type, type))
+    .get()
   return row?.d ?? null
 }

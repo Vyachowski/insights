@@ -43,7 +43,11 @@ export async function ingestGudokExpenses(
   })
 }
 
-/** Latest date (`YYYY-MM-DD`) for which a telephony expense exists, or null. */
-export function latestTelephonyDate(): Promise<string | null> {
-  return latestExpenseDate(TELEPHONY_TYPE)
+/**
+ * The day a Gudok run must reach: the oldest telephony estimate, or the latest
+ * stored day when no estimates exist. The latest day alone would stop the
+ * bookmarklet going back to the estimates. Null when nothing is stored.
+ */
+export function telephonySince(): string | null {
+  return transaction(tx => oldestEstimateDate(tx, TELEPHONY_TYPE) ?? latestExpenseDate(tx, TELEPHONY_TYPE))
 }

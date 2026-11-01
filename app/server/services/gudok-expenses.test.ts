@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 
 import { sqlite } from '@/server/db/client'
 
-const { ingestGudokExpenses, latestTelephonyDate, writeGudokExpenses } = await import('./gudok-expenses')
+const { ingestGudokExpenses, telephonySince, writeGudokExpenses } = await import('./gudok-expenses')
 const { GudokPayloadError } = await import('@/server/core/gudok-calls')
 const { transaction } = await import('@/server/db/transaction')
 
@@ -140,10 +140,39 @@ describe('writeGudokExpenses over an estimate', () => {
   })
 })
 
-describe('latestTelephonyDate', () => {
-  it('returns null when empty and the max date otherwise', async () => {
-    expect(await latestTelephonyDate()).toBeNull()
-    await ingestGudokExpenses([charge({ date: '20.07.2026' }), charge({ date: '26.07.2026', project: 'Ростов-На-Дону..' })])
-    expect(await latestTelephonyDate()).toBe('2026-07-26')
+describe('telephonySince', () => {
+  const seedEstimate = (date: string, type = 'telephony') => sqlite.prepare(
+    'INSERT INTO expenses (date, site_id, amount, type, is_estimate, created_at, updated_at) VALUES (?, 5, 87000, ?, 1, 0, 0)',
+  ).run(date, type)
+  const seedTwoDays = () => ingestGudokExpenses([
+    charge({ date: '20.07.2026' }),
+    charge({ date: '26.07.2026', project: 'Ростов-На-Дону..' }),
+  ])
+
+  it('is null with nothing stored', () => {
+    expect(telephonySince()).toBeNull()
+  })
+
+  it('returns the latest stored day with no estimates', async () => {
+    await seedTwoDays()
+    expect(telephonySince()).toBe('2026-07-26')
+  })
+
+  it('returns the oldest estimate, not the latest real day after it', async () => {
+    await seedTwoDays()
+    seedEstimate('2026-07-22')
+    seedEstimate('2026-08-25')
+    expect(telephonySince()).toBe('2026-07-22')
+  })
+
+  it('returns the oldest estimate when only estimates are stored', () => {
+    seedEstimate('2026-08-25')
+    expect(telephonySince()).toBe('2026-08-25')
+  })
+
+  it('ignores another expense type', async () => {
+    await seedTwoDays()
+    seedEstimate('2026-01-01', 'hosting')
+    expect(telephonySince()).toBe('2026-07-26')
   })
 })
