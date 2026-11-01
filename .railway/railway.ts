@@ -8,7 +8,7 @@ export default defineRailway(() => {
     sizeMB: 5000,
   })
   const appBucket = bucket('bucket', { region: 'ams' })
-  const dashboard = service('Dashboard', {
+  const app = service('insights-app', {
     source: github('Vyachowski/insights', { checkSuites: false }),
     build: '',
     // exec keeps node as PID 1, so SIGTERM reaches server.ts. Through npm every stop looks like a crash.
@@ -52,6 +52,6 @@ export default defineRailway(() => {
   })
 
   return project('insights', {
-    resources: [dashboard, backendVolume, appBucket],
+    resources: [app, backendVolume, appBucket],
   })
 })
