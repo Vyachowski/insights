@@ -1,15 +1,15 @@
 import { toKopecks, toRubles } from './money'
 
-// Manual (non-import) expense category. Hosting is billed once a year per
-// site; a single `hosting` expense per (date, siteId) mirrors the unique
-// index on the table. Sits alongside TELEPHONY_TYPE in gudok-history.ts.
+// Expense category of a hosting charge. A single `hosting` expense per
+// (date, hostingId) mirrors the unique index on the table. Sits alongside
+// TELEPHONY_TYPE in gudok-history.ts.
 export const HOSTING_TYPE = 'hosting'
 
 type EntryForm = Record<string, FormDataEntryValue | undefined>
 
 type ParsedEntry =
   | { error: string }
-  | { expense: { date: string, siteId: number | null, type: string, amount: number } }
+  | { expense: { date: string, siteId: null, hostingId: number, type: string, amount: number } }
   | { revenue: { date: string, siteId: number | null, amount: number } }
 
 // Shape check plus a round-trip so calendar-invalid dates like 2024-02-30 or
@@ -20,12 +20,10 @@ export function isValidIsoDate(value: string): boolean {
   return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === value
 }
 
-function parseHosting(form: EntryForm, siteId: number | null, amount: number): ParsedEntry {
-  const year = Number(form.year)
-  if (!Number.isInteger(year) || year < 2000 || year > 2100) {
-    return { error: 'Укажите год' }
-  }
-  return { expense: { date: `${year}-01-01`, siteId, type: HOSTING_TYPE, amount } }
+function parseHosting(form: EntryForm, amount: number): ParsedEntry {
+  const date = String(form.date ?? '')
+  if (!isValidIsoDate(date)) return { error: 'Укажите дату' }
+  return { expense: { date, siteId: null, hostingId: Number(form.hostingId), type: HOSTING_TYPE, amount } }
 }
 
 function parseRevenue(form: EntryForm, siteId: number | null, amount: number): ParsedEntry {
@@ -47,7 +45,7 @@ export function parseEntryForm(form: EntryForm): ParsedEntry {
   }
 
   const amount = toKopecks(amountRubles)
-  if (form.intent === 'add-hosting') return parseHosting(form, siteId, amount)
+  if (form.intent === 'add-hosting') return parseHosting(form, amount)
   if (form.intent === 'add-revenue') return parseRevenue(form, siteId, amount)
   return { error: 'Неизвестное действие' }
 }

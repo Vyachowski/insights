@@ -20,9 +20,12 @@ const callLoader = (tab: string) => loader({
 
 const rows = (table: string) => sqlite.prepare(`SELECT * FROM ${table}`).all()
 
+const firstHostingId = () => (rows('hostings') as { id: number }[])[0].id
+
 beforeEach(() => {
   sqlite.exec(`
     DELETE FROM revenues; DELETE FROM expenses; DELETE FROM sites; DELETE FROM cities;
+    DELETE FROM hostings WHERE provider <> 'sprinthost';
     INSERT INTO cities (id, code, slug, name, population, created_at, updated_at)
       VALUES (1, 'SAM', 'samara', 'Самара', 100, 0, 0);
     INSERT INTO sites (id, city_id, url, yandex_counter_id, created_at, updated_at)
@@ -45,28 +48,75 @@ describe('finance action', () => {
     expect(rows('revenues')).toMatchObject([{ site_id: null }])
   })
 
-  it('stores hosting on January 1 of the year', async () => {
-    await callAction({ intent: 'add-hosting', year: '2026', siteId: '5', amount: '500' })
+  describe('add-hosting', () => {
+    const addHosting = (fields: Record<string, string> = {}) => callAction({
+      intent: 'add-hosting',
+      hostingId: String(firstHostingId()),
+      date: '2026-03-15',
+      amount: '500',
+      ...fields,
+    })
 
-    expect(rows('expenses')).toMatchObject([{ date: '2026-01-01', type: 'hosting', amount: 50000 }])
-  })
+    it('stores a real row on the date for the hosting, with no site', async () => {
+      const response = await addHosting({ siteId: '5' })
 
-  it('overwrites a linked hosting row and adds no second one', async () => {
-    const [{ id }] = rows('hostings') as { id: number }[]
-    sqlite.prepare(`INSERT INTO expenses (hosting_id, date, amount, type, created_at, updated_at)
-      VALUES (?, '2026-01-01', 30000, 'hosting', 0, 0)`).run(id)
+      expect(await response.json()).toEqual({ ok: true, outcome: 'created' })
+      expect(rows('expenses')).toMatchObject([{
+        date: '2026-03-15',
+        hosting_id: firstHostingId(),
+        site_id: null,
+        type: 'hosting',
+        amount: 50000,
+        is_estimate: 0,
+      }])
+    })
 
-    const response = await callAction({ intent: 'add-hosting', year: '2026', siteId: '', amount: '500' })
+    it('overwrites the amount on the same hosting and date', async () => {
+      await addHosting()
 
-    expect(await response.json()).toEqual({ ok: true, outcome: 'updated' })
-    expect(rows('expenses')).toMatchObject([{ hosting_id: id, site_id: null, amount: 50000 }])
+      const response = await addHosting({ amount: '700' })
+
+      expect(await response.json()).toEqual({ ok: true, outcome: 'updated' })
+      expect(rows('expenses')).toMatchObject([{ amount: 70000 }])
+    })
+
+    it('reports a repeated entry as skipped', async () => {
+      await addHosting()
+
+      expect(await (await addHosting()).json()).toEqual({ ok: true, outcome: 'skipped' })
+      expect(rows('expenses')).toHaveLength(1)
+    })
+
+    it('keeps two hostings apart on one date', async () => {
+      sqlite.exec("INSERT INTO hostings (id, provider, account, created_at, updated_at) VALUES (99, 'second', 'b1', 0, 0)")
+
+      await addHosting()
+      await addHosting({ hostingId: '99', amount: '700' })
+
+      expect(rows('expenses')).toMatchObject([{ amount: 50000 }, { hosting_id: 99, amount: 70000 }])
+    })
+
+    it.each(['99', 'abc', ''])('refuses the unknown hosting %j and writes nothing', async hostingId => {
+      const response = await addHosting({ hostingId })
+
+      expect(response.status).toBe(400)
+      expect(await response.json()).toEqual({ error: 'Хостинг не найден' })
+      expect(rows('expenses')).toEqual([])
+    })
+
+    it('refuses a bad date and writes nothing', async () => {
+      const response = await addHosting({ date: '2026-02-30' })
+
+      expect(response.status).toBe(400)
+      expect(await response.json()).toEqual({ error: 'Укажите дату' })
+      expect(rows('expenses')).toEqual([])
+    })
   })
 
   it.each([
     [{ intent: 'add-revenue', date: '2026-03-01', siteId: '', amount: '0' }, 'Укажите сумму больше нуля'],
     [{ intent: 'add-revenue', date: '2026-03-01', siteId: 'abc', amount: '10' }, 'Некорректный сайт'],
     [{ intent: 'add-revenue', date: '2026-02-30', siteId: '', amount: '10' }, 'Укажите дату'],
-    [{ intent: 'add-hosting', year: '1999', siteId: '', amount: '10' }, 'Укажите год'],
     [{ intent: 'other', siteId: '', amount: '10' }, 'Неизвестное действие'],
   ])('rejects %j', async (form, error) => {
     const response = await callAction(form)
@@ -148,5 +198,11 @@ describe('finance loader', () => {
 
     expect(expenses).toMatchObject([{ amount: 500, isEstimate: false }, { amount: 870, isEstimate: true }])
     expect(sumAmounts(expenses)).toBe(1370)
+  })
+
+  it.each(['revenue', 'expenses'])('passes the hostings on the %s tab', async tab => {
+    expect((await callLoader(tab)).hostings).toEqual([
+      { id: firstHostingId(), provider: 'sprinthost', account: 'a0181620' },
+    ])
   })
 })

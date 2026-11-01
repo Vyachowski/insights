@@ -1,42 +1,39 @@
 import { Group, Modal, Select, Stack } from '@mantine/core'
 import { useState } from 'react'
 
-import type { Site } from '@/server/db/queries/sites'
+import type { HostingOption } from '@/server/services/finance'
 
 import Button from '@/components/Button'
 import Input from '@/components/Input'
-import { getHostname } from '@/lib/format'
 
 interface HostingValues {
-  year: string
-  siteId: string
+  hostingId: string
+  date: string
   amount: string
 }
 
 interface AddHostingModalProps {
-  sites: Site[]
+  hostings: HostingOption[]
   submitting: boolean
   onClose: () => void
   onSubmit: (values: HostingValues) => void
 }
 
-// Hosting is billed once a year, so the date is a plain year picker.
-const YEARS = Array.from({ length: 7 }, (_, i) => String(new Date().getFullYear() + 1 - i))
-
-export default function AddHostingModal({ sites, submitting, onClose, onSubmit }: AddHostingModalProps) {
-  const [year, setYear] = useState(String(new Date().getFullYear()))
-  const [siteId, setSiteId] = useState<string>('')
+export default function AddHostingModal({ hostings, submitting, onClose, onSubmit }: AddHostingModalProps) {
+  const [hostingId, setHostingId] = useState(String(hostings[0]?.id ?? ''))
+  const [date, setDate] = useState('')
   const [amount, setAmount] = useState('')
   const [errors, setErrors] = useState<Record<string, string>>({})
 
-  const siteOptions = [
-    { value: '', label: 'Общий (компания)' },
-    ...sites.map(site => ({ value: String(site.id), label: getHostname(site.url) })),
-  ]
+  const hostingOptions = hostings.map(({ id, provider, account }) => ({
+    value: String(id),
+    label: `${provider} ${account}`,
+  }))
 
   function validate() {
     const e: Record<string, string> = {}
-    if (!year) e.year = 'Укажите год'
+    if (!hostingId) e.hostingId = 'Хостинг не найден'
+    if (!date) e.date = 'Укажите дату'
     if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) e.amount = 'Укажите сумму'
     return e
   }
@@ -45,7 +42,7 @@ export default function AddHostingModal({ sites, submitting, onClose, onSubmit }
     e.preventDefault()
     const errs = validate()
     if (Object.keys(errs).length > 0) { setErrors(errs); return }
-    onSubmit({ year, siteId, amount })
+    onSubmit({ hostingId, date, amount })
   }
 
   // Future: this modal may host other expense types; for now only hosting.
@@ -54,22 +51,21 @@ export default function AddHostingModal({ sites, submitting, onClose, onSubmit }
       <form onSubmit={handleSubmit}>
         <Stack gap="md">
           <Select
-            label="Год"
-            value={year}
-            onChange={value => setYear(value ?? '')}
-            data={YEARS}
+            label="Хостинг"
+            value={hostingId}
+            onChange={value => setHostingId(value ?? '')}
+            data={hostingOptions}
             allowDeselect={false}
-            error={errors.year}
+            error={errors.hostingId}
             comboboxProps={{ withinPortal: false }}
           />
 
-          <Select
-            label="Сайт"
-            value={siteId}
-            onChange={value => setSiteId(value ?? '')}
-            data={siteOptions}
-            allowDeselect={false}
-            comboboxProps={{ withinPortal: false }}
+          <Input
+            label="Дата"
+            type="date"
+            value={date}
+            onChange={e => setDate(e.target.value)}
+            error={errors.date}
           />
 
           <Input
