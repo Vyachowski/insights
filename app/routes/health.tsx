@@ -1,8 +1,8 @@
+import { config } from '@/server/config'
 import { pingDb } from '@/server/db/client'
-import { env } from '@/server/env'
 
 export async function loader() {
-  const version = env.RAILWAY_GIT_COMMIT_SHA?.slice(0, 7) || 'dev'
+  const version = config.RAILWAY_GIT_COMMIT_SHA?.slice(0, 7) || 'dev'
   try {
     pingDb()
     return Response.json({ status: 'ok', db: 'up', version })

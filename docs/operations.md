@@ -12,7 +12,7 @@
 
 ## Startup
 
-Env validation → open SQLite (WAL, busy_timeout) → Drizzle `migrate()` → enable foreign keys → bootstrap → listen → start the backup and auto charge schedulers. Migrations are in `drizzle/`, generated with `npm run drizzle:generate` from `app/server/db/schema.ts`.
+Config validation (`app/server/config.ts`) → open SQLite (WAL, busy_timeout) → Drizzle `migrate()` → enable foreign keys → bootstrap → listen → start the backup and auto charge schedulers. Migrations are in `drizzle/`, generated with `npm run drizzle:generate` from `app/server/db/schema.ts`.
 
 ## Bootstrap
 

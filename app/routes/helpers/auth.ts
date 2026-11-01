@@ -1,6 +1,6 @@
 import { createCookieSessionStorage, redirect } from 'react-router'
 
-import { env, sessionMaxAgeSeconds } from '@/server/env'
+import { config, sessionMaxAgeSeconds } from '@/server/config'
 import { findActiveUser, type SessionUser } from '@/server/services/auth'
 
 const sessionStorage = createCookieSessionStorage({
@@ -9,8 +9,8 @@ const sessionStorage = createCookieSessionStorage({
     httpOnly: true,
     sameSite: 'lax',
     path: '/',
-    secure: env.NODE_ENV === 'production',
-    secrets: [env.JWT_SECRET],
+    secure: config.NODE_ENV === 'production',
+    secrets: [config.JWT_SECRET],
     maxAge: sessionMaxAgeSeconds,
   },
 })

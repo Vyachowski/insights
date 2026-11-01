@@ -33,7 +33,7 @@ const { insertSites, listSites } = await import('@/server/db/queries/sites')
 const { insertUsers } = await import('@/server/db/queries/users')
 const { chargeSchedules } = await import('@/server/db/schema')
 const { transaction } = await import('@/server/db/transaction')
-const { env } = await import('@/server/env')
+const { config } = await import('@/server/config')
 
 const MONTHS = 12
 const CALLS_PER_MONTH = 5
@@ -45,22 +45,22 @@ const lastMonths = Array.from({ length: MONTHS }, (_, ago) => subMonths(startOfM
 
 // The fixed ids keep a session valid across rebuilds and across copies on localhost
 async function seedUsers() {
-  if (!env.ADMIN_EMAIL || !env.ADMIN_PASSWORD) throw new Error('[sandbox] ADMIN_* not set')
-  if (!env.USER_EMAIL || !env.USER_PASSWORD) throw new Error('[sandbox] USER_* not set')
+  if (!config.ADMIN_EMAIL || !config.ADMIN_PASSWORD) throw new Error('[sandbox] ADMIN_* not set')
+  if (!config.USER_EMAIL || !config.USER_PASSWORD) throw new Error('[sandbox] USER_* not set')
   await insertUsers([{
     id: 'sandbox-admin',
-    email: env.ADMIN_EMAIL,
-    password: await argon2.hash(env.ADMIN_PASSWORD),
+    email: config.ADMIN_EMAIL,
+    password: await argon2.hash(config.ADMIN_PASSWORD),
     role: 'ADMIN',
-    firstName: env.ADMIN_NAME ?? null,
-    lastName: env.ADMIN_LASTNAME ?? null,
+    firstName: config.ADMIN_NAME ?? null,
+    lastName: config.ADMIN_LASTNAME ?? null,
   }, {
     id: 'sandbox-user',
-    email: env.USER_EMAIL,
-    password: await argon2.hash(env.USER_PASSWORD),
+    email: config.USER_EMAIL,
+    password: await argon2.hash(config.USER_PASSWORD),
     role: 'USER',
-    firstName: env.USER_NAME ?? null,
-    lastName: env.USER_LASTNAME ?? null,
+    firstName: config.USER_NAME ?? null,
+    lastName: config.USER_LASTNAME ?? null,
   }])
 }
 
@@ -154,4 +154,4 @@ const siteIds = (await seedSites()).map(site => site.id)
 await seedFinance(siteIds)
 await seedAutoCharges(siteIds)
 const callCount = seedCalls(siteIds)
-console.log(`[sandbox] rebuilt ${env.DATABASE_PATH}: ${siteIds.length} sites, ${MONTHS} months, ${callCount} calls`)
+console.log(`[sandbox] rebuilt ${config.DATABASE_PATH}: ${siteIds.length} sites, ${MONTHS} months, ${callCount} calls`)

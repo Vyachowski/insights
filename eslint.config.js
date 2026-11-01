@@ -148,7 +148,7 @@ export default defineConfig([
     { group: QUERY_INTERNALS, message: 'Routes call db functions or services, not queries.' },
   ], ['app/routes/health.tsx']),
   restrictImports(['app/screens/**', 'app/components/**', 'app/hooks/**', 'app/lib/**'], [
-    { group: [...QUERY_INTERNALS, '**/server/env', '**/server/storage', '**/server/jobs/**', '**/routes/helpers/**'], message: 'UI never touches server internals, not even for types.' },
+    { group: [...QUERY_INTERNALS, '**/server/config', '**/server/storage', '**/server/jobs/**', '**/routes/helpers/**'], message: 'UI never touches server internals, not even for types.' },
     { group: ['**/server/core/**', '**/server/db/queries/**', '**/server/services/**'], allowTypeImports: true, message: 'UI sees the server through route data: type imports only.' },
   ]),
   restrictCode(['app/screens/**'], {

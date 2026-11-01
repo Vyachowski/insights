@@ -4,12 +4,12 @@ import path from 'node:path'
 import Database from 'better-sqlite3'
 import { drizzle } from 'drizzle-orm/better-sqlite3'
 
-import { env } from '../env'
+import { config } from '../config'
 import * as schema from './schema'
 
-fs.mkdirSync(path.dirname(env.DATABASE_PATH), { recursive: true })
+fs.mkdirSync(path.dirname(config.DATABASE_PATH), { recursive: true })
 
-export const sqlite = new Database(env.DATABASE_PATH)
+export const sqlite = new Database(config.DATABASE_PATH)
 sqlite.pragma('journal_mode = WAL')
 sqlite.pragma('busy_timeout = 5000')
 

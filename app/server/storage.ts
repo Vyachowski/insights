@@ -1,6 +1,6 @@
 import { AwsClient } from 'aws4fetch'
 
-import { env, isStorageConfigured } from './env'
+import { config, isStorageConfigured } from './config'
 
 export { isStorageConfigured }
 
@@ -9,17 +9,17 @@ let client: AwsClient | null = null
 // Lazy: constructing at import time would crash when storage is unconfigured
 function getClient(): AwsClient {
   client ??= new AwsClient({
-    accessKeyId: env.BUCKET_ACCESS_KEY_ID!,
-    secretAccessKey: env.BUCKET_SECRET_ACCESS_KEY!,
+    accessKeyId: config.BUCKET_ACCESS_KEY_ID!,
+    secretAccessKey: config.BUCKET_SECRET_ACCESS_KEY!,
     service: 's3',
-    region: env.BUCKET_REGION,
+    region: config.BUCKET_REGION,
   })
   return client
 }
 
 // aws4fetch signs requests but does not build S3 URLs — path-style by hand
 function objectUrl(key: string): string {
-  return `${env.BUCKET_ENDPOINT}/${env.BUCKET_NAME}/${key}`
+  return `${config.BUCKET_ENDPOINT}/${config.BUCKET_NAME}/${key}`
 }
 
 /** Buffer on success, null strictly on 404, throws otherwise. */
@@ -50,7 +50,7 @@ export async function putObject(key: string, body: Buffer): Promise<void> {
 /** Keys under a prefix, up to the 1000 of one S3 page. */
 export async function listObjectKeys(prefix: string): Promise<string[]> {
   const query = new URLSearchParams({ 'list-type': '2', prefix })
-  const res = await getClient().fetch(`${env.BUCKET_ENDPOINT}/${env.BUCKET_NAME}?${query}`)
+  const res = await getClient().fetch(`${config.BUCKET_ENDPOINT}/${config.BUCKET_NAME}?${query}`)
   if (!res.ok) throw new Error(`S3 LIST ${prefix}: ${res.status}`)
   const xml = await res.text()
   return [...xml.matchAll(/<Key>(.*?)<\/Key>/g)].map(match => match[1])
