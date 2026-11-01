@@ -52,6 +52,12 @@ export function parseEntryForm(form: EntryForm): ParsedEntry {
   return { error: 'Неизвестное действие' }
 }
 
+export function parseRevenueId(form: EntryForm): { id: number } | { error: string } {
+  const id = Number(form.id)
+  if (!Number.isInteger(id) || id <= 0) return { error: 'Некорректная запись' }
+  return { id }
+}
+
 export function withRubles<T extends { amount: number }>(rows: T[]): T[] {
   return rows.map(row => ({ ...row, amount: toRubles(row.amount) }))
 }

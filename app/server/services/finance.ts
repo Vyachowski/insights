@@ -1,6 +1,6 @@
-import { parseEntryForm, withRubles } from '@/server/core/finance'
+import { parseEntryForm, parseRevenueId, withRubles } from '@/server/core/finance'
 import { listExpenses, upsertExpense } from '@/server/db/queries/expenses'
-import { listRevenues, upsertRevenue } from '@/server/db/queries/revenues'
+import { deleteRevenue, listRevenues, upsertRevenue } from '@/server/db/queries/revenues'
 import { listSites } from '@/server/db/queries/sites'
 
 /** Only the open tab's rows are loaded. Amounts are in rubles. */
@@ -22,4 +22,11 @@ export async function addFinanceEntry(form: Parameters<typeof parseEntryForm>[0]
     ? await upsertExpense(entry.expense)
     : await upsertRevenue(entry.revenue)
   return { ok: true, outcome }
+}
+
+export function deleteFinanceEntry(form: Parameters<typeof parseRevenueId>[0]) {
+  const parsed = parseRevenueId(form)
+  if ('error' in parsed) return parsed
+
+  return { ok: true, outcome: deleteRevenue(parsed.id) }
 }
