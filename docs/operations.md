@@ -37,7 +37,7 @@ Config validation (`app/server/config.ts`) → open SQLite (WAL, busy_timeout) �
 - Each check logs `[auto-charges] schedules checked: N, estimates written: M`. `checked` counts enabled schedules whose number has a site.
 - One check is one transaction. A failure logs `[auto-charges] check failed: ...`, writes nothing, and the next tick repeats it. The app keeps working.
 - Shutdown stops the timer before the database closes. A check is synchronous, so it cannot be cut off halfway.
-- Admins see the red alert `Сверка с Гудком устарела` when estimates are stored and the date behind `Сверено с Гудком до DD.MM` is over 90 days old by the `Europe/Moscow` day. That date is the period end of the last recorded run, or the latest real `telephony` day with no recorded run. Exactly 90 days shows nothing, and with neither date no alert shows. Run the bookmarklet to clear it.
+- Admins see the red alert `Сверка с Гудком устарела` when estimates are stored and the date behind `Сверено с Гудком до DD.MM` is over 90 days old by the `Europe/Moscow` day. That date is the period end of the last recorded run, or the latest real `telephony` day with no recorded run. Exactly 90 days shows nothing, and with neither date no alert shows. Run the console script to clear it.
 
 ## Gudok call webhook
 
@@ -73,7 +73,7 @@ Calls received after that backup are not in it. Recover them from a Gudok CSV ex
 
 ## Gudok telephony expenses
 
-Gudok has no API for charges, so a bookmarklet reads its `/history` page and posts to `/webhooks/gudok/expenses/:secret`. See `scripts/gudok-telephony-bookmarklet.md`.
+Gudok has no API for charges, so a console script reads `/history.json` in the owner's session and posts the reply to `/webhooks/gudok/expenses/:secret`. See `scripts/gudok-telephony-console.md`.
 
 Both endpoints use `GUDOK_WEBHOOK_SECRET`. A wrong or unset secret returns 404.
 
@@ -97,4 +97,4 @@ Both endpoints use `GUDOK_WEBHOOK_SECRET`. A wrong or unset secret returns 404.
 
 - `start` and `end` are `YYYY-MM-DD`, both days included. They may be the same day.
 - A 400 or 500 body is `{ "error": "..." }`.
-- Every reply, errors included, carries `Access-Control-Allow-Origin: https://in.gudok.tel`, so the bookmarklet can read it.
+- Every reply, errors included, carries `Access-Control-Allow-Origin: https://in.gudok.tel`, so the console script can read it.

@@ -13,11 +13,11 @@ async function readBody(request: Request) {
   }
 }
 
-// Secret-gated endpoint for Gudok /history charges, posted by the bookmarklet
+// Secret-gated endpoint for Gudok /history charges, posted by the console script
 // running on https://in.gudok.tel: Gudok's /history.json reply as it is, or the
-// older `operations` list. The bookmarklet posts a JSON string with a
+// older `operations` list. The console script posts a JSON string with a
 // `text/plain` content-type so the browser treats it as a "simple" request and
-// skips the CORS preflight; the CORS headers let the bookmarklet read the
+// skips the CORS preflight; the CORS headers let the console script read the
 // result. Shares the call-webhook secret.
 export function action({ request, params }: Route.ActionArgs) {
   return withGudokCors(async () => {
