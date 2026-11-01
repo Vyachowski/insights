@@ -113,11 +113,7 @@ export function buildDashboardSummary(
   })
 
   return {
-    verdict: {
-      ...computeVerdict(currentPeriod.profit, previousPeriod.profit),
-      monthlyCurrent: monthlyProfit.averageCurrent,
-      monthlyPrevious: monthlyProfit.averagePrevious,
-    },
+    verdict: withMonthly(computeVerdict(currentPeriod.profit, previousPeriod.profit)),
     trends: {
       calls: withMonthly({ current: current.calls, previous: previous.calls }),
       revenue: withMonthly({ current: currentPeriod.revenue, previous: previousPeriod.revenue }),

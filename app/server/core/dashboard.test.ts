@@ -153,6 +153,18 @@ describe('buildDashboardSummary', () => {
     expect(verdict).toMatchObject({ monthlyCurrent: 1500, monthlyPrevious: 700 })
   })
 
+  it('keeps the verdict monthly figures to the same window as its totals', () => {
+    const { verdict } = buildDashboardSummary(
+      { ...emptyYear, revenue: 130000, monthlyRevenue: new Map([[1, 80000], [2, 50000]]) },
+      // Last February closed in full, but only its first half is in the window
+      { ...emptyYear, revenue: 120000, monthlyRevenue: new Map([[1, 60000], [2, 100000]]) },
+      cities,
+      new Date(2026, 1, 15),
+      noDates,
+    )
+    expect(verdict).toMatchObject({ isGrowing: true, monthlyCurrent: 650, monthlyPrevious: 600 })
+  })
+
   it('falls back to the calendar month before any data lands', () => {
     const { monthlyProfit } = buildDashboardSummary(emptyYear, previous, cities, now, noDates)
     expect(monthlyProfit.elapsedMonths).toBe(5)
