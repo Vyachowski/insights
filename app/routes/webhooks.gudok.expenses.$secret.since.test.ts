@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const mockEnv: { GUDOK_WEBHOOK_SECRET?: string } = {}
-const latestMock = vi.fn()
+const sinceMock = vi.fn()
 
 vi.mock('@/server/env', () => ({ env: mockEnv }))
 vi.mock('@/server/services/gudok-expenses', () => ({
-  latestTelephonyDate: () => latestMock(),
+  telephonySince: () => sinceMock(),
 }))
 
 const { loader } = await import('./webhooks.gudok.expenses.$secret.since')
@@ -18,26 +18,37 @@ const call = (secret?: string) => (loader as unknown as Handler)({ params: { sec
 
 beforeEach(() => {
   mockEnv.GUDOK_WEBHOOK_SECRET = SECRET
-  latestMock.mockReset()
-  latestMock.mockResolvedValue('2026-10-31')
+  sinceMock.mockReset()
+  sinceMock.mockReturnValue('2026-10-31')
 })
 
 describe('gudok expenses since route', () => {
-  it('valid secret → 200 and the latest stored day', async () => {
+  it('valid secret → 200 and the date from the service', async () => {
     const res = await call(SECRET)
     expect(res.status).toBe(200)
     expect(res.headers.get('Access-Control-Allow-Origin')).toBe('https://in.gudok.tel')
     expect(await res.json()).toEqual({ since: '2026-10-31' })
   })
 
-  it.each(['nope', undefined])('secret %j → 404, no read', async secret => {
-    await expect(call(secret)).rejects.toMatchObject({ status: 404 })
-    expect(latestMock).not.toHaveBeenCalled()
+  it.each(['nope', undefined])('secret %j → readable 404, no read', async secret => {
+    const res = await call(secret)
+    expect(res.status).toBe(404)
+    expect(res.headers.get('Access-Control-Allow-Origin')).toBe('https://in.gudok.tel')
+    expect(sinceMock).not.toHaveBeenCalled()
   })
 
   it('secret unset → 404, no read', async () => {
     mockEnv.GUDOK_WEBHOOK_SECRET = undefined
-    await expect(call(SECRET)).rejects.toMatchObject({ status: 404 })
-    expect(latestMock).not.toHaveBeenCalled()
+    expect((await call(SECRET)).status).toBe(404)
+    expect(sinceMock).not.toHaveBeenCalled()
+  })
+
+  it('failed read → readable 500', async () => {
+    vi.spyOn(console, 'error').mockImplementationOnce(() => {})
+    sinceMock.mockImplementation(() => { throw new Error('disk') })
+    const res = await call(SECRET)
+    expect(res.status).toBe(500)
+    expect(res.headers.get('Access-Control-Allow-Origin')).toBe('https://in.gudok.tel')
+    expect(await res.json()).toEqual({ error: 'Internal server error' })
   })
 })

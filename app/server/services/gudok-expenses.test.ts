@@ -2,7 +2,9 @@ import { beforeEach, describe, expect, it } from 'vitest'
 
 import { sqlite } from '@/server/db/client'
 
-const { ingestGudokExpenses, latestTelephonyDate } = await import('./gudok-expenses')
+const { ingestGudokExpenses, telephonySince, writeGudokExpenses } = await import('./gudok-expenses')
+const { GudokPayloadError } = await import('@/server/core/gudok-calls')
+const { transaction } = await import('@/server/db/transaction')
 
 beforeEach(() => {
   sqlite.exec('DELETE FROM expenses; DELETE FROM sites; DELETE FROM cities;')
@@ -83,40 +85,94 @@ describe('ingestGudokExpenses', () => {
   })
 })
 
-describe('ingestGudokExpenses over an estimate', () => {
+describe('ingestGudokExpenses with estimates stored', () => {
+  const seedEstimate = (date = '2026-07-20', type = 'telephony') => sqlite.prepare(
+    'INSERT INTO expenses (date, site_id, amount, type, is_estimate, created_at, updated_at) VALUES (?, 5, 87000, ?, 1, 0, 0)',
+  ).run(date, type)
+
+  it('refuses the post and writes nothing, as a real charge on another date would add a second row', async () => {
+    seedEstimate()
+    const stored = expenseRows()
+    await expect(ingestGudokExpenses([charge()])).rejects.toThrow(GudokPayloadError)
+    expect(expenseRows()).toEqual(stored)
+  })
+
+  it('refuses an empty post too', async () => {
+    seedEstimate()
+    await expect(ingestGudokExpenses([])).rejects.toThrow(GudokPayloadError)
+  })
+
+  it('accepts the post when the estimates are of another type', async () => {
+    seedEstimate('2026-07-20', 'hosting')
+    expect(await ingestGudokExpenses([charge()])).toEqual({ created: 1, updated: 0, skipped: 0 })
+  })
+})
+
+describe('writeGudokExpenses over an estimate', () => {
+  const write = (rows: ReturnType<typeof charge>[]) =>
+    transaction(tx => writeGudokExpenses(tx, rows, new Map([['волгоград', 5]])))
   const seedEstimate = () => sqlite.exec(
     'INSERT INTO expenses (date, site_id, amount, type, comment, is_estimate, created_at, updated_at) '
     + "VALUES ('2026-07-26', 5, 87000, 'telephony', 'Оценка', 1, 0, 0);",
   )
   const realComment = 'Гудок: Продление: Гудок-номер +7 844 260 69 54'
 
-  it('replaces the estimate and its comment at the same amount', async () => {
+  it('replaces the estimate and its comment at the same amount', () => {
     seedEstimate()
-    const result = await ingestGudokExpenses([charge()])
+    const result = write([charge()])
     expect(result).toEqual({ created: 0, updated: 1, skipped: 0 })
     expect(expenseRows()).toMatchObject([{ amount: 87000, comment: realComment, is_estimate: 0 }])
   })
 
-  it('replaces the estimate and its comment at a different amount', async () => {
+  it('replaces the estimate and its comment at a different amount', () => {
     seedEstimate()
-    const result = await ingestGudokExpenses([charge({ amount: '-900,000' })])
+    const result = write([charge({ amount: '-900,000' })])
     expect(result).toEqual({ created: 0, updated: 1, skipped: 0 })
     expect(expenseRows()).toMatchObject([{ amount: 90000, comment: realComment, is_estimate: 0 }])
   })
 
-  it('skips a repeated run once the estimate is replaced', async () => {
+  it('skips a repeated run once the estimate is replaced', () => {
     seedEstimate()
-    await ingestGudokExpenses([charge()])
-    const result = await ingestGudokExpenses([charge()])
+    write([charge()])
+    const result = write([charge()])
     expect(result).toEqual({ created: 0, updated: 0, skipped: 1 })
     expect(expenseRows()).toMatchObject([{ is_estimate: 0 }])
   })
 })
 
-describe('latestTelephonyDate', () => {
-  it('returns null when empty and the max date otherwise', async () => {
-    expect(await latestTelephonyDate()).toBeNull()
-    await ingestGudokExpenses([charge({ date: '20.07.2026' }), charge({ date: '26.07.2026', project: 'Ростов-На-Дону..' })])
-    expect(await latestTelephonyDate()).toBe('2026-07-26')
+describe('telephonySince', () => {
+  const seedEstimate = (date: string, type = 'telephony') => sqlite.prepare(
+    'INSERT INTO expenses (date, site_id, amount, type, is_estimate, created_at, updated_at) VALUES (?, 5, 87000, ?, 1, 0, 0)',
+  ).run(date, type)
+  const seedTwoDays = () => ingestGudokExpenses([
+    charge({ date: '20.07.2026' }),
+    charge({ date: '26.07.2026', project: 'Ростов-На-Дону..' }),
+  ])
+
+  it('is null with nothing stored', () => {
+    expect(telephonySince()).toBeNull()
+  })
+
+  it('returns the latest stored day with no estimates', async () => {
+    await seedTwoDays()
+    expect(telephonySince()).toBe('2026-07-26')
+  })
+
+  it('returns the oldest estimate, not the latest real day after it', async () => {
+    await seedTwoDays()
+    seedEstimate('2026-07-22')
+    seedEstimate('2026-08-25')
+    expect(telephonySince()).toBe('2026-07-22')
+  })
+
+  it('returns the oldest estimate when only estimates are stored', () => {
+    seedEstimate('2026-08-25')
+    expect(telephonySince()).toBe('2026-08-25')
+  })
+
+  it('ignores another expense type', async () => {
+    await seedTwoDays()
+    seedEstimate('2026-01-01', 'hosting')
+    expect(telephonySince()).toBe('2026-07-26')
   })
 })

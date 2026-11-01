@@ -72,3 +72,25 @@ Calls received after that backup are not in it. Recover them from a Gudok CSV ex
 ## Gudok telephony expenses
 
 Gudok has no API for charges, so a bookmarklet reads its `/history` page and posts to `/webhooks/gudok/expenses/:secret`. See `scripts/gudok-telephony-bookmarklet.md`.
+
+Both endpoints use `GUDOK_WEBHOOK_SECRET`. A wrong or unset secret returns 404.
+
+`GET /webhooks/gudok/expenses/:secret/since` returns `{ "since": "YYYY-MM-DD" }`: the date of the oldest `telephony` estimate, or the latest stored day when no estimates exist. `since` is `null` when nothing is stored.
+
+`POST /webhooks/gudok/expenses/:secret` takes JSON, sent as `text/plain` to skip the CORS preflight:
+
+```json
+{ "operations": [], "period": { "start": "2026-10-01", "end": "2026-10-31" } }
+```
+
+| Post | Status | Result |
+|---|---|---|
+| Valid period, `operations` may be empty | 200 | Runs reconciliation, returns `ok`, `created`, `updated`, `skipped`, `deletedEstimates` |
+| No `period`, no `telephony` estimates | 200 | Plain ingest, returns `ok`, `created`, `updated`, `skipped` |
+| No `period`, `telephony` estimates exist | 400 | Writes nothing: the old script would add second rows |
+| `period` with an invalid date, such as `2026-02-31`, or `start` after `end`, or `null` | 400 | Writes nothing |
+| Broken JSON, or `operations` is not a list | 400 | Writes nothing |
+
+- `start` and `end` are `YYYY-MM-DD`, both days included. They may be the same day.
+- A 400 or 500 body is `{ "error": "..." }`.
+- Every reply, errors included, carries `Access-Control-Allow-Origin: https://in.gudok.tel`, so the bookmarklet can read it.

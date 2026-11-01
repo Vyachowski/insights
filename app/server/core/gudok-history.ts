@@ -1,3 +1,4 @@
+import { GudokPayloadError } from './gudok-calls'
 import { toKopecks } from './money'
 import { resolveProjectTitle } from './site-matching'
 
@@ -42,6 +43,21 @@ export function parseGudokOperationDate(raw: string): string | null {
   }
   const date = new Date(trimmed)
   return isNaN(date.getTime()) ? null : date.toISOString().slice(0, 10)
+}
+
+const isDay = (value: unknown): value is string => {
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false
+  const time = Date.parse(`${value}T00:00:00Z`)
+  // The round trip refuses a day past the month's end, which parsing can roll over
+  return !isNaN(time) && new Date(time).toISOString().startsWith(value)
+}
+
+/** The period a Gudok run covers. Throws GudokPayloadError when it is unusable. */
+export function parseGudokPeriod(raw: unknown) {
+  const { start, end } = (raw ?? {}) as { start?: unknown, end?: unknown }
+  if (!isDay(start) || !isDay(end)) throw new GudokPayloadError('Invalid period date')
+  if (start > end) throw new GudokPayloadError('Period start is after its end')
+  return { start, end }
 }
 
 /** Strip the trailing `..` decoration/truncation Gudok appends to project cells. */

@@ -1,15 +1,18 @@
-import { writeGudokExpenses } from './gudok-expenses'
+import { ingestGudokExpenses, writeGudokExpenses } from './gudok-expenses'
 
 import type { DayPeriod } from '@/server/db/queries/period'
 
 import { reconciledSchedule } from '@/server/core/auto-charges'
-import { type GudokOperationRow, TELEPHONY_TYPE } from '@/server/core/gudok-history'
+import { GudokPayloadError } from '@/server/core/gudok-calls'
+import { type GudokOperationRow, parseGudokPeriod, TELEPHONY_TYPE } from '@/server/core/gudok-history'
 import { toCityToSiteId } from '@/server/core/site-matching'
 import { listEnabledSchedules, updateSchedule } from '@/server/db/queries/charge-schedules'
 import { deleteEstimates, listChargedSites, listLastCharges } from '@/server/db/queries/expenses'
 import { insertReconciliationRun } from '@/server/db/queries/reconciliation-runs'
 import { listSiteCities } from '@/server/db/queries/sites'
 import { transaction } from '@/server/db/transaction'
+
+export { GudokPayloadError }
 
 /**
  * Makes a period exact from the Gudok rows that cover it, in one transaction:
@@ -39,4 +42,12 @@ export async function reconcileTelephony(rows: GudokOperationRow[], period: DayP
     insertReconciliationRun(tx, period)
     return { ...written, deletedEstimates: deleted.length }
   })
+}
+
+/**
+ * One bookmarklet post: with a period it is a reconciliation run, and without
+ * one it is a plain ingest. Throws GudokPayloadError on a post it must refuse.
+ */
+export async function receiveGudokPost(rows: GudokOperationRow[], period: unknown) {
+  return period === undefined ? ingestGudokExpenses(rows) : reconcileTelephony(rows, parseGudokPeriod(period))
 }

@@ -1,4 +1,4 @@
-import { and, between, eq, isNotNull, isNull, max, sql } from 'drizzle-orm'
+import { and, between, eq, isNotNull, isNull, max, min, sql } from 'drizzle-orm'
 
 import { db } from '../client'
 import { expenses } from '../schema'
@@ -118,11 +118,22 @@ export function listLastCharges(tx: Tx, type: string) {
     .all()
 }
 
+/** Oldest date (`YYYY-MM-DD`) of an estimate of this type, or null. */
+export function oldestEstimateDate(tx: Tx, type: string): string | null {
+  const row = tx
+    .select({ d: min(expenses.date) })
+    .from(expenses)
+    .where(and(eq(expenses.type, type), eq(expenses.isEstimate, true)))
+    .get()
+  return row?.d ?? null
+}
+
 /** Latest date (`YYYY-MM-DD`) of an expense of this type, or null. */
-export async function latestExpenseDate(type: string): Promise<string | null> {
-  const [row] = await db
+export function latestExpenseDate(tx: Tx, type: string): string | null {
+  const row = tx
     .select({ d: max(expenses.date) })
     .from(expenses)
     .where(eq(expenses.type, type))
+    .get()
   return row?.d ?? null
 }
