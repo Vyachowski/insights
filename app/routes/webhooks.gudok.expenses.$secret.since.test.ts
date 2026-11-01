@@ -30,14 +30,25 @@ describe('gudok expenses since route', () => {
     expect(await res.json()).toEqual({ since: '2026-10-31' })
   })
 
-  it.each(['nope', undefined])('secret %j → 404, no read', async secret => {
-    await expect(call(secret)).rejects.toMatchObject({ status: 404 })
+  it.each(['nope', undefined])('secret %j → readable 404, no read', async secret => {
+    const res = await call(secret)
+    expect(res.status).toBe(404)
+    expect(res.headers.get('Access-Control-Allow-Origin')).toBe('https://in.gudok.tel')
     expect(latestMock).not.toHaveBeenCalled()
   })
 
   it('secret unset → 404, no read', async () => {
     mockEnv.GUDOK_WEBHOOK_SECRET = undefined
-    await expect(call(SECRET)).rejects.toMatchObject({ status: 404 })
+    expect((await call(SECRET)).status).toBe(404)
     expect(latestMock).not.toHaveBeenCalled()
+  })
+
+  it('failed read → readable 500', async () => {
+    vi.spyOn(console, 'error').mockImplementationOnce(() => {})
+    latestMock.mockRejectedValue(new Error('disk'))
+    const res = await call(SECRET)
+    expect(res.status).toBe(500)
+    expect(res.headers.get('Access-Control-Allow-Origin')).toBe('https://in.gudok.tel')
+    expect(await res.json()).toEqual({ error: 'Internal server error' })
   })
 })

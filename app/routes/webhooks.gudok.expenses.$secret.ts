@@ -1,36 +1,30 @@
 import type { Route } from './+types/webhooks.gudok.expenses.$secret'
 
+import { withGudokCors } from '@/routes/helpers/gudok-cors'
 import { assertWebhookSecret } from '@/routes/helpers/webhook-secret'
 import { ingestGudokExpenses, type GudokOperationRow } from '@/server/services/gudok-expenses'
 
 // Secret-gated ingest for Gudok /history charges, posted by the bookmarklet
 // running on https://in.gudok.tel. The bookmarklet posts a JSON string with a
 // `text/plain` content-type so the browser treats it as a "simple" request and
-// skips the CORS preflight; we still send Access-Control-Allow-Origin so the
-// bookmarklet can read the result. Shares the call-webhook secret.
-const GUDOK_ORIGIN = 'https://in.gudok.tel'
+// skips the CORS preflight; the CORS headers let the bookmarklet read the
+// result. Shares the call-webhook secret.
+export function action({ request, params }: Route.ActionArgs) {
+  return withGudokCors(async () => {
+    assertWebhookSecret(params.secret)
 
-function corsHeaders(): HeadersInit {
-  return {
-    'Access-Control-Allow-Origin': GUDOK_ORIGIN,
-    'Vary': 'Origin',
-  }
-}
+    let rows: GudokOperationRow[]
+    try {
+      const text = await request.text()
+      const body: unknown = JSON.parse(text)
+      const ops = (body as { operations?: unknown })?.operations
+      if (!Array.isArray(ops)) throw new Error('missing operations[]')
+      rows = ops as GudokOperationRow[]
+    } catch {
+      return Response.json({ error: 'Malformed request body' }, { status: 400 })
+    }
 
-export async function action({ request, params }: Route.ActionArgs) {
-  assertWebhookSecret(params.secret)
-
-  let rows: GudokOperationRow[]
-  try {
-    const text = await request.text()
-    const body: unknown = JSON.parse(text)
-    const ops = (body as { operations?: unknown })?.operations
-    if (!Array.isArray(ops)) throw new Error('missing operations[]')
-    rows = ops as GudokOperationRow[]
-  } catch {
-    return Response.json({ error: 'Malformed request body' }, { status: 400, headers: corsHeaders() })
-  }
-
-  const result = await ingestGudokExpenses(rows)
-  return Response.json({ ok: true, ...result }, { headers: corsHeaders() })
+    const result = await ingestGudokExpenses(rows)
+    return Response.json({ ok: true, ...result })
+  })
 }
