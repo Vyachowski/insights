@@ -1,3 +1,5 @@
+import type { Tx } from '@/server/db/transaction'
+
 import {
   chargesDue,
   isValidInterval,
@@ -5,6 +7,7 @@ import {
   numberCharge,
   parseScheduleForm,
 } from '@/server/core/auto-charges'
+import { HOSTING_TYPE } from '@/server/core/finance'
 import { TELEPHONY_TYPE } from '@/server/core/gudok-history'
 import {
   disableSchedule,
@@ -12,32 +15,47 @@ import {
   findNumberSchedule,
   hasOtherEnabledNumber,
   listActiveSchedules,
+  listEnabledHostingSchedules,
   setNextChargeDate,
 } from '@/server/db/queries/charge-schedules'
-import { insertEstimate, listLastCharges } from '@/server/db/queries/expenses'
+import { insertEstimate, insertHostingCharge, listLastCharges } from '@/server/db/queries/expenses'
 import { listNumbersWithSchedules } from '@/server/db/queries/phone-numbers'
 import { transaction } from '@/server/db/transaction'
 
+/** The charges of one schedule due up to today, and how many `write` stored. */
+function writeDue(
+  tx: Tx,
+  { id, ...schedule }: { id: number } & Parameters<typeof chargesDue>[0],
+  today: string,
+  write: (date: string) => boolean,
+) {
+  const { dates, nextDate } = chargesDue(schedule, today)
+  if (dates.length === 0) return 0
+
+  const written = dates.filter(date => write(date)).length
+  setNextChargeDate(tx, id, nextDate)
+  return written
+}
+
 /**
- * Writes an estimated telephony charge for every date due up to today in one
- * transaction, so a failed check writes nothing and the next one repeats it.
+ * Writes an estimated telephony charge and a real hosting charge for every date
+ * due up to today in one transaction, so a failed check writes nothing and the
+ * next one repeats it.
  */
-export function writeDueEstimates() {
+export function writeDueCharges() {
   const today = moscowDay(new Date())
 
   return transaction(tx => {
-    const schedules = listActiveSchedules(tx)
+    const numbers = listActiveSchedules(tx)
+    const hostings = listEnabledHostingSchedules(tx)
     let written = 0
-    for (const { id, siteId, amount, ...schedule } of schedules) {
-      const { dates, nextDate } = chargesDue(schedule, today)
-      if (dates.length === 0) continue
-
-      for (const date of dates) {
-        if (insertEstimate(tx, { date, siteId, amount, type: TELEPHONY_TYPE })) written++
-      }
-      setNextChargeDate(tx, id, nextDate)
+    for (const { siteId, amount, ...schedule } of numbers) {
+      written += writeDue(tx, schedule, today, date => insertEstimate(tx, { date, siteId, amount, type: TELEPHONY_TYPE }))
     }
-    return { checked: schedules.length, written }
+    for (const { hostingId, amount, ...schedule } of hostings) {
+      written += writeDue(tx, schedule, today, date => insertHostingCharge(tx, { date, hostingId, amount, type: HOSTING_TYPE }))
+    }
+    return { checked: numbers.length + hostings.length, written }
   })
 }
 

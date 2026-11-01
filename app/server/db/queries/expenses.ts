@@ -88,6 +88,14 @@ export function insertEstimate(tx: Tx, row: Required<Omit<UpsertExpenseInput, 'c
   return tx.insert(expenses).values({ ...row, isEstimate: true }).onConflictDoNothing().run().changes > 0
 }
 
+/** Writes a real hosting charge unless the key is taken, so a stored row never changes. */
+export function insertHostingCharge(
+  tx: Tx,
+  row: { date: string, hostingId: number, amount: number, type: string },
+): boolean {
+  return tx.insert(expenses).values(row).onConflictDoNothing().run().changes > 0
+}
+
 /** Deletes the estimates dated inside the period and returns the site of each. */
 export function deleteEstimates(tx: Tx, type: string, { start, end }: DayPeriod) {
   return tx

@@ -1,6 +1,6 @@
 import { and, eq, isNotNull, ne, or, sql } from 'drizzle-orm'
 
-import { chargeSchedules, phoneNumbers } from '../schema'
+import { chargeSchedules, hostings, phoneNumbers } from '../schema'
 
 import type { Tx } from '../transaction'
 
@@ -34,6 +34,22 @@ export function listActiveSchedules(tx: Tx) {
 
 export function listEnabledSchedules(tx: Tx) {
   return selectSchedules(tx).where(eq(chargeSchedules.enabled, true)).all()
+}
+
+/** Enabled hosting schedules. The check holds their interval set. */
+export function listEnabledHostingSchedules(tx: Tx) {
+  return tx
+    .select({
+      id: chargeSchedules.id,
+      nextDate: chargeSchedules.nextDate,
+      amount: chargeSchedules.amount,
+      intervalMonths: sql<number>`${chargeSchedules.intervalMonths}`,
+      hostingId: hostings.id,
+    })
+    .from(chargeSchedules)
+    .innerJoin(hostings, eq(hostings.id, chargeSchedules.hostingId))
+    .where(eq(chargeSchedules.enabled, true))
+    .all()
 }
 
 export function setNextChargeDate(tx: Tx, id: number, nextDate: string): void {
