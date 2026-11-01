@@ -30,6 +30,9 @@ const envSchema = z.object({
   // Shared secret for the Gudok call webhook. Sent in the URL path
   // (/webhooks/gudok/<secret>); the endpoint is disabled when unset
   GUDOK_WEBHOOK_SECRET: z.string().min(1).optional(),
+  // Set by Railway; shown by the health endpoint. No min(1): an empty value
+  // must not stop the app from starting
+  RAILWAY_GIT_COMMIT_SHA: z.string().optional(),
 })
 
 type Env = z.infer<typeof envSchema>
