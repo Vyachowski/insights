@@ -101,6 +101,7 @@ Rules the code cannot explain on its own. UI labels stay in Russian, exactly as 
 - The same check writes it, in the same transaction as telephony. It writes every date due up to today by the `Europe/Moscow` day, then moves the next date past today.
 - The step is 12 calendar months and is not edited. A date keeps its day, and 29.02 falls on 28.02, where it then stays.
 - A charge never changes a stored row: when the key `(date, hostingId)` is taken, the row stays as it is and the date counts as done. A repeated check adds nothing. Two hostings can charge on one date.
+- A `hosting` row with no site and no hosting, as an expense CSV writes it, takes the date for every hosting: the server cannot tell whose it is. The row stays as it is, unlinked, and the date counts as done. A hosting row with a site does not take the date.
 - Switching on offers the last row of this hosting + 12 months and that row's amount, worked out on each read, so switching on again never brings back old stored values. A hosting with no row offers nothing, and the admin fills in both fields. A hosting row with a site or with no hosting does not count.
 - The form and its checks are the ones `Номера` uses, and a next date in the past is allowed. Switching off stops new charges and keeps the schedule row and written rows.
 - Reconciliation, the no-charge mark and the Gudok alerts stay telephony-only, so a run leaves hosting schedules and rows unchanged.

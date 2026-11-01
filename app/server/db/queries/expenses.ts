@@ -31,6 +31,14 @@ const realWrite = (amount: number, comment?: string) => ({
   isEstimate: false,
 })
 
+/** A row an expense CSV writes: no site and no hosting. The company-level index holds one per date. */
+const unlinkedRow = (date: string, type: string) => and(
+  eq(expenses.date, date),
+  eq(expenses.type, type),
+  isNull(expenses.siteId),
+  isNull(expenses.hostingId),
+)
+
 export function listExpenses() {
   return db.select().from(expenses).orderBy(expenses.id)
 }
@@ -88,11 +96,16 @@ export function insertEstimate(tx: Tx, row: Required<Omit<UpsertExpenseInput, 'c
   return tx.insert(expenses).values({ ...row, isEstimate: true }).onConflictDoNothing().run().changes > 0
 }
 
-/** Writes a real hosting charge unless the key is taken, so a stored row never changes. */
+/**
+ * Writes a real hosting charge unless the key is taken, so a stored row never
+ * changes. A row with no hosting on the date takes the key too, so the same
+ * charge from a CSV does not count twice.
+ */
 export function insertHostingCharge(
   tx: Tx,
   row: { date: string, hostingId: number, amount: number, type: string },
 ): boolean {
+  if (tx.select({ id: expenses.id }).from(expenses).where(unlinkedRow(row.date, row.type)).get()) return false
   return tx.insert(expenses).values(row).onConflictDoNothing().run().changes > 0
 }
 
