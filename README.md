@@ -27,7 +27,7 @@ Each task runs in its own branch and worktree and reaches `main` through a `--no
 | `docs/agents/` | agents | setup for the engineering skills |
 | `.scratch/` | agents | temporary specs and tasks, hidden from git |
 
-Add new documents only when one is needed. `GLOSSARY.md` and `CODING_STANDARDS.md` do not exist yet: create the glossary when terms get confused, and coding standards when a review misses a mistake no linter could catch.
+Add new documents only when one is needed. `CODING_STANDARDS.md` does not exist yet: create it when a review misses a mistake no linter could catch.
 
 ## Which skill when
 
