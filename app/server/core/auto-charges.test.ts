@@ -44,7 +44,7 @@ describe('chargesDue', () => {
 })
 
 describe('reconciledSchedule', () => {
-  const schedule = { nextDate: '2026-10-29', amount: 87000, intervalDays: 30 }
+  const schedule = { nextDate: '2026-10-29', amount: 87000, intervalDays: 30, noChargePeriodEnd: null }
   const run = { estimated: false, charged: false, periodEnd: '2026-10-31' }
   const lastCharge = { date: '2026-10-27', amount: 90000 }
 
@@ -67,9 +67,11 @@ describe('reconciledSchedule', () => {
     { estimated: true, charged: false, noChargePeriodEnd: '2026-10-31' },
     { estimated: true, charged: true, noChargePeriodEnd: null },
     { estimated: false, charged: true, noChargePeriodEnd: null },
-    { estimated: false, charged: false, noChargePeriodEnd: null },
+    { estimated: false, charged: false, noChargePeriodEnd: '2026-09-30' },
   ])('with estimated $estimated and charged $charged stores $noChargePeriodEnd', ({ noChargePeriodEnd, ...flags }) => {
-    expect(reconciledSchedule(schedule, { ...run, ...flags }).noChargePeriodEnd).toBe(noChargePeriodEnd)
+    const marked = { ...schedule, noChargePeriodEnd: '2026-09-30' }
+
+    expect(reconciledSchedule(marked, { ...run, ...flags }).noChargePeriodEnd).toBe(noChargePeriodEnd)
   })
 })
 

@@ -210,12 +210,12 @@ describe('reconcileTelephony', () => {
     expect(scheduleOf().no_charge_period_end).toBeNull()
   })
 
-  it('clears a stored value after a short period with no charge due', async () => {
+  it('keeps a stored value after a short period with no charge due', async () => {
     seedSchedule({ noChargePeriodEnd: '2026-09-30' })
 
     await reconcileTelephony([], { start: '2026-10-25', end: '2026-10-28' })
 
-    expect(scheduleOf().no_charge_period_end).toBeNull()
+    expect(scheduleOf().no_charge_period_end).toBe('2026-09-30')
   })
 
   it('clears a stored value after a real charge', async () => {
@@ -261,13 +261,13 @@ describe('reconcileTelephony', () => {
     })
   })
 
-  it('keeps the values of a number with no site and clears its stored value', async () => {
+  it('keeps the values and the stored value of a number with no site', async () => {
     seedSchedule({ siteId: null, nextDate: '2026-11-23', amount: 50000, noChargePeriodEnd: '2026-09-30' })
     seedEstimate('2026-10-24', { siteId: null })
 
     await reconcileTelephony([charge({ project: 'Неизвестный..' })], PERIOD)
 
-    expect(scheduleOf()).toMatchObject({ next_date: '2026-11-23', amount: 50000, no_charge_period_end: null })
+    expect(scheduleOf()).toMatchObject({ next_date: '2026-11-23', amount: 50000, no_charge_period_end: '2026-09-30' })
   })
 
   it('records the run, also when no charge came', async () => {
@@ -331,6 +331,14 @@ describe('no-charge mark', () => {
     await reconcileTelephony([charge()], PERIOD)
 
     expect(await markOf()).toMatchObject({ enabled: true, noChargePeriodEnd: null })
+  })
+
+  it('stays through a repeated run with no real charge', async () => {
+    await reconcileTelephony([], PERIOD)
+
+    await reconcileTelephony([], PERIOD)
+
+    expect(await markOf()).toMatchObject({ enabled: true, noChargePeriodEnd: '2026-10-31' })
   })
 
   it('is cleared by switching the number off', async () => {

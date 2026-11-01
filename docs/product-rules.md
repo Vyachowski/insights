@@ -96,7 +96,7 @@ Rules the code cannot explain on its own. UI labels stay in Russian, exactly as 
 - Real rows are then written like any telephony sync. A row that replaces a deleted estimate reports `created`.
 - Each enabled schedule takes its next date (last real charge + interval) and amount from the site's last real `telephony` charge, so a date shift or tariff change needs no edits. A site with no real charge at all keeps its values.
 - A number stays on after a run with no real charge: only the admin switches it off. If its next date is now in the past, the hourly check writes estimates again.
-- An enabled schedule stores the period's end when the period held an estimate for its site and no real charge. In every other case the stored value is cleared, so a short period with no charge due sets nothing.
+- An enabled schedule stores the period's end when the period held an estimate for its site and no real charge. A real charge in the period clears the stored value. In every other case it stays, so a repeated or short run with no charge due neither sets nor clears it.
 - A disabled schedule is not changed.
 - Every run goes in the reconciliation log, also with no rows. The result reports created, updated, skipped and deleted-estimate counts.
 

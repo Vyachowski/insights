@@ -15,6 +15,7 @@ const selectSchedules = (tx: Tx) => tx
     nextDate: chargeSchedules.nextDate,
     amount: chargeSchedules.amount,
     intervalDays: chargeSchedules.intervalDays,
+    noChargePeriodEnd: chargeSchedules.noChargePeriodEnd,
     siteId: phoneNumbers.siteId,
   })
   .from(chargeSchedules)
