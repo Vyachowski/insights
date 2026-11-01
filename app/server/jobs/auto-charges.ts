@@ -1,4 +1,4 @@
-import { writeDueEstimates } from '../services/auto-charges'
+import { writeDueCharges } from '../services/auto-charges'
 
 const HOUR_MS = 60 * 60 * 1000
 
@@ -18,8 +18,8 @@ export function stopAutoChargeScheduler(): void {
 // A check is synchronous, so a shutdown can never find one mid-flight
 function runCheck(): void {
   try {
-    const { checked, written } = writeDueEstimates()
-    console.log(`[auto-charges] schedules checked: ${checked}, estimates written: ${written}`)
+    const { checked, written } = writeDueCharges()
+    console.log(`[auto-charges] schedules checked: ${checked}, charges written: ${written}`)
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
     console.error(`[auto-charges] check failed: ${message} (retrying next tick)`)

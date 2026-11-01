@@ -1,21 +1,16 @@
-import { Badge, Box, Group, Paper, ScrollArea, Stack, Table, Text, Title } from '@mantine/core'
+import { Badge, Box, Paper, ScrollArea, Stack, Table, Text, Title } from '@mantine/core'
 import { useState } from 'react'
 import { useFetcher } from 'react-router'
 
-import NumberChargeModal from './NumberChargeModal'
+import { CHARGE_TOASTS } from './charge-toasts'
+import ChargeActions from './ChargeActions'
+import ChargeModal from './ChargeModal'
 
 import type { Site } from '@/server/db/queries/sites'
 import type { NumberCharge, NumberChargeResult } from '@/server/services/auto-charges'
 
-import Button from '@/components/Button'
 import { useResultToast } from '@/hooks/useResultToast'
 import { formatAmount, formatDate, formatDayMonth, getSiteName } from '@/lib/format'
-
-const TOASTS = {
-  on: { color: 'teal', message: 'Автосписание включено' },
-  updated: { color: 'blue', message: 'Автосписание обновлено' },
-  off: { color: 'gray', message: 'Автосписание выключено' },
-}
 
 interface NumbersTabViewProps {
   numbers: NumberCharge[]
@@ -23,31 +18,10 @@ interface NumbersTabViewProps {
   isAdmin: boolean
 }
 
-function NumberActions({ row, disabled, onEdit, onSwitchOff }: {
-  row: NumberCharge
-  disabled: boolean
-  onEdit: () => void
-  onSwitchOff: () => void
-}) {
-  if (!row.enabled) {
-    return (
-      <Button size="sm" variant="secondary" disabled={disabled || row.siteId === null} onClick={onEdit}>
-        Включить
-      </Button>
-    )
-  }
-  return (
-    <Group gap="xs" justify="flex-end" wrap="nowrap">
-      <Button size="sm" variant="secondary" disabled={disabled} onClick={onEdit}>Изменить</Button>
-      <Button size="sm" variant="ghost" disabled={disabled} onClick={onSwitchOff}>Выключить</Button>
-    </Group>
-  )
-}
-
 export default function NumbersTabView({ numbers, sites, isAdmin }: NumbersTabViewProps) {
   const [editing, setEditing] = useState<NumberCharge | null>(null)
   const fetcher = useFetcher<NumberChargeResult>()
-  useResultToast(fetcher, TOASTS)
+  useResultToast(fetcher, CHARGE_TOASTS)
   const submitting = fetcher.state !== 'idle'
 
   const submit = (intent: string, row: NumberCharge, values: { nextDate?: string, amount?: string } = {}) => {
@@ -109,9 +83,10 @@ export default function NumbersTabView({ numbers, sites, isAdmin }: NumbersTabVi
                     <Table.Td ta="right">{row.amount === null ? '—' : formatAmount(row.amount)}</Table.Td>
                     {isAdmin && (
                       <Table.Td ta="right">
-                        <NumberActions
-                          row={row}
+                        <ChargeActions
+                          enabled={row.enabled}
                           disabled={submitting}
+                          canEnable={row.siteId !== null}
                           onEdit={() => setEditing(row)}
                           onSwitchOff={() => submit('switch-off', row)}
                         />
@@ -126,8 +101,10 @@ export default function NumbersTabView({ numbers, sites, isAdmin }: NumbersTabVi
       </Paper>
 
       {isAdmin && editing && (
-        <NumberChargeModal
+        <ChargeModal
           row={editing}
+          name={editing.name ?? editing.number ?? '—'}
+          noOfferHint="По сайту нет реальных списаний: укажите дату и сумму."
           submitting={submitting}
           onClose={() => setEditing(null)}
           onSubmit={values => {

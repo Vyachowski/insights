@@ -6,15 +6,17 @@ import type { NumberCharge } from '@/server/services/auto-charges'
 import Button from '@/components/Button'
 import Input from '@/components/Input'
 
-interface NumberChargeModalProps {
-  row: NumberCharge
+interface ChargeModalProps {
+  row: Pick<NumberCharge, 'enabled' | 'nextDate' | 'amount' | 'offer'>
+  name: string
+  noOfferHint: string
   submitting: boolean
   onClose: () => void
   onSubmit: (values: { nextDate: string, amount: string }) => void
 }
 
-export default function NumberChargeModal({ row, submitting, onClose, onSubmit }: NumberChargeModalProps) {
-  // A number that is off starts from the offer, never from its old stored values
+export default function ChargeModal({ row, name, noOfferHint, submitting, onClose, onSubmit }: ChargeModalProps) {
+  // A charge that is off starts from the offer, never from its old stored values
   const start = row.enabled ? row : row.offer
   const [nextDate, setNextDate] = useState(start?.nextDate ?? '')
   const [amount, setAmount] = useState(start?.amount?.toString() ?? '')
@@ -38,13 +40,13 @@ export default function NumberChargeModal({ row, submitting, onClose, onSubmit }
     <Modal
       opened
       onClose={onClose}
-      title={`${row.enabled ? 'Автосписание' : 'Включить автосписание'}: ${row.name ?? row.number ?? '—'}`}
+      title={`${row.enabled ? 'Автосписание' : 'Включить автосписание'}: ${name}`}
       centered
     >
       <form onSubmit={handleSubmit}>
         <Stack gap="md">
           {!start && (
-            <Text c="dimmed" size="sm">По сайту нет реальных списаний: укажите дату и сумму.</Text>
+            <Text c="dimmed" size="sm">{noOfferHint}</Text>
           )}
 
           <Input

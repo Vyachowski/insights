@@ -33,11 +33,20 @@ Config validation (`app/server/config.ts`) → open SQLite (WAL, busy_timeout) �
 
 ## Auto charges
 
-- The server checks for due estimates at startup and then hourly, in every environment. The job has its own scheduler, because the backup one does not start without bucket storage.
-- Each check logs `[auto-charges] schedules checked: N, estimates written: M`. `checked` counts enabled schedules whose number has a site.
+- The server checks for due charges at startup and then hourly, in every environment. The job has its own scheduler, because the backup one does not start without bucket storage.
+- Each check logs `[auto-charges] schedules checked: N, charges written: M`. `checked` counts enabled schedules whose number has a site and enabled hosting schedules. `written` counts telephony estimates and real hosting rows.
 - One check is one transaction. A failure logs `[auto-charges] check failed: ...`, writes nothing, and the next tick repeats it. The app keeps working.
 - Shutdown stops the timer before the database closes. A check is synchronous, so it cannot be cut off halfway.
 - Admins see the red alert `Сверка с Гудком устарела` when estimates are stored and the date behind `Сверено с Гудком до DD.MM` is over 90 days old by the `Europe/Moscow` day. That date is the period end of the last recorded run, or the latest real `telephony` day with no recorded run. Exactly 90 days shows nothing, and with neither date no alert shows. Run the console script to clear it.
+
+### Adding a hosting
+
+There is no form: a new hosting and its site links go in a migration.
+
+1. Add a custom migration: `npx drizzle-kit generate --custom --name=add_<provider>_hosting`.
+2. In it, `INSERT INTO hostings` the provider and account, with `created_at` and `updated_at`. The pair is unique.
+3. In it, `UPDATE sites SET hosting_id` for the sites of that hosting.
+4. Do not seed a schedule: the hosting starts off. After the deploy, switch its auto charge on in `Филиалы` → `Хостинг`.
 
 ## Gudok call webhook
 

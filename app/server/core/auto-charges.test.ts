@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it } from 'vitest'
 
 import {
   chargesDue,
+  hostingCharge,
   isReconciliationStale,
   isValidInterval,
   moscowDay,
@@ -41,6 +42,32 @@ describe('chargesDue', () => {
 
   it('refuses an interval that would never pass today', () => {
     expect(() => chargesDue({ ...schedule, intervalDays: 0 }, '2026-10-29')).toThrow(RangeError)
+  })
+})
+
+describe('chargesDue by calendar months', () => {
+  const yearly = (nextDate: string) => ({ nextDate, intervalMonths: 12 })
+
+  it('owes each year on the same calendar date, across a leap year', () => {
+    expect(chargesDue(yearly('2027-03-15'), '2029-03-15')).toEqual({
+      dates: ['2027-03-15', '2028-03-15', '2029-03-15'],
+      nextDate: '2030-03-15',
+    })
+  })
+
+  it('falls from 29.02 on 28.02, where the date then stays', () => {
+    expect(chargesDue(yearly('2024-02-29'), '2028-03-01')).toEqual({
+      dates: ['2024-02-29', '2025-02-28', '2026-02-28', '2027-02-28', '2028-02-28'],
+      nextDate: '2029-02-28',
+    })
+  })
+
+  it('takes the last day of a shorter month', () => {
+    expect(chargesDue({ nextDate: '2026-01-31', intervalMonths: 1 }, '2026-01-31').nextDate).toBe('2026-02-28')
+  })
+
+  it('refuses an interval that would never pass today', () => {
+    expect(() => chargesDue({ nextDate: '2026-10-29', intervalMonths: 0 }, '2026-10-29')).toThrow(RangeError)
   })
 })
 
@@ -140,6 +167,25 @@ describe('numberCharge', () => {
 
     expect(numberCharge(stored, { date: '2026-10-27', amount: 87050 }).offer)
       .toEqual({ nextDate: '2026-11-26', amount: 870.5 })
+  })
+})
+
+describe('hostingCharge', () => {
+  it('gives an enabled hosting its next date and amount in rubles', () => {
+    expect(hostingCharge({ enabled: true, nextDate: '2027-03-15', amount: 1200050 }))
+      .toEqual({ enabled: true, nextDate: '2027-03-15', amount: 12000.5, offer: null })
+  })
+
+  it('hides the stored values of a schedule that is off', () => {
+    expect(hostingCharge({ enabled: false, nextDate: '2027-03-15', amount: 1200000 }))
+      .toEqual({ enabled: false, nextDate: null, amount: null, offer: null })
+  })
+
+  it('offers the last charge + 12 months, and 29.02 falls on 28.02', () => {
+    const stored = { enabled: false, nextDate: '2026-01-01', amount: 30000 }
+
+    expect(hostingCharge(stored, { date: '2028-02-29', amount: 1200000 }).offer)
+      .toEqual({ nextDate: '2029-02-28', amount: 12000 })
   })
 })
 

@@ -46,7 +46,7 @@ describe('auto charge scheduler', () => {
     startAutoChargeScheduler()
 
     expect(expenseDates()).toEqual(['2026-10-29'])
-    expect(console.log).toHaveBeenCalledWith('[auto-charges] schedules checked: 1, estimates written: 1')
+    expect(console.log).toHaveBeenCalledWith('[auto-charges] schedules checked: 1, charges written: 1')
   })
 
   it('checks again every hour', async () => {

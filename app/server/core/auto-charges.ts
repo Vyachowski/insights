@@ -5,6 +5,7 @@ const DAY_MS = 24 * 60 * 60 * 1000
 
 // Charges repeat every 30 days, not monthly. Same as the column default
 const DEFAULT_INTERVAL_DAYS = 30
+export const HOSTING_INTERVAL_MONTHS = 12
 const RECONCILIATION_MAX_AGE_DAYS = 90
 
 const MOSCOW_DATE = new Intl.DateTimeFormat('en-CA', {
@@ -21,18 +22,30 @@ export const moscowDay = (now: Date): string => MOSCOW_DATE.format(now)
 export const addDays = (date: string, days: number) =>
   new Date(Date.parse(`${date}T00:00:00Z`) + days * DAY_MS).toISOString().slice(0, 10)
 
+/** A date keeps its day, and in a month too short for it falls on the last day. */
+function addMonths(date: string, months: number) {
+  const next = new Date(`${date}T00:00:00Z`)
+  const day = next.getUTCDate()
+  next.setUTCMonth(next.getUTCMonth() + months)
+  // A missing day rolls into the month after, so step back to the end of the wanted one
+  if (next.getUTCDate() !== day) next.setUTCDate(0)
+  return next.toISOString().slice(0, 10)
+}
+
+type ChargeInterval = { intervalDays: number } | { intervalMonths: number }
+
 /** Every date owed up to `today`, and the first next date past it. */
-export function chargesDue(
-  schedule: { nextDate: string, intervalDays: number },
-  today: string,
-) {
-  if (schedule.intervalDays < 1) throw new RangeError(`Bad charge interval: ${schedule.intervalDays}`)
+export function chargesDue(schedule: { nextDate: string } & ChargeInterval, today: string) {
+  const [interval, step] = 'intervalDays' in schedule
+    ? [schedule.intervalDays, addDays]
+    : [schedule.intervalMonths, addMonths]
+  if (interval < 1) throw new RangeError(`Bad charge interval: ${interval}`)
 
   const dates: string[] = []
   let date = schedule.nextDate
   while (date <= today) {
     dates.push(date)
-    date = addDays(date, schedule.intervalDays)
+    date = step(date, interval)
   }
   return { dates, nextDate: date }
 }
@@ -77,29 +90,45 @@ export function isReconciliationStale(
   return hasEstimates && until !== null && addDays(until, RECONCILIATION_MAX_AGE_DAYS) < today
 }
 
-/**
- * A number as `Номера` shows it: one that is off has no next charge and no
- * no-charge mark, and the amount is in rubles. `offer` comes from the site's
- * last real charge and never from stored values, so switching on again starts fresh.
- */
-export function numberCharge<T extends {
+interface StoredCharge {
   enabled: boolean | null
   nextDate: string | null
   amount: number | null
-  noChargePeriodEnd: string | null
-}>(row: T, lastCharge?: { date: string, amount: number }) {
+}
+
+interface LastCharge {
+  date: string
+  amount: number
+}
+
+/**
+ * A charge as its tab shows it: one that is off has no next date and no amount,
+ * and the amount is in rubles. `offer` comes from the last charge and never from
+ * stored values, so switching on again starts fresh.
+ */
+function shownCharge<T extends StoredCharge>(row: T, step: (date: string) => string, lastCharge?: LastCharge) {
   const enabled = row.enabled === true
   return {
     ...row,
     enabled,
     nextDate: enabled ? row.nextDate : null,
     amount: enabled && row.amount !== null ? toRubles(row.amount) : null,
-    noChargePeriodEnd: enabled ? row.noChargePeriodEnd : null,
-    offer: lastCharge
-      ? { nextDate: addDays(lastCharge.date, DEFAULT_INTERVAL_DAYS), amount: toRubles(lastCharge.amount) }
-      : null,
+    offer: lastCharge ? { nextDate: step(lastCharge.date), amount: toRubles(lastCharge.amount) } : null,
   }
 }
+
+/** A number as `Номера` shows it. One that is off has no no-charge mark. */
+export function numberCharge<T extends StoredCharge & { noChargePeriodEnd: string | null }>(
+  row: T,
+  lastCharge?: LastCharge,
+) {
+  const shown = shownCharge(row, date => addDays(date, DEFAULT_INTERVAL_DAYS), lastCharge)
+  return { ...shown, noChargePeriodEnd: shown.enabled ? row.noChargePeriodEnd : null }
+}
+
+/** A hosting as `Хостинг` shows it. */
+export const hostingCharge = <T extends StoredCharge>(row: T, lastCharge?: LastCharge) =>
+  shownCharge(row, date => addMonths(date, HOSTING_INTERVAL_MONTHS), lastCharge)
 
 /** `chargesDue` throws below 1, and one bad schedule would stop every estimate. */
 export const isValidInterval = (days: number) => Number.isInteger(days) && days >= 1

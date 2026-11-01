@@ -18,6 +18,7 @@ for (const suffix of ['', '-wal', '-shm']) fs.rmSync(`${SANDBOX_DB}${suffix}`, {
 
 // Loaded after the delete, because importing the client opens the file
 const { PROVIDER } = await import('@/server/core/gudok-calls')
+const { HOSTING_INTERVAL_MONTHS } = await import('@/server/core/auto-charges')
 const { HOSTING_TYPE } = await import('@/server/core/finance')
 const { TELEPHONY_TYPE } = await import('@/server/core/gudok-history')
 const { toKopecks } = await import('@/server/core/money')
@@ -25,6 +26,7 @@ const { db } = await import('@/server/db/client')
 const { runMigrations } = await import('@/server/db/migrate')
 const { insertCall } = await import('@/server/db/queries/calls')
 const { insertCities, listCities } = await import('@/server/db/queries/cities')
+const { enableHostingSchedule } = await import('@/server/db/queries/charge-schedules')
 const { upsertExpense } = await import('@/server/db/queries/expenses')
 const { listHostings } = await import('@/server/db/queries/hostings')
 const { upsertMetric } = await import('@/server/db/queries/metrics')
@@ -142,7 +144,7 @@ async function seedFinance(siteIds: number[]) {
   }
 }
 
-// One number on, one with a schedule that is off, one with no schedule, one with no site
+// One number on, one with a schedule that is off, one with no schedule, one with no site, and the hosting on
 async function seedAutoCharges(siteIds: number[]) {
   await createPhoneNumber({ provider: PROVIDER, providerNumberId: 'sandbox-free', number: '70000000000', name: 'Номер без сайта' })
   const schedule = { provider: PROVIDER, nextDate: isoDate(addDays(now, 10)), amount: toKopecks(870) }
@@ -150,6 +152,12 @@ async function seedAutoCharges(siteIds: number[]) {
     { ...schedule, providerNumberId: `sandbox-${siteIds[0]}`, enabled: true },
     { ...schedule, providerNumberId: `sandbox-${siteIds[1]}` },
   ])
+  const [hosting] = await listHostings()
+  transaction(tx => enableHostingSchedule(
+    tx,
+    { hostingId: hosting.id, intervalMonths: HOSTING_INTERVAL_MONTHS },
+    { nextDate: isoDate(addDays(now, 60)), amount: toKopecks(12_000) },
+  ))
 }
 
 runMigrations()

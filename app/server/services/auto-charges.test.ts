@@ -2,14 +2,17 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { sqlite } from '@/server/db/client'
 
-const { changeNumberCharge, listNumberCharges, writeDueEstimates } = await import('./auto-charges')
+const { changeNumberCharge, listNumberCharges, writeDueCharges } = await import('./auto-charges')
 
 const NOW = new Date('2026-10-29T09:00:00Z')
 
 beforeEach(() => {
   vi.useFakeTimers({ now: NOW, toFake: ['Date'] })
   sqlite.exec(
-    'DELETE FROM charge_schedules; DELETE FROM phone_numbers; DELETE FROM expenses; DELETE FROM sites; DELETE FROM cities;',
+    'DELETE FROM charge_schedules; DELETE FROM phone_numbers; DELETE FROM expenses; DELETE FROM sites; DELETE FROM cities; DELETE FROM hostings;',
+  )
+  sqlite.exec(
+    "INSERT INTO hostings (id, provider, account, created_at, updated_at) VALUES (1, 'sprinthost', 'a', 0, 0), (2, 'sprinthost', 'b', 0, 0);",
   )
   sqlite.exec(
     "INSERT INTO cities (id, code, slug, name, population, created_at, updated_at) VALUES (1, 'VOL', 'volgograd', 'Волгоград', 100, 0, 0);",
@@ -43,17 +46,30 @@ function seedSchedule({ enabled = 1, nextDate = '2026-10-29', amount = 87000, si
   ).run(enabled, nextDate, amount)
 }
 
+function seedHostingSchedule({ hostingId = 1, enabled = 1, nextDate = '2026-10-29', amount = 1200000 } = {}) {
+  sqlite.prepare(
+    'INSERT INTO charge_schedules (hosting_id, enabled, next_date, amount, interval_days, interval_months, created_at, updated_at) '
+    + 'VALUES (?, ?, ?, ?, NULL, 12, 0, 0)',
+  ).run(hostingId, enabled, nextDate, amount)
+}
+
+function seedHostingExpense(date: string, amount: number, hostingId = 1) {
+  sqlite.prepare(
+    "INSERT INTO expenses (date, hosting_id, amount, type, comment, created_at, updated_at) VALUES (?, ?, ?, 'hosting', 'Вручную', 1, 1)",
+  ).run(date, hostingId, amount)
+}
+
 function expenseRows() {
   return sqlite.prepare('SELECT * FROM expenses ORDER BY date').all() as Record<string, unknown>[]
 }
 
 const nextDate = () => (sqlite.prepare('SELECT next_date FROM charge_schedules').get() as { next_date: string }).next_date
 
-describe('writeDueEstimates', () => {
+describe('writeDueCharges', () => {
   it('writes an estimate on the due date and moves the next date', () => {
     seedSchedule()
 
-    expect(writeDueEstimates()).toEqual({ checked: 1, written: 1 })
+    expect(writeDueCharges()).toEqual({ checked: 1, written: 1 })
 
     expect(expenseRows()).toMatchObject([{
       date: '2026-10-29',
@@ -69,7 +85,7 @@ describe('writeDueEstimates', () => {
   it('writes nothing before the due date', () => {
     seedSchedule({ nextDate: '2026-10-30' })
 
-    expect(writeDueEstimates()).toEqual({ checked: 1, written: 0 })
+    expect(writeDueCharges()).toEqual({ checked: 1, written: 0 })
 
     expect(expenseRows()).toEqual([])
     expect(nextDate()).toBe('2026-10-30')
@@ -79,16 +95,16 @@ describe('writeDueEstimates', () => {
     seedSchedule({ nextDate: '2026-10-30' })
 
     vi.setSystemTime('2026-10-29T20:59:59Z')
-    expect(writeDueEstimates().written).toBe(0)
+    expect(writeDueCharges().written).toBe(0)
 
     vi.setSystemTime('2026-10-29T21:00:00Z')
-    expect(writeDueEstimates().written).toBe(1)
+    expect(writeDueCharges().written).toBe(1)
   })
 
   it('catches up every date missed in downtime', () => {
     seedSchedule({ nextDate: '2026-08-30' })
 
-    expect(writeDueEstimates()).toEqual({ checked: 1, written: 3 })
+    expect(writeDueCharges()).toEqual({ checked: 1, written: 3 })
 
     expect(expenseRows().map(row => row.date)).toEqual(['2026-08-30', '2026-09-29', '2026-10-29'])
     expect(nextDate()).toBe('2026-11-28')
@@ -96,10 +112,10 @@ describe('writeDueEstimates', () => {
 
   it('adds nothing on a repeated run', () => {
     seedSchedule({ nextDate: '2026-08-30' })
-    writeDueEstimates()
+    writeDueCharges()
     const before = expenseRows()
 
-    expect(writeDueEstimates()).toEqual({ checked: 1, written: 0 })
+    expect(writeDueCharges()).toEqual({ checked: 1, written: 0 })
 
     expect(expenseRows()).toEqual(before)
     expect(nextDate()).toBe('2026-11-28')
@@ -113,7 +129,7 @@ describe('writeDueEstimates', () => {
     )
     const [realRow] = expenseRows()
 
-    expect(writeDueEstimates()).toEqual({ checked: 1, written: 1 })
+    expect(writeDueCharges()).toEqual({ checked: 1, written: 1 })
 
     expect(expenseRows()).toEqual([realRow, expect.objectContaining({ date: '2026-10-29', is_estimate: 1 })])
     expect(nextDate()).toBe('2026-11-28')
@@ -126,7 +142,7 @@ describe('writeDueEstimates', () => {
       + "VALUES ('2026-10-29', 5, 500000, 'hosting', 0, 0);",
     )
 
-    expect(writeDueEstimates().written).toBe(1)
+    expect(writeDueCharges().written).toBe(1)
 
     expect(expenseRows().map(row => row.type).sort()).toEqual(['hosting', 'telephony'])
   })
@@ -134,7 +150,7 @@ describe('writeDueEstimates', () => {
   it('skips a disabled schedule', () => {
     seedSchedule({ enabled: 0 })
 
-    expect(writeDueEstimates()).toEqual({ checked: 0, written: 0 })
+    expect(writeDueCharges()).toEqual({ checked: 0, written: 0 })
 
     expect(expenseRows()).toEqual([])
     expect(nextDate()).toBe('2026-10-29')
@@ -143,13 +159,13 @@ describe('writeDueEstimates', () => {
   it('skips a number with no site, and catches up once it has one', () => {
     seedSchedule({ siteId: null, nextDate: '2026-09-29' })
 
-    expect(writeDueEstimates()).toEqual({ checked: 0, written: 0 })
+    expect(writeDueCharges()).toEqual({ checked: 0, written: 0 })
     expect(expenseRows()).toEqual([])
     expect(nextDate()).toBe('2026-09-29')
 
     sqlite.exec('UPDATE phone_numbers SET site_id = 5')
 
-    expect(writeDueEstimates()).toEqual({ checked: 1, written: 2 })
+    expect(writeDueCharges()).toEqual({ checked: 1, written: 2 })
   })
 
   it('writes nothing when any date of the check fails', () => {
@@ -160,11 +176,112 @@ describe('writeDueEstimates', () => {
     )
 
     try {
-      expect(() => writeDueEstimates()).toThrow('disk full')
+      expect(() => writeDueCharges()).toThrow('disk full')
       expect(expenseRows()).toEqual([])
       expect(nextDate()).toBe('2026-09-29')
     } finally {
       sqlite.exec('DROP TRIGGER fail_second_date')
+    }
+  })
+})
+
+describe('writeDueCharges for a hosting', () => {
+  const nextDates = () => (sqlite.prepare('SELECT next_date FROM charge_schedules ORDER BY hosting_id').all() as { next_date: string }[])
+    .map(row => row.next_date)
+
+  it('writes a real row with its hosting and moves the next date a year on', () => {
+    seedHostingSchedule()
+
+    expect(writeDueCharges()).toEqual({ checked: 1, written: 1 })
+
+    expect(expenseRows()).toMatchObject([{
+      date: '2026-10-29',
+      site_id: null,
+      hosting_id: 1,
+      amount: 1200000,
+      type: 'hosting',
+      comment: null,
+      is_estimate: 0,
+    }])
+    expect(nextDates()).toEqual(['2027-10-29'])
+  })
+
+  it('writes nothing before the due date', () => {
+    seedHostingSchedule({ nextDate: '2026-10-30' })
+
+    expect(writeDueCharges()).toEqual({ checked: 1, written: 0 })
+
+    expect(expenseRows()).toEqual([])
+    expect(nextDates()).toEqual(['2026-10-30'])
+  })
+
+  it('catches up every year missed in downtime, and 29.02 falls on 28.02', () => {
+    seedHostingSchedule({ nextDate: '2024-02-29' })
+
+    expect(writeDueCharges()).toEqual({ checked: 1, written: 3 })
+
+    expect(expenseRows().map(row => row.date)).toEqual(['2024-02-29', '2025-02-28', '2026-02-28'])
+    expect(nextDates()).toEqual(['2027-02-28'])
+  })
+
+  it('adds nothing on a repeated run', () => {
+    seedHostingSchedule({ nextDate: '2025-10-29' })
+    writeDueCharges()
+    const before = expenseRows()
+
+    expect(writeDueCharges()).toEqual({ checked: 1, written: 0 })
+
+    expect(expenseRows()).toEqual(before)
+  })
+
+  it('leaves a taken key unchanged and counts the date as done', () => {
+    seedHostingSchedule({ nextDate: '2025-10-29' })
+    seedHostingExpense('2025-10-29', 900000)
+    const [stored] = expenseRows()
+
+    expect(writeDueCharges()).toEqual({ checked: 1, written: 1 })
+
+    expect(expenseRows()).toEqual([stored, expect.objectContaining({ date: '2026-10-29', amount: 1200000 })])
+    expect(nextDates()).toEqual(['2027-10-29'])
+  })
+
+  it('writes two hostings on one date', () => {
+    seedHostingSchedule({ hostingId: 1 })
+    seedHostingSchedule({ hostingId: 2 })
+
+    expect(writeDueCharges()).toEqual({ checked: 2, written: 2 })
+
+    expect(expenseRows().map(row => row.hosting_id).sort()).toEqual([1, 2])
+  })
+
+  it('counts numbers and hostings in one check', () => {
+    seedSchedule()
+    seedHostingSchedule()
+
+    expect(writeDueCharges()).toEqual({ checked: 2, written: 2 })
+  })
+
+  it('skips a schedule that is off', () => {
+    seedHostingSchedule({ enabled: 0 })
+
+    expect(writeDueCharges()).toEqual({ checked: 0, written: 0 })
+
+    expect(expenseRows()).toEqual([])
+  })
+
+  it('writes neither a number nor a hosting when a hosting row fails', () => {
+    seedSchedule()
+    seedHostingSchedule()
+    sqlite.exec(
+      'CREATE TRIGGER fail_hosting BEFORE INSERT ON expenses WHEN NEW.type = \'hosting\' '
+      + "BEGIN SELECT RAISE(ABORT, 'disk full'); END;",
+    )
+
+    try {
+      expect(() => writeDueCharges()).toThrow('disk full')
+      expect(expenseRows()).toEqual([])
+    } finally {
+      sqlite.exec('DROP TRIGGER fail_hosting')
     }
   })
 })
@@ -235,7 +352,7 @@ describe('changeNumberCharge', () => {
 
   it('switches off, keeps written rows and stops new estimates', () => {
     seedSchedule()
-    writeDueEstimates()
+    writeDueCharges()
 
     expect(switchOff()).toEqual({ ok: true, outcome: 'off' })
 
@@ -243,7 +360,7 @@ describe('changeNumberCharge', () => {
     expect(expenseRows()).toMatchObject([{ date: '2026-10-29', is_estimate: 1 }])
 
     vi.setSystemTime('2026-12-29T09:00:00Z')
-    expect(writeDueEstimates()).toEqual({ checked: 0, written: 0 })
+    expect(writeDueCharges()).toEqual({ checked: 0, written: 0 })
     expect(expenseRows()).toHaveLength(1)
   })
 
@@ -369,17 +486,17 @@ describe('changeNumberCharge', () => {
     expect(save()).toEqual({ error: 'Некорректный интервал списания' })
 
     expect(schedules()).toMatchObject([{ enabled: 0 }])
-    expect(writeDueEstimates()).toEqual({ checked: 0, written: 0 })
+    expect(writeDueCharges()).toEqual({ checked: 0, written: 0 })
   })
 
   it('still switches off a schedule with a bad interval, so the job recovers', () => {
     seedSchedule()
     sqlite.exec('UPDATE charge_schedules SET interval_days = 0')
-    expect(() => writeDueEstimates()).toThrow(RangeError)
+    expect(() => writeDueCharges()).toThrow(RangeError)
 
     expect(switchOff()).toEqual({ ok: true, outcome: 'off' })
 
-    expect(writeDueEstimates()).toEqual({ checked: 0, written: 0 })
+    expect(writeDueCharges()).toEqual({ checked: 0, written: 0 })
   })
 
   it('reports off for a number with no schedule and creates none', () => {

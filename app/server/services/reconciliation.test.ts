@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { sqlite } from '@/server/db/client'
 
-const { changeNumberCharge, listNumberCharges, writeDueEstimates } = await import('./auto-charges')
+const { changeNumberCharge, listNumberCharges, writeDueCharges } = await import('./auto-charges')
 const {
   checkReconciliationStale,
   GudokPayloadError,
@@ -17,7 +17,7 @@ beforeEach(() => {
   vi.useFakeTimers({ now: NOW, toFake: ['Date'] })
   sqlite.exec(
     'DELETE FROM reconciliation_runs; DELETE FROM charge_schedules; DELETE FROM phone_numbers; '
-    + 'DELETE FROM expenses; DELETE FROM sites; DELETE FROM cities;',
+    + 'DELETE FROM expenses; DELETE FROM sites; DELETE FROM cities; DELETE FROM hostings;',
   )
   sqlite.exec(
     'INSERT INTO cities (id, code, slug, name, population, created_at, updated_at) VALUES '
@@ -197,7 +197,7 @@ describe('reconcileTelephony', () => {
       expect.objectContaining({ date: '2026-09-24', is_estimate: 1 }),
     ])
 
-    expect(writeDueEstimates().written).toBe(1)
+    expect(writeDueCharges().written).toBe(1)
     expect(expenseRows()).toEqual([
       expect.objectContaining({ date: '2026-08-25', is_estimate: 0 }),
       expect.objectContaining({ date: '2026-09-24', is_estimate: 1 }),
@@ -311,6 +311,26 @@ describe('reconcileTelephony', () => {
     } finally {
       sqlite.exec('DROP TRIGGER fail_run')
     }
+  })
+})
+
+describe('a hosting and a reconciliation run', () => {
+  it('leaves the hosting schedule and its rows unchanged', () => {
+    sqlite.exec(`
+      INSERT INTO hostings (id, provider, account, created_at, updated_at) VALUES (1, 'sprinthost', 'a', 0, 0);
+      INSERT INTO charge_schedules (hosting_id, enabled, next_date, amount, interval_days, interval_months, created_at, updated_at)
+        VALUES (1, 1, '2026-10-15', 1200000, NULL, 12, 0, 0);
+    `)
+    writeDueCharges()
+    const schedule = sqlite.prepare('SELECT * FROM charge_schedules').get()
+    const hostingRows = () => sqlite.prepare("SELECT * FROM expenses WHERE type = 'hosting'").all()
+    const rows = hostingRows()
+    expect(rows).toMatchObject([{ date: '2026-10-15', hosting_id: 1 }])
+
+    reconcileTelephony([charge()], PERIOD)
+
+    expect(sqlite.prepare('SELECT * FROM charge_schedules').get()).toEqual(schedule)
+    expect(hostingRows()).toEqual(rows)
   })
 })
 
