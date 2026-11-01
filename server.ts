@@ -61,7 +61,7 @@ const server = app.listen(env.PORT, () => {
 })
 
 const { startBackupScheduler, stopBackupScheduler, isBackupInFlight } = await import(
-  './app/server/backup'
+  './app/server/jobs/backup'
 )
 startBackupScheduler()
 
