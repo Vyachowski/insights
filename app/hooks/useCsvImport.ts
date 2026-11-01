@@ -4,7 +4,7 @@ import { useRevalidator } from 'react-router'
 import type { ImportResource } from '@/server/services/csv-imports'
 import type { CsvImportConfig } from '@ui/CsvImportModal'
 
-import { importFile, importUrl } from '@/lib/importClient'
+import { importFile, importUrl } from '@/lib/import-client'
 
 /** The open import modal of a screen; `config` is null while it is closed. */
 export function useCsvImport<T extends ImportResource>(titles: Record<T, string>) {

@@ -5,7 +5,7 @@ import { useRef, useState } from 'react'
 
 import type { ImportResult } from '@/server/services/csv-imports'
 
-import { downloadCsv } from '@/lib/importClient'
+import { downloadCsv } from '@/lib/import-client'
 
 type ResultStatus = 'success' | 'ignored' | 'mixed' | 'empty'
 
