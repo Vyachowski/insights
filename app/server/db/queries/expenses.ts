@@ -4,6 +4,8 @@ import { db } from '../client'
 import { expenses } from '../schema'
 import { isUniqueViolation } from './sqlite-errors'
 
+import type { Tx } from '../transaction'
+
 export type Expense = typeof expenses.$inferSelect
 
 export interface UpsertExpenseInput {
@@ -71,6 +73,11 @@ export async function upsertExpense({
     await db.update(expenses).set(realWrite(amount, comment)).where(match)
     return 'updated'
   }
+}
+
+/** Writes an estimate unless the key is taken, so a stored row never changes. */
+export function insertEstimate(tx: Tx, row: Required<Omit<UpsertExpenseInput, 'comment'>>): boolean {
+  return tx.insert(expenses).values({ ...row, isEstimate: true }).onConflictDoNothing().run().changes > 0
 }
 
 /** Latest date (`YYYY-MM-DD`) of an expense of this type, or null. */

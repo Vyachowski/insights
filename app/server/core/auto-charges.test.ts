@@ -1,0 +1,59 @@
+import { afterEach, describe, expect, it } from 'vitest'
+
+import { chargesDue, moscowDay } from './auto-charges'
+
+describe('moscowDay', () => {
+  it('turns over at midnight in Moscow, not in UTC', () => {
+    expect(moscowDay(new Date('2026-10-31T20:59:59Z'))).toBe('2026-10-31')
+    expect(moscowDay(new Date('2026-10-31T21:00:00Z'))).toBe('2026-11-01')
+  })
+})
+
+describe('chargesDue', () => {
+  const schedule = { nextDate: '2026-10-29', intervalDays: 30 }
+
+  it('owes nothing before the next date', () => {
+    expect(chargesDue(schedule, '2026-10-28')).toEqual({ dates: [], nextDate: '2026-10-29' })
+  })
+
+  it('owes the charge on the next date, and moves it past today', () => {
+    expect(chargesDue(schedule, '2026-10-29')).toEqual({ dates: ['2026-10-29'], nextDate: '2026-11-28' })
+  })
+
+  it('owes every date missed in downtime', () => {
+    expect(chargesDue(schedule, '2027-01-01')).toEqual({
+      dates: ['2026-10-29', '2026-11-28', '2026-12-28'],
+      nextDate: '2027-01-27',
+    })
+  })
+
+  it('counts a leap day', () => {
+    expect(chargesDue({ nextDate: '2028-02-15', intervalDays: 30 }, '2028-02-15').nextDate).toBe('2028-03-16')
+  })
+
+  it('refuses an interval that would never pass today', () => {
+    expect(() => chargesDue({ ...schedule, intervalDays: 0 }, '2026-10-29')).toThrow(RangeError)
+  })
+})
+
+describe('on a server in another time zone', () => {
+  const serverZone = process.env.TZ
+
+  afterEach(() => {
+    if (serverZone === undefined) delete process.env.TZ
+    else process.env.TZ = serverZone
+  })
+
+  it.each([
+    ['America/New_York', 240],
+    ['Pacific/Kiritimati', -840],
+  ])('%s gets the same days', (zone, offsetMinutes) => {
+    process.env.TZ = zone
+    expect(new Date('2026-10-01T00:00:00Z').getTimezoneOffset()).toBe(offsetMinutes)
+
+    expect(moscowDay(new Date('2026-10-31T20:59:59Z'))).toBe('2026-10-31')
+    expect(moscowDay(new Date('2026-10-31T21:00:00Z'))).toBe('2026-11-01')
+    // New York leaves daylight time on 2026-11-01, inside this step
+    expect(chargesDue({ nextDate: '2026-10-20', intervalDays: 30 }, '2026-10-20').nextDate).toBe('2026-11-19')
+  })
+})
