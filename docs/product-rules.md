@@ -87,6 +87,7 @@ Rules the code cannot explain on its own. UI labels stay in Russian, exactly as 
 - A number with no site cannot be switched on. A site has one enabled number: a second one is refused, and the check runs inside the write transaction.
 - Switching off stops new estimates. The schedule row stays, and rows already written stay until a reconciliation run.
 - Switching on or off clears the stored no-charge period end. An edit keeps it.
+- `Нет списания в Гудке до DD.MM` in `Номера` shows that stored value on an enabled number, for admin and user alike, so the admin can switch the number off or look into it. The date is the end of the checked period. The number stays on while marked, because a charge can also fail for other reasons. A number that is off shows no mark.
 
 ## Reconciliation
 
