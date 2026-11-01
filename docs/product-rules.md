@@ -74,7 +74,7 @@ Rules the code cannot explain on its own. UI labels stay in Russian, exactly as 
 ## Hosting
 
 - A hosting is one paid account: a provider and an account, unique as a pair. A site belongs to one hosting, and a hosting has many sites.
-- `Филиалы` → `Хостинг` shows each hosting, its number of sites and its auto charge, for admin and user alike.
+- `Филиалы` → `Хостинг` shows each hosting, its number of sites and its auto charge, for admin and user alike. A hosting that is off shows no next date and no amount.
 
 ## Auto charges
 
@@ -93,6 +93,17 @@ Rules the code cannot explain on its own. UI labels stay in Russian, exactly as 
 - Switching off stops new estimates. The schedule row stays, and rows already written stay until a reconciliation run.
 - Switching on or off clears the stored no-charge period end. An edit keeps it.
 - `Нет списания в Гудке до DD.MM` in `Номера` shows that stored value on an enabled number, for admin and user alike, so the admin can switch the number off or look into it. The date is the end of the checked period. The number stays on while marked, because a charge can also fail for other reasons. A number that is off shows no mark.
+
+### Hosting charges
+
+- One auto charge per hosting, switched in `Филиалы` → `Хостинг` by the admin. A user sees the tab with no controls. Every hosting starts off.
+- A hosting charge is a real row, not an estimate: `type = 'hosting'`, with its hosting, no site, no `оценка` mark and no comment. Hosting has no outside source to reconcile against.
+- The same check writes it, in the same transaction as telephony. It writes every date due up to today by the `Europe/Moscow` day, then moves the next date past today.
+- The step is 12 calendar months and is not edited. A date keeps its day, and 29.02 falls on 28.02, where it then stays.
+- A charge never changes a stored row: when the key `(date, hostingId)` is taken, the row stays as it is and the date counts as done. A repeated check adds nothing. Two hostings can charge on one date.
+- Switching on offers the last row of this hosting + 12 months and that row's amount, worked out on each read, so switching on again never brings back old stored values. A hosting with no row offers nothing, and the admin fills in both fields. A hosting row with a site or with no hosting does not count.
+- The form and its checks are the ones `Номера` uses, and a next date in the past is allowed. Switching off stops new charges and keeps the schedule row and written rows.
+- Reconciliation, the no-charge mark and the Gudok alerts stay telephony-only, so a run leaves hosting schedules and rows unchanged.
 
 ## Reconciliation
 
@@ -119,7 +130,7 @@ Rules the code cannot explain on its own. UI labels stay in Russian, exactly as 
 - Manual entry, revenue and expense CSV import, and telephony sync overwrite the amount for the same key: revenue `(date, siteId)`, expenses `(date, siteId, type)`. A write that carries a hosting keys on `(date, hostingId)`. A write with no hosting on `(date, no site, 'hosting')` still matches a linked row and overwrites its amount, so an old expense CSV adds no second row.
 - Any real write on the expense key replaces an estimate and clears `is_estimate`, even at the same amount, and reports `updated`. This covers manual entry, expense CSV import and telephony sync. A repeated real write with the same amount reports `skipped`. The write's comment replaces the estimate's; with no comment the field is cleared, so estimate text never stays on a real row.
 - An admin deletes a revenue row in `Финансы` → `Доходы` after a confirm. The delete is permanent, and `Сводка` changes on its next load. Deleting a row that is already gone reports `skipped`. Importing a CSV that holds the row writes it again.
-- Annual hosting is stored as `type = 'hosting'` dated `YYYY-01-01`.
+- A hosting charge is stored as `type = 'hosting'` on its real charge date. `Добавить хостинг` still dates its row `YYYY-01-01`.
 - CSV import fails when required columns are missing or more than 50% of rows are invalid. A failed file writes nothing. Extra columns are allowed, because real Gudok exports carry more columns than we use. A calls import keeps the whole row in `calls.raw`.
 - In revenue, expense and metrics CSVs a row is invalid when its date or amount can't be read or its `siteId` is not a stored site. An empty `siteId` means `Общий`, except in metrics, where it is required.
 - A revenue or expense import under the 50% limit writes its valid rows and reports invalid ones as disputed: not written, and offered as a download with `Неверная строка` in the `Причина` column. `skipped` stays the count of rows with the same amount. After a fix, the downloaded file can be uploaded as it is. Metrics count invalid rows as `skipped`.
