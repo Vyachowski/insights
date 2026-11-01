@@ -2,7 +2,7 @@ import { and, between, eq, isNotNull, isNull, max, min, sql } from 'drizzle-orm'
 
 import { db } from '../client'
 import { expenses } from '../schema'
-import { isUniqueViolation } from './sqlite-errors'
+import { isUniqueViolation } from '../unique-violation'
 
 import type { Tx } from '../transaction'
 import type { DayPeriod } from './period'

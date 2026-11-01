@@ -28,8 +28,8 @@ vi.mock('@/server/config', () => ({
   isStorageConfigured: () => false,
 }))
 
-vi.mock('./fetch-file', () => ({
-  fetchUrlToBuffer: (url: string) => fetchMock(url),
+vi.mock('./helpers/fetch-csv', () => ({
+  fetchCsvBuffer: (url: string) => fetchMock(url),
 }))
 
 const { bootstrap } = await import('./bootstrap')
