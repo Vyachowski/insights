@@ -87,11 +87,13 @@ Both endpoints use `GUDOK_WEBHOOK_SECRET`. A wrong or unset secret returns 404.
 
 | Post | Status | Result |
 |---|---|---|
-| Valid period, `operations` may be empty | 200 | Runs reconciliation, returns `ok`, `created`, `updated`, `skipped`, `deletedEstimates` |
-| No `period`, no `telephony` estimates | 200 | Plain ingest, returns `ok`, `created`, `updated`, `skipped` |
-| No `period`, `telephony` estimates exist | 400 | Writes nothing: the old script would add second rows |
+| Gudok's `/history.json` reply as it is, with `recordsFiltered` and `data` | 200 | Picks the period, runs reconciliation, returns `ok`, `created`, `updated`, `skipped`, `deletedEstimates`, `period` |
+| A reply that does not match, see `docs/product-rules.md` | 400 | Writes nothing |
+| `operations` with a valid period, the list may be empty | 200 | Runs reconciliation, returns `ok`, `created`, `updated`, `skipped`, `deletedEstimates` |
+| `operations` with no `period`, no `telephony` estimates | 200 | Plain ingest, returns `ok`, `created`, `updated`, `skipped` |
+| `operations` with no `period`, `telephony` estimates exist | 400 | Writes nothing: the old script would add second rows |
 | `period` with an invalid date, such as `2026-02-31`, or `start` after `end`, or `null` | 400 | Writes nothing |
-| Broken JSON, or `operations` is not a list | 400 | Writes nothing |
+| Broken JSON | 400 | Writes nothing |
 
 - `start` and `end` are `YYYY-MM-DD`, both days included. They may be the same day.
 - A 400 or 500 body is `{ "error": "..." }`.

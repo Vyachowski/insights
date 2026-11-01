@@ -18,7 +18,7 @@ const MOSCOW_DATE = new Intl.DateTimeFormat('en-CA', {
 export const moscowDay = (now: Date): string => MOSCOW_DATE.format(now)
 
 // In UTC, so a daylight saving change on the server cannot shift a date
-const addDays = (date: string, days: number) =>
+export const addDays = (date: string, days: number) =>
   new Date(Date.parse(`${date}T00:00:00Z`) + days * DAY_MS).toISOString().slice(0, 10)
 
 /** Every date owed up to `today`, and the first next date past it. */

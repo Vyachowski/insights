@@ -1,10 +1,16 @@
-import { ingestGudokExpenses, writeGudokExpenses } from './gudok-expenses'
+import { ingestGudokExpenses, telephonySince, writeGudokExpenses } from './gudok-expenses'
 
 import type { DayPeriod } from '@/server/db/queries/period'
 
-import { isReconciliationStale, moscowDay, reconciledSchedule } from '@/server/core/auto-charges'
+import { addDays, isReconciliationStale, moscowDay, reconciledSchedule } from '@/server/core/auto-charges'
 import { GudokPayloadError } from '@/server/core/gudok-calls'
-import { type GudokOperationRow, parseGudokPeriod, TELEPHONY_TYPE } from '@/server/core/gudok-history'
+import {
+  type GudokOperationRow,
+  parseGudokPeriod,
+  parseGudokReply,
+  rowsInPeriod,
+  TELEPHONY_TYPE,
+} from '@/server/core/gudok-history'
 import { toCityToSiteId } from '@/server/core/site-matching'
 import { listEnabledSchedules, updateSchedule } from '@/server/db/queries/charge-schedules'
 import {
@@ -19,6 +25,8 @@ import { listSiteCities } from '@/server/db/queries/sites'
 import { transaction } from '@/server/db/transaction'
 
 export { GudokPayloadError }
+
+const FIRST_RUN_DAYS = 90
 
 /** The dates that say how far telephony expenses are exact. */
 export async function readReconciliationDates() {
@@ -71,4 +79,16 @@ export async function reconcileTelephony(rows: GudokOperationRow[], period: DayP
  */
 export async function receiveGudokPost(rows: GudokOperationRow[], period: unknown) {
   return period === undefined ? ingestGudokExpenses(rows) : reconcileTelephony(rows, parseGudokPeriod(period))
+}
+
+/**
+ * One run on Gudok's whole history: the server picks the period, so a script
+ * cannot post one that loses estimates. Throws GudokPayloadError and writes
+ * nothing when the reply does not match.
+ */
+export async function receiveGudokReply(reply: unknown, now = new Date()) {
+  const rows = parseGudokReply(reply)
+  const end = moscowDay(now)
+  const period = parseGudokPeriod({ start: telephonySince() ?? addDays(end, -FIRST_RUN_DAYS), end })
+  return { ...await reconcileTelephony(rowsInPeriod(rows, period), period), period }
 }

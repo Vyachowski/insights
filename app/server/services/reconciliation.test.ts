@@ -7,6 +7,7 @@ const {
   checkReconciliationStale,
   GudokPayloadError,
   receiveGudokPost,
+  receiveGudokReply,
   reconcileTelephony,
 } = await import('./reconciliation')
 
@@ -456,5 +457,59 @@ describe('receiveGudokPost', () => {
     expect(result).toEqual({ created: 1, updated: 0, skipped: 0 })
     expect(expenseRows()).toEqual([expect.objectContaining({ date: '2026-10-24', is_estimate: 0 })])
     expect(runs()).toEqual([])
+  })
+})
+
+describe('receiveGudokReply', () => {
+  const cell = (value: string) => `<span class="cell-content">${value}</span>`
+  const replyRow = (date: string, kind = 'Списание', project = 'Волгоград..') => ({
+    created_at: cell(date),
+    text: cell('Продление'),
+    project: cell(project),
+    kind_texted: cell(kind),
+    amount: cell('-870,000 <i>i</i>'),
+  })
+  const replyOf = (...data: ReturnType<typeof replyRow>[]) => ({ recordsFiltered: data.length, data })
+
+  it('runs from the oldest estimate to today in Moscow, and returns the period', async () => {
+    seedEstimate('2026-10-24')
+    seedEstimate('2026-10-27')
+    vi.setSystemTime(new Date('2026-10-31T21:30:00Z'))
+
+    const result = await receiveGudokReply(replyOf(replyRow('24.10.2026')))
+
+    expect(result).toEqual({
+      created: 1,
+      updated: 0,
+      skipped: 0,
+      deletedEstimates: 2,
+      period: { start: '2026-10-24', end: '2026-11-01' },
+    })
+  })
+
+  it('writes only the rows inside the period', async () => {
+    seedExpense('2026-10-24')
+
+    await receiveGudokReply(replyOf(replyRow('27.10.2026'), replyRow('24.10.2026'), replyRow('23.10.2026')))
+
+    expect(expenseRows()).toEqual([
+      expect.objectContaining({ date: '2026-10-24', amount: 87000 }),
+      expect.objectContaining({ date: '2026-10-27', amount: 87000 }),
+    ])
+  })
+
+  it('goes 90 days back with nothing stored', async () => {
+    const { period } = await receiveGudokReply(replyOf(replyRow('24.10.2026')))
+    expect(period).toEqual({ start: '2026-08-03', end: '2026-11-01' })
+  })
+
+  it('writes nothing, not even the good rows, when one row does not match', async () => {
+    seedEstimate('2026-10-24')
+
+    await expect(receiveGudokReply(replyOf(replyRow('24.10.2026'), replyRow('25.10.2026', 'Оплата'))))
+      .rejects.toThrow(new GudokPayloadError('Гудок изменился: строка 2: неизвестный тип "Оплата". Ничего не записано'))
+
+    expect(expenseRows()).toEqual([expect.objectContaining({ date: '2026-10-24', is_estimate: 1 })])
+    expect(sqlite.prepare('SELECT COUNT(*) AS runs FROM reconciliation_runs').get()).toEqual({ runs: 0 })
   })
 })
