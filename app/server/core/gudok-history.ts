@@ -10,6 +10,12 @@ import { resolveProjectTitle } from './site-matching'
 // Latin), so the sync upserts against those rows instead of duplicating.
 export const TELEPHONY_TYPE = 'telephony'
 const CHARGE_KIND = 'Списание'
+const KNOWN_KINDS = new Set([CHARGE_KIND, 'Пополнение', '-'])
+const REPLY_FIELDS = ['created_at', 'project', 'kind_texted', 'amount'] as const
+const REPLY_DATE = /^\d{2}\.\d{2}\.\d{4}$/
+const REPLY_AMOUNT = /^-?\d{1,3}(?: \d{3})*,\d{3} i$/
+const MISMATCHES_SHOWN = 3
+const ENTITIES: Record<string, string> = { 'amp': '&', 'lt': '<', 'gt': '>', 'quot': '"', '#39': "'", 'nbsp': ' ' }
 
 export interface GudokOperationRow {
   id?: number | string
@@ -58,6 +64,59 @@ export function parseGudokPeriod(raw: unknown) {
   if (!isDay(start) || !isDay(end)) throw new GudokPayloadError('Invalid period date')
   if (start > end) throw new GudokPayloadError('Period start is after its end')
   return { start, end }
+}
+
+const textOf = (html: string) => html
+  .replace(/<[^>]*>/g, '')
+  .replace(/&(amp|lt|gt|quot|#39|nbsp);/g, (_, name: string) => ENTITIES[name])
+  .trim()
+
+function gudokChanged(mismatches: string[]) {
+  const shown = mismatches.slice(0, MISMATCHES_SHOWN).join('; ')
+  const total = mismatches.length > MISMATCHES_SHOWN ? `; всего расхождений: ${mismatches.length}` : ''
+  return new GudokPayloadError(`Гудок изменился: ${shown}${total}. Ничего не записано`)
+}
+
+function readReplyRow(raw: unknown, index: number) {
+  const cells = (raw ?? {}) as Record<string, unknown>
+  const label = `строка ${index + 1}`
+  const missing = REPLY_FIELDS.filter(field => typeof cells[field] !== 'string')
+  if (missing.length) return { mismatches: [`${label}: нет ${missing.join(', ')}`] }
+
+  const [date, project, kind, amount] = REPLY_FIELDS.map(field => textOf(cells[field] as string))
+  const mismatches = [
+    ...(REPLY_DATE.test(date) && isDay(parseGudokOperationDate(date)) ? [] : [`${label}: дата "${date}"`]),
+    ...(REPLY_AMOUNT.test(amount) ? [] : [`${label}: сумма "${amount}"`]),
+    ...(KNOWN_KINDS.has(kind) ? [] : [`${label}: неизвестный тип "${kind}"`]),
+  ]
+  const text = typeof cells.text === 'string' ? textOf(cells.text) : ''
+  return { row: { date, text, project, kind, amount }, mismatches }
+}
+
+/**
+ * Reads Gudok's `/history.json` reply into operation rows. Any row it cannot
+ * read throws GudokPayloadError, because a skipped charge would look like a
+ * period with no charge and lose the period's estimates.
+ */
+export function parseGudokReply(raw: unknown): GudokOperationRow[] {
+  const { recordsFiltered, data } = (raw ?? {}) as { recordsFiltered?: unknown, data?: unknown }
+  if (typeof recordsFiltered !== 'number' || !Array.isArray(data)) throw gudokChanged(['нет recordsFiltered или data'])
+  // The history is never empty, so this is a request Gudok no longer understands
+  if (data.length === 0) throw gudokChanged(['в ответе нет строк'])
+  if (data.length !== recordsFiltered) throw gudokChanged([`пришло ${data.length} строк из ${recordsFiltered}`])
+
+  const rows = data.map(readReplyRow)
+  const mismatches = rows.flatMap(row => row.mismatches)
+  if (mismatches.length) throw gudokChanged(mismatches)
+  return rows.flatMap(({ row }) => row ?? [])
+}
+
+/** The rows dated inside the period, both ends included. */
+export function rowsInPeriod(rows: GudokOperationRow[], { start, end }: { start: string, end: string }) {
+  return rows.filter(row => {
+    const date = parseGudokOperationDate(row.date)
+    return date !== null && date >= start && date <= end
+  })
 }
 
 /** Strip the trailing `..` decoration/truncation Gudok appends to project cells. */
