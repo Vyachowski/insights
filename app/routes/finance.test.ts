@@ -6,6 +6,7 @@ import { sqlite } from '@/server/db/client'
 vi.mock('@/routes/helpers/auth', () => ({ requireAdmin: async () => undefined, requireUser: async () => undefined }))
 
 const { action, loader } = await import('./finance')
+const { importers } = await import('@/server/services/csv-imports')
 
 const callAction = (fields: Record<string, string>) => {
   const body = new FormData()
@@ -94,6 +95,15 @@ describe('finance action', () => {
       await addHosting({ hostingId: '99', amount: '700' })
 
       expect(rows('expenses')).toMatchObject([{ amount: 50000 }, { hosting_id: 99, amount: 70000 }])
+    })
+
+    it('links a row from an expense CSV and adds no second row', async () => {
+      await importers.expenses(Buffer.from('date,type,siteId,amount\n2026-03-15,hosting,,300'))
+
+      const response = await addHosting()
+
+      expect(await response.json()).toEqual({ ok: true, outcome: 'updated' })
+      expect(rows('expenses')).toMatchObject([{ hosting_id: firstHostingId(), site_id: null, amount: 50000 }])
     })
 
     it.each(['99', 'abc', ''])('refuses the unknown hosting %j and writes nothing', async hostingId => {

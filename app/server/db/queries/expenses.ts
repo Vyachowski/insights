@@ -48,7 +48,9 @@ export function listExpenses() {
  * same matching used by CSV import and the Gudok telephony ingest. Same amount
  * is a no-op; a different amount overwrites; otherwise a new row is inserted.
  * With no hosting a write on (date, no site, 'hosting') still matches a linked
- * row, so an old CSV adds no second row. Every write here is real: over an estimate it overwrites and clears the mark,
+ * row, so an old CSV adds no second row. A write with a hosting and no row of
+ * its own takes over a row with no hosting, so the reverse order adds none
+ * either. Every write here is real: over an estimate it overwrites and clears the mark,
  * even at the same amount. Synchronous, so it can run inside a transaction.
  */
 export function writeRealExpense(
@@ -74,6 +76,14 @@ export function writeRealExpense(
   if (existing) {
     writer.update(expenses).set(realWrite(amount, comment)).where(eq(expenses.id, existing.id)).run()
     return 'updated'
+  }
+  if (hostingId !== undefined) {
+    const { changes } = writer
+      .update(expenses)
+      .set({ ...realWrite(amount, comment), hostingId })
+      .where(unlinkedRow(date, type))
+      .run()
+    if (changes > 0) return 'updated'
   }
   try {
     writer.insert(expenses).values({ date, siteId, hostingId, amount, type, comment }).run()
