@@ -23,7 +23,7 @@ interface Props {
   submitting: boolean
   onImportClick: () => void
   onAddClick: () => void
-  onRemove: (id: number) => void
+  onRemove: (entry: Revenue) => void
   onModalClose: () => void
   onModalSubmit: (values: { date: string, siteId: string, amount: string }) => void
 }
@@ -89,7 +89,7 @@ export default function RevenueTabView({ entries, sites, isAdmin, period, showMo
                     </Table.Td>
                     <Table.Td ta="right">
                       {isAdmin && (
-                        <ActionIcon variant="subtle" color="red" onClick={() => onRemove(entry.id)}>
+                        <ActionIcon variant="subtle" color="red" aria-label="Удалить доход" onClick={() => onRemove(entry)}>
                           <Trash2 size={15} />
                         </ActionIcon>
                       )}
