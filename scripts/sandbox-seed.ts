@@ -26,6 +26,7 @@ const { runMigrations } = await import('@/server/db/migrate')
 const { insertCall } = await import('@/server/db/queries/calls')
 const { insertCities, listCities } = await import('@/server/db/queries/cities')
 const { upsertExpense } = await import('@/server/db/queries/expenses')
+const { listHostings } = await import('@/server/db/queries/hostings')
 const { upsertMetric } = await import('@/server/db/queries/metrics')
 const { createPhoneNumber } = await import('@/server/db/queries/phone-numbers')
 const { upsertRevenue } = await import('@/server/db/queries/revenues')
@@ -70,6 +71,8 @@ async function seedSites() {
     { code: 'PRM', slug: 'primersk', name: 'Примерск', population: 150_000 },
   ])
   const [first, second] = await listCities()
+  // Migrations add the hosting before these sites exist, so they link it here
+  const [hosting] = await listHostings()
   await insertSites([1, 2, 3].map(n => ({
     cityId: (n === 3 ? second : first).id,
     name: `Сайт ${n}`,
@@ -77,6 +80,7 @@ async function seedSites() {
     url: `https://site-${n}.sandbox.test`,
     yandexCounterId: `0000000${n}`,
     gudokProjectId: n,
+    hostingId: hosting.id,
   })))
   return listSites()
 }

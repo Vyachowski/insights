@@ -3,15 +3,21 @@ import type { Route } from './+types/branches'
 import { requireAdmin, requireUser } from '@/routes/helpers/auth'
 import BranchesScreen from '@/screens/branches/BranchesScreen'
 import { listCities } from '@/server/db/queries/cities'
+import { listHostings } from '@/server/db/queries/hostings'
 import { listSites } from '@/server/db/queries/sites'
 import { changeNumberCharge, listNumberCharges } from '@/server/services/auto-charges'
 
 export async function loader({ request }: Route.LoaderArgs) {
   await requireUser(request)
 
-  const [sites, cities, numbers] = await Promise.all([listSites(), listCities(), listNumberCharges()])
+  const [sites, cities, numbers, hostings] = await Promise.all([
+    listSites(),
+    listCities(),
+    listNumberCharges(),
+    listHostings(),
+  ])
 
-  return { sites, cities, numbers }
+  return { sites, cities, numbers, hostings }
 }
 
 export async function action({ request }: Route.ActionArgs) {

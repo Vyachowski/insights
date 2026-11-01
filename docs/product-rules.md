@@ -71,6 +71,11 @@ Rules the code cannot explain on its own. UI labels stay in Russian, exactly as 
 - A revenue or expense row with a null `siteId` is a company-level entry (`Общий`).
 - Telephony expenses come from Gudok's operations: only `Списание` rows count, summed into one `telephony` row per date and site.
 
+## Hosting
+
+- A hosting is one paid account: a provider and an account, unique as a pair. A site belongs to one hosting, and a hosting has many sites.
+- `Филиалы` → `Хостинг` shows each hosting, its number of sites and its auto charge, for admin and user alike.
+
 ## Auto charges
 
 - Between Gudok runs the server writes an estimated `telephony` charge for each enabled schedule. The row has `is_estimate` set and no comment.
