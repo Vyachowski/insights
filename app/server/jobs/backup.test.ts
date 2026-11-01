@@ -18,7 +18,7 @@ vi.mock('../db/client', () => ({
     backup: vi.fn(async (target: string) => fs.writeFileSync(target, 'snapshot')),
   },
 }))
-vi.mock('../env', () => ({
+vi.mock('../config', () => ({
   env: runtime,
   isStorageConfigured: () => storage.configured,
 }))

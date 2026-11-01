@@ -2,12 +2,12 @@ import * as argon2 from 'argon2'
 
 import { fetchUrlToBuffer } from './fetch-file'
 
+import { env } from '@/server/config'
 import { assertCsvColumns, parseCsvBuffer } from '@/server/core/csv'
 import { CITY_CSV_COLUMNS, cityRowSchema, SITE_CSV_COLUMNS, siteRowSchema } from '@/server/core/seed-rows'
 import { countCities, insertCities } from '@/server/db/queries/cities'
 import { countSites, insertSites } from '@/server/db/queries/sites'
 import { countUsers, insertUsers } from '@/server/db/queries/users'
-import { env } from '@/server/env'
 import { getObject, isStorageConfigured } from '@/server/storage'
 
 export async function bootstrap(): Promise<void> {

@@ -23,7 +23,7 @@ const FULL_ENV = {
 const mockEnv: Record<string, string | undefined> = {}
 const fetchMock = vi.fn()
 
-vi.mock('@/server/env', () => ({
+vi.mock('@/server/config', () => ({
   env: mockEnv,
   isStorageConfigured: () => false,
 }))

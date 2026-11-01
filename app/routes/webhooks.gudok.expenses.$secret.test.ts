@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 const mockEnv: { GUDOK_WEBHOOK_SECRET?: string } = {}
 const receiveMock = vi.fn()
 
-vi.mock('@/server/env', () => ({ env: mockEnv }))
+vi.mock('@/server/config', () => ({ env: mockEnv }))
 vi.mock('@/server/services/reconciliation', () => {
   class GudokPayloadError extends Error {}
   return { GudokPayloadError, receiveGudokPost: (rows: unknown, period: unknown) => receiveMock(rows, period) }

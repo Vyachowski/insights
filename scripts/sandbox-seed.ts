@@ -33,7 +33,7 @@ const { insertSites, listSites } = await import('@/server/db/queries/sites')
 const { insertUsers } = await import('@/server/db/queries/users')
 const { chargeSchedules } = await import('@/server/db/schema')
 const { transaction } = await import('@/server/db/transaction')
-const { env } = await import('@/server/env')
+const { env } = await import('@/server/config')
 
 const MONTHS = 12
 const CALLS_PER_MONTH = 5

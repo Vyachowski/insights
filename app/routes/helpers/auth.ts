@@ -1,6 +1,6 @@
 import { createCookieSessionStorage, redirect } from 'react-router'
 
-import { env, sessionMaxAgeSeconds } from '@/server/env'
+import { env, sessionMaxAgeSeconds } from '@/server/config'
 import { findActiveUser, type SessionUser } from '@/server/services/auth'
 
 const sessionStorage = createCookieSessionStorage({

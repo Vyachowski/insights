@@ -6,7 +6,7 @@ import { createRequestHandler } from '@react-router/express'
 import express from 'express'
 
 // Validates env on import — fail fast before anything else
-const { env } = await import('./app/server/env')
+const { env } = await import('./app/server/config')
 
 // Startup order (design decision 7): env → migrate → bootstrap → listen.
 // migrate/bootstrap are wired by the data-layer tasks; placeholders keep

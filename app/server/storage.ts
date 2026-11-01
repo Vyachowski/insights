@@ -1,6 +1,6 @@
 import { AwsClient } from 'aws4fetch'
 
-import { env, isStorageConfigured } from './env'
+import { env, isStorageConfigured } from './config'
 
 export { isStorageConfigured }
 

@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 const mockEnv: { RAILWAY_GIT_COMMIT_SHA?: string } = {}
 const pingDbMock = vi.fn()
 
-vi.mock('@/server/env', () => ({ env: mockEnv }))
+vi.mock('@/server/config', () => ({ env: mockEnv }))
 // The shared in-memory client has no pingDb, and the 503 path needs it to throw
 vi.mock('@/server/db/client', () => ({ pingDb: () => pingDbMock() }))
 
