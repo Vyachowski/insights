@@ -14,6 +14,7 @@
     "typecheck": "react-router typegen && tsc --noEmit",
     "lint": "eslint .",
     "knip": "knip",
+    "check": "npm run typecheck && npm run lint && npm test && npm run knip && npm run build",
     "drizzle:generate": "drizzle-kit generate",
     "prepare": "node -e \"if (require('fs').existsSync('.git')) require('child_process').execSync('npx simple-git-hooks', {stdio: 'inherit'})\""
   },
@@ -71,7 +72,7 @@
   "simple-git-hooks": {
     "pre-commit": "npx lint-staged",
     "commit-msg": "npx --no-install commitlint --edit \"$1\"",
-    "pre-push": "npm run typecheck && npm test"
+    "pre-push": "npm run check"
   },
   "lint-staged": {
     "**/*.{ts,tsx}": "eslint --flag v10_config_lookup_from_file --fix"

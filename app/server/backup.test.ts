@@ -11,6 +11,7 @@ const storage = vi.hoisted(() => ({
   listObjectKeys: vi.fn(),
   putObject: vi.fn(),
 }))
+const runtime = vi.hoisted(() => ({ DATABASE_PATH: '/tmp/test.db', NODE_ENV: 'production' }))
 
 vi.mock('./db/client', () => ({
   sqlite: {
@@ -18,7 +19,7 @@ vi.mock('./db/client', () => ({
   },
 }))
 vi.mock('./env', () => ({
-  env: { DATABASE_PATH: '/tmp/test.db' },
+  env: runtime,
   isStorageConfigured: () => storage.configured,
 }))
 vi.mock('./storage', () => storage)
@@ -36,6 +37,68 @@ describe('stopBackupScheduler', () => {
       stopBackupScheduler()
       stopBackupScheduler()
     }).not.toThrow()
+  })
+})
+
+describe('startBackupScheduler', () => {
+  const HOUR_MS = 60 * 60 * 1000
+
+  beforeEach(() => {
+    vi.resetModules()
+    vi.useFakeTimers({ toFake: ['Date', 'setInterval', 'clearInterval'] })
+    vi.clearAllMocks()
+    storage.configured = true
+    storage.headObject.mockResolvedValue(true)
+  })
+
+  afterEach(async () => {
+    const { stopBackupScheduler } = await import('./backup')
+    stopBackupScheduler()
+    vi.useRealTimers()
+    vi.restoreAllMocks()
+    storage.configured = false
+    runtime.NODE_ENV = 'production'
+  })
+
+  it.each(['development', 'test'])('starts no backup cycle in %s', async nodeEnv => {
+    runtime.NODE_ENV = nodeEnv
+    const logged = vi.spyOn(console, 'log').mockImplementation(() => undefined)
+    const { startBackupScheduler } = await import('./backup')
+
+    startBackupScheduler()
+    await vi.advanceTimersByTimeAsync(HOUR_MS)
+
+    expect(vi.getTimerCount()).toBe(0)
+    expect(storage.headObject).not.toHaveBeenCalled()
+    expect(storage.putObject).not.toHaveBeenCalled()
+    expect(storage.listObjectKeys).not.toHaveBeenCalled()
+    expect(storage.deleteObject).not.toHaveBeenCalled()
+    expect(logged).toHaveBeenCalledWith(`[backup] NODE_ENV is ${nodeEnv} — backups off`)
+  })
+
+  it('starts a cycle and the hourly timer in production', async () => {
+    vi.spyOn(console, 'log').mockImplementation(() => undefined)
+    const { startBackupScheduler } = await import('./backup')
+
+    startBackupScheduler()
+
+    expect(vi.getTimerCount()).toBe(1)
+    await vi.waitFor(() => expect(storage.headObject).toHaveBeenCalledTimes(1))
+    await vi.advanceTimersByTimeAsync(HOUR_MS)
+    expect(storage.headObject).toHaveBeenCalledTimes(2)
+  })
+
+  it('starts nothing in production without bucket storage', async () => {
+    storage.configured = false
+    const logged = vi.spyOn(console, 'log').mockImplementation(() => undefined)
+    const { startBackupScheduler } = await import('./backup')
+
+    startBackupScheduler()
+    await vi.advanceTimersByTimeAsync(HOUR_MS)
+
+    expect(vi.getTimerCount()).toBe(0)
+    expect(storage.headObject).not.toHaveBeenCalled()
+    expect(logged).toHaveBeenCalledWith('[backup] bucket storage not configured — backups disabled')
   })
 })
 
