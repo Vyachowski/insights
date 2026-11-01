@@ -53,7 +53,7 @@ npm run dev
 
 `.env` holds local values only. Leave `BUCKET_*` and `GUDOK_WEBHOOK_SECRET` unset, and use a local `JWT_SECRET` and test `ADMIN_*`/`USER_*`.
 
-To run on synthetic data with no `.env`, use the sandbox. It rebuilds `data/sandbox.db` on every start. The port and the test admin's sign-in are in `.env.sandbox`, and `PORT` from the shell wins:
+To run on synthetic data with no `.env`, use the sandbox. It rebuilds `data/sandbox.db` on every start. The port and the sign-ins of the test admin and user are in `.env.sandbox`, and `PORT` from the shell wins:
 
 ```bash
 PORT=3200 npm run dev:sandbox

@@ -21,6 +21,7 @@ const { PROVIDER } = await import('@/server/core/gudok-calls')
 const { HOSTING_TYPE } = await import('@/server/core/finance')
 const { TELEPHONY_TYPE } = await import('@/server/core/gudok-history')
 const { toKopecks } = await import('@/server/core/money')
+const { db } = await import('@/server/db/client')
 const { runMigrations } = await import('@/server/db/migrate')
 const { insertCall } = await import('@/server/db/queries/calls')
 const { insertCities, listCities } = await import('@/server/db/queries/cities')
@@ -30,6 +31,7 @@ const { createPhoneNumber } = await import('@/server/db/queries/phone-numbers')
 const { upsertRevenue } = await import('@/server/db/queries/revenues')
 const { insertSites, listSites } = await import('@/server/db/queries/sites')
 const { insertUsers } = await import('@/server/db/queries/users')
+const { chargeSchedules } = await import('@/server/db/schema')
 const { transaction } = await import('@/server/db/transaction')
 const { env } = await import('@/server/env')
 
@@ -41,9 +43,10 @@ const now = new Date()
 const isoDate = (date: Date) => format(date, 'yyyy-MM-dd')
 const lastMonths = Array.from({ length: MONTHS }, (_, ago) => subMonths(startOfMonth(now), ago))
 
-// The fixed id keeps a session valid across rebuilds and across copies on localhost
-async function seedAdmin() {
+// The fixed ids keep a session valid across rebuilds and across copies on localhost
+async function seedUsers() {
   if (!env.ADMIN_EMAIL || !env.ADMIN_PASSWORD) throw new Error('[sandbox] ADMIN_* not set')
+  if (!env.USER_EMAIL || !env.USER_PASSWORD) throw new Error('[sandbox] USER_* not set')
   await insertUsers([{
     id: 'sandbox-admin',
     email: env.ADMIN_EMAIL,
@@ -51,6 +54,13 @@ async function seedAdmin() {
     role: 'ADMIN',
     firstName: env.ADMIN_NAME ?? null,
     lastName: env.ADMIN_LASTNAME ?? null,
+  }, {
+    id: 'sandbox-user',
+    email: env.USER_EMAIL,
+    password: await argon2.hash(env.USER_PASSWORD),
+    role: 'USER',
+    firstName: env.USER_NAME ?? null,
+    lastName: env.USER_LASTNAME ?? null,
   }])
 }
 
@@ -128,9 +138,20 @@ async function seedFinance(siteIds: number[]) {
   }
 }
 
+// One number on, one with a schedule that is off, one with no schedule, one with no site
+async function seedAutoCharges(siteIds: number[]) {
+  await createPhoneNumber({ provider: PROVIDER, providerNumberId: 'sandbox-free', number: '70000000000', name: 'Номер без сайта' })
+  const schedule = { provider: PROVIDER, nextDate: isoDate(addDays(now, 10)), amount: toKopecks(870) }
+  await db.insert(chargeSchedules).values([
+    { ...schedule, providerNumberId: `sandbox-${siteIds[0]}`, enabled: true },
+    { ...schedule, providerNumberId: `sandbox-${siteIds[1]}` },
+  ])
+}
+
 runMigrations()
-await seedAdmin()
+await seedUsers()
 const siteIds = (await seedSites()).map(site => site.id)
 await seedFinance(siteIds)
+await seedAutoCharges(siteIds)
 const callCount = seedCalls(siteIds)
 console.log(`[sandbox] rebuilt ${env.DATABASE_PATH}: ${siteIds.length} sites, ${MONTHS} months, ${callCount} calls`)
