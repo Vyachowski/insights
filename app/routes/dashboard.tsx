@@ -1,7 +1,7 @@
 import type { Route } from './+types/dashboard'
 
+import { requireUser } from '@/routes/helpers/auth'
 import DashboardScreen from '@/screens/dashboard/DashboardScreen'
-import { requireUser } from '@/server/auth'
 import { getDashboardSummary } from '@/server/services/dashboard'
 
 export async function loader({ request }: Route.LoaderArgs) {

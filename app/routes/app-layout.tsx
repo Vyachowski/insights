@@ -7,7 +7,7 @@ import { Outlet, useLoaderData, useLocation } from 'react-router'
 import type { Route } from './+types/app-layout'
 
 import { menuItems } from '@/navigation'
-import { requireUser } from '@/server/auth'
+import { requireUser } from '@/routes/helpers/auth'
 import { isBackupOverdue } from '@/server/jobs/backup'
 
 export async function loader({ request }: Route.LoaderArgs) {

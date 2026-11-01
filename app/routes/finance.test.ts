@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { sqlite } from '@/server/db/client'
 
-vi.mock('@/server/auth', () => ({ requireAdmin: async () => undefined, requireUser: async () => undefined }))
+vi.mock('@/routes/helpers/auth', () => ({ requireAdmin: async () => undefined, requireUser: async () => undefined }))
 
 const { action, loader } = await import('./finance')
 

@@ -1,6 +1,6 @@
 import { useFetcher, useRouteLoaderData } from 'react-router'
 
-import type { SessionUser } from '@/server/auth'
+import type { SessionUser } from '@/server/services/auth'
 
 // Same contract the old Redux-based useAuth exposed, so Header/Sidebar
 // port unchanged: user comes from the app-layout loader, logout posts

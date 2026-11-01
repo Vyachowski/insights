@@ -1,6 +1,6 @@
 import type { Route } from './+types/import'
 
-import { requireAdmin } from '@/server/auth'
+import { requireAdmin } from '@/routes/helpers/auth'
 import {
   CsvValidationError,
   importers,

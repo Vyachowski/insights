@@ -7,7 +7,8 @@ import { data, Form, redirect, useNavigation } from 'react-router'
 
 import type { Route } from './+types/login'
 
-import { createUserSession, getUser, verifyLogin } from '@/server/auth'
+import { createUserSession, getUser } from '@/routes/helpers/auth'
+import { verifyLogin } from '@/server/services/auth'
 
 export async function loader({ request }: Route.LoaderArgs) {
   if (await getUser(request)) throw redirect('/')
