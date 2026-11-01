@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { sqlite } from '@/server/db/client'
 
-const { startAutoChargeScheduler, stopAutoChargeScheduler } = await import('./auto-charge-scheduler')
+const { startAutoChargeScheduler, stopAutoChargeScheduler } = await import('./auto-charges')
 
 const HOUR_MS = 60 * 60 * 1000
 

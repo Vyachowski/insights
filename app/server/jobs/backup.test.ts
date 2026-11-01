@@ -13,16 +13,16 @@ const storage = vi.hoisted(() => ({
 }))
 const runtime = vi.hoisted(() => ({ DATABASE_PATH: '/tmp/test.db', NODE_ENV: 'production' }))
 
-vi.mock('./db/client', () => ({
+vi.mock('../db/client', () => ({
   sqlite: {
     backup: vi.fn(async (target: string) => fs.writeFileSync(target, 'snapshot')),
   },
 }))
-vi.mock('./env', () => ({
+vi.mock('../env', () => ({
   env: runtime,
   isStorageConfigured: () => storage.configured,
 }))
-vi.mock('./storage', () => storage)
+vi.mock('../storage', () => storage)
 
 describe('stopBackupScheduler', () => {
   it('is safe to call before the scheduler starts', async () => {

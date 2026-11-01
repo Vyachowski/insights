@@ -39,6 +39,7 @@ A service holds the steps of an operation and uses `core` and `db` inside them. 
 | Service | `app/server/services/` | runs one operation step by step, owns transactions | SQL, HTTP requests and responses |
 | Core | `app/server/core/` | pure functions: parsing, checks, calculations | database, network, files, the current time |
 | Db | `app/server/db/` (queries in `queries/`) | schema, connection, reads and writes | business decisions, rubles, parsing of CSV or webhooks, HTTP |
+| Job | `app/server/jobs/` | runs on a timer, logs its failures | logic of its own: that stays in a service |
 | Screen | `app/screens/` | layout and screen state | calculations, server calls beyond route data, values formatted by hand |
 
 Functional core, imperative shell: `core` is the pure centre, everything else is the shell.
@@ -50,7 +51,8 @@ Functional core, imperative shell: `core` is the pure centre, everything else is
 - A loader may read `db` directly when there is no logic and no money. Every write goes through a service.
 - A service reads the current time and passes it to `core`, so `core` stays pure.
 - A service opens a transaction with `transaction(fn)` from `db`. better-sqlite3 runs it synchronously, so nothing inside may be async.
-- `backup`, `health` and `server.ts` use the connection in `db/client.ts` directly. Everything else uses `db` functions.
+- `jobs/backup`, `health` and `server.ts` use the connection in `db/client.ts` directly. Everything else uses `db` functions.
+- `jobs/backup` is the one job that still holds its own logic, until it moves to a service.
 - Screens format values and total rows with `app/lib/`. Filtering, sorting and paging of loaded rows stay in the browser, in `app/hooks/`.
 - Small app: choose plain functions; add a seam only when a second implementation exists.
 

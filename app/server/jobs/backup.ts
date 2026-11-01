@@ -1,9 +1,9 @@
 import fs from 'node:fs'
 import path from 'node:path'
 
-import { sqlite } from './db/client'
-import { env, isStorageConfigured } from './env'
-import { deleteObject, headObject, listObjectKeys, putObject } from './storage'
+import { sqlite } from '../db/client'
+import { env, isStorageConfigured } from '../env'
+import { deleteObject, headObject, listObjectKeys, putObject } from '../storage'
 
 const HOUR_MS = 60 * 60 * 1000
 export const RETENTION_DAYS = 14

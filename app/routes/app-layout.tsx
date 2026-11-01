@@ -8,7 +8,7 @@ import type { Route } from './+types/app-layout'
 
 import { menuItems } from '@/navigation'
 import { requireUser } from '@/server/auth'
-import { isBackupOverdue } from '@/server/backup'
+import { isBackupOverdue } from '@/server/jobs/backup'
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await requireUser(request)
