@@ -52,7 +52,6 @@ describe('getDashboardSummary', () => {
     expect(verdict).toMatchObject({
       isGrowing: true,
       isStrong: true,
-      growthPercent: 71.4,
       current: 1200,
       previous: 700,
     })

@@ -6,13 +6,12 @@ import { toRubles } from './money'
 export const STRONG_SWING_PERCENT = 20
 
 export function computeVerdict(current: number, previous: number) {
-  const growthPercent
+  const swingPercent
     = previous !== 0 ? ((current - previous) / Math.abs(previous)) * 100 : 0
 
   return {
     isGrowing: current >= previous,
-    isStrong: Math.abs(growthPercent) >= STRONG_SWING_PERCENT,
-    growthPercent: Number(growthPercent.toFixed(1)),
+    isStrong: Math.abs(swingPercent) >= STRONG_SWING_PERCENT,
     current,
     previous,
   }
@@ -113,11 +112,7 @@ export function buildDashboardSummary(
   })
 
   return {
-    verdict: {
-      ...computeVerdict(currentPeriod.profit, previousPeriod.profit),
-      monthlyCurrent: monthlyProfit.averageCurrent,
-      monthlyPrevious: monthlyProfit.averagePrevious,
-    },
+    verdict: withMonthly(computeVerdict(currentPeriod.profit, previousPeriod.profit)),
     trends: {
       calls: withMonthly({ current: current.calls, previous: previous.calls }),
       revenue: withMonthly({ current: currentPeriod.revenue, previous: previousPeriod.revenue }),

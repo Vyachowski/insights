@@ -5,10 +5,9 @@ import { buildDashboardSummary, computeVerdict, mergeCallsByCity, type YearTotal
 import type { ReconciliationDates } from './auto-charges'
 
 describe('computeVerdict', () => {
-  it('reports growth as year-over-year percent against last year', () => {
+  it('reports growth against last year', () => {
     const verdict = computeVerdict(1200, 1000)
     expect(verdict.isGrowing).toBe(true)
-    expect(verdict.growthPercent).toBe(20)
     expect(verdict.current).toBe(1200)
     expect(verdict.previous).toBe(1000)
   })
@@ -22,13 +21,12 @@ describe('computeVerdict', () => {
   it('handles a profit that crosses into a loss', () => {
     const verdict = computeVerdict(-134160, 427388)
     expect(verdict.isGrowing).toBe(false)
-    expect(verdict.growthPercent).toBe(-131.4)
     expect(verdict.isStrong).toBe(true)
   })
 
   it('avoids dividing by zero when last year was zero', () => {
     const verdict = computeVerdict(500, 0)
-    expect(verdict.growthPercent).toBe(0)
+    expect(verdict.isStrong).toBe(false)
     expect(verdict.isGrowing).toBe(true)
   })
 })
@@ -151,6 +149,18 @@ describe('buildDashboardSummary', () => {
     expect(monthlyProfit.averageCurrent).toBe(1500)
     expect(monthlyProfit.averagePrevious).toBe(700) // August stays out of the average
     expect(verdict).toMatchObject({ monthlyCurrent: 1500, monthlyPrevious: 700 })
+  })
+
+  it('keeps the verdict monthly figures to the same window as its totals', () => {
+    const { verdict } = buildDashboardSummary(
+      { ...emptyYear, revenue: 130000, monthlyRevenue: new Map([[1, 80000], [2, 50000]]) },
+      // Last February closed in full, but only its first half is in the window
+      { ...emptyYear, revenue: 120000, monthlyRevenue: new Map([[1, 60000], [2, 100000]]) },
+      cities,
+      new Date(2026, 1, 15),
+      noDates,
+    )
+    expect(verdict).toMatchObject({ isGrowing: true, monthlyCurrent: 650, monthlyPrevious: 600 })
   })
 
   it('falls back to the calendar month before any data lands', () => {
