@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 
 import { sqlite } from '@/server/db/client'
 
@@ -82,5 +82,57 @@ describe('getDashboardSummary', () => {
     expect(monthlyProfit.months[11]).toEqual({ month: 12, current: 0, previous: 9999 })
     expect(monthlyProfit).toMatchObject({ elapsedMonths: 2, averageCurrent: 600, averagePrevious: 350 })
     expect(verdict).toMatchObject({ monthlyCurrent: 600, monthlyPrevious: 350 })
+  })
+
+  it('counts estimates in the yearly totals, in `Расходы` and in monthly profit', async () => {
+    sqlite.exec(
+      'INSERT INTO expenses (site_id, date, amount, type, is_estimate, created_at, updated_at) '
+      + "VALUES (5, '2026-02-20', 87000, 'telephony', 1, 0, 0)",
+    )
+
+    const { trends, verdict, monthlyProfit } = await getDashboardSummary()
+    sqlite.exec("DELETE FROM expenses WHERE type = 'telephony'")
+
+    expect(trends.expenses).toMatchObject({ current: 1170, previous: 100 })
+    expect(verdict).toMatchObject({ current: 330, previous: 700 })
+    expect(monthlyProfit.months[1]).toEqual({ month: 2, current: -370, previous: -100 })
+  })
+
+  describe('reconciled date', () => {
+    const seedRun = (periodEnd: string) => sqlite.prepare(
+      "INSERT INTO reconciliation_runs (period_start, period_end, ran_at) VALUES ('2026-01-01', ?, 0)",
+    ).run(periodEnd)
+
+    const seedTelephony = (date: string, isEstimate: number) => sqlite.prepare(
+      "INSERT INTO expenses (site_id, date, amount, type, is_estimate, created_at, updated_at) VALUES (5, ?, 87000, 'telephony', ?, 0, 0)",
+    ).run(date, isEstimate)
+
+    const reconciledUntil = async () => (await getDashboardSummary()).trends.reconciledUntil
+
+    afterEach(() => {
+      sqlite.exec("DELETE FROM reconciliation_runs; DELETE FROM expenses WHERE type = 'telephony';")
+    })
+
+    it('is the end of the period of the last recorded run', async () => {
+      seedTelephony('2026-03-10', 0)
+      seedRun('2026-02-28')
+      seedRun('2026-01-31')
+
+      expect(await reconciledUntil()).toBe('2026-01-31')
+    })
+
+    it('falls back to the latest real telephony day with no recorded run', async () => {
+      seedTelephony('2026-01-05', 0)
+      seedTelephony('2026-02-04', 0)
+      seedTelephony('2026-03-06', 1)
+
+      expect(await reconciledUntil()).toBe('2026-02-04')
+    })
+
+    it('is null with neither, whatever other expenses and estimates exist', async () => {
+      seedTelephony('2026-03-06', 1)
+
+      expect(await reconciledUntil()).toBeNull()
+    })
   })
 })

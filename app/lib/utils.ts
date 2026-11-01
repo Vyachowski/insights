@@ -9,6 +9,9 @@ export const formatAmount = (amount: number) =>
 export const formatDate = (date: string | Date) =>
   new Date(date).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' })
 
+// `YYYY-MM-DD` to `DD.MM`, from the text alone, so the time zone cannot shift the day.
+export const formatDayMonth = (date: string) => `${date.slice(8, 10)}.${date.slice(5, 7)}`
+
 export function getHostname(url: string) {
   try { return new URL(url).hostname } catch { return url }
 }
