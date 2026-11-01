@@ -53,7 +53,7 @@ Functional core, imperative shell: `core` is the pure centre, everything else is
 - `backup`, `health` and `server.ts` use the connection in `db/client.ts` directly. Everything else uses `db` functions.
 - Screens format values and total rows with `app/lib/`. Filtering, sorting and paging of loaded rows stay in the browser, in `app/hooks/`.
 
-`eslint.config.js` enforces these imports.
+`eslint.config.js` enforces these imports. It also refuses hand totals and formatting in screens, and the clock, network, console and process in `core`.
 
 ## Tests
 
