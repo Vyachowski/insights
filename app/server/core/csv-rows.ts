@@ -1,15 +1,11 @@
+import { isValidIsoDate } from './finance'
 import { toKopecks } from './money'
 
 import type { CsvRow } from './csv'
 
 type SiteIds = ReadonlySet<number>
 
-const toUtcDate = (d: Date) => d.toISOString().slice(0, 10)
-
-function parseDate(raw: string | undefined): string | null {
-  const date = raw ? new Date(raw) : null
-  return date && !isNaN(date.getTime()) ? toUtcDate(date) : null
-}
+const parseDate = (raw: string | undefined) => raw && isValidIsoDate(raw) ? raw : null
 
 /** An empty cell is a company-level row; `undefined` marks an unusable cell. */
 function parseSiteId(raw: string | undefined, siteIds: SiteIds): number | null | undefined {
