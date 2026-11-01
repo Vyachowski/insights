@@ -67,7 +67,7 @@ startBackupScheduler()
 
 // Its own scheduler: the backup one does not start without bucket storage
 const { startAutoChargeScheduler, stopAutoChargeScheduler } = await import(
-  './app/server/auto-charge-scheduler'
+  './app/server/jobs/auto-charges'
 )
 startAutoChargeScheduler()
 
