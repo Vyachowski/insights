@@ -64,6 +64,48 @@ describe('finance action', () => {
     expect(await response.json()).toEqual({ error })
     expect(rows('revenues')).toEqual([])
   })
+
+  describe('delete-revenue', () => {
+    beforeEach(() => {
+      sqlite.exec(`
+        INSERT INTO revenues (id, site_id, date, amount, created_at, updated_at) VALUES
+          (1, 5, '2026-03-01', 10000, 0, 0),
+          (2, NULL, '2026-03-02', 20000, 0, 0);
+      `)
+    })
+
+    it.each([
+      [1, 2],
+      [2, 1],
+    ])('deletes row %i and keeps row %i', async (id, kept) => {
+      const response = await callAction({ intent: 'delete-revenue', id: String(id) })
+
+      expect(await response.json()).toEqual({ ok: true, outcome: 'deleted' })
+      expect(rows('revenues')).toMatchObject([{ id: kept }])
+    })
+
+    it('stays gone on the next load', async () => {
+      await callAction({ intent: 'delete-revenue', id: '1' })
+
+      expect((await callLoader('revenue')).revenues).toMatchObject([{ id: 2 }])
+    })
+
+    it('reports a repeated delete as skipped', async () => {
+      await callAction({ intent: 'delete-revenue', id: '1' })
+      const response = await callAction({ intent: 'delete-revenue', id: '1' })
+
+      expect(response.status).toBe(200)
+      expect(await response.json()).toEqual({ ok: true, outcome: 'skipped' })
+    })
+
+    it('refuses a bad id and deletes nothing', async () => {
+      const response = await callAction({ intent: 'delete-revenue', id: 'abc' })
+
+      expect(response.status).toBe(400)
+      expect(await response.json()).toEqual({ error: 'Некорректная запись' })
+      expect(rows('revenues')).toHaveLength(2)
+    })
+  })
 })
 
 describe('finance loader', () => {

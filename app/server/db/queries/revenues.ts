@@ -57,3 +57,8 @@ export async function upsertRevenue({
     return 'updated'
   }
 }
+
+/** A row that is already gone reports `skipped`, so a repeated delete is safe. */
+export function deleteRevenue(id: number): 'deleted' | 'skipped' {
+  return db.delete(revenues).where(eq(revenues.id, id)).run().changes > 0 ? 'deleted' : 'skipped'
+}

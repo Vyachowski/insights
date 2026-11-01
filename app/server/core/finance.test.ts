@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { HOSTING_TYPE, parseEntryForm } from './finance'
+import { HOSTING_TYPE, parseEntryForm, parseRevenueId } from './finance'
 
 const revenue = { intent: 'add-revenue', amount: '1500.50', date: '2026-03-15', siteId: '5' }
 const hosting = { intent: 'add-hosting', amount: '12000', year: '2026', siteId: '5' }
@@ -46,5 +46,15 @@ describe('parseEntryForm errors', () => {
 
   it.each(['add-unknown', undefined])('rejects the intent %j', intent => {
     expect(parseEntryForm({ ...revenue, intent })).toEqual({ error: 'Неизвестное действие' })
+  })
+})
+
+describe('parseRevenueId', () => {
+  it('parses a stored id', () => {
+    expect(parseRevenueId({ id: '7' })).toEqual({ id: 7 })
+  })
+
+  it.each(['0', '-1', '1.5', 'abc', '', undefined])('rejects the id %j', id => {
+    expect(parseRevenueId({ id })).toEqual({ error: 'Некорректная запись' })
   })
 })

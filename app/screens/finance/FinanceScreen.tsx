@@ -3,10 +3,12 @@ import { useCallback, useMemo, useState } from 'react'
 import { useFetcher, useSearchParams } from 'react-router'
 
 import AddHostingModal from './AddHostingModal'
+import DeleteRevenueModal from './DeleteRevenueModal'
 import ExpensesTabView from './ExpensesTabView'
 import RevenueTabView from './RevenueTabView'
-import { type EntryResult, useEntryToast } from './useEntryToast'
+import { type DeleteResult, type EntryResult, useDeleteToast, useEntryToast } from './useEntryToast'
 
+import type { Revenue } from '@/server/db/queries/revenues'
 import type { getFinancePage } from '@/server/services/finance'
 
 import CsvImportModal from '@/components/CsvImportModal'
@@ -42,8 +44,9 @@ export default function FinanceScreen({ revenues, expenses, sites }: Awaited<Ret
   const revenueFetcher = useFetcher<EntryResult>()
   useEntryToast(revenueFetcher, { created: 'Доход добавлен', updated: 'Сумма дохода обновлена' })
 
-  // Old behavior parity: remove revenue is client-local only
-  const [removedIds, setRemovedIds] = useState<ReadonlySet<number>>(new Set())
+  const deleteFetcher = useFetcher<DeleteResult>()
+  useDeleteToast(deleteFetcher)
+  const [revenueToDelete, setRevenueToDelete] = useState<Revenue | null>(null)
 
   const period = usePeriodFilter(activeTab === 'expenses' ? expenses : revenues)
 
@@ -54,8 +57,7 @@ export default function FinanceScreen({ revenues, expenses, sites }: Awaited<Ret
     [expenses],
   )
 
-  const isShownRevenue = useCallback((e: { id: number }) => !removedIds.has(e.id), [removedIds])
-  const revenueEntries = usePeriodRows(revenues, period, isShownRevenue)
+  const revenueEntries = usePeriodRows(revenues, period)
 
   const isShownExpense = useCallback(
     (e: { type: string }) => selectedCategory === null || e.type === selectedCategory,
@@ -86,7 +88,7 @@ export default function FinanceScreen({ revenues, expenses, sites }: Awaited<Ret
             submitting={revenueFetcher.state !== 'idle'}
             onImportClick={() => csvImport.open('revenue')}
             onAddClick={() => setShowAddModal(true)}
-            onRemove={id => setRemovedIds(prev => new Set(prev).add(id))}
+            onRemove={setRevenueToDelete}
             onModalClose={() => setShowAddModal(false)}
             onModalSubmit={values => {
               revenueFetcher.submit(
@@ -114,6 +116,21 @@ export default function FinanceScreen({ revenues, expenses, sites }: Awaited<Ret
 
       {csvImport.config && (
         <CsvImportModal config={csvImport.config} onClose={csvImport.close} />
+      )}
+
+      {isAdmin && revenueToDelete && (
+        <DeleteRevenueModal
+          entry={revenueToDelete}
+          sites={sites}
+          onClose={() => setRevenueToDelete(null)}
+          onConfirm={() => {
+            deleteFetcher.submit(
+              { intent: 'delete-revenue', id: revenueToDelete.id },
+              { method: 'post' },
+            )
+            setRevenueToDelete(null)
+          }}
+        />
       )}
 
       {isAdmin && showAddHosting && (
