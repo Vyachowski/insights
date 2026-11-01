@@ -58,6 +58,26 @@ Functional core, imperative shell: `core` is the pure centre, everything else is
 
 `eslint.config.js` enforces these imports. It also refuses hand totals and formatting in screens, and the clock, network, console and process in `core`.
 
+## Names
+
+Files:
+
+- A file name says what all the code inside is about: `startup.ts`, `money.ts`, `storage.ts`. It need not match a function in it.
+- A component or a hook gives the file its name: `Button.tsx`, `useTable.ts`.
+- Every other file is kebab-case: `auto-charges.ts`.
+- Check a name: from the name alone you can tell what is inside and what does not belong there.
+- No file names without a topic: `utils`, `helpers`, `common`, `misc`, `shared`.
+- Route files follow their address: `webhooks.gudok.$secret.ts`.
+
+Folders:
+
+- Folders are kebab-case and name a type of thing, not a purpose: `services/`, `hooks/`, `components/`. Inside `app/screens/`, each folder is one screen.
+- A folder needs two files or more. A single file sits in its parent: `app/theme.ts`, `app/menu-items.ts`.
+- `helpers/` is the shared code of one layer, and one file is enough: `app/routes/helpers/`, `app/server/services/helpers/`.
+- A helper does one step. A service runs a whole operation.
+- `app/lib/` holds plain browser functions, with no React.
+- `app/server/db/` holds what is about the database but is not a query. `queries/` holds queries and pieces of SQL.
+
 ## Tests
 
 - Tests sit beside the source as `*.test.ts`.
