@@ -1,16 +1,10 @@
-import { ingestGudokExpenses, telephonySince, writeGudokExpenses } from './gudok-expenses'
+import { telephonySince, writeGudokExpenses } from './gudok-expenses'
 
 import type { DayPeriod } from '@/server/db/queries/period'
 
 import { addDays, isReconciliationStale, moscowDay, reconciledSchedule } from '@/server/core/auto-charges'
 import { GudokPayloadError } from '@/server/core/gudok-calls'
-import {
-  type GudokOperationRow,
-  parseGudokPeriod,
-  parseGudokReply,
-  rowsInPeriod,
-  TELEPHONY_TYPE,
-} from '@/server/core/gudok-history'
+import { type GudokOperationRow, parseGudokReply, rowsInPeriod, TELEPHONY_TYPE } from '@/server/core/gudok-history'
 import { toCityToSiteId } from '@/server/core/site-matching'
 import { listEnabledSchedules, updateSchedule } from '@/server/db/queries/charge-schedules'
 import {
@@ -74,14 +68,6 @@ export async function reconcileTelephony(rows: GudokOperationRow[], period: DayP
 }
 
 /**
- * One post of the old script: with a period it is a reconciliation run, and without
- * one it is a plain ingest. Throws GudokPayloadError on a post it must refuse.
- */
-export async function receiveGudokPost(rows: GudokOperationRow[], period: unknown) {
-  return period === undefined ? ingestGudokExpenses(rows) : reconcileTelephony(rows, parseGudokPeriod(period))
-}
-
-/**
  * One run on Gudok's whole history: the server picks the period, so a script
  * cannot post one that loses estimates. Throws GudokPayloadError and writes
  * nothing when the reply does not match.
@@ -89,6 +75,8 @@ export async function receiveGudokPost(rows: GudokOperationRow[], period: unknow
 export async function receiveGudokReply(reply: unknown, now = new Date()) {
   const rows = parseGudokReply(reply)
   const end = moscowDay(now)
-  const period = parseGudokPeriod({ start: telephonySince() ?? addDays(end, -FIRST_RUN_DAYS), end })
+  const since = telephonySince() ?? addDays(end, -FIRST_RUN_DAYS)
+  // A row entered with a future date must not turn the period over
+  const period = { start: since < end ? since : end, end }
   return { ...await reconcileTelephony(rowsInPeriod(rows, period), period), period }
 }

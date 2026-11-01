@@ -5,7 +5,6 @@ export default [
   route('import', 'routes/import.ts'),
   route('webhooks/gudok/:secret', 'routes/webhooks.gudok.$secret.ts'),
   route('webhooks/gudok/expenses/:secret', 'routes/webhooks.gudok.expenses.$secret.ts'),
-  route('webhooks/gudok/expenses/:secret/since', 'routes/webhooks.gudok.expenses.$secret.since.ts'),
   route('login', 'routes/login.tsx'),
   route('logout', 'routes/logout.tsx'),
   layout('routes/app-layout.tsx', [

@@ -15,6 +15,7 @@ const REPLY_FIELDS = ['created_at', 'project', 'kind_texted', 'amount'] as const
 const REPLY_DATE = /^\d{2}\.\d{2}\.\d{4}$/
 const REPLY_AMOUNT = /^-?\d{1,3}(?: \d{3})*,\d{3} i$/
 const MISMATCHES_SHOWN = 3
+const OLD_SCRIPT = 'Скрипт устарел: возьмите новый из scripts/gudok-telephony-console.js'
 const ENTITIES: Record<string, string> = { 'amp': '&', 'lt': '<', 'gt': '>', 'quot': '"', '#39': "'", 'nbsp': ' ' }
 
 export interface GudokOperationRow {
@@ -58,14 +59,6 @@ const isDay = (value: unknown): value is string => {
   return !isNaN(time) && new Date(time).toISOString().startsWith(value)
 }
 
-/** The period a Gudok run covers. Throws GudokPayloadError when it is unusable. */
-export function parseGudokPeriod(raw: unknown) {
-  const { start, end } = (raw ?? {}) as { start?: unknown, end?: unknown }
-  if (!isDay(start) || !isDay(end)) throw new GudokPayloadError('Invalid period date')
-  if (start > end) throw new GudokPayloadError('Period start is after its end')
-  return { start, end }
-}
-
 const textOf = (html: string) => html
   .replace(/<[^>]*>/g, '')
   .replace(/&(amp|lt|gt|quot|#39|nbsp);/g, (_, name: string) => ENTITIES[name])
@@ -99,7 +92,8 @@ function readReplyRow(raw: unknown, index: number) {
  * period with no charge and lose the period's estimates.
  */
 export function parseGudokReply(raw: unknown): GudokOperationRow[] {
-  const { recordsFiltered, data } = (raw ?? {}) as { recordsFiltered?: unknown, data?: unknown }
+  const { operations, recordsFiltered, data } = (raw ?? {}) as Record<string, unknown>
+  if (operations !== undefined) throw new GudokPayloadError(OLD_SCRIPT)
   if (typeof recordsFiltered !== 'number' || !Array.isArray(data)) throw gudokChanged(['нет recordsFiltered или data'])
   // The history is never empty, so this is a request Gudok no longer understands
   if (data.length === 0) throw gudokChanged(['в ответе нет строк'])

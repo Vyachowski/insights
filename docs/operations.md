@@ -75,26 +75,17 @@ Calls received after that backup are not in it. Recover them from a Gudok CSV ex
 
 Gudok has no API for charges, so a console script reads `/history.json` in the owner's session and posts the reply to `/webhooks/gudok/expenses/:secret`. See `scripts/gudok-telephony-console.md`.
 
-Both endpoints use `GUDOK_WEBHOOK_SECRET`. A wrong or unset secret returns 404.
+The endpoint uses `GUDOK_WEBHOOK_SECRET`. A wrong or unset secret returns 404.
 
-`GET /webhooks/gudok/expenses/:secret/since` returns `{ "since": "YYYY-MM-DD" }`: the date of the oldest `telephony` estimate, or the latest stored day when no estimates exist. `since` is `null` when nothing is stored.
-
-`POST /webhooks/gudok/expenses/:secret` takes JSON, sent as `text/plain` to skip the CORS preflight:
-
-```json
-{ "operations": [], "period": { "start": "2026-10-01", "end": "2026-10-31" } }
-```
+`POST /webhooks/gudok/expenses/:secret` takes Gudok's `/history.json` reply as it is, as JSON sent as `text/plain` to skip the CORS preflight. The server picks the period, see `docs/product-rules.md`.
 
 | Post | Status | Result |
 |---|---|---|
-| Gudok's `/history.json` reply as it is, with `recordsFiltered` and `data` | 200 | Picks the period, runs reconciliation, returns `ok`, `created`, `updated`, `skipped`, `deletedEstimates`, `period` |
-| A reply that does not match, see `docs/product-rules.md` | 400 | Writes nothing |
-| `operations` with a valid period, the list may be empty | 200 | Runs reconciliation, returns `ok`, `created`, `updated`, `skipped`, `deletedEstimates` |
-| `operations` with no `period`, no `telephony` estimates | 200 | Plain ingest, returns `ok`, `created`, `updated`, `skipped` |
-| `operations` with no `period`, `telephony` estimates exist | 400 | Writes nothing: the old script would add second rows |
-| `period` with an invalid date, such as `2026-02-31`, or `start` after `end`, or `null` | 400 | Writes nothing |
+| A reply that passes every check | 200 | Runs reconciliation, returns `ok`, `created`, `updated`, `skipped`, `deletedEstimates`, `period` |
+| A reply that does not match | 400 | Writes nothing, `error` says `Гудок изменился: ...` |
+| A body with `operations`, from the old script | 400 | Writes nothing, `error` says `Скрипт устарел: ...` |
 | Broken JSON | 400 | Writes nothing |
 
-- `start` and `end` are `YYYY-MM-DD`, both days included. They may be the same day.
+- `period` in the result is `{ start, end }` in `YYYY-MM-DD`, both days included. They may be the same day.
 - A 400 or 500 body is `{ "error": "..." }`.
 - Every reply, errors included, carries `Access-Control-Allow-Origin: https://in.gudok.tel`, so the console script can read it.
