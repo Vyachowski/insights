@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { db, sqlite } from '@/server/db/client'
 
-const { upsertRevenue } = await import('./revenues')
+const { deleteRevenue, listRevenues, upsertRevenue } = await import('./revenues')
 
 beforeEach(() => {
   sqlite.exec('DELETE FROM revenues; DELETE FROM sites; DELETE FROM cities;')
@@ -67,5 +67,24 @@ describe('upsertRevenue', () => {
 
     expect(outcome).toBe('updated')
     expect(revenueRows()).toMatchObject([{ site_id: siteId, amount: 750000 }])
+  })
+})
+
+describe('deleteRevenue', () => {
+  it('deletes only the given row', async () => {
+    await upsertRevenue({ date: '2026-01-01', siteId: 5, amount: 500000 })
+    await upsertRevenue({ date: '2026-01-02', siteId: 5, amount: 600000 })
+    const [first] = await listRevenues()
+
+    expect(deleteRevenue(first.id)).toBe('deleted')
+    expect(revenueRows()).toMatchObject([{ date: '2026-01-02' }])
+  })
+
+  it('skips a row that is already gone', async () => {
+    await upsertRevenue({ date: '2026-01-01', siteId: 5, amount: 500000 })
+    const [row] = await listRevenues()
+    deleteRevenue(row.id)
+
+    expect(deleteRevenue(row.id)).toBe('skipped')
   })
 })
