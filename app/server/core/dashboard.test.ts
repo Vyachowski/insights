@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { computeVerdict, mergeCallsByCity } from './dashboard'
+import { buildDashboardSummary, computeVerdict, mergeCallsByCity, type YearTotals } from './dashboard'
 
 describe('computeVerdict', () => {
   it('reports growth as year-over-year percent against last year', () => {
@@ -71,5 +71,78 @@ describe('mergeCallsByCity', () => {
       [{ cityId: 2, city: 'Казань', count: 875 }],
     )
     expect(top).toEqual({ city: 'Казань', current: 900, previous: 875 })
+  })
+})
+
+describe('buildDashboardSummary', () => {
+  const cities = [{ id: 1, name: 'Москва' }]
+  const now = new Date(2026, 4, 15)
+
+  const emptyYear: YearTotals = {
+    revenue: 0,
+    expenses: 0,
+    calls: 0,
+    callsByCity: [],
+    monthlyRevenue: new Map(),
+    monthlyExpenses: new Map(),
+  }
+
+  // January and March carry data, so three months have elapsed
+  const current: YearTotals = {
+    revenue: 600000,
+    expenses: 150000,
+    calls: 90,
+    callsByCity: [{ cityId: 1, city: 'Москва', count: 90 }],
+    monthlyRevenue: new Map([[1, 200000], [3, 400000]]),
+    monthlyExpenses: new Map([[3, 150000]]),
+  }
+  const previous: YearTotals = {
+    ...emptyYear,
+    revenue: 300000,
+    expenses: 90000,
+    calls: 30,
+    callsByCity: [{ cityId: 1, city: 'Москва', count: 30 }],
+    monthlyRevenue: new Map([[2, 300000], [8, 900000]]),
+    monthlyExpenses: new Map([[2, 90000]]),
+  }
+
+  it('turns stored kopecks into a yearly profit verdict in rubles', () => {
+    const { verdict } = buildDashboardSummary(current, previous, cities, now)
+    expect(verdict).toMatchObject({ current: 4500, previous: 2100, isGrowing: true, isStrong: true })
+  })
+
+  it('averages trends over the elapsed months', () => {
+    const { trends } = buildDashboardSummary(current, previous, cities, now)
+    expect(trends.revenue).toEqual({ current: 6000, previous: 3000, monthlyCurrent: 2000, monthlyPrevious: 1000 })
+    expect(trends.expenses).toEqual({ current: 1500, previous: 900, monthlyCurrent: 500, monthlyPrevious: 300 })
+    expect(trends.calls).toEqual({ current: 90, previous: 30, monthlyCurrent: 30, monthlyPrevious: 10 })
+  })
+
+  it('merges calls by city with monthly averages', () => {
+    const { callsByCity } = buildDashboardSummary(current, previous, cities, now)
+    expect(callsByCity).toEqual([
+      { city: 'Москва', current: 90, previous: 30, monthlyCurrent: 30, monthlyPrevious: 10 },
+    ])
+  })
+
+  it('lists profit for all 12 months', () => {
+    const { monthlyProfit } = buildDashboardSummary(current, previous, cities, now)
+    expect(monthlyProfit.months).toHaveLength(12)
+    expect(monthlyProfit.months[0]).toEqual({ month: 1, current: 2000, previous: 0 })
+    expect(monthlyProfit.months[1]).toEqual({ month: 2, current: 0, previous: 2100 })
+    expect(monthlyProfit.months[2]).toEqual({ month: 3, current: 2500, previous: 0 })
+  })
+
+  it('compares both years over the same elapsed months', () => {
+    const { monthlyProfit, verdict } = buildDashboardSummary(current, previous, cities, now)
+    expect(monthlyProfit.elapsedMonths).toBe(3)
+    expect(monthlyProfit.averageCurrent).toBe(1500)
+    expect(monthlyProfit.averagePrevious).toBe(700) // August stays out of the average
+    expect(verdict).toMatchObject({ monthlyCurrent: 1500, monthlyPrevious: 700 })
+  })
+
+  it('falls back to the calendar month before any data lands', () => {
+    const { monthlyProfit } = buildDashboardSummary(emptyYear, previous, cities, now)
+    expect(monthlyProfit.elapsedMonths).toBe(5)
   })
 })

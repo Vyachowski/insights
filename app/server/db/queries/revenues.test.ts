@@ -1,6 +1,6 @@
-import { beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { sqlite } from '@/server/db/client'
+import { db, sqlite } from '@/server/db/client'
 
 const { upsertRevenue } = await import('./revenues')
 
@@ -12,6 +12,10 @@ beforeEach(() => {
   sqlite.exec(
     "INSERT INTO sites (id, city_id, url, yandex_counter_id, created_at, updated_at) VALUES (5, 1, 'https://volgograd.example.com/', '111', 0, 0);",
   )
+})
+
+afterEach(() => {
+  vi.restoreAllMocks()
 })
 
 function revenueRows() {
@@ -52,5 +56,16 @@ describe('upsertRevenue', () => {
     expect(rows).toHaveLength(2)
     const nullRow = rows.find(r => r.site_id === null)
     expect(nullRow?.amount).toBe(400000)
+  })
+
+  it.each([5, null])('overwrites the row when an insert race is lost, siteId %j', async siteId => {
+    await upsertRevenue({ date: '2026-01-01', siteId, amount: 500000 })
+    const noRowFound = { from: () => ({ where: () => ({ limit: async () => [] }) }) }
+    vi.spyOn(db, 'select').mockReturnValueOnce(noRowFound as never)
+
+    const outcome = await upsertRevenue({ date: '2026-01-01', siteId, amount: 750000 })
+
+    expect(outcome).toBe('updated')
+    expect(revenueRows()).toMatchObject([{ site_id: siteId, amount: 750000 }])
   })
 })
