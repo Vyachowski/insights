@@ -69,7 +69,7 @@ Rules the code cannot explain on its own. UI labels stay in Russian, exactly as 
 
 - A `Site` belongs to a `City`, and metrics and calls roll up to the city.
 - A revenue or expense row with a null `siteId` is a company-level entry (`Общий`).
-- Telephony expenses come from Gudok `/history`: only `Списание` rows count, summed into one `telephony` row per date and site.
+- Telephony expenses come from Gudok's operations: only `Списание` rows count, summed into one `telephony` row per date and site.
 
 ## Auto charges
 
@@ -99,6 +99,14 @@ Rules the code cannot explain on its own. UI labels stay in Russian, exactly as 
 - An enabled schedule stores the period's end when the period held an estimate for its site and no real charge. A real charge in the period clears the stored value. In every other case it stays, so a repeated or short run with no charge due neither sets nor clears it.
 - A disabled schedule is not changed.
 - Every run goes in the reconciliation log, also with no rows. The result reports created, updated, skipped and deleted-estimate counts.
+
+### Gudok's reply
+
+- A run posts Gudok's whole `/history.json` reply as it is. The server picks the period: from the oldest `telephony` estimate, or the latest stored day when no estimates exist, or 90 days back with nothing stored, to today in `Europe/Moscow`. Rows outside it are not written.
+- Every row of the reply is checked, inside the period or not. One mismatch stops the run: nothing is written, not even the good rows, and the reply is a 400 with `Гудок изменился: <what did not match>. Ничего не записано`. It names the first three mismatches and the total.
+- A mismatch is: no `recordsFiltered` or `data`, no rows at all, a row count other than `recordsFiltered`, a row with no `created_at`, `project`, `kind_texted` or `amount`, a date that is not a real `DD.MM.YYYY`, an amount off the pattern `-870,000 i`, or a kind other than `Списание`, `Пополнение` and `-`.
+- No rows at all is a mismatch, not an empty period: the whole history is never empty, and Gudok answers a request it does not understand with zero rows and no error. A skipped `Списание` would look like a period with no charge and lose that period's estimates, so nothing is skipped.
+- Top-ups and balances pass through the post and are not stored.
 
 ## Writing data
 

@@ -2,11 +2,16 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const mockConfig: { GUDOK_WEBHOOK_SECRET?: string } = {}
 const receiveMock = vi.fn()
+const replyMock = vi.fn()
 
 vi.mock('@/server/config', () => ({ config: mockConfig }))
 vi.mock('@/server/services/reconciliation', () => {
   class GudokPayloadError extends Error {}
-  return { GudokPayloadError, receiveGudokPost: (rows: unknown, period: unknown) => receiveMock(rows, period) }
+  return {
+    GudokPayloadError,
+    receiveGudokPost: (rows: unknown, period: unknown) => receiveMock(rows, period),
+    receiveGudokReply: (reply: unknown) => replyMock(reply),
+  }
 })
 
 const { action } = await import('./webhooks.gudok.expenses.$secret')
@@ -30,6 +35,8 @@ beforeEach(() => {
   mockConfig.GUDOK_WEBHOOK_SECRET = SECRET
   receiveMock.mockReset()
   receiveMock.mockResolvedValue({ created: 1 })
+  replyMock.mockReset()
+  replyMock.mockResolvedValue({ created: 2 })
 })
 
 describe('gudok expenses webhook route', () => {
@@ -38,6 +45,24 @@ describe('gudok expenses webhook route', () => {
     expect(res.status).toBe(200)
     expectReadable(res)
     expect(receiveMock).toHaveBeenCalledWith(OPERATIONS, undefined)
+  })
+
+  it('Gudok reply → passes it on whole and returns the counts', async () => {
+    const reply = { recordsFiltered: 1, data: [{ DT_RowId: '1' }] }
+    const res = await call(SECRET, JSON.stringify(reply))
+    expect(res.status).toBe(200)
+    expectReadable(res)
+    expect(replyMock).toHaveBeenCalledWith(reply)
+    expect(receiveMock).not.toHaveBeenCalled()
+    expect(await res.json()).toEqual({ ok: true, created: 2 })
+  })
+
+  it('refused reply → readable 400 with the reason', async () => {
+    replyMock.mockRejectedValue(new GudokPayloadError('Гудок изменился: в ответе нет строк. Ничего не записано'))
+    const res = await call(SECRET, '{}')
+    expect(res.status).toBe(400)
+    expectReadable(res)
+    expect(await res.json()).toEqual({ error: 'Гудок изменился: в ответе нет строк. Ничего не записано' })
   })
 
   it('period → passes it on and returns the counts', async () => {
@@ -69,11 +94,12 @@ describe('gudok expenses webhook route', () => {
     expect(receiveMock).not.toHaveBeenCalled()
   })
 
-  it.each(['not json', 'null', '{}', '{"operations":"x"}'])('body %s → readable 400, nothing received', async body => {
-    const res = await call(SECRET, body)
+  it('broken JSON → readable 400, nothing received', async () => {
+    const res = await call(SECRET, 'not json')
     expect(res.status).toBe(400)
     expectReadable(res)
     expect(receiveMock).not.toHaveBeenCalled()
+    expect(replyMock).not.toHaveBeenCalled()
   })
 
   it('failed write → readable 500', async () => {
