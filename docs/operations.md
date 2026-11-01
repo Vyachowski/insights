@@ -5,6 +5,10 @@
 - Railway runs one replica with the SQLite file on a Volume (`DATABASE_PATH`). The old container stops before the new one starts, so brief downtime is expected.
 - `railpack.json` runs `npm prune --omit=dev` after the build. The production path must not import a devDependency.
 - `.railwayignore` keeps docs, scripts and tests out of the deploy context.
+- `.railway/railway.ts` is the Railway configuration: service, volume, bucket, domain and start command. It replaced `railway.json`, which Railway stops reading on 2026-12-01.
+- Railway does not read `.railway/` during a deploy, so a push does not apply it. After an edit, run `railway config plan`, check that it lists only the intended changes, then run `railway config apply`.
+- The start command is `NODE_ENV=production exec node --import tsx server.ts`. It keeps node as PID 1, so SIGTERM reaches `server.ts`. Through `npm run start`, npm gets the signal and every stop looks like a crash.
+- `apply` deletes any service variable missing from the file. List a new variable in `env` with `preserve()` and set its value in Railway.
 
 ## Startup
 

@@ -1,6 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
-  "entry": ["server.ts", "scripts/sandbox-seed.ts"],
+  "entry": ["server.ts", "scripts/sandbox-seed.ts", ".railway/railway.ts"],
   "ignore": ["scripts/gudok-telephony-bookmarklet.js"],
   "ignoreExportsUsedInFile": true
 }
