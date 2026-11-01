@@ -37,6 +37,7 @@ Env validation → open SQLite (WAL, busy_timeout) → Drizzle `migrate()` → e
 - Each check logs `[auto-charges] schedules checked: N, estimates written: M`. `checked` counts enabled schedules whose number has a site.
 - One check is one transaction. A failure logs `[auto-charges] check failed: ...`, writes nothing, and the next tick repeats it. The app keeps working.
 - Shutdown stops the timer before the database closes. A check is synchronous, so it cannot be cut off halfway.
+- Admins see the red alert `Сверка с Гудком устарела` when estimates are stored and the date behind `Сверено с Гудком до DD.MM` is over 90 days old by the `Europe/Moscow` day. That date is the period end of the last recorded run, or the latest real `telephony` day with no recorded run. Exactly 90 days shows nothing, and with neither date no alert shows. Run the bookmarklet to clear it.
 
 ## Gudok call webhook
 
