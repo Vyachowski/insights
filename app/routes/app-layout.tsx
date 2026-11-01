@@ -22,7 +22,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 
 export default function AppLayout() {
-  const { backupOverdue } = useLoaderData<typeof loader>()
+  const { backupOverdue, reconciliationStale } = useLoaderData<typeof loader>()
   const { pathname } = useLocation()
   const [opened, { toggle, close }] = useDisclosure(false)
 
@@ -50,6 +50,11 @@ export default function AppLayout() {
         {backupOverdue && (
           <Alert color="red" mb="md" title="Бэкапы не работают">
             Больше суток не удаётся сохранить копию базы. Причина в логах сервиса, строки [backup].
+          </Alert>
+        )}
+        {reconciliationStale && (
+          <Alert color="red" mb="md" title="Сверка с Гудком устарела">
+            Последняя сверка старше 90 дней, расходы держатся на оценках. Запустите букмарклет на странице истории Гудка.
           </Alert>
         )}
         <Outlet context={activePageId} />
