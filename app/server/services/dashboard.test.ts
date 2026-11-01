@@ -84,6 +84,20 @@ describe('getDashboardSummary', () => {
     expect(verdict).toMatchObject({ monthlyCurrent: 600, monthlyPrevious: 350 })
   })
 
+  it('counts estimates in the yearly totals, in `Расходы` and in monthly profit', async () => {
+    sqlite.exec(
+      'INSERT INTO expenses (site_id, date, amount, type, is_estimate, created_at, updated_at) '
+      + "VALUES (5, '2026-02-20', 87000, 'telephony', 1, 0, 0)",
+    )
+
+    const { trends, verdict, monthlyProfit } = await getDashboardSummary()
+    sqlite.exec("DELETE FROM expenses WHERE type = 'telephony'")
+
+    expect(trends.expenses).toMatchObject({ current: 1170, previous: 100 })
+    expect(verdict).toMatchObject({ current: 330, previous: 700 })
+    expect(monthlyProfit.months[1]).toEqual({ month: 2, current: -370, previous: -100 })
+  })
+
   describe('reconciled date', () => {
     const seedRun = (periodEnd: string) => sqlite.prepare(
       "INSERT INTO reconciliation_runs (period_start, period_end, ran_at) VALUES ('2026-01-01', ?, 0)",
