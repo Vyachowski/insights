@@ -24,7 +24,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 
 export default function AppLayout() {
-  const { backupOverdue, reconciliationStale } = useLoaderData<typeof loader>()
+  const { backupOverdue, reconciliationStale, webhookSilent } = useLoaderData<typeof loader>()
   const { pathname } = useLocation()
   const [opened, { toggle, close }] = useDisclosure(false)
 
@@ -57,6 +57,11 @@ export default function AppLayout() {
         {reconciliationStale && (
           <Alert color="red" mb="md" title="Сверка с Гудком устарела">
             Последняя сверка старше 90 дней, расходы держатся на оценках. Запустите букмарклет на странице истории Гудка.
+          </Alert>
+        )}
+        {webhookSilent && (
+          <Alert color="red" mb="md" title="Вебхук Гудка молчит">
+            Больше суток не приходят звонки, новые могут теряться. Проверьте настройку вебхука в Гудке и логи сервиса.
           </Alert>
         )}
         <Outlet context={activePageId} />
