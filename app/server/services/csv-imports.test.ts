@@ -83,6 +83,34 @@ describe('siteId cells', () => {
   })
 })
 
+describe('date cells', () => {
+  // Each of these reads as some other day when left to the Date parser
+  const unclearDates = ['2026-02-31', '02.03.2026', '03/02/2026']
+
+  it.each(unclearDates)('disputes a revenue row dated %s', async date => {
+    const result = await importers.revenue(revenueCsv(`${date},,100`, '2026-01-02,,200'))
+
+    expect(result).toMatchObject({ created: 1, updated: 0, skipped: 0, disputed: 1 })
+    expect(rows('revenues')).toMatchObject([{ date: '2026-01-02' }])
+  })
+
+  it.each(unclearDates)('disputes an expense row dated %s', async date => {
+    const result = await importers.expenses(expensesCsv(`${date},ads,,100`, '2026-01-02,ads,,200'))
+
+    expect(result).toMatchObject({ created: 1, updated: 0, skipped: 0, disputed: 1 })
+    expect(rows('expenses')).toMatchObject([{ date: '2026-01-02' }])
+  })
+
+  it.each(unclearDates)('skips a metrics row dated %s', async date => {
+    const result = await importers.metrics(
+      metricsCsv(metricRow('5', date), metricRow('5', '2026-01-02')),
+    )
+
+    expect(result).toEqual({ created: 1, skipped: 1 })
+    expect(rows('site_metrics')).toMatchObject([{ date: '2026-01-02' }])
+  })
+})
+
 describe('amount cells', () => {
   it.each(['', '100,50', '100abc'])('drops the amount "%s"', async amount => {
     const result = await importers.revenue(
