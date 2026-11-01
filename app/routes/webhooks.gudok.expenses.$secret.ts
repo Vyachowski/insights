@@ -1,7 +1,7 @@
 import type { Route } from './+types/webhooks.gudok.expenses.$secret'
 
-import { env } from '@/server/env'
 import { ingestGudokExpenses, type GudokOperationRow } from '@/server/services/gudok-expenses'
+import { assertWebhookSecret } from '@/server/webhook-secret'
 
 // Secret-gated ingest for Gudok /history charges, posted by the bookmarklet
 // running on https://in.gudok.tel. The bookmarklet posts a JSON string with a
@@ -17,15 +17,8 @@ function corsHeaders(): HeadersInit {
   }
 }
 
-function assertSecret(secret: string | undefined): void {
-  const expected = env.GUDOK_WEBHOOK_SECRET
-  if (!expected || secret !== expected) {
-    throw new Response('Not Found', { status: 404 })
-  }
-}
-
 export async function action({ request, params }: Route.ActionArgs) {
-  assertSecret(params.secret)
+  assertWebhookSecret(params.secret)
 
   let rows: GudokOperationRow[]
   try {
