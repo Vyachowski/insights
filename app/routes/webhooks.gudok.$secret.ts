@@ -31,6 +31,7 @@ async function handle(request: Request, secret: string | undefined) {
     return Response.json({ ok: true, ...result })
   } catch (error) {
     if (error instanceof GudokPayloadError) {
+      console.error(`[gudok-webhook] delivery ${JSON.stringify(params.id)} rejected: ${error.message}`)
       return Response.json({ error: error.message }, { status: 400 })
     }
     throw error
