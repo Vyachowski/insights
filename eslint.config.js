@@ -31,7 +31,7 @@ const restrictCode = (files, rules) => ({
 })
 
 export default defineConfig([
-  globalIgnores(['build', 'node_modules', '.claude', '.react-router', 'coverage', 'scripts/gudok-telephony-bookmarklet.js']),
+  globalIgnores(['build', 'node_modules', '.claude', '.react-router', 'coverage', 'scripts/gudok-telephony-console.js']),
   {
     files: ['**/*.{js,mjs,cjs,ts,tsx}'],
     extends: [

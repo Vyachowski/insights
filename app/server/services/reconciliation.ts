@@ -37,7 +37,7 @@ export async function readReconciliationDates() {
   return { lastRunEnd, lastRealDay }
 }
 
-/** Whether the admin should run the bookmarklet: estimates wait for a check past the limit. */
+/** Whether the admin should run the console script: estimates wait for a check past the limit. */
 export async function checkReconciliationStale(now = new Date()) {
   const hasEstimates = transaction(tx => oldestEstimateDate(tx, TELEPHONY_TYPE)) !== null
   return isReconciliationStale(await readReconciliationDates(), { hasEstimates, today: moscowDay(now) })
@@ -74,7 +74,7 @@ export async function reconcileTelephony(rows: GudokOperationRow[], period: DayP
 }
 
 /**
- * One bookmarklet post: with a period it is a reconciliation run, and without
+ * One post of the old script: with a period it is a reconciliation run, and without
  * one it is a plain ingest. Throws GudokPayloadError on a post it must refuse.
  */
 export async function receiveGudokPost(rows: GudokOperationRow[], period: unknown) {
