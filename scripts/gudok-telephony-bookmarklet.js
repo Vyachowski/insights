@@ -19,6 +19,16 @@
   const cell = (tr, name) =>
     (tr.querySelector(`[data-column-name="${name}"]`)?.textContent || '').trim()
 
+  // The body of a good reply. An error is { error }, but a wrong secret gives a
+  // plain-text 404, so this does not assume JSON.
+  async function readReply(res) {
+    const text = await res.text()
+    let body = null
+    try { body = JSON.parse(text) } catch (e) { /* reported below */ }
+    if (res.ok && body) return body
+    throw new Error(body?.error || `HTTP ${res.status} ${text}`.trim())
+  }
+
   // "DD.MM.YYYY" -> Date (local midnight). Returns null when unparseable.
   function ruDate(s) {
     const m = /^(\d{2})\.(\d{2})\.(\d{2}|\d{4})$/.exec((s || '').trim())
@@ -49,7 +59,7 @@
   let since = null
   try {
     const res = await fetch(`${base}/since`, { credentials: 'omit' })
-    since = (await res.json()).since // 'YYYY-MM-DD' | null
+    since = (await readReply(res)).since // 'YYYY-MM-DD' | null
   } catch (e) {
     alert('Не удалось получить дату синхронизации: ' + e)
     return
@@ -107,8 +117,7 @@
       credentials: 'omit',
       body: JSON.stringify({ operations }),
     })
-    const out = await res.json()
-    if (!res.ok) throw new Error(out.error || res.status)
+    const out = await readReply(res)
     alert(`Готово. Отправлено ${operations.length} списаний.\n`
       + `Создано: ${out.created}, обновлено: ${out.updated}, пропущено: ${out.skipped}.`)
   } catch (e) {
