@@ -19,8 +19,12 @@ It is **not** token-golf and **not** broken/caveman grammar — it's relevance a
 
 ## Git
 
-- Solo project: commit directly to `main`. Create a branch only when asked.
+- Each task gets its own branch and worktree from fresh `main`: `git worktree add .claude/worktrees/<task> -b task/<task> main`.
+- In a worktree run `npm ci`, then `PORT=<free port> npm run dev:sandbox`. `.env` and real databases stay in the main folder. The first open on a cold Vite cache logs `504 Outdated Optimize Dep`, once per worktree: reload the page.
+- `npm ci` in a worktree prints `ENOTDIR` from simple-git-hooks: expected. All worktrees share one set of hooks, and `npx simple-git-hooks` installs them from the main folder only.
 - One atomic, non-breaking change per commit.
+- To finish: `npm run check`, then from the main folder `git merge --no-ff task/<task>` and `git push`, then `git worktree remove .claude/worktrees/<task>` and `git branch -d task/<task>`.
+- The `pre-commit` hook refuses commits on `main`. Merges pass, conflict commits included.
 - Keep PRs and all other text free of AI attribution. The `commit-msg` hook rejects it in commits.
 
 ## Building
