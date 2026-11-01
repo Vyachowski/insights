@@ -47,6 +47,15 @@ Statuses: `[ ]` not started · `[~]` in progress · `[x]` done.
 - [ ] `Сверено с Гудком до DD.MM` under `Расходы`
 - [ ] Admin alerts: no Gudok charge, reconciliation over 90 days old, webhook silent over 24 hours
 
+## V2.2.1 — Гудок через JSON
+
+**Goal:** a change in Gudok stops a run with a clear message instead of losing data.
+
+- [ ] Grill the open questions in `.scratch/gudok-history-json/spec.md`
+- [ ] Bookmarklet reads `/history.json` instead of driving the page
+- [ ] A run checks Gudok's reply and posts nothing on any mismatch
+- [ ] A run says when the bookmarklet must be updated
+
 ## V2.3 — Хостинг
 
 **Goal:** hosting costs reach the dashboard through the same auto charge.
