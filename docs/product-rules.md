@@ -27,6 +27,8 @@ Rules the code cannot explain on its own. UI labels stay in Russian, exactly as 
 - The bar has a target line at last year's same-window level. It is red below the line and green at or past it.
 - `Расходы` is inverted: green below the line, red past it.
 - Profit stays out of `Тренды`; it belongs to `Итог`.
+- Estimates count in every `Сводка` figure like real rows: `Итог`, `Расходы` and `Прибыль по месяцам`. There is no filter and no second expense figure.
+- `Сверено с Гудком до DD.MM` under `Расходы` says how far that figure is exact, for admin and user alike. The date is the period end of the last recorded run. With no recorded run it is the latest real `telephony` day, because the run of 2026-10-31 is not in the log. Estimates never set it. With neither date the label is hidden.
 - `Звонки по городам` hides cities with zero calls in both windows and ranks the rest by this year's calls. Calls are the only per-city metric.
 
 ## `Прибыль по месяцам`
