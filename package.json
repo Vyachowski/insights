@@ -8,6 +8,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "dev": "tsx server.ts",
+    "dev:sandbox": "cross-env NODE_ENV=development DOTENV_CONFIG_PATH=.env.sandbox tsx scripts/sandbox-seed.ts && cross-env NODE_ENV=development DOTENV_CONFIG_PATH=.env.sandbox tsx server.ts",
     "build": "react-router build",
     "start": "cross-env NODE_ENV=production node --import tsx server.ts",
     "test": "vitest run",

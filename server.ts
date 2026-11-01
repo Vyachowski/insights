@@ -1,5 +1,7 @@
 import 'dotenv/config'
 
+import { realpathSync } from 'node:fs'
+
 import { createRequestHandler } from '@react-router/express'
 import express from 'express'
 
@@ -18,7 +20,18 @@ const viteDevServer = isProduction
   ? undefined
   // eslint-disable-next-line import/no-extraneous-dependencies -- dev only, never loaded in production
   : await import('vite').then(vite =>
-    vite.createServer({ server: { middlewareMode: true } }),
+    vite.createServer({
+      // dotenv above is the only env source, so a sandbox never picks up .env
+      envDir: false,
+      // Copies in other worktrees may share node_modules through a symlink
+      cacheDir: '.react-router/vite',
+      server: {
+        middlewareMode: true,
+        // Vite's default HMR port is fixed, so a second copy could not bind it
+        hmr: { port: env.PORT + 10_000 },
+        fs: { allow: ['.', realpathSync('node_modules')] },
+      },
+    }),
   )
 
 const app = express()
