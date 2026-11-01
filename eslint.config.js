@@ -149,7 +149,7 @@ export default defineConfig([
   ], ['app/routes/health.tsx']),
   restrictImports(['app/screens/**', 'app/components/**', 'app/hooks/**', 'app/lib/**'], [
     { group: [...QUERY_INTERNALS, '**/server/config', '**/server/storage', '**/server/jobs/**', '**/routes/helpers/**'], message: 'UI never touches server internals, not even for types.' },
-    { group: ['**/server/core/**', '**/server/db/queries/**', '**/server/services/**'], allowTypeImports: true, message: 'UI sees the server through route data: type imports only.' },
+    { group: ['**/server/core/**', '**/server/db/queries/**', '**/server/db/unique-violation', '**/server/services/**'], allowTypeImports: true, message: 'UI sees the server through route data: type imports only.' },
   ]),
   restrictCode(['app/screens/**'], {
     'no-restricted-syntax': ['error',
