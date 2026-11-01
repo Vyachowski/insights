@@ -84,7 +84,7 @@ describe('upsertExpense', () => {
 
   it.each([5, null])('overwrites the row when an insert race is lost, siteId %j', async siteId => {
     await upsertExpense({ date: '2026-01-01', siteId, type: HOSTING_TYPE, amount: 500000 })
-    const noRowFound = { from: () => ({ where: () => ({ limit: async () => [] }) }) }
+    const noRowFound = { from: () => ({ where: () => ({ limit: () => ({ get: () => undefined }) }) }) }
     vi.spyOn(db, 'select').mockReturnValueOnce(noRowFound as never)
 
     const outcome = await upsertExpense({ date: '2026-01-01', siteId, type: HOSTING_TYPE, amount: 750000 })
@@ -138,7 +138,7 @@ describe('upsertExpense over an estimate', () => {
 
   it('clears the mark when an insert race meets an estimate', async () => {
     seedEstimate()
-    const noRowFound = { from: () => ({ where: () => ({ limit: async () => [] }) }) }
+    const noRowFound = { from: () => ({ where: () => ({ limit: () => ({ get: () => undefined }) }) }) }
     vi.spyOn(db, 'select').mockReturnValueOnce(noRowFound as never)
 
     const outcome = await upsertExpense({ date: '2026-01-01', siteId: 5, type: 'telephony', amount: 87000 })

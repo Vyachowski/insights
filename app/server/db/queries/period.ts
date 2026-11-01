@@ -8,6 +8,12 @@ export interface Period {
   end: Date
 }
 
+/** `YYYY-MM-DD` days, both included. */
+export interface DayPeriod {
+  start: string
+  end: string
+}
+
 // DATE-as-text columns compare lexicographically ('YYYY-MM-DD' sorts
 // correctly); timestamp columns are integer epoch-ms comparisons.
 const toUtcDate = (d: Date) => d.toISOString().slice(0, 10)
