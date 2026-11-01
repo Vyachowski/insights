@@ -32,3 +32,5 @@ export function writeDueEstimates() {
 export async function listNumberCharges() {
   return (await listNumbersWithSchedules()).map(numberCharge)
 }
+
+export type NumberCharge = Awaited<ReturnType<typeof listNumberCharges>>[number]
