@@ -74,6 +74,19 @@ describe('gudok webhook route', () => {
     expect(res.status).toBe(400)
   })
 
+  it('logs a rejected delivery, because the call is lost', async () => {
+    const log = vi.spyOn(console, 'error').mockImplementation(() => {})
+    ingestMock.mockRejectedValue(new GudokPayloadError('Invalid Gudok date'))
+    const req = new Request('http://x/webhooks/gudok/top-secret', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ id: 7, date: 'not a date' }),
+    })
+    await call(action, req, SECRET)
+    expect(log).toHaveBeenCalledWith('[gudok-webhook] delivery 7 rejected: Invalid Gudok date')
+    log.mockRestore()
+  })
+
   it('duplicate delivery still → 200', async () => {
     ingestMock.mockResolvedValue({ stored: false, duplicate: true, gudokId: 1, siteId: 5 })
     const req = new Request('http://x/webhooks/gudok/top-secret', {

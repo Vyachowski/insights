@@ -68,6 +68,7 @@ The test call also creates or updates a row in `phone_numbers`. The query above 
 - A new number gets its site from `project_id` through `sites.gudok_project_id`, then from the project title. With no match `site_id` stays empty.
 - A known number updates `number` and `name` only. Its `site_id` changes by hand only, directly in the database.
 - The call is always stored. A number failure is logged, and the call stays idempotent on `provider + provider_call_id`.
+- Only `id` and `date` are required. Any other field that can't be read gets its default, and the full payload stays in `calls.raw`. A delivery with no usable `id` or `date` gets a 400 and a `[gudok-webhook] delivery … rejected` log line.
 - Open question: whether Gudok retries failed deliveries is unknown.
 
 ### Rollback of the calls migration

@@ -21,6 +21,17 @@ describe('parseGudokPayload', () => {
     expect(date.toISOString()).toBe('2026-07-26T10:00:00.000Z')
   })
 
+  it('stores a call whose number fields cannot be read', () => {
+    const { payload } = parseGudokPayload({
+      id: 42,
+      date: '2026-07-26T10:00:00Z',
+      project_id: 'abc',
+      billsec: 'n/a',
+      call_number: '',
+    })
+    expect(payload).toMatchObject({ id: 42, project_id: 0, billsec: 0, call_number: 0 })
+  })
+
   it.each([
     ['epoch seconds', '1785060000'],
     ['epoch milliseconds', '1785060000000'],
