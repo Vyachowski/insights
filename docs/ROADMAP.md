@@ -51,10 +51,10 @@ Statuses: `[ ]` not started · `[~]` in progress · `[x]` done.
 
 **Goal:** a change in Gudok stops a run with a clear message instead of losing data.
 
-- [ ] Grill the open questions in `.scratch/gudok-history-json/spec.md`
-- [ ] Bookmarklet reads `/history.json` instead of driving the page
-- [ ] A run checks Gudok's reply and posts nothing on any mismatch
-- [ ] A run says when the bookmarklet must be updated
+- [x] Grill the open questions in `.scratch/gudok-history-json/spec.md`
+- [x] Console script reads `/history.json` instead of driving the page
+- [x] The server checks Gudok's reply and writes nothing on any mismatch
+- [x] A run says when the script must be updated
 
 ## V2.3 — Хостинг
 

@@ -5,7 +5,6 @@ import {
   cleanProject,
   parseGudokAmountKopecks,
   parseGudokOperationDate,
-  parseGudokPeriod,
   parseGudokReply,
   rowsInPeriod,
 } from './gudok-history'
@@ -114,12 +113,18 @@ describe('parseGudokReply', () => {
     ['a missing field', replyWith({ project: undefined }), 'строка 1: нет project'],
     ['a short year', replyWith({ created_at: span('24.10.26') }), 'строка 1: дата "24.10.26"'],
     ['a day past the month end', replyWith({ created_at: span('31.02.2026') }), 'строка 1: дата "31.02.2026"'],
+    ['a leap day in a common year', replyWith({ created_at: span('29.02.2026') }), 'строка 1: дата "29.02.2026"'],
     ['an amount with no decimals', replyWith({ amount: span('-870') }), 'строка 1: сумма "-870"'],
     ['an amount with a point', replyWith({ amount: money('-870.000') }), 'строка 1: сумма "-870.000 i"'],
     ['an unknown kind', replyWith({ kind_texted: span('Оплата') }), 'строка 1: неизвестный тип "Оплата"'],
   ])('stops on %s', (_, reply, mismatch) => {
     expect(() => parseGudokReply(reply))
       .toThrow(new GudokPayloadError(`Гудок изменился: ${mismatch}. Ничего не записано`))
+  })
+
+  it('tells the old script to update', () => {
+    expect(() => parseGudokReply({ operations: [], period: { start: '2026-10-01', end: '2026-10-31' } }))
+      .toThrow(new GudokPayloadError('Скрипт устарел: возьмите новый из scripts/gudok-telephony-console.js'))
   })
 
   it('names the first three mismatches and the total', () => {
@@ -136,35 +141,6 @@ describe('rowsInPeriod', () => {
     const rows = parseGudokReply(REPLY)
     const dates = rowsInPeriod(rows, { start: '2026-10-22', end: '2026-10-23' }).map(row => row.date)
     expect(dates).toEqual(['23.10.2026', '22.10.2026'])
-  })
-})
-
-describe('parseGudokPeriod', () => {
-  it('returns the period, including a single day and a leap day', () => {
-    expect(parseGudokPeriod({ start: '2026-10-01', end: '2026-10-31' })).toEqual({ start: '2026-10-01', end: '2026-10-31' })
-    expect(parseGudokPeriod({ start: '2026-10-31', end: '2026-10-31' })).toEqual({ start: '2026-10-31', end: '2026-10-31' })
-    expect(parseGudokPeriod({ start: '2024-02-29', end: '2024-03-01' })).toEqual({ start: '2024-02-29', end: '2024-03-01' })
-  })
-
-  it.each([
-    ['a day past the month end', { start: '2026-02-31', end: '2026-03-01' }],
-    ['a leap day in a common year', { start: '2026-02-29', end: '2026-03-01' }],
-    ['a bad end', { start: '2026-10-01', end: '2026-04-31' }],
-    ['month 13', { start: '2026-13-01', end: '2026-13-02' }],
-    ['day 00', { start: '2026-10-00', end: '2026-10-01' }],
-    ['a date with a time', { start: '2026-10-01T00:00:00Z', end: '2026-10-31' }],
-    ['a Gudok date', { start: '01.10.2026', end: '31.10.2026' }],
-    ['a number', { start: 20261001, end: 20261031 }],
-    ['a missing end', { start: '2026-10-01' }],
-    ['an empty object', {}],
-    ['null', null],
-    ['a string', '2026-10-01'],
-  ])('refuses %s', (_, period) => {
-    expect(() => parseGudokPeriod(period)).toThrow(GudokPayloadError)
-  })
-
-  it('refuses a start after its end', () => {
-    expect(() => parseGudokPeriod({ start: '2026-10-02', end: '2026-10-01' })).toThrow(GudokPayloadError)
   })
 })
 

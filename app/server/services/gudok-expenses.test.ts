@@ -2,8 +2,9 @@ import { beforeEach, describe, expect, it } from 'vitest'
 
 import { sqlite } from '@/server/db/client'
 
-const { ingestGudokExpenses, telephonySince, writeGudokExpenses } = await import('./gudok-expenses')
-const { GudokPayloadError } = await import('@/server/core/gudok-calls')
+const { telephonySince, writeGudokExpenses } = await import('./gudok-expenses')
+const { toCityToSiteId } = await import('@/server/core/site-matching')
+const { listSiteCities } = await import('@/server/db/queries/sites')
 const { transaction } = await import('@/server/db/transaction')
 
 beforeEach(() => {
@@ -33,9 +34,14 @@ const charge = (over: Record<string, unknown> = {}) => ({
   ...over,
 })
 
-describe('ingestGudokExpenses', () => {
+async function ingest(rows: Parameters<typeof writeGudokExpenses>[1]) {
+  const cityToSiteId = toCityToSiteId(await listSiteCities())
+  return transaction(tx => writeGudokExpenses(tx, rows, cityToSiteId))
+}
+
+describe('writeGudokExpenses', () => {
   it('records only charges, resolves site, stores positive kopecks', async () => {
-    const result = await ingestGudokExpenses([
+    const result = await ingest([
       charge(),
       { date: '26.07.2026', project: '..', kind: 'Пополнение', amount: '870,000 i', text: 'Пополнение' },
     ])
@@ -46,7 +52,7 @@ describe('ingestGudokExpenses', () => {
   })
 
   it('aggregates multiple charges the same day and city into one row', async () => {
-    await ingestGudokExpenses([
+    await ingest([
       charge({ amount: '-870,000' }),
       charge({ amount: '-500,000', text: 'Продление: Гудок-номер +7 844 111 22 33' }),
     ])
@@ -57,16 +63,16 @@ describe('ingestGudokExpenses', () => {
 
   it('is idempotent: re-posting the same days does not duplicate', async () => {
     const batch = [charge(), charge({ project: 'Ростов-На-Дону..', amount: '-500,000' })]
-    const first = await ingestGudokExpenses(batch)
+    const first = await ingest(batch)
     expect(first).toEqual({ created: 2, updated: 0, skipped: 0 })
-    const second = await ingestGudokExpenses(batch)
+    const second = await ingest(batch)
     expect(second).toEqual({ created: 0, updated: 0, skipped: 2 })
     expect(expenseRows()).toHaveLength(2)
   })
 
   it('replaces the stored amount when a re-collected day gains a charge', async () => {
-    await ingestGudokExpenses([charge({ amount: '-870,000' })])
-    const res = await ingestGudokExpenses([
+    await ingest([charge({ amount: '-870,000' })])
+    const res = await ingest([
       charge({ amount: '-870,000' }),
       charge({ amount: '-500,000', text: 'ещё номер' }),
     ])
@@ -75,36 +81,13 @@ describe('ingestGudokExpenses', () => {
   })
 
   it('resolves a truncated long city name by prefix', async () => {
-    await ingestGudokExpenses([charge({ project: 'Ростов-На-Д..', amount: '-870,000' })])
+    await ingest([charge({ project: 'Ростов-На-Д..', amount: '-870,000' })])
     expect(expenseRows()[0].site_id).toBe(6)
   })
 
   it('stores unmatched projects as company-level (null site)', async () => {
-    await ingestGudokExpenses([charge({ project: 'Неизвестный..', amount: '-870,000' })])
+    await ingest([charge({ project: 'Неизвестный..', amount: '-870,000' })])
     expect(expenseRows()[0].site_id).toBeNull()
-  })
-})
-
-describe('ingestGudokExpenses with estimates stored', () => {
-  const seedEstimate = (date = '2026-07-20', type = 'telephony') => sqlite.prepare(
-    'INSERT INTO expenses (date, site_id, amount, type, is_estimate, created_at, updated_at) VALUES (?, 5, 87000, ?, 1, 0, 0)',
-  ).run(date, type)
-
-  it('refuses the post and writes nothing, as a real charge on another date would add a second row', async () => {
-    seedEstimate()
-    const stored = expenseRows()
-    await expect(ingestGudokExpenses([charge()])).rejects.toThrow(GudokPayloadError)
-    expect(expenseRows()).toEqual(stored)
-  })
-
-  it('refuses an empty post too', async () => {
-    seedEstimate()
-    await expect(ingestGudokExpenses([])).rejects.toThrow(GudokPayloadError)
-  })
-
-  it('accepts the post when the estimates are of another type', async () => {
-    seedEstimate('2026-07-20', 'hosting')
-    expect(await ingestGudokExpenses([charge()])).toEqual({ created: 1, updated: 0, skipped: 0 })
   })
 })
 
@@ -144,7 +127,7 @@ describe('telephonySince', () => {
   const seedEstimate = (date: string, type = 'telephony') => sqlite.prepare(
     'INSERT INTO expenses (date, site_id, amount, type, is_estimate, created_at, updated_at) VALUES (?, 5, 87000, ?, 1, 0, 0)',
   ).run(date, type)
-  const seedTwoDays = () => ingestGudokExpenses([
+  const seedTwoDays = () => ingest([
     charge({ date: '20.07.2026' }),
     charge({ date: '26.07.2026', project: 'Ростов-На-Дону..' }),
   ])
