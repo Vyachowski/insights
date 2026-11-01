@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { sumAmounts } from '@/lib/utils'
+import { sumAmounts } from '@/lib/totals'
 import { sqlite } from '@/server/db/client'
 
 vi.mock('@/routes/helpers/auth', () => ({ requireAdmin: async () => undefined, requireUser: async () => undefined }))

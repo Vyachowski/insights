@@ -1,10 +1,10 @@
 import { Box, Code, Group, Paper, ScrollArea, Stack, Table, Text, Title } from '@mantine/core'
-import Button from '@ui/Button'
 import { MapPin, Plus } from 'lucide-react'
 
 import type { City } from '@/server/db/queries/cities'
 
-import { formatNumber } from '@/lib/utils'
+import Button from '@/components/Button'
+import { formatNumber } from '@/lib/format'
 
 export default function CitiesTabView({ cities }: { cities: City[] }) {
   return (

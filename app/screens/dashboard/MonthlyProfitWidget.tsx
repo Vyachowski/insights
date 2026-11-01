@@ -1,9 +1,9 @@
 import { Box, Group, Paper, Stack, Text, Tooltip } from '@mantine/core'
-import Card from '@ui/Card'
 
 import type { DashboardSummary } from '@/server/core/dashboard'
 
-import { formatRub, formatYoyDelta } from '@/lib/utils'
+import Card from '@/components/Card'
+import { formatRub, formatYoyDelta } from '@/lib/format'
 
 const CURRENT_YEAR = new Date().getFullYear()
 const PREVIOUS_YEAR = CURRENT_YEAR - 1

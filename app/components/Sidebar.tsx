@@ -1,10 +1,10 @@
 import { Box, Group, NavLink, Stack, Text } from '@mantine/core'
-import Avatar from '@ui/Avatar'
-import Logo from '@ui/Logo'
 import { NavLink as RouterNavLink } from 'react-router'
 
+import Avatar from '@/components/Avatar'
+import Logo from '@/components/Logo'
 import { useAuth } from '@/hooks/useAuth'
-import { menuItems } from '@/navigation'
+import { menuItems } from '@/menu-items'
 
 interface SidebarProps {
   onClose: () => void

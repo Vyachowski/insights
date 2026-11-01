@@ -1,7 +1,4 @@
 import { ActionIcon, Box, Group, Paper, ScrollArea, Stack, Table, Text, Title } from '@mantine/core'
-import Button from '@ui/Button'
-import PeriodFilters from '@ui/PeriodFilters'
-import TablePager from '@ui/TablePager'
 import { Plus, Trash2, Upload } from 'lucide-react'
 
 import AddRevenueModal from './AddRevenueModal'
@@ -10,8 +7,12 @@ import type { PeriodFilter } from '@/hooks/usePeriodFilter'
 import type { Revenue } from '@/server/db/queries/revenues'
 import type { Site } from '@/server/db/queries/sites'
 
+import Button from '@/components/Button'
+import PeriodFilters from '@/components/PeriodFilters'
+import TablePager from '@/components/TablePager'
 import { useTable } from '@/hooks/useTable'
-import { formatAmount, formatDate, getSiteName, sumAmounts } from '@/lib/utils'
+import { formatAmount, formatDate, getSiteName } from '@/lib/format'
+import { sumAmounts } from '@/lib/totals'
 
 interface Props {
   entries: Revenue[]
