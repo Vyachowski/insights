@@ -72,6 +72,7 @@ Rules the code cannot explain on its own. UI labels stay in Russian, exactly as 
 ## Auto charges
 
 - Between Gudok runs the server writes an estimated `telephony` charge for each enabled schedule. The row has `is_estimate` set and no comment.
+- In `Финансы` → `Расходы` an estimate shows the `оценка` mark, for admin and user alike. Estimates count in the table's row count and total like real rows.
 - A check writes every date due up to today, then moves the next date past today by the schedule's interval, 30 days by default. Missed dates are written after downtime.
 - Today is the `Europe/Moscow` day on any server.
 - An estimate never changes a stored row: when the key `(date, siteId, type)` is taken, the row stays as it is and the date counts as done. A repeated check adds nothing.

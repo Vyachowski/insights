@@ -79,7 +79,10 @@ export default function ExpensesTabView({ entries, sites, isAdmin, period, categ
                 table.rows.map(entry => (
                   <Table.Tr key={entry.id}>
                     <Table.Td style={{ whiteSpace: 'nowrap' }}>{formatDate(entry.date)}</Table.Td>
-                    <Table.Td><Badge variant="light" color="gray" size="sm">{entry.type}</Badge></Table.Td>
+                    <Table.Td>
+                      <Badge variant="light" color="gray" size="sm">{entry.type}</Badge>
+                      {entry.isEstimate && <Badge variant="light" color="yellow" size="sm" ml="xs" miw="max-content">оценка</Badge>}
+                    </Table.Td>
                     <Table.Td>
                       {entry.siteId === null
                         ? <Text span c="dimmed" fs="italic">Общий</Text>

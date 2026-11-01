@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { sumAmounts } from '@/lib/utils'
 import { sqlite } from '@/server/db/client'
 
 vi.mock('@/routes/helpers/auth', () => ({ requireAdmin: async () => undefined, requireUser: async () => undefined }))
@@ -81,5 +82,18 @@ describe('finance loader', () => {
     const data = await callLoader('expenses')
 
     expect(data.expenses).toMatchObject([{ amount: 5, type: 'ads' }])
+  })
+
+  it('marks estimates in the expenses and counts them in the total', async () => {
+    sqlite.exec(`
+      INSERT INTO expenses (site_id, date, amount, type, is_estimate, created_at, updated_at) VALUES
+        (5, '2026-01-01', 50000, 'telephony', 0, 0, 0),
+        (5, '2026-01-31', 87000, 'telephony', 1, 0, 0);
+    `)
+
+    const { expenses } = await callLoader('expenses')
+
+    expect(expenses).toMatchObject([{ amount: 500, isEstimate: false }, { amount: 870, isEstimate: true }])
+    expect(sumAmounts(expenses)).toBe(1370)
   })
 })
