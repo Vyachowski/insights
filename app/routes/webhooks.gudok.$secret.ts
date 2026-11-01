@@ -1,19 +1,11 @@
 import type { Route } from './+types/webhooks.gudok.$secret'
 
-import { env } from '@/server/env'
 import { GudokPayloadError, ingestGudokCall } from '@/server/services/gudok-calls'
+import { assertWebhookSecret } from '@/server/webhook-secret'
 
 // Public, secret-gated webhook for Gudok call-completion events. Gudok's config
 // exposes only a destination URL and a GET/POST toggle (no headers/auth), so the
 // shared secret travels in the URL path and both methods are accepted.
-
-function assertSecret(secret: string | undefined): void {
-  const expected = env.GUDOK_WEBHOOK_SECRET
-  // 404 (not 401) on mismatch/unset so the endpoint's existence isn't confirmed
-  if (!expected || secret !== expected) {
-    throw new Response('Not Found', { status: 404 })
-  }
-}
 
 async function readParams(request: Request): Promise<Record<string, unknown>> {
   if (request.method === 'GET') {
@@ -27,7 +19,7 @@ async function readParams(request: Request): Promise<Record<string, unknown>> {
 }
 
 async function handle(request: Request, secret: string | undefined) {
-  assertSecret(secret)
+  assertWebhookSecret(secret)
   let params: Record<string, unknown>
   try {
     params = await readParams(request)

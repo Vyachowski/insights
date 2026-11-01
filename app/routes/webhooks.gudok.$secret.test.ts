@@ -15,8 +15,8 @@ const { GudokPayloadError } = await import('@/server/services/gudok-calls')
 const SECRET = 'top-secret'
 // The handlers only touch request + params.secret; cast past the fuller
 // generated Route arg types, which aren't relevant to this test.
-type Handler = (a: { request: Request; params: { secret: string } }) => Promise<Response>
-const call = (fn: unknown, request: Request, secret: string) =>
+type Handler = (a: { request: Request; params: { secret?: string } }) => Promise<Response>
+const call = (fn: unknown, request: Request, secret?: string) =>
   (fn as Handler)({ request, params: { secret } })
 
 beforeEach(() => {
@@ -48,6 +48,12 @@ describe('gudok webhook route', () => {
   it('wrong secret → 404, no ingest', async () => {
     const req = new Request('http://x/webhooks/gudok/nope', { method: 'POST' })
     await expect(call(action, req, 'nope')).rejects.toMatchObject({ status: 404 })
+    expect(ingestMock).not.toHaveBeenCalled()
+  })
+
+  it('missing secret → 404, no ingest', async () => {
+    const req = new Request('http://x/webhooks/gudok', { method: 'POST' })
+    await expect(call(action, req)).rejects.toMatchObject({ status: 404 })
     expect(ingestMock).not.toHaveBeenCalled()
   })
 
