@@ -10,12 +10,20 @@ import {
   rowsInPeriod,
 } from './gudok-history'
 
-const span = (value: string, attrs = '') =>
-  `<span class="cell-content common-text" data-aligning-help="center"${attrs}>${value}</span>`
-const money = (value: string) => span(`<span class="common-text">${value} <i class="icon-ruble">i</i></span>`)
+const span = (value: string, name = 'text', first = false) =>
+  `<span class="cell-content common-text" data-column-name="${name}" data-aligning-help="center"${
+    first ? ` id="table-${name}-cell"` : ''
+  }>${value}</span>`
+const ruble = '<span class="ruble-icon">i</span>'
+const money = (value: string, first = false) => span(
+  `<span class="amount-value ${value.startsWith('-') ? 'not-positive-value' : ''}">${value} ${ruble}</span>`,
+  'amount',
+  first,
+)
+const project = (value: string, first = false) => span(`<span class="project">${value}</span>`, 'project', first)
 
-// Four rows in Gudok's markup with made-up values: one per kind, and the first
-// row, which carries an id attribute the others do not have.
+// Four rows in Gudok's markup with made-up values, taken from the live reply:
+// one per kind, and the row that carries id attributes the others do not have.
 const REPLY = {
   recordsTotal: 4,
   recordsFiltered: 4,
@@ -23,39 +31,39 @@ const REPLY = {
   data: [
     {
       DT_RowId: '1',
-      created_at: span('24.10.2026', ' id="table-created_at-cell"'),
-      text: span('Продление: Гудок-номер'),
-      project: span('Ростов-На-Д..'),
-      kind_texted: span('Списание', ' id="table-kind_texted-cell"'),
-      amount: money('-870,000'),
-      current_balance: money('100,000'),
+      created_at: span('24.10.2026', 'created_at', true),
+      text: span('Продление<strong>: Гудок-номер</strong>', 'text', true),
+      project: project('Ростов-На-Д..', true),
+      kind_texted: span('Списание', 'kind_texted', true),
+      amount: money('-870,000', true),
+      current_balance: span(`100,000 ${ruble}`, 'current_balance', true),
     },
     {
       DT_RowId: '2',
-      created_at: span('23.10.2026'),
+      created_at: span('23.10.2026', 'created_at'),
       text: span('Оплата &amp; бонус'),
-      project: span('..'),
-      kind_texted: span('Пополнение'),
+      project: project('..'),
+      kind_texted: span('Пополнение', 'kind_texted'),
       amount: money('870,000'),
-      current_balance: money('970,000'),
+      current_balance: span(`970,000 ${ruble}`, 'current_balance'),
     },
     {
       DT_RowId: '3',
-      created_at: span('22.10.2026'),
-      text: span('Бонус'),
-      project: span('Волгоград..'),
-      kind_texted: span('-'),
+      created_at: span('22.10.2026', 'created_at'),
+      text: span('Бонус<strong>: возврат</strong>'),
+      project: project('Волгоград..'),
+      kind_texted: span('-', 'kind_texted'),
       amount: money('5,000'),
-      current_balance: money('100,000'),
+      current_balance: span(`100,000 ${ruble}`, 'current_balance'),
     },
     {
       DT_RowId: '4',
-      created_at: span('21.10.2026'),
-      text: span('Продление: Гудок-номер'),
-      project: span('Волгоград..'),
-      kind_texted: span('Списание'),
+      created_at: span('21.10.2026', 'created_at'),
+      text: span('Продление<strong>: Гудок-номер</strong>'),
+      project: project('Волгоград..'),
+      kind_texted: span('Списание', 'kind_texted'),
       amount: money('-870,000'),
-      current_balance: money('95,000'),
+      current_balance: span(`95,000 ${ruble}`, 'current_balance'),
     },
   ],
 }
@@ -86,7 +94,7 @@ describe('parseGudokReply', () => {
     expect(parseGudokReply(REPLY)).toEqual([
       { date: '24.10.2026', text: 'Продление: Гудок-номер', project: 'Ростов-На-Д..', kind: 'Списание', amount: '-870,000 i' },
       { date: '23.10.2026', text: 'Оплата & бонус', project: '..', kind: 'Пополнение', amount: '870,000 i' },
-      { date: '22.10.2026', text: 'Бонус', project: 'Волгоград..', kind: '-', amount: '5,000 i' },
+      { date: '22.10.2026', text: 'Бонус: возврат', project: 'Волгоград..', kind: '-', amount: '5,000 i' },
       { date: '21.10.2026', text: 'Продление: Гудок-номер', project: 'Волгоград..', kind: 'Списание', amount: '-870,000 i' },
     ])
   })
