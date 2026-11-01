@@ -32,6 +32,9 @@ describe('parseGudokPayload', () => {
   it.each([
     ['a missing id', { date: '2026-07-26T10:00:00Z' }],
     ['an id that is not a number', { id: 'abc', date: '2026-07-26T10:00:00Z' }],
+    ['an empty id', { id: '', date: '2026-07-26T10:00:00Z' }],
+    ['a blank id', { id: ' ', date: '2026-07-26T10:00:00Z' }],
+    ['a null id', { id: null, date: '2026-07-26T10:00:00Z' }],
     ['a missing date', { id: 1 }],
     ['an empty date', { id: 1, date: '' }],
   ])('rejects %s', (_label, raw) => {

@@ -12,7 +12,8 @@ const num = z.coerce.number()
 const str = z.coerce.string()
 
 const payloadSchema = z.object({
-  id: z.coerce.number().int(),
+  // Coercion alone reads '', ' ' and null as 0, which would merge such calls
+  id: z.union([z.number(), z.string().trim().min(1)]).pipe(z.coerce.number<string | number>().int()),
   date: z.string().min(1),
   project_id: num.default(0),
   project_title: str.default(''),
