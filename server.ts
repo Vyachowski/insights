@@ -65,6 +65,12 @@ const { startBackupScheduler, stopBackupScheduler, isBackupInFlight } = await im
 )
 startBackupScheduler()
 
+// Its own scheduler: the backup one does not start without bucket storage
+const { startAutoChargeScheduler, stopAutoChargeScheduler } = await import(
+  './app/server/auto-charge-scheduler'
+)
+startAutoChargeScheduler()
+
 const { sqlite } = await import('./app/server/db/client')
 
 // Graceful shutdown: Railway sends SIGTERM on every redeploy/stop. Close the
@@ -76,10 +82,12 @@ function shutdown(signal: string) {
   shuttingDown = true
   console.log(`[web] ${signal} received, shutting down`)
   server.close(() => {
-    // Release stateful resources in order: stop the backup timer so no new
-    // cycle starts, then close the DB. Skip close() if a snapshot is still
-    // copying (it uses the same connection) — the safety net below covers it.
+    // Release stateful resources in order: stop the backup and auto charge
+    // timers so no new cycle starts, then close the DB. Skip close() if a
+    // snapshot is still copying (it uses the same connection) — the safety net
+    // below covers it.
     stopBackupScheduler()
+    stopAutoChargeScheduler()
     if (!isBackupInFlight()) {
       try {
         sqlite.close()
