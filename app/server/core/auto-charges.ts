@@ -21,18 +21,28 @@ export const moscowDay = (now: Date): string => MOSCOW_DATE.format(now)
 export const addDays = (date: string, days: number) =>
   new Date(Date.parse(`${date}T00:00:00Z`) + days * DAY_MS).toISOString().slice(0, 10)
 
+/** A date keeps its day, and in a month too short for it falls on the last day. */
+export function addMonths(date: string, months: number) {
+  const next = new Date(`${date}T00:00:00Z`)
+  const day = next.getUTCDate()
+  next.setUTCMonth(next.getUTCMonth() + months)
+  // A missing day rolls into the month after, so step back to the end of the wanted one
+  if (next.getUTCDate() !== day) next.setUTCDate(0)
+  return next.toISOString().slice(0, 10)
+}
+
+type ChargeInterval = { intervalDays: number } | { intervalMonths: number }
+
 /** Every date owed up to `today`, and the first next date past it. */
-export function chargesDue(
-  schedule: { nextDate: string, intervalDays: number },
-  today: string,
-) {
-  if (schedule.intervalDays < 1) throw new RangeError(`Bad charge interval: ${schedule.intervalDays}`)
+export function chargesDue(schedule: { nextDate: string } & ChargeInterval, today: string) {
+  const interval = 'intervalDays' in schedule ? schedule.intervalDays : schedule.intervalMonths
+  if (interval < 1) throw new RangeError(`Bad charge interval: ${interval}`)
 
   const dates: string[] = []
   let date = schedule.nextDate
   while (date <= today) {
     dates.push(date)
-    date = addDays(date, schedule.intervalDays)
+    date = 'intervalDays' in schedule ? addDays(date, interval) : addMonths(date, interval)
   }
   return { dates, nextDate: date }
 }

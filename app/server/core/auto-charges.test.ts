@@ -44,6 +44,32 @@ describe('chargesDue', () => {
   })
 })
 
+describe('chargesDue by calendar months', () => {
+  const yearly = (nextDate: string) => ({ nextDate, intervalMonths: 12 })
+
+  it('owes each year on the same calendar date, across a leap year', () => {
+    expect(chargesDue(yearly('2027-03-15'), '2029-03-15')).toEqual({
+      dates: ['2027-03-15', '2028-03-15', '2029-03-15'],
+      nextDate: '2030-03-15',
+    })
+  })
+
+  it('falls from 29.02 on 28.02, where the date then stays', () => {
+    expect(chargesDue(yearly('2024-02-29'), '2028-03-01')).toEqual({
+      dates: ['2024-02-29', '2025-02-28', '2026-02-28', '2027-02-28', '2028-02-28'],
+      nextDate: '2029-02-28',
+    })
+  })
+
+  it('takes the last day of a shorter month', () => {
+    expect(chargesDue({ nextDate: '2026-01-31', intervalMonths: 1 }, '2026-01-31').nextDate).toBe('2026-02-28')
+  })
+
+  it('refuses an interval that would never pass today', () => {
+    expect(() => chargesDue({ nextDate: '2026-10-29', intervalMonths: 0 }, '2026-10-29')).toThrow(RangeError)
+  })
+})
+
 describe('isReconciliationStale', () => {
   const today = '2026-11-01'
   const estimates = { hasEstimates: true, today }
