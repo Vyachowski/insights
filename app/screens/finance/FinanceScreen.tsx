@@ -28,7 +28,7 @@ const IMPORT_TITLES = {
   expenses: 'Импорт расходов',
 }
 
-export default function FinanceScreen({ revenues, expenses, sites }: Awaited<ReturnType<typeof getFinancePage>>) {
+export default function FinanceScreen({ revenues, expenses, sites, hostings }: Awaited<ReturnType<typeof getFinancePage>>) {
   const [searchParams, setSearchParams] = useSearchParams()
   const { user } = useAuth()
   const isAdmin = user?.isAdmin ?? false
@@ -135,7 +135,7 @@ export default function FinanceScreen({ revenues, expenses, sites }: Awaited<Ret
 
       {isAdmin && showAddHosting && (
         <AddHostingModal
-          sites={sites}
+          hostings={hostings}
           submitting={hostingFetcher.state !== 'idle'}
           onClose={() => setShowAddHosting(false)}
           onSubmit={values => {

@@ -157,6 +157,17 @@ describe('re-importing a file', () => {
     expect(rows('expenses')).toMatchObject([{ amount: 10000 }, { amount: 25000 }])
   })
 
+  it('overwrites a linked hosting row and adds no second one', async () => {
+    const [{ id }] = rows('hostings') as { id: number }[]
+    sqlite.prepare(`INSERT INTO expenses (hosting_id, date, amount, type, created_at, updated_at)
+      VALUES (?, '2026-01-01', 30000, 'hosting', 0, 0)`).run(id)
+
+    const result = await importers.expenses(expensesCsv('2026-01-01,hosting,,500'))
+
+    expect(result).toMatchObject({ created: 0, updated: 1 })
+    expect(rows('expenses')).toMatchObject([{ hosting_id: id, site_id: null, amount: 50000 }])
+  })
+
   it('overwrites metrics for the same site and date', async () => {
     await importers.metrics(metricsCsv(metricRow('5', '2026-01-01')))
 
