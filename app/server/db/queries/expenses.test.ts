@@ -95,6 +95,74 @@ describe('upsertExpense', () => {
   })
 })
 
+describe('upsertExpense with a hosting', () => {
+  const charge = { date: '2026-03-01', siteId: null, type: HOSTING_TYPE, amount: 500000 }
+
+  beforeEach(() => {
+    sqlite.exec(`
+      DELETE FROM hostings;
+      INSERT INTO hostings (id, provider, account, created_at, updated_at) VALUES
+        (1, 'sprinthost', 'a0181620', 0, 0),
+        (2, 'sprinthost', 'b0000000', 0, 0);
+    `)
+  })
+
+  it('inserts a row that points at the hosting', async () => {
+    expect(await upsertExpense({ ...charge, hostingId: 1 })).toBe('created')
+    expect(expenseRows()).toMatchObject([{ site_id: null, hosting_id: 1, amount: 500000, is_estimate: 0 }])
+  })
+
+  it('overwrites on the same hosting and date, and skips the same amount', async () => {
+    await upsertExpense({ ...charge, hostingId: 1 })
+
+    expect(await upsertExpense({ ...charge, hostingId: 1 })).toBe('skipped')
+    expect(await upsertExpense({ ...charge, hostingId: 1, amount: 750000 })).toBe('updated')
+    expect(expenseRows()).toMatchObject([{ hosting_id: 1, amount: 750000 }])
+  })
+
+  it('keeps two hostings apart on one date', async () => {
+    await upsertExpense({ ...charge, hostingId: 1 })
+    await upsertExpense({ ...charge, hostingId: 2, amount: 750000 })
+
+    expect(expenseRows()).toMatchObject([
+      { hosting_id: 1, amount: 500000 },
+      { hosting_id: 2, amount: 750000 },
+    ])
+  })
+
+  it('overwrites its own row when an insert race is lost', async () => {
+    await upsertExpense({ ...charge, hostingId: 1 })
+    await upsertExpense({ ...charge, hostingId: 2 })
+    const noRowFound = { from: () => ({ where: () => ({ limit: () => ({ get: () => undefined }) }) }) }
+    vi.spyOn(db, 'select').mockReturnValueOnce(noRowFound as never)
+
+    expect(await upsertExpense({ ...charge, hostingId: 1, amount: 750000 })).toBe('updated')
+    expect(expenseRows()).toMatchObject([
+      { hosting_id: 1, amount: 750000 },
+      { hosting_id: 2, amount: 500000 },
+    ])
+  })
+
+  it('takes a write with no hosting as a write over the linked row', async () => {
+    await upsertExpense({ ...charge, hostingId: 1 })
+
+    expect(await upsertExpense({ ...charge, amount: 750000 })).toBe('updated')
+    expect(expenseRows()).toMatchObject([{ hosting_id: 1, amount: 750000 }])
+  })
+
+  it('leaves a site row alone on a write with no site', async () => {
+    await upsertExpense({ ...charge, hostingId: 1 })
+    await upsertExpense({ ...charge, siteId: 5, amount: 100 })
+
+    await upsertExpense({ ...charge, amount: 750000 })
+
+    expect(expenseRows()).toMatchObject([
+      { site_id: null, hosting_id: 1, amount: 750000 },
+      { site_id: 5, hosting_id: null, amount: 100 },
+    ])
+  })
+})
+
 describe('upsertExpense over an estimate', () => {
   it('replaces the estimate at the same amount', async () => {
     seedEstimate()

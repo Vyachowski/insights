@@ -13,6 +13,8 @@ export interface UpsertExpenseInput {
   /** `YYYY-MM-DD` */
   date: string
   siteId: number | null
+  /** With a hosting the key is (date, hostingId), and the row has no site */
+  hostingId?: number
   type: string
   /** integer kopecks */
   amount: number
@@ -37,18 +39,21 @@ export function listExpenses() {
  * Idempotent upsert of a single expense keyed by (date, siteId, type) — the
  * same matching used by CSV import and the Gudok telephony ingest. Same amount
  * is a no-op; a different amount overwrites; otherwise a new row is inserted.
- * Every write here is real: over an estimate it overwrites and clears the mark,
+ * With no hosting a write on (date, no site, 'hosting') still matches a linked
+ * row, so an old CSV adds no second row. Every write here is real: over an estimate it overwrites and clears the mark,
  * even at the same amount. Synchronous, so it can run inside a transaction.
  */
 export function writeRealExpense(
   writer: Pick<Tx, 'select' | 'insert' | 'update'>,
-  { date, siteId, type, amount, comment }: UpsertExpenseInput,
+  { date, siteId, hostingId, type, amount, comment }: UpsertExpenseInput,
 ): UpsertExpenseOutcome {
-  const match = and(
-    eq(expenses.date, date),
-    eq(expenses.type, type),
-    siteId === null ? isNull(expenses.siteId) : eq(expenses.siteId, siteId),
-  )
+  const match = hostingId === undefined
+    ? and(
+      eq(expenses.date, date),
+      eq(expenses.type, type),
+      siteId === null ? isNull(expenses.siteId) : eq(expenses.siteId, siteId),
+    )
+    : and(eq(expenses.date, date), eq(expenses.hostingId, hostingId))
 
   const existing = writer
     .select({ id: expenses.id, amount: expenses.amount, isEstimate: expenses.isEstimate })
@@ -63,12 +68,12 @@ export function writeRealExpense(
     return 'updated'
   }
   try {
-    writer.insert(expenses).values({ date, siteId, amount, type, comment }).run()
+    writer.insert(expenses).values({ date, siteId, hostingId, amount, type, comment }).run()
     return 'created'
   } catch (err) {
     if (!isUniqueViolation(err)) throw err
-    // Lost an insert race against a concurrent add for the same (date, siteId,
-    // type); a row exists now — overwrite its amount to stay idempotent.
+    // Lost an insert race against a concurrent add on the same key; a row
+    // exists now — overwrite its amount to stay idempotent.
     writer.update(expenses).set(realWrite(amount, comment)).where(match).run()
     return 'updated'
   }
@@ -79,7 +84,7 @@ export async function upsertExpense(input: UpsertExpenseInput): Promise<UpsertEx
 }
 
 /** Writes an estimate unless the key is taken, so a stored row never changes. */
-export function insertEstimate(tx: Tx, row: Required<Omit<UpsertExpenseInput, 'comment'>>): boolean {
+export function insertEstimate(tx: Tx, row: Required<Omit<UpsertExpenseInput, 'comment' | 'hostingId'>>): boolean {
   return tx.insert(expenses).values({ ...row, isEstimate: true }).onConflictDoNothing().run().changes > 0
 }
 

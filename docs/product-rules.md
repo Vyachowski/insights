@@ -111,7 +111,7 @@ Rules the code cannot explain on its own. UI labels stay in Russian, exactly as 
 ## Writing data
 
 - Writes are idempotent. Calls CSV import never changes stored rows and skips duplicates, so re-uploading a file is safe. Webhooks key on `provider + providerCallId`.
-- Manual entry, revenue and expense CSV import, and telephony sync overwrite the amount for the same key: revenue `(date, siteId)`, expenses `(date, siteId, type)`.
+- Manual entry, revenue and expense CSV import, and telephony sync overwrite the amount for the same key: revenue `(date, siteId)`, expenses `(date, siteId, type)`. A write that carries a hosting keys on `(date, hostingId)`. A write with no hosting on `(date, no site, 'hosting')` still matches a linked row and overwrites its amount, so an old expense CSV adds no second row.
 - Any real write on the expense key replaces an estimate and clears `is_estimate`, even at the same amount, and reports `updated`. This covers manual entry, expense CSV import and telephony sync. A repeated real write with the same amount reports `skipped`. The write's comment replaces the estimate's; with no comment the field is cleared, so estimate text never stays on a real row.
 - An admin deletes a revenue row in `Финансы` → `Доходы` after a confirm. The delete is permanent, and `Сводка` changes on its next load. Deleting a row that is already gone reports `skipped`. Importing a CSV that holds the row writes it again.
 - Annual hosting is stored as `type = 'hosting'` dated `YYYY-01-01`.

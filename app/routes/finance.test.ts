@@ -51,6 +51,17 @@ describe('finance action', () => {
     expect(rows('expenses')).toMatchObject([{ date: '2026-01-01', type: 'hosting', amount: 50000 }])
   })
 
+  it('overwrites a linked hosting row and adds no second one', async () => {
+    const [{ id }] = rows('hostings') as { id: number }[]
+    sqlite.prepare(`INSERT INTO expenses (hosting_id, date, amount, type, created_at, updated_at)
+      VALUES (?, '2026-01-01', 30000, 'hosting', 0, 0)`).run(id)
+
+    const response = await callAction({ intent: 'add-hosting', year: '2026', siteId: '', amount: '500' })
+
+    expect(await response.json()).toEqual({ ok: true, outcome: 'updated' })
+    expect(rows('expenses')).toMatchObject([{ hosting_id: id, site_id: null, amount: 50000 }])
+  })
+
   it.each([
     [{ intent: 'add-revenue', date: '2026-03-01', siteId: '', amount: '0' }, 'Укажите сумму больше нуля'],
     [{ intent: 'add-revenue', date: '2026-03-01', siteId: 'abc', amount: '10' }, 'Некорректный сайт'],
