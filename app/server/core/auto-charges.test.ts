@@ -1,6 +1,13 @@
 import { afterEach, describe, expect, it } from 'vitest'
 
-import { chargesDue, moscowDay, numberCharge, reconciledSchedule } from './auto-charges'
+import {
+  chargesDue,
+  isValidInterval,
+  moscowDay,
+  numberCharge,
+  parseScheduleForm,
+  reconciledSchedule,
+} from './auto-charges'
 
 describe('moscowDay', () => {
   it('turns over at midnight in Moscow, not in UTC', () => {
@@ -69,22 +76,57 @@ describe('reconciledSchedule', () => {
 describe('numberCharge', () => {
   it('gives an enabled number its next date and amount in rubles', () => {
     expect(numberCharge({ enabled: true, nextDate: '2026-11-26', amount: 87050 }))
-      .toEqual({ enabled: true, nextDate: '2026-11-26', amount: 870.5 })
+      .toEqual({ enabled: true, nextDate: '2026-11-26', amount: 870.5, offer: null })
   })
 
   it('shows a number with no schedule as off', () => {
     expect(numberCharge({ enabled: null, nextDate: null, amount: null }))
-      .toEqual({ enabled: false, nextDate: null, amount: null })
+      .toEqual({ enabled: false, nextDate: null, amount: null, offer: null })
   })
 
   it('hides the stored values of a schedule that is off', () => {
     expect(numberCharge({ enabled: false, nextDate: '2026-11-26', amount: 87000 }))
-      .toEqual({ enabled: false, nextDate: null, amount: null })
+      .toEqual({ enabled: false, nextDate: null, amount: null, offer: null })
   })
 
   it('keeps the rest of the row', () => {
     expect(numberCharge({ name: 'Волгоград', enabled: null, nextDate: null, amount: null }))
       .toMatchObject({ name: 'Волгоград' })
+  })
+
+  it('offers the last real charge + 30 days and its amount, not the stored values', () => {
+    const stored = { enabled: false, nextDate: '2026-01-01', amount: 30000 }
+
+    expect(numberCharge(stored, { date: '2026-10-27', amount: 87050 }).offer)
+      .toEqual({ nextDate: '2026-11-26', amount: 870.5 })
+  })
+})
+
+describe('isValidInterval', () => {
+  it.each([[1, true], [30, true], [0, false], [-30, false], [1.5, false], [NaN, false]])('%d: %s', (days, valid) => {
+    expect(isValidInterval(days)).toBe(valid)
+  })
+})
+
+describe('parseScheduleForm', () => {
+  it('gives the date and the amount in kopecks', () => {
+    expect(parseScheduleForm({ nextDate: '2026-11-26', amount: '870.50' }))
+      .toEqual({ nextDate: '2026-11-26', amount: 87050 })
+  })
+
+  it.each(['', '26.11.2026', '2026-11-31', '2026-13-01', '2026-11-26T00:00:00Z', ' 2026-11-26'])(
+    'refuses the date %j',
+    nextDate => {
+      expect(parseScheduleForm({ nextDate, amount: '870' })).toEqual({ error: 'Укажите дату' })
+    },
+  )
+
+  it('refuses a missing date', () => {
+    expect(parseScheduleForm({ amount: '870' })).toEqual({ error: 'Укажите дату' })
+  })
+
+  it.each(['', '0', '-870', 'abc', '0.001', 'Infinity', '1e300'])('refuses the amount %j', amount => {
+    expect(parseScheduleForm({ nextDate: '2026-11-26', amount })).toEqual({ error: 'Укажите сумму больше нуля' })
   })
 })
 

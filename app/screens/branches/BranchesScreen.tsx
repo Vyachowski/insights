@@ -9,6 +9,8 @@ import type { City } from '@/server/db/queries/cities'
 import type { Site } from '@/server/db/queries/sites'
 import type { NumberCharge } from '@/server/services/auto-charges'
 
+import { useAuth } from '@/hooks/useAuth'
+
 const TABS = [
   { id: 'cities', label: 'Города' },
   { id: 'sites', label: 'Сайты' },
@@ -25,6 +27,7 @@ interface Props {
 
 export default function BranchesScreen({ sites, cities, numbers }: Props) {
   const [searchParams, setSearchParams] = useSearchParams()
+  const { user } = useAuth()
   const activeTab = (searchParams.get('tab') ?? 'cities') as TabId
 
   return (
@@ -47,7 +50,7 @@ export default function BranchesScreen({ sites, cities, numbers }: Props) {
           <SitesTabView sites={sites} cities={cities} />
         </Tabs.Panel>
         <Tabs.Panel value="numbers">
-          <NumbersTabView numbers={numbers} sites={sites} />
+          <NumbersTabView numbers={numbers} sites={sites} isAdmin={user?.isAdmin ?? false} />
         </Tabs.Panel>
       </Tabs>
     </Container>

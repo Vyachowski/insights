@@ -77,6 +77,13 @@ Rules the code cannot explain on its own. UI labels stay in Russian, exactly as 
 - An estimate never changes a stored row: when the key `(date, siteId, type)` is taken, the row stays as it is and the date counts as done. A repeated check adds nothing.
 - A number with no site is skipped and its next date stays. Once the number has a site, the missed dates are written.
 - All schedules start off, and a number with no schedule has no auto charge.
+- Auto charge is switched per number in `Филиалы` → `Номера`, by the admin. A user sees the tab with no controls.
+- Switching on offers the site's last real `telephony` charge + 30 days and that charge's amount. Estimates are not counted, and the offer is worked out on each read, so switching on again never brings back old stored values. A site with no real charge offers nothing, and the admin fills in both fields.
+- A switch-on is confirmed in a form, because rows written by a mistaken one stay until a reconciliation run. A next date in the past is allowed: the next check writes every date due since then.
+- The next date must be a real `YYYY-MM-DD` date and the amount above zero. The interval is not edited: a stored interval below 1 is refused, because one bad schedule stops the check for all numbers. Switching off still works on such a schedule.
+- A number with no site cannot be switched on. A site has one enabled number: a second one is refused, and the check runs inside the write transaction.
+- Switching off stops new estimates. The schedule row stays, and rows already written stay until a reconciliation run.
+- Switching on clears the stored no-charge period end. An edit keeps it.
 
 ## Reconciliation
 

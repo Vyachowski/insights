@@ -1,11 +1,60 @@
-import { Badge, Box, Paper, ScrollArea, Stack, Table, Text, Title } from '@mantine/core'
+import { Badge, Box, Group, Paper, ScrollArea, Stack, Table, Text, Title } from '@mantine/core'
+import Button from '@ui/Button'
+import { useState } from 'react'
+import { useFetcher } from 'react-router'
+
+import NumberChargeModal from './NumberChargeModal'
 
 import type { Site } from '@/server/db/queries/sites'
-import type { NumberCharge } from '@/server/services/auto-charges'
+import type { NumberCharge, NumberChargeResult } from '@/server/services/auto-charges'
 
+import { useResultToast } from '@/hooks/useResultToast'
 import { formatAmount, formatDate, getSiteName } from '@/lib/utils'
 
-export default function NumbersTabView({ numbers, sites }: { numbers: NumberCharge[]; sites: Site[] }) {
+const TOASTS = {
+  on: { color: 'teal', message: 'Автосписание включено' },
+  updated: { color: 'blue', message: 'Автосписание обновлено' },
+  off: { color: 'gray', message: 'Автосписание выключено' },
+}
+
+interface NumbersTabViewProps {
+  numbers: NumberCharge[]
+  sites: Site[]
+  isAdmin: boolean
+}
+
+function NumberActions({ row, disabled, onEdit, onSwitchOff }: {
+  row: NumberCharge
+  disabled: boolean
+  onEdit: () => void
+  onSwitchOff: () => void
+}) {
+  if (!row.enabled) {
+    return (
+      <Button size="sm" variant="secondary" disabled={disabled || row.siteId === null} onClick={onEdit}>
+        Включить
+      </Button>
+    )
+  }
+  return (
+    <Group gap="xs" justify="flex-end" wrap="nowrap">
+      <Button size="sm" variant="secondary" disabled={disabled} onClick={onEdit}>Изменить</Button>
+      <Button size="sm" variant="ghost" disabled={disabled} onClick={onSwitchOff}>Выключить</Button>
+    </Group>
+  )
+}
+
+export default function NumbersTabView({ numbers, sites, isAdmin }: NumbersTabViewProps) {
+  const [editing, setEditing] = useState<NumberCharge | null>(null)
+  const fetcher = useFetcher<NumberChargeResult>()
+  useResultToast(fetcher, TOASTS)
+  const submitting = fetcher.state !== 'idle'
+
+  const submit = (intent: string, row: NumberCharge, values: { nextDate?: string, amount?: string } = {}) => {
+    const { provider, providerNumberId } = row
+    fetcher.submit({ intent, provider, providerNumberId, ...values }, { method: 'post' })
+  }
+
   return (
     <Stack gap="md">
       <Box>
@@ -26,12 +75,13 @@ export default function NumbersTabView({ numbers, sites }: { numbers: NumberChar
                 <Table.Th>Автосписание</Table.Th>
                 <Table.Th>Следующая дата</Table.Th>
                 <Table.Th ta="right">Сумма</Table.Th>
+                {isAdmin && <Table.Th />}
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
               {numbers.length === 0 ? (
                 <Table.Tr>
-                  <Table.Td colSpan={6}>
+                  <Table.Td colSpan={isAdmin ? 7 : 6}>
                     <Text ta="center" c="dimmed" size="sm" py={64}>Нет данных</Text>
                   </Table.Td>
                 </Table.Tr>
@@ -50,6 +100,16 @@ export default function NumbersTabView({ numbers, sites }: { numbers: NumberChar
                       {row.nextDate ? formatDate(row.nextDate) : '—'}
                     </Table.Td>
                     <Table.Td ta="right">{row.amount === null ? '—' : formatAmount(row.amount)}</Table.Td>
+                    {isAdmin && (
+                      <Table.Td ta="right">
+                        <NumberActions
+                          row={row}
+                          disabled={submitting}
+                          onEdit={() => setEditing(row)}
+                          onSwitchOff={() => submit('switch-off', row)}
+                        />
+                      </Table.Td>
+                    )}
                   </Table.Tr>
                 ))
               )}
@@ -57,6 +117,18 @@ export default function NumbersTabView({ numbers, sites }: { numbers: NumberChar
           </Table>
         </ScrollArea.Autosize>
       </Paper>
+
+      {isAdmin && editing && (
+        <NumberChargeModal
+          row={editing}
+          submitting={submitting}
+          onClose={() => setEditing(null)}
+          onSubmit={values => {
+            submit('save', editing, values)
+            setEditing(null)
+          }}
+        />
+      )}
     </Stack>
   )
 }
