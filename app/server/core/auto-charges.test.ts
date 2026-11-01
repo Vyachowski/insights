@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest'
 
-import { chargesDue, moscowDay, reconciledSchedule } from './auto-charges'
+import { chargesDue, moscowDay, numberCharge, reconciledSchedule } from './auto-charges'
 
 describe('moscowDay', () => {
   it('turns over at midnight in Moscow, not in UTC', () => {
@@ -63,6 +63,28 @@ describe('reconciledSchedule', () => {
     { estimated: false, charged: false, noChargePeriodEnd: null },
   ])('with estimated $estimated and charged $charged stores $noChargePeriodEnd', ({ noChargePeriodEnd, ...flags }) => {
     expect(reconciledSchedule(schedule, { ...run, ...flags }).noChargePeriodEnd).toBe(noChargePeriodEnd)
+  })
+})
+
+describe('numberCharge', () => {
+  it('gives an enabled number its next date and amount in rubles', () => {
+    expect(numberCharge({ enabled: true, nextDate: '2026-11-26', amount: 87050 }))
+      .toEqual({ enabled: true, nextDate: '2026-11-26', amount: 870.5 })
+  })
+
+  it('shows a number with no schedule as off', () => {
+    expect(numberCharge({ enabled: null, nextDate: null, amount: null }))
+      .toEqual({ enabled: false, nextDate: null, amount: null })
+  })
+
+  it('hides the stored values of a schedule that is off', () => {
+    expect(numberCharge({ enabled: false, nextDate: '2026-11-26', amount: 87000 }))
+      .toEqual({ enabled: false, nextDate: null, amount: null })
+  })
+
+  it('keeps the rest of the row', () => {
+    expect(numberCharge({ name: 'Волгоград', enabled: null, nextDate: null, amount: null }))
+      .toMatchObject({ name: 'Волгоград' })
   })
 })
 

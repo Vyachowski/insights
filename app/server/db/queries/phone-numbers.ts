@@ -1,7 +1,7 @@
-import { and, eq } from 'drizzle-orm'
+import { and, eq, sql } from 'drizzle-orm'
 
 import { db } from '../client'
-import { phoneNumbers } from '../schema'
+import { chargeSchedules, phoneNumbers } from '../schema'
 
 const byId = (provider: string, providerNumberId: string) => and(
   eq(phoneNumbers.provider, provider),
@@ -22,6 +22,27 @@ export function listPhoneNumbers(provider: string) {
     })
     .from(phoneNumbers)
     .where(eq(phoneNumbers.provider, provider))
+}
+
+/** Every number by site, with its schedule fields empty when it has none. */
+export function listNumbersWithSchedules() {
+  return db
+    .select({
+      provider: phoneNumbers.provider,
+      providerNumberId: phoneNumbers.providerNumberId,
+      number: phoneNumbers.number,
+      name: phoneNumbers.name,
+      siteId: phoneNumbers.siteId,
+      enabled: chargeSchedules.enabled,
+      nextDate: chargeSchedules.nextDate,
+      amount: chargeSchedules.amount,
+    })
+    .from(phoneNumbers)
+    .leftJoin(chargeSchedules, and(
+      eq(chargeSchedules.provider, phoneNumbers.provider),
+      eq(chargeSchedules.providerNumberId, phoneNumbers.providerNumberId),
+    ))
+    .orderBy(sql`${phoneNumbers.siteId} NULLS LAST`, phoneNumbers.providerNumberId)
 }
 
 export async function createPhoneNumber(values: typeof phoneNumbers.$inferInsert): Promise<void> {

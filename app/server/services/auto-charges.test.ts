@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { sqlite } from '@/server/db/client'
 
-const { writeDueEstimates } = await import('./auto-charges')
+const { listNumberCharges, writeDueEstimates } = await import('./auto-charges')
 
 const NOW = new Date('2026-10-29T09:00:00Z')
 
@@ -156,5 +156,15 @@ describe('writeDueEstimates', () => {
     } finally {
       sqlite.exec('DROP TRIGGER fail_second_date')
     }
+  })
+})
+
+describe('listNumberCharges', () => {
+  it('gives each number its site and auto charge, in rubles', async () => {
+    seedSchedule({ nextDate: '2026-11-26', amount: 87000 })
+
+    expect(await listNumberCharges()).toMatchObject([
+      { providerNumberId: '1', siteId: 5, enabled: true, nextDate: '2026-11-26', amount: 870 },
+    ])
   })
 })

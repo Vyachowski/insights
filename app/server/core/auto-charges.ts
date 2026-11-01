@@ -1,3 +1,5 @@
+import { toRubles } from './money'
+
 const DAY_MS = 24 * 60 * 60 * 1000
 
 const MOSCOW_DATE = new Intl.DateTimeFormat('en-CA', {
@@ -48,5 +50,20 @@ export function reconciledSchedule(
     nextDate: lastCharge ? addDays(lastCharge.date, schedule.intervalDays) : schedule.nextDate,
     amount: lastCharge?.amount ?? schedule.amount,
     noChargePeriodEnd: estimated && !charged ? periodEnd : null,
+  }
+}
+
+/** A number as `Номера` shows it: one that is off has no next charge, and the amount is in rubles. */
+export function numberCharge<T extends {
+  enabled: boolean | null
+  nextDate: string | null
+  amount: number | null
+}>(row: T) {
+  const enabled = row.enabled === true
+  return {
+    ...row,
+    enabled,
+    nextDate: enabled ? row.nextDate : null,
+    amount: enabled && row.amount !== null ? toRubles(row.amount) : null,
   }
 }
