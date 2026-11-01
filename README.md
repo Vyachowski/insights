@@ -51,6 +51,12 @@ npm install
 npm run dev
 ```
 
+To run on synthetic data with no `.env`, use the sandbox. It rebuilds `data/sandbox.db` on every start. The port and the test admin's sign-in are in `.env.sandbox`, and `PORT` from the shell wins:
+
+```bash
+PORT=3200 npm run dev:sandbox
+```
+
 Other commands are in `package.json`.
 
 ## License
