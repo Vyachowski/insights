@@ -118,3 +118,33 @@ export function disableSchedule(tx: Tx, { provider, providerNumberId }: NumberId
     .where(and(eq(chargeSchedules.provider, provider), eq(chargeSchedules.providerNumberId, providerNumberId)))
     .run()
 }
+
+/** A hosting with its schedule's state, empty when the hosting is unknown. */
+export function findHostingSchedule(tx: Tx, hostingId: number) {
+  return tx
+    .select({ enabled: chargeSchedules.enabled })
+    .from(hostings)
+    .leftJoin(chargeSchedules, eq(chargeSchedules.hostingId, hostings.id))
+    .where(eq(hostings.id, hostingId))
+    .get()
+}
+
+/**
+ * Switches the hosting on with these values. The insert names `interval_days`,
+ * because its default of 30 would break the shape check, and a stored interval stays.
+ */
+export function enableHostingSchedule(
+  tx: Tx,
+  { hostingId, intervalMonths }: { hostingId: number, intervalMonths: number },
+  values: { nextDate: string, amount: number },
+): void {
+  tx.insert(chargeSchedules)
+    .values({ hostingId, intervalMonths, intervalDays: null, ...values, enabled: true })
+    .onConflictDoUpdate({ target: chargeSchedules.hostingId, set: { ...values, enabled: true } })
+    .run()
+}
+
+/** Keeps the row: the date and amount stay until the hosting is switched on again. */
+export function disableHostingSchedule(tx: Tx, hostingId: number): void {
+  tx.update(chargeSchedules).set({ enabled: false }).where(eq(chargeSchedules.hostingId, hostingId)).run()
+}

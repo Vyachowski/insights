@@ -131,6 +131,17 @@ export function listLastCharges(tx: Tx, type: string) {
     .all()
 }
 
+/** The latest row per hosting. */
+export function listLastHostingCharges(tx: Tx) {
+  return tx
+    // SQLite takes the bare `amount` from the row that holds max(date)
+    .select({ hostingId: expenses.hostingId, date: sql<string>`max(${expenses.date})`, amount: expenses.amount })
+    .from(expenses)
+    .where(isNotNull(expenses.hostingId))
+    .groupBy(expenses.hostingId)
+    .all()
+}
+
 /** Oldest date (`YYYY-MM-DD`) of an estimate of this type, or null. */
 export function oldestEstimateDate(tx: Tx, type: string): string | null {
   const row = tx

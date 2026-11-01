@@ -7,9 +7,8 @@ import NumbersTabView from './NumbersTabView'
 import SitesTabView from './SitesTabView'
 
 import type { City } from '@/server/db/queries/cities'
-import type { Hosting } from '@/server/db/queries/hostings'
 import type { Site } from '@/server/db/queries/sites'
-import type { NumberCharge } from '@/server/services/auto-charges'
+import type { HostingCharge, NumberCharge } from '@/server/services/auto-charges'
 
 import { useAuth } from '@/hooks/useAuth'
 
@@ -26,12 +25,13 @@ interface Props {
   sites: Site[]
   cities: City[]
   numbers: NumberCharge[]
-  hostings: Hosting[]
+  hostings: HostingCharge[]
 }
 
 export default function BranchesScreen({ sites, cities, numbers, hostings }: Props) {
   const [searchParams, setSearchParams] = useSearchParams()
   const { user } = useAuth()
+  const isAdmin = user?.isAdmin ?? false
   const activeTab = (searchParams.get('tab') ?? 'cities') as TabId
 
   return (
@@ -54,10 +54,10 @@ export default function BranchesScreen({ sites, cities, numbers, hostings }: Pro
           <SitesTabView sites={sites} cities={cities} />
         </Tabs.Panel>
         <Tabs.Panel value="numbers">
-          <NumbersTabView numbers={numbers} sites={sites} isAdmin={user?.isAdmin ?? false} />
+          <NumbersTabView numbers={numbers} sites={sites} isAdmin={isAdmin} />
         </Tabs.Panel>
         <Tabs.Panel value="hostings">
-          <HostingsTabView hostings={hostings} />
+          <HostingsTabView hostings={hostings} isAdmin={isAdmin} />
         </Tabs.Panel>
       </Tabs>
     </Container>

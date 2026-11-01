@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it } from 'vitest'
 
 import {
   chargesDue,
+  hostingCharge,
   isReconciliationStale,
   isValidInterval,
   moscowDay,
@@ -166,6 +167,25 @@ describe('numberCharge', () => {
 
     expect(numberCharge(stored, { date: '2026-10-27', amount: 87050 }).offer)
       .toEqual({ nextDate: '2026-11-26', amount: 870.5 })
+  })
+})
+
+describe('hostingCharge', () => {
+  it('gives an enabled hosting its next date and amount in rubles', () => {
+    expect(hostingCharge({ enabled: true, nextDate: '2027-03-15', amount: 1200050 }))
+      .toEqual({ enabled: true, nextDate: '2027-03-15', amount: 12000.5, offer: null })
+  })
+
+  it('hides the stored values of a schedule that is off', () => {
+    expect(hostingCharge({ enabled: false, nextDate: '2027-03-15', amount: 1200000 }))
+      .toEqual({ enabled: false, nextDate: null, amount: null, offer: null })
+  })
+
+  it('offers the last charge + 12 months, and 29.02 falls on 28.02', () => {
+    const stored = { enabled: false, nextDate: '2026-01-01', amount: 30000 }
+
+    expect(hostingCharge(stored, { date: '2028-02-29', amount: 1200000 }).offer)
+      .toEqual({ nextDate: '2029-02-28', amount: 12000 })
   })
 })
 
