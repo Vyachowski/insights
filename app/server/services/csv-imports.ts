@@ -5,7 +5,10 @@ import {
   assertSkipRate,
   CsvValidationError,
   type CsvRow,
+  INVALID_ROW_REASON,
   parseCsvBuffer,
+  REASON_COLUMN,
+  toDisputedCsv,
 } from '@/server/core/csv'
 import {
   METRIC_NUMBER_COLUMNS,
@@ -24,7 +27,7 @@ export interface ImportResult {
   created: number
   skipped: number
   updated?: number
-  // Calls import only: rows left for a person to resolve
+  // Rows left for a person to resolve; metrics count theirs as `skipped`
   disputed?: number
   disputedCsv?: string | null
 }
@@ -35,12 +38,21 @@ async function upsertRows<T>(
   parseRow: (row: CsvRow) => T | null,
   upsert: (value: T) => Promise<'created' | 'updated' | 'skipped'>,
 ): Promise<ImportResult> {
-  const values = rows.map(parseRow).filter(value => value !== null)
-  assertSkipRate(values.length, rows.length - values.length)
+  const parsed = rows.map(row => ({ row, value: parseRow(row) }))
+  const disputed = parsed
+    .filter(({ value }) => value === null)
+    .map(({ row }) => ({ ...row, [REASON_COLUMN]: INVALID_ROW_REASON }))
+  assertSkipRate(rows.length - disputed.length, disputed.length)
 
   const result = { created: 0, updated: 0, skipped: 0 }
-  for (const value of values) result[await upsert(value)]++
-  return result
+  for (const { value } of parsed) {
+    if (value !== null) result[await upsert(value)]++
+  }
+  return {
+    ...result,
+    disputed: disputed.length,
+    disputedCsv: disputed.length > 0 ? toDisputedCsv(disputed) : null,
+  }
 }
 
 async function importRevenue(buffer: Buffer): Promise<ImportResult> {

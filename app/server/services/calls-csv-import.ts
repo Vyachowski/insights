@@ -3,11 +3,17 @@ import {
   groupNumbersByName,
   parseCallRow,
   REASON,
-  REASON_COLUMN,
   resolveNumber,
-  toDisputedCsv,
 } from '@/server/core/calls-csv'
-import { assertCsvColumns, assertSkipRate, type CsvRow, parseCsvBuffer } from '@/server/core/csv'
+import {
+  assertCsvColumns,
+  assertSkipRate,
+  type CsvRow,
+  INVALID_ROW_REASON,
+  parseCsvBuffer,
+  REASON_COLUMN,
+  toDisputedCsv,
+} from '@/server/core/csv'
 import { PROVIDER } from '@/server/core/gudok-calls'
 import { findCallDates, insertCall } from '@/server/db/queries/calls'
 import { listPhoneNumbers } from '@/server/db/queries/phone-numbers'
@@ -51,7 +57,7 @@ export async function importCallsCsv(buffer: Buffer): Promise<CallsImportResult>
     transaction(tx => {
       for (const { row, call } of parsed.slice(i, i + CHUNK_SIZE)) {
         if (!call) {
-          disputed.push({ ...row, [REASON_COLUMN]: REASON.invalid })
+          disputed.push({ ...row, [REASON_COLUMN]: INVALID_ROW_REASON })
           continue
         }
 

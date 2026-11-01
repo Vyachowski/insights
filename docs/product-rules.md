@@ -109,6 +109,7 @@ Rules the code cannot explain on its own. UI labels stay in Russian, exactly as 
 - Annual hosting is stored as `type = 'hosting'` dated `YYYY-01-01`.
 - CSV import fails when required columns are missing or more than 50% of rows are invalid. A failed file writes nothing. Extra columns are allowed, because real Gudok exports carry more columns than we use. A calls import keeps the whole row in `calls.raw`.
 - In revenue, expense and metrics CSVs a row is invalid when its date or amount can't be read or its `siteId` is not a stored site. An empty `siteId` means `Общий`, except in metrics, where it is required.
+- A revenue or expense import under the 50% limit writes its valid rows and reports invalid ones as disputed: not written, and offered as a download with `Неверная строка` in the `Причина` column. `skipped` stays the count of rows with the same amount. After a fix, the downloaded file can be uploaded as it is. Metrics count invalid rows as `skipped`.
 - Import, manual entry and other writes are admin-only. A write shows exactly one result toast; revalidation must not repeat it.
 
 ## Roles

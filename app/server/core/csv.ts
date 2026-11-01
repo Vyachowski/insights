@@ -5,6 +5,9 @@ export class CsvValidationError extends Error {}
 
 export type CsvRow = Record<string, string>
 
+export const REASON_COLUMN = 'Причина'
+export const INVALID_ROW_REASON = 'Неверная строка'
+
 const CSV_PARSE_OPTIONS = {
   columns: true,
   skip_empty_lines: true,
@@ -39,4 +42,15 @@ export function assertSkipRate(valid: number, invalid: number): void {
       `Too many invalid rows: ${invalid} of ${total} could not be imported. Check the file format.`,
     )
   }
+}
+
+function csvCell(value: string) {
+  return /[",\r\n]/.test(value) ? `"${value.replaceAll('"', '""')}"` : value
+}
+
+/** BOM first, so Excel reads the Cyrillic correctly. */
+export function toDisputedCsv(rows: CsvRow[]) {
+  const columns = Object.keys(rows[0])
+  const lines = [columns, ...rows.map(row => columns.map(column => row[column]))]
+  return `\uFEFF${lines.map(line => line.map(csvCell).join(',')).join('\r\n')}\r\n`
 }

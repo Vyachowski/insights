@@ -19,13 +19,15 @@ function resultStatus(r: ImportResult): ResultStatus {
 }
 
 function resultSummary(r: ImportResult) {
-  if (r.disputed != null) {
+  // Calls never update, so their `skipped` rows are duplicates
+  if (r.disputed != null && r.updated == null) {
     return `Новых: ${r.created}, дублей: ${r.skipped}, спорных: ${r.disputed}`
   }
   return [
     r.created > 0 && `+${r.created} создано`,
     r.updated != null && r.updated > 0 && `${r.updated} обновлено`,
     r.skipped > 0 && `${r.skipped} пропущено`,
+    r.disputed != null && r.disputed > 0 && `спорных: ${r.disputed}`,
   ].filter(Boolean).join(', ') || 'Без изменений'
 }
 
@@ -149,7 +151,7 @@ export default function CsvImportModal({ config, onClose }: Props) {
             <Button
               type="button"
               variant="secondary"
-              onClick={() => downloadCsv('disputed-calls.csv', result.disputedCsv!)}
+              onClick={() => downloadCsv('disputed-rows.csv', result.disputedCsv!)}
             >
               <Download size={15} />
               Скачать спорные строки

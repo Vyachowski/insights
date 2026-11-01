@@ -2,9 +2,7 @@ import type { CsvRow } from './csv'
 
 type NumberMatch = { providerNumberId: string, siteId: number | null }
 
-export const REASON_COLUMN = 'Причина'
 export const REASON = {
-  invalid: 'Неверная строка',
   unknownNumber: 'Неизвестный номер',
   ambiguousNumber: 'Имя есть у нескольких номеров',
   noSite: 'У номера нет сайта',
@@ -61,15 +59,4 @@ function toMinute(date: Date) {
 export function compareWithStored(date: Date, stored: { date: Date }[]) {
   if (stored.some(call => toMinute(call.date) === toMinute(date))) return 'duplicate'
   return stored.length > 0 ? 'otherMinute' : 'new'
-}
-
-function csvCell(value: string) {
-  return /[",\r\n]/.test(value) ? `"${value.replaceAll('"', '""')}"` : value
-}
-
-/** BOM first, so Excel reads the Cyrillic correctly. */
-export function toDisputedCsv(rows: CsvRow[]) {
-  const columns = Object.keys(rows[0])
-  const lines = [columns, ...rows.map(row => columns.map(column => row[column]))]
-  return `\uFEFF${lines.map(line => line.map(csvCell).join(',')).join('\r\n')}\r\n`
 }
