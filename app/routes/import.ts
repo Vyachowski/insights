@@ -6,7 +6,7 @@ import {
   importers,
   type ImportResource,
 } from '@/server/services/csv-imports'
-import { fetchUrlToBuffer } from '@/server/services/fetch-file'
+import { fetchUrlToBuffer } from '@/server/services/helpers/fetch-csv'
 
 // Resource route: the single mutation endpoint for CSV imports.
 // Accepts multipart form data: `intent` = resource name, plus either

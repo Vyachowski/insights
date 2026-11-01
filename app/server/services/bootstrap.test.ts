@@ -28,7 +28,7 @@ vi.mock('@/server/config', () => ({
   isStorageConfigured: () => false,
 }))
 
-vi.mock('./fetch-file', () => ({
+vi.mock('./helpers/fetch-csv', () => ({
   fetchUrlToBuffer: (url: string) => fetchMock(url),
 }))
 

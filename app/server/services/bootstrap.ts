@@ -1,6 +1,6 @@
 import * as argon2 from 'argon2'
 
-import { fetchUrlToBuffer } from './fetch-file'
+import { fetchUrlToBuffer } from './helpers/fetch-csv'
 
 import { config } from '@/server/config'
 import { assertCsvColumns, parseCsvBuffer } from '@/server/core/csv'
