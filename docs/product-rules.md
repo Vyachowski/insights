@@ -8,7 +8,7 @@ Rules the code cannot explain on its own. UI labels stay in Russian, exactly as 
 - Parity with last year's window is 100%. Last year's full-year total is never the reference, so a mid-year metric is not pushed below 100% just because the year is incomplete.
 - Each widget has a `%` · `абс.` toggle, default `%`.
 - `абс.` is the signed average monthly year-over-year difference: (this year's total − last year's total) ÷ elapsed months, with a `/мес` suffix. It is never a cumulative total.
-- All widgets use the same elapsed-months definition, so their monthly figures are comparable.
+- All widgets use the same elapsed-months definition, so their monthly figures are comparable: the months up to today with revenue or expense data. A gap or a future-dated row does not count. Before any data lands, it is every month so far.
 
 ## Year-over-year label
 

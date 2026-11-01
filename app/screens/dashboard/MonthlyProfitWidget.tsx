@@ -18,7 +18,7 @@ function barColor(value: number, isCurrent: boolean) {
 }
 
 export default function MonthlyProfitWidget({ monthly }: { monthly: DashboardSummary['monthlyProfit'] }) {
-  const { months, averageCurrent, averagePrevious, elapsedMonths } = monthly
+  const { months, averageCurrent, averagePrevious, elapsedMonths, currentMonth } = monthly
   const maxAbs = Math.max(1, ...months.flatMap(m => [Math.abs(m.current), Math.abs(m.previous)]))
   const barLen = (value: number) => (value === 0 ? 0 : Math.max(2, Math.round((Math.abs(value) / maxAbs) * CHART_HALF)))
   const hasPrevious = averagePrevious !== 0
@@ -77,7 +77,7 @@ export default function MonthlyProfitWidget({ monthly }: { monthly: DashboardSum
         />
         <Group align="stretch" gap="xs" wrap="nowrap">
           {months.map(m => {
-            const future = m.month > elapsedMonths && m.current === 0 && m.previous === 0
+            const future = m.month > currentMonth && m.current === 0 && m.previous === 0
             return (
               <Tooltip
                 key={m.month}

@@ -72,25 +72,28 @@ function buildMonthlyProfit(current: YearTotals, previous: YearTotals, now: Date
     }
   })
 
-  // Elapsed = latest current-year month with any revenue or expense; before any
-  // data lands, fall back to the current calendar month.
-  let lastWithData = 0
-  for (let m = 1; m <= 12; m++) {
-    if ((current.monthlyRevenue.get(m) ?? 0) !== 0 || (current.monthlyExpenses.get(m) ?? 0) !== 0) lastWithData = m
-  }
-  const elapsedMonths = lastWithData || now.getMonth() + 1
+  // Elapsed = months up to today with any revenue or expense, so a gap or a
+  // future-dated row changes nothing; before any data lands, every month so far.
+  const currentMonth = now.getMonth() + 1
+  const hasData = (m: number) =>
+    (current.monthlyRevenue.get(m) ?? 0) !== 0 || (current.monthlyExpenses.get(m) ?? 0) !== 0
+  const monthsSoFar = months.filter(m => m.month <= currentMonth)
+  const monthsWithData = monthsSoFar.filter(m => hasData(m.month))
+  const compared = monthsWithData.length > 0 ? monthsWithData : monthsSoFar
+  const elapsedMonths = compared.length
 
-  const averageThrough = (year: YearTotals) => {
+  const averageOf = (year: 'current' | 'previous') => {
     let total = 0
-    for (let m = 1; m <= elapsedMonths; m++) total += profitAt(year, m)
+    for (const m of compared) total += m[year]
     return total / elapsedMonths
   }
 
   return {
     months,
-    averageCurrent: averageThrough(current),
-    averagePrevious: averageThrough(previous),
+    averageCurrent: averageOf('current'),
+    averagePrevious: averageOf('previous'),
     elapsedMonths,
+    currentMonth,
   }
 }
 
