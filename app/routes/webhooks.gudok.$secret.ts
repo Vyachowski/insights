@@ -1,7 +1,7 @@
 import type { Route } from './+types/webhooks.gudok.$secret'
 
+import { assertWebhookSecret } from '@/routes/helpers/webhook-secret'
 import { GudokPayloadError, ingestGudokCall } from '@/server/services/gudok-calls'
-import { assertWebhookSecret } from '@/server/webhook-secret'
 
 // Public, secret-gated webhook for Gudok call-completion events. Gudok's config
 // exposes only a destination URL and a GET/POST toggle (no headers/auth), so the

@@ -1,10 +1,7 @@
-import * as argon2 from 'argon2'
 import { createCookieSessionStorage, redirect } from 'react-router'
 
-import { findUserByEmail, findUserById, type User } from './db/queries/users'
-import { env, sessionMaxAgeSeconds } from './env'
-
-export type SessionUser = Omit<User, 'password'>
+import { env, sessionMaxAgeSeconds } from '@/server/env'
+import { findActiveUser, type SessionUser } from '@/server/services/auth'
 
 const sessionStorage = createCookieSessionStorage({
   cookie: {
@@ -17,20 +14,6 @@ const sessionStorage = createCookieSessionStorage({
     maxAge: sessionMaxAgeSeconds,
   },
 })
-
-/** Verifies credentials; returns the user (without password) or null. */
-export async function verifyLogin(
-  email: string,
-  password: string,
-): Promise<SessionUser | null> {
-  const user = await findUserByEmail(email)
-
-  if (!user || user.status !== 'ACTIVE') return null
-  if (!(await argon2.verify(user.password, password))) return null
-
-  const { password: _password, ...sessionUser } = user
-  return sessionUser
-}
 
 /** Sets the session cookie and redirects. */
 export async function createUserSession(
@@ -51,11 +34,7 @@ export async function getUser(request: Request): Promise<SessionUser | null> {
   const userId: unknown = session.get('userId')
   if (typeof userId !== 'string') return null
 
-  const user = await findUserById(userId)
-  if (!user || user.status !== 'ACTIVE') return null
-
-  const { password: _password, ...sessionUser } = user
-  return sessionUser
+  return findActiveUser(userId)
 }
 
 /** Loader/action guard: redirects to /login when unauthenticated. */

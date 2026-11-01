@@ -1,7 +1,7 @@
 import type { Route } from './+types/traffic'
 
+import { requireUser } from '@/routes/helpers/auth'
 import TrafficScreen from '@/screens/traffic/TrafficScreen'
-import { requireUser } from '@/server/auth'
 import { listCalls } from '@/server/db/queries/calls'
 import { listMetrics } from '@/server/db/queries/metrics'
 import { listSites } from '@/server/db/queries/sites'

@@ -1,4 +1,4 @@
-import { env } from './env'
+import { env } from '@/server/env'
 
 export function assertWebhookSecret(secret: string | undefined): void {
   const expected = env.GUDOK_WEBHOOK_SECRET

@@ -1,7 +1,7 @@
 import type { Route } from './+types/webhooks.gudok.expenses.$secret.since'
 
+import { assertWebhookSecret } from '@/routes/helpers/webhook-secret'
 import { latestTelephonyDate } from '@/server/services/gudok-expenses'
-import { assertWebhookSecret } from '@/server/webhook-secret'
 
 // Companion to the telephony ingest endpoint: tells the bookmarklet the latest
 // day already stored so it only expands Gudok's date range back to there.

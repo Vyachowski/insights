@@ -1,7 +1,7 @@
 import type { Route } from './+types/finance'
 
+import { requireAdmin, requireUser } from '@/routes/helpers/auth'
 import FinanceScreen from '@/screens/finance/FinanceScreen'
-import { requireAdmin, requireUser } from '@/server/auth'
 import { addFinanceEntry, getFinancePage } from '@/server/services/finance'
 
 export async function loader({ request }: Route.LoaderArgs) {
