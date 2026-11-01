@@ -60,7 +60,7 @@ describe('siteId cells', () => {
       revenueCsv(`2026-01-01,${siteId},100`, '2026-01-02,5,200', '2026-01-03,,300'),
     )
 
-    expect(result).toEqual({ created: 2, updated: 0, skipped: 0 })
+    expect(result).toMatchObject({ created: 2, updated: 0, skipped: 0, disputed: 1 })
     expect(siteIds('revenues')).toEqual([{ siteId: 5 }, { siteId: null }])
   })
 
@@ -69,7 +69,7 @@ describe('siteId cells', () => {
       expensesCsv(`2026-01-01,ads,${siteId},100`, '2026-01-02,ads,5,200', '2026-01-03,ads,,300'),
     )
 
-    expect(result).toEqual({ created: 2, updated: 0, skipped: 0 })
+    expect(result).toMatchObject({ created: 2, updated: 0, skipped: 0, disputed: 1 })
     expect(siteIds('expenses')).toEqual([{ siteId: 5 }, { siteId: null }])
   })
 
@@ -89,7 +89,7 @@ describe('amount cells', () => {
       csv('date,siteId,amount', `2026-01-01,,"${amount}"`, '2026-01-02,,200'),
     )
 
-    expect(result).toEqual({ created: 1, updated: 0, skipped: 0 })
+    expect(result).toMatchObject({ created: 1, updated: 0, skipped: 0, disputed: 1 })
   })
 
   it('stores integer kopecks', async () => {
@@ -99,13 +99,52 @@ describe('amount cells', () => {
   })
 })
 
+describe('invalid rows under the limit', () => {
+  const bom = '\uFEFF'
+
+  it('hands back a revenue row and writes the valid one', async () => {
+    const result = await importers.revenue(revenueCsv('2026-01-01,,100', 'bad,5,200'))
+
+    expect(result).toEqual({
+      created: 1,
+      updated: 0,
+      skipped: 0,
+      disputed: 1,
+      disputedCsv: `${bom}date,siteId,amount,Причина\r\nbad,5,200,Неверная строка\r\n`,
+    })
+    expect(rows('revenues')).toMatchObject([{ amount: 10000 }])
+  })
+
+  it('hands back an expense row and writes the valid one', async () => {
+    const result = await importers.expenses(expensesCsv('2026-01-01,ads,,100', '2026-01-02,,5,200'))
+
+    expect(result).toEqual({
+      created: 1,
+      updated: 0,
+      skipped: 0,
+      disputed: 1,
+      disputedCsv: `${bom}date,type,siteId,amount,Причина\r\n2026-01-02,,5,200,Неверная строка\r\n`,
+    })
+    expect(rows('expenses')).toMatchObject([{ amount: 10000 }])
+  })
+
+  it('writes a handed-back row once it is fixed', async () => {
+    const { disputedCsv } = await importers.revenue(revenueCsv('2026-01-01,,100', 'bad,5,200'))
+
+    const result = await importers.revenue(Buffer.from(String(disputedCsv).replace('bad', '2026-01-02')))
+
+    expect(result).toEqual({ created: 1, updated: 0, skipped: 0, disputed: 0, disputedCsv: null })
+    expect(rows('revenues')).toMatchObject([{ amount: 10000 }, { amount: 20000 }])
+  })
+})
+
 describe('re-importing a file', () => {
   it('skips revenue with the same amount and overwrites a changed one', async () => {
     await importers.revenue(revenueCsv('2026-01-01,,100', '2026-01-02,5,200'))
 
     const result = await importers.revenue(revenueCsv('2026-01-01,,100', '2026-01-02,5,250'))
 
-    expect(result).toEqual({ created: 0, updated: 1, skipped: 1 })
+    expect(result).toEqual({ created: 0, updated: 1, skipped: 1, disputed: 0, disputedCsv: null })
     expect(rows('revenues')).toMatchObject([{ amount: 10000 }, { amount: 25000 }])
   })
 
@@ -114,7 +153,7 @@ describe('re-importing a file', () => {
 
     const result = await importers.expenses(expensesCsv('2026-01-01,ads,,100', '2026-01-02,ads,5,250'))
 
-    expect(result).toEqual({ created: 0, updated: 1, skipped: 1 })
+    expect(result).toEqual({ created: 0, updated: 1, skipped: 1, disputed: 0, disputedCsv: null })
     expect(rows('expenses')).toMatchObject([{ amount: 10000 }, { amount: 25000 }])
   })
 
