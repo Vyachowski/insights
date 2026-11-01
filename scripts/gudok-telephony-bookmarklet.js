@@ -55,6 +55,20 @@
     return dates.length ? new Date(Math.min(...dates.map(d => d.getTime()))) : null
   }
 
+  // First day of the page's date range (local midnight), or null when unknown.
+  function pageRangeStart() {
+    const start = window.goodok_daterangepicker?.startDate?.toDate?.()
+    if (start) return new Date(start.getFullYear(), start.getMonth(), start.getDate())
+    const text = document.querySelector('#daterangepicker-text')?.textContent || ''
+    const first = /\d{2}\.\d{2}\.\d{2,4}/.exec(text)
+    return first ? ruDate(first[0]) : null
+  }
+
+  function moreButton() {
+    const btn = document.querySelector('.load-more-btn')
+    return btn && btn.offsetParent !== null ? btn : null
+  }
+
   // 1. Ask which day to collect from.
   let since = null
   try {
@@ -65,18 +79,33 @@
     return
   }
   // Default: 90 days back when nothing stored yet.
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
   const sinceDate = since
     ? new Date(`${since}T00:00:00`)
-    : new Date(Date.now() - 90 * 864e5)
+    : new Date(today.getFullYear(), today.getMonth(), today.getDate() - 90)
+
+  // Only the range found here proves anything. After we write to the picker it
+  // shows our dates, whether or not the page loaded them.
+  const foundStart = pageRangeStart()
+  const rangeCovered = Boolean(foundStart) && foundStart <= sinceDate
+  let undoRange = () => {}
 
   // 2. Best-effort: widen Gudok's date range to [since .. today] via the page's
   //    own picker, then reload. Selectors/API may drift — adjust to the live page.
+  //    A range that already covers `since` was set by the admin: leave it alone.
   try {
-    if (window.goodok_daterangepicker && window.moment && window.data_table_controller) {
+    if (!rangeCovered && window.goodok_daterangepicker && window.moment && window.data_table_controller) {
       const dp = window.goodok_daterangepicker
+      const txt = document.querySelector('#daterangepicker-text')
+      const saved = { start: dp.startDate, end: dp.endDate, text: txt?.textContent }
+      undoRange = () => {
+        dp.startDate = saved.start
+        dp.endDate = saved.end
+        if (txt) txt.textContent = saved.text
+      }
       dp.startDate = window.moment(sinceDate)
       dp.endDate = window.moment()
-      const txt = document.querySelector('#daterangepicker-text')
       if (txt) txt.textContent = `${dp.startDate.format('DD.MM.YY')} – ${dp.endDate.format('DD.MM.YY')}`
       window.data_table_controller.change_dates()
       await sleep(1500)
@@ -84,19 +113,33 @@
   } catch (e) { /* fall through to load-more within the current range */ }
 
   // 3. Load more until we've covered `since` (rows are date-desc), bounded.
+  let fullyLoaded = false
   for (let i = 0; i < 200; i++) {
     const oldest = oldestLoadedDate()
     if (oldest && oldest < sinceDate) break
-    const btn = document.querySelector('.load-more-btn')
-    if (!btn || btn.offsetParent === null) break
-    btn.click()
-    await sleep(700)
+    const btn = moreButton()
+    if (btn) {
+      btn.click()
+      await sleep(700)
+      continue
+    }
+    await sleep(1500) // the button may hide for a moment while rows load
+    if (!moreButton()) {
+      fullyLoaded = true
+      break
+    }
   }
 
+  // Stop unless the rows prove `since` was reached. The range counts only with
+  // the whole list loaded: a day may have no operations, so no older row exists.
   const oldest = oldestLoadedDate()
-  if (oldest && oldest > sinceDate) {
-    alert(`Внимание: загружены операции только с ${oldest.toLocaleDateString('ru-RU')}, `
-      + `а нужно с ${sinceDate.toLocaleDateString('ru-RU')}. Выставьте период вручную и запустите снова.`)
+  if (!(oldest && oldest < sinceDate) && !(rangeCovered && fullyLoaded)) {
+    undoRange() // or the next click would read our dates as the page's own
+    const needed = sinceDate.toLocaleDateString('ru-RU')
+    const loaded = oldest ? `загружены только с ${oldest.toLocaleDateString('ru-RU')}` : 'операции не загружены'
+    alert(`Ничего не отправлено: нужны операции с ${needed}, а ${loaded}.\n`
+      + `Выставьте в Гудке период с ${needed} по сегодня и запустите снова.`)
+    return
   }
 
   // 4. Collect charge rows within [since .. today].
