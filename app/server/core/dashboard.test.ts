@@ -88,7 +88,7 @@ describe('buildDashboardSummary', () => {
     monthlyExpenses: new Map(),
   }
 
-  // January and March carry data, so three months have elapsed
+  // January and March carry data, so February's gap leaves two elapsed months
   const current: YearTotals = {
     revenue: 600000,
     expenses: 150000,
@@ -123,15 +123,15 @@ describe('buildDashboardSummary', () => {
 
   it('averages trends over the elapsed months', () => {
     const { trends } = buildDashboardSummary(current, previous, cities, now, noDates)
-    expect(trends.revenue).toEqual({ current: 6000, previous: 3000, monthlyCurrent: 2000, monthlyPrevious: 1000 })
-    expect(trends.expenses).toEqual({ current: 1500, previous: 900, monthlyCurrent: 500, monthlyPrevious: 300 })
-    expect(trends.calls).toEqual({ current: 90, previous: 30, monthlyCurrent: 30, monthlyPrevious: 10 })
+    expect(trends.revenue).toEqual({ current: 6000, previous: 3000, monthlyCurrent: 3000, monthlyPrevious: 1500 })
+    expect(trends.expenses).toEqual({ current: 1500, previous: 900, monthlyCurrent: 750, monthlyPrevious: 450 })
+    expect(trends.calls).toEqual({ current: 90, previous: 30, monthlyCurrent: 45, monthlyPrevious: 15 })
   })
 
   it('merges calls by city with monthly averages', () => {
     const { callsByCity } = buildDashboardSummary(current, previous, cities, now, noDates)
     expect(callsByCity).toEqual([
-      { city: 'Москва', current: 90, previous: 30, monthlyCurrent: 30, monthlyPrevious: 10 },
+      { city: 'Москва', current: 90, previous: 30, monthlyCurrent: 45, monthlyPrevious: 15 },
     ])
   })
 
@@ -145,10 +145,19 @@ describe('buildDashboardSummary', () => {
 
   it('compares both years over the same elapsed months', () => {
     const { monthlyProfit, verdict } = buildDashboardSummary(current, previous, cities, now, noDates)
-    expect(monthlyProfit.elapsedMonths).toBe(3)
-    expect(monthlyProfit.averageCurrent).toBe(1500)
-    expect(monthlyProfit.averagePrevious).toBe(700) // August stays out of the average
-    expect(verdict).toMatchObject({ monthlyCurrent: 1500, monthlyPrevious: 700 })
+    expect(monthlyProfit.elapsedMonths).toBe(2)
+    expect(monthlyProfit.averageCurrent).toBe(2250)
+    expect(monthlyProfit.averagePrevious).toBe(0) // Last year's February and August stay out
+    expect(verdict).toMatchObject({ monthlyCurrent: 2250, monthlyPrevious: 1050 })
+  })
+
+  it('leaves a future-dated row out of the elapsed months', () => {
+    const withFutureRow: YearTotals = {
+      ...current,
+      monthlyRevenue: new Map([...current.monthlyRevenue, [11, 700000]]),
+    }
+    const { monthlyProfit } = buildDashboardSummary(withFutureRow, previous, cities, now, noDates)
+    expect(monthlyProfit).toMatchObject({ elapsedMonths: 2, averageCurrent: 2250, currentMonth: 5 })
   })
 
   it('keeps the verdict monthly figures to the same window as its totals', () => {
