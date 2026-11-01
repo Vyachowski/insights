@@ -15,6 +15,7 @@ const selectSchedules = (tx: Tx) => tx
     nextDate: chargeSchedules.nextDate,
     amount: chargeSchedules.amount,
     intervalDays: chargeSchedules.intervalDays,
+    noChargePeriodEnd: chargeSchedules.noChargePeriodEnd,
     siteId: phoneNumbers.siteId,
   })
   .from(chargeSchedules)
@@ -93,10 +94,10 @@ export function enableSchedule(
     .run()
 }
 
-/** Keeps the row: stored values stay until the number is switched on again. */
+/** Keeps the row: the date and amount stay until the number is switched on again. The no-charge mark goes. */
 export function disableSchedule(tx: Tx, { provider, providerNumberId }: NumberId): void {
   tx.update(chargeSchedules)
-    .set({ enabled: false })
+    .set({ enabled: false, noChargePeriodEnd: null })
     .where(and(eq(chargeSchedules.provider, provider), eq(chargeSchedules.providerNumberId, providerNumberId)))
     .run()
 }

@@ -36,6 +36,7 @@ export function listNumbersWithSchedules() {
       enabled: chargeSchedules.enabled,
       nextDate: chargeSchedules.nextDate,
       amount: chargeSchedules.amount,
+      noChargePeriodEnd: chargeSchedules.noChargePeriodEnd,
     })
     .from(phoneNumbers)
     .leftJoin(chargeSchedules, and(

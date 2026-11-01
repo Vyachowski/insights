@@ -86,7 +86,8 @@ Rules the code cannot explain on its own. UI labels stay in Russian, exactly as 
 - The next date must be a real `YYYY-MM-DD` date and the amount above zero. The interval is not edited: a stored interval below 1 is refused, because one bad schedule stops the check for all numbers. Switching off still works on such a schedule.
 - A number with no site cannot be switched on. A site has one enabled number: a second one is refused, and the check runs inside the write transaction.
 - Switching off stops new estimates. The schedule row stays, and rows already written stay until a reconciliation run.
-- Switching on clears the stored no-charge period end. An edit keeps it.
+- Switching on or off clears the stored no-charge period end. An edit keeps it.
+- `Нет списания в Гудке до DD.MM` in `Номера` shows that stored value on an enabled number, for admin and user alike, so the admin can switch the number off or look into it. The date is the end of the checked period. The number stays on while marked, because a charge can also fail for other reasons. A number that is off shows no mark.
 
 ## Reconciliation
 
@@ -95,7 +96,7 @@ Rules the code cannot explain on its own. UI labels stay in Russian, exactly as 
 - Real rows are then written like any telephony sync. A row that replaces a deleted estimate reports `created`.
 - Each enabled schedule takes its next date (last real charge + interval) and amount from the site's last real `telephony` charge, so a date shift or tariff change needs no edits. A site with no real charge at all keeps its values.
 - A number stays on after a run with no real charge: only the admin switches it off. If its next date is now in the past, the hourly check writes estimates again.
-- An enabled schedule stores the period's end when the period held an estimate for its site and no real charge. In every other case the stored value is cleared, so a short period with no charge due sets nothing.
+- An enabled schedule stores the period's end when the period held an estimate for its site and no real charge. A real charge in the period clears the stored value. In every other case it stays, so a repeated or short run with no charge due neither sets nor clears it.
 - A disabled schedule is not changed.
 - Every run goes in the reconciliation log, also with no rows. The result reports created, updated, skipped and deleted-estimate counts.
 

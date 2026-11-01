@@ -39,10 +39,11 @@ export function chargesDue(
 /**
  * A schedule after a Gudok run: the next date and amount follow the site's last
  * real charge, and with no real charge at all they stay. `noChargePeriodEnd` is
- * set only when an estimate in the period had no real charge to back it.
+ * set when an estimate in the period had no real charge to back it, and only a
+ * real charge in the period clears it, so a repeated or short run leaves it.
  */
 export function reconciledSchedule(
-  schedule: { nextDate: string, amount: number, intervalDays: number },
+  schedule: { nextDate: string, amount: number, intervalDays: number, noChargePeriodEnd: string | null },
   { lastCharge, estimated, charged, periodEnd }: {
     lastCharge?: { date: string, amount: number }
     estimated: boolean
@@ -53,19 +54,20 @@ export function reconciledSchedule(
   return {
     nextDate: lastCharge ? addDays(lastCharge.date, schedule.intervalDays) : schedule.nextDate,
     amount: lastCharge?.amount ?? schedule.amount,
-    noChargePeriodEnd: estimated && !charged ? periodEnd : null,
+    noChargePeriodEnd: charged ? null : estimated ? periodEnd : schedule.noChargePeriodEnd,
   }
 }
 
 /**
- * A number as `Номера` shows it: one that is off has no next charge, and the
- * amount is in rubles. `offer` comes from the site's last real charge and never
- * from stored values, so switching on again starts fresh.
+ * A number as `Номера` shows it: one that is off has no next charge and no
+ * no-charge mark, and the amount is in rubles. `offer` comes from the site's
+ * last real charge and never from stored values, so switching on again starts fresh.
  */
 export function numberCharge<T extends {
   enabled: boolean | null
   nextDate: string | null
   amount: number | null
+  noChargePeriodEnd: string | null
 }>(row: T, lastCharge?: { date: string, amount: number }) {
   const enabled = row.enabled === true
   return {
@@ -73,6 +75,7 @@ export function numberCharge<T extends {
     enabled,
     nextDate: enabled ? row.nextDate : null,
     amount: enabled && row.amount !== null ? toRubles(row.amount) : null,
+    noChargePeriodEnd: enabled ? row.noChargePeriodEnd : null,
     offer: lastCharge
       ? { nextDate: addDays(lastCharge.date, DEFAULT_INTERVAL_DAYS), amount: toRubles(lastCharge.amount) }
       : null,
