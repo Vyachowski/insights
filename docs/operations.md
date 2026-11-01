@@ -15,6 +15,7 @@ Env validation → open SQLite (WAL, busy_timeout) → Drizzle `migrate()` → e
 - On an empty database the server creates users from `ADMIN_*`/`USER_*`, then cities and sites.
 - Reference CSVs come from the bucket (`seed/cities.csv`, `seed/sites.csv`) when `BUCKET_*` is set, else from `CITIES_CSV_URL`/`SITES_CSV_URL`.
 - A failed step is logged and skipped; startup continues.
+- A local `.env` holds no production values, so `BUCKET_*` stays unset there. With no CSV source a new local database gets users only. Use `npm run dev:sandbox` for a filled one.
 - Data CSVs (calls, revenue, expenses, metrics) are uploaded in the app.
 
 ## Backups
