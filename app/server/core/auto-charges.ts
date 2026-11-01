@@ -5,6 +5,7 @@ const DAY_MS = 24 * 60 * 60 * 1000
 
 // Charges repeat every 30 days, not monthly. Same as the column default
 const DEFAULT_INTERVAL_DAYS = 30
+const RECONCILIATION_MAX_AGE_DAYS = 90
 
 const MOSCOW_DATE = new Intl.DateTimeFormat('en-CA', {
   timeZone: 'Europe/Moscow',
@@ -66,6 +67,15 @@ export interface ReconciliationDates {
 
 // The log starts after the first Gudok runs, so older runs leave only their rows
 export const reconciledUntil = ({ lastRunEnd, lastRealDay }: ReconciliationDates) => lastRunEnd ?? lastRealDay
+
+/** Estimates wait for a check past the limit. With no date there is no age to measure. */
+export function isReconciliationStale(
+  dates: ReconciliationDates,
+  { hasEstimates, today }: { hasEstimates: boolean, today: string },
+) {
+  const until = reconciledUntil(dates)
+  return hasEstimates && until !== null && addDays(until, RECONCILIATION_MAX_AGE_DAYS) < today
+}
 
 /**
  * A number as `Номера` shows it: one that is off has no next charge and no

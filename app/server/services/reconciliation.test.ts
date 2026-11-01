@@ -3,7 +3,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { sqlite } from '@/server/db/client'
 
 const { changeNumberCharge, listNumberCharges, writeDueEstimates } = await import('./auto-charges')
-const { GudokPayloadError, receiveGudokPost, reconcileTelephony } = await import('./reconciliation')
+const {
+  checkReconciliationStale,
+  GudokPayloadError,
+  receiveGudokPost,
+  reconcileTelephony,
+} = await import('./reconciliation')
 
 const NOW = new Date('2026-11-01T09:00:00Z')
 const PERIOD = { start: '2026-10-01', end: '2026-10-31' }
@@ -348,6 +353,50 @@ describe('no-charge mark', () => {
 
     expect(await markOf()).toMatchObject({ enabled: false, noChargePeriodEnd: null })
     expect(scheduleOf().no_charge_period_end).toBeNull()
+  })
+})
+
+describe('checkReconciliationStale', () => {
+  const seedRun = (periodEnd: string) => sqlite.prepare(
+    "INSERT INTO reconciliation_runs (period_start, period_end, ran_at) VALUES ('2026-01-01', ?, 0)",
+  ).run(periodEnd)
+
+  const seedTelephony = (date: string, isEstimate: number) => sqlite.prepare(
+    "INSERT INTO expenses (site_id, date, amount, type, is_estimate, created_at, updated_at) VALUES (5, ?, 87000, 'telephony', ?, 0, 0)",
+  ).run(date, isEstimate)
+
+  it('flags 91 days from the last recorded run, not 90', async () => {
+    seedTelephony('2026-10-27', 1)
+    seedRun('2026-08-03')
+    expect(await checkReconciliationStale()).toBe(false)
+
+    seedRun('2026-08-02')
+    expect(await checkReconciliationStale()).toBe(true)
+  })
+
+  it('uses the last real telephony day with no recorded run, and estimates never set it', async () => {
+    seedTelephony('2026-08-03', 0)
+    seedTelephony('2026-10-27', 1)
+    expect(await checkReconciliationStale()).toBe(false)
+
+    sqlite.exec("DELETE FROM expenses WHERE date = '2026-08-03'")
+    seedTelephony('2026-08-02', 0)
+    expect(await checkReconciliationStale()).toBe(true)
+  })
+
+  it('stays quiet with no estimates stored', async () => {
+    seedTelephony('2026-01-05', 0)
+    seedRun('2026-01-05')
+
+    expect(await checkReconciliationStale()).toBe(false)
+  })
+
+  it('counts the day in `Europe/Moscow`', async () => {
+    seedTelephony('2026-10-27', 1)
+    seedRun('2026-08-02')
+
+    expect(await checkReconciliationStale(new Date('2026-10-31T20:59:59Z'))).toBe(false)
+    expect(await checkReconciliationStale(new Date('2026-10-31T21:00:00Z'))).toBe(true)
   })
 })
 

@@ -2,12 +2,18 @@ import { ingestGudokExpenses, writeGudokExpenses } from './gudok-expenses'
 
 import type { DayPeriod } from '@/server/db/queries/period'
 
-import { reconciledSchedule } from '@/server/core/auto-charges'
+import { isReconciliationStale, moscowDay, reconciledSchedule } from '@/server/core/auto-charges'
 import { GudokPayloadError } from '@/server/core/gudok-calls'
 import { type GudokOperationRow, parseGudokPeriod, TELEPHONY_TYPE } from '@/server/core/gudok-history'
 import { toCityToSiteId } from '@/server/core/site-matching'
 import { listEnabledSchedules, updateSchedule } from '@/server/db/queries/charge-schedules'
-import { deleteEstimates, latestRealExpenseDate, listChargedSites, listLastCharges } from '@/server/db/queries/expenses'
+import {
+  deleteEstimates,
+  latestRealExpenseDate,
+  listChargedSites,
+  listLastCharges,
+  oldestEstimateDate,
+} from '@/server/db/queries/expenses'
 import { insertReconciliationRun, lastRunPeriodEnd } from '@/server/db/queries/reconciliation-runs'
 import { listSiteCities } from '@/server/db/queries/sites'
 import { transaction } from '@/server/db/transaction'
@@ -21,6 +27,12 @@ export async function readReconciliationDates() {
     latestRealExpenseDate(TELEPHONY_TYPE),
   ])
   return { lastRunEnd, lastRealDay }
+}
+
+/** Whether the admin should run the bookmarklet: estimates wait for a check past the limit. */
+export async function checkReconciliationStale(now = new Date()) {
+  const hasEstimates = transaction(tx => oldestEstimateDate(tx, TELEPHONY_TYPE)) !== null
+  return isReconciliationStale(await readReconciliationDates(), { hasEstimates, today: moscowDay(now) })
 }
 
 /**

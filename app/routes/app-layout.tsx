@@ -9,10 +9,16 @@ import type { Route } from './+types/app-layout'
 import { menuItems } from '@/navigation'
 import { requireUser } from '@/routes/helpers/auth'
 import { isBackupOverdue } from '@/server/jobs/backup'
+import { checkReconciliationStale } from '@/server/services/reconciliation'
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await requireUser(request)
-  return { user, backupOverdue: user.role === 'ADMIN' && isBackupOverdue() }
+  const isAdmin = user.role === 'ADMIN'
+  return {
+    user,
+    backupOverdue: isAdmin && isBackupOverdue(),
+    reconciliationStale: isAdmin && await checkReconciliationStale(),
+  }
 }
 
 export default function AppLayout() {
