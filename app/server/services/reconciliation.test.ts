@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { sqlite } from '@/server/db/client'
 
 const { writeDueEstimates } = await import('./auto-charges')
-const { reconcileTelephony } = await import('./reconciliation')
+const { GudokPayloadError, receiveGudokPost, reconcileTelephony } = await import('./reconciliation')
 
 const NOW = new Date('2026-11-01T09:00:00Z')
 const PERIOD = { start: '2026-10-01', end: '2026-10-31' }
@@ -306,5 +306,64 @@ describe('reconcileTelephony', () => {
     } finally {
       sqlite.exec('DROP TRIGGER fail_run')
     }
+  })
+})
+
+describe('receiveGudokPost', () => {
+  it('runs reconciliation on a valid period and returns its counts', async () => {
+    seedEstimate('2026-10-24')
+
+    const result = await receiveGudokPost([charge({ date: '26.10.2026' })], PERIOD)
+
+    expect(result).toEqual({ created: 1, updated: 0, skipped: 0, deletedEstimates: 1 })
+    expect(expenseRows()).toEqual([expect.objectContaining({ date: '2026-10-26', is_estimate: 0 })])
+    expect(runs()).toMatchObject([{ period_start: '2026-10-01', period_end: '2026-10-31' }])
+  })
+
+  it('accepts an empty list with a valid period, so a run with no charges still reconciles', async () => {
+    seedEstimate('2026-10-24')
+
+    const result = await receiveGudokPost([], PERIOD)
+
+    expect(result).toEqual({ created: 0, updated: 0, skipped: 0, deletedEstimates: 1 })
+    expect(expenseRows()).toEqual([])
+    expect(runs()).toHaveLength(1)
+  })
+
+  it.each([
+    ['a day that does not exist', { start: '2026-02-31', end: '2026-10-31' }],
+    ['a start after its end', { start: '2026-10-31', end: '2026-10-01' }],
+    ['null', null],
+  ])('refuses %s and writes nothing', async (_, period) => {
+    seedEstimate('2026-10-24')
+    const stored = expenseRows()
+
+    await expect(receiveGudokPost([charge()], period)).rejects.toThrow(GudokPayloadError)
+
+    expect(expenseRows()).toEqual(stored)
+    expect(runs()).toEqual([])
+  })
+
+  it('refuses a bad period with no estimates stored, not falling back to the ingest', async () => {
+    await expect(receiveGudokPost([charge()], { start: 'x', end: 'y' })).rejects.toThrow(GudokPayloadError)
+    expect(expenseRows()).toEqual([])
+  })
+
+  it('refuses a post with no period while estimates exist and writes nothing', async () => {
+    seedEstimate('2026-10-24')
+    const stored = expenseRows()
+
+    await expect(receiveGudokPost([charge({ date: '26.10.2026' })], undefined)).rejects.toThrow(GudokPayloadError)
+
+    expect(expenseRows()).toEqual(stored)
+    expect(runs()).toEqual([])
+  })
+
+  it('keeps the ingest for a post with no period and no estimates', async () => {
+    const result = await receiveGudokPost([charge()], undefined)
+
+    expect(result).toEqual({ created: 1, updated: 0, skipped: 0 })
+    expect(expenseRows()).toEqual([expect.objectContaining({ date: '2026-10-24', is_estimate: 0 })])
+    expect(runs()).toEqual([])
   })
 })

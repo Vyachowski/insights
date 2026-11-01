@@ -1,6 +1,7 @@
+import { GudokPayloadError } from '@/server/core/gudok-calls'
 import { groupCharges, type GudokOperationRow, TELEPHONY_TYPE } from '@/server/core/gudok-history'
 import { toCityToSiteId } from '@/server/core/site-matching'
-import { latestExpenseDate, writeRealExpense } from '@/server/db/queries/expenses'
+import { latestExpenseDate, oldestEstimateDate, writeRealExpense } from '@/server/db/queries/expenses'
 import { listSiteCities } from '@/server/db/queries/sites'
 import { transaction, type Tx } from '@/server/db/transaction'
 
@@ -27,13 +28,19 @@ export function writeGudokExpenses(
  * Ingest Gudok operation rows as telephony expenses: one `telephony` expense
  * per (date, site), replacing the stored amount with the freshly computed sum.
  * Idempotent: re-posting the same days does not create duplicates and keeps
- * totals correct.
+ * totals correct. Refused while estimates exist: with no period to clear them,
+ * a real charge on another date would sit beside one.
  */
 export async function ingestGudokExpenses(
   rows: GudokOperationRow[],
 ): Promise<ExpenseIngestResult> {
   const cityToSiteId = toCityToSiteId(await listSiteCities())
-  return transaction(tx => writeGudokExpenses(tx, rows, cityToSiteId))
+  return transaction(tx => {
+    if (oldestEstimateDate(tx, TELEPHONY_TYPE)) {
+      throw new GudokPayloadError('Period required while estimates exist: update the bookmarklet')
+    }
+    return writeGudokExpenses(tx, rows, cityToSiteId)
+  })
 }
 
 /** Latest date (`YYYY-MM-DD`) for which a telephony expense exists, or null. */

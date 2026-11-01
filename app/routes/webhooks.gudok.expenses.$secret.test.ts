@@ -1,17 +1,20 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const mockEnv: { GUDOK_WEBHOOK_SECRET?: string } = {}
-const ingestMock = vi.fn()
+const receiveMock = vi.fn()
 
 vi.mock('@/server/env', () => ({ env: mockEnv }))
-vi.mock('@/server/services/gudok-expenses', () => ({
-  ingestGudokExpenses: (rows: unknown) => ingestMock(rows),
-}))
+vi.mock('@/server/services/reconciliation', () => {
+  class GudokPayloadError extends Error {}
+  return { GudokPayloadError, receiveGudokPost: (rows: unknown, period: unknown) => receiveMock(rows, period) }
+})
 
 const { action } = await import('./webhooks.gudok.expenses.$secret')
+const { GudokPayloadError } = await import('@/server/services/reconciliation')
 
 const SECRET = 'top-secret'
 const OPERATIONS = [{ id: 1 }]
+const PERIOD = { start: '2026-10-01', end: '2026-10-31' }
 // The handler only touches request + params.secret; cast past the fuller
 // generated Route arg types, which aren't relevant to this test.
 type Handler = (a: { request: Request; params: { secret?: string } }) => Promise<Response>
@@ -25,41 +28,57 @@ const expectReadable = (res: Response) =>
 
 beforeEach(() => {
   mockEnv.GUDOK_WEBHOOK_SECRET = SECRET
-  ingestMock.mockReset()
-  ingestMock.mockResolvedValue({ stored: 1 })
+  receiveMock.mockReset()
+  receiveMock.mockResolvedValue({ created: 1 })
 })
 
 describe('gudok expenses webhook route', () => {
-  it('valid secret → 200 and ingests the operations', async () => {
+  it('valid secret, no period → 200 and passes the operations on', async () => {
     const res = await call(SECRET)
     expect(res.status).toBe(200)
     expectReadable(res)
-    expect(ingestMock).toHaveBeenCalledWith(OPERATIONS)
+    expect(receiveMock).toHaveBeenCalledWith(OPERATIONS, undefined)
   })
 
-  it.each(['nope', undefined])('secret %j → readable 404, no ingest', async secret => {
+  it('period → passes it on and returns the counts', async () => {
+    receiveMock.mockResolvedValue({ created: 2, updated: 0, skipped: 1, deletedEstimates: 3 })
+    const res = await call(SECRET, JSON.stringify({ operations: [], period: PERIOD }))
+    expect(res.status).toBe(200)
+    expect(receiveMock).toHaveBeenCalledWith([], PERIOD)
+    expect(await res.json()).toEqual({ ok: true, created: 2, updated: 0, skipped: 1, deletedEstimates: 3 })
+  })
+
+  it('refused post → readable 400 with the reason', async () => {
+    receiveMock.mockRejectedValue(new GudokPayloadError('Invalid period date'))
+    const res = await call(SECRET, JSON.stringify({ operations: [], period: { start: 'x' } }))
+    expect(res.status).toBe(400)
+    expectReadable(res)
+    expect(await res.json()).toEqual({ error: 'Invalid period date' })
+  })
+
+  it.each(['nope', undefined])('secret %j → readable 404, nothing received', async secret => {
     const res = await call(secret)
     expect(res.status).toBe(404)
     expectReadable(res)
-    expect(ingestMock).not.toHaveBeenCalled()
+    expect(receiveMock).not.toHaveBeenCalled()
   })
 
-  it('secret unset → 404, no ingest', async () => {
+  it('secret unset → 404, nothing received', async () => {
     mockEnv.GUDOK_WEBHOOK_SECRET = undefined
     expect((await call(SECRET)).status).toBe(404)
-    expect(ingestMock).not.toHaveBeenCalled()
+    expect(receiveMock).not.toHaveBeenCalled()
   })
 
-  it.each(['not json', 'null', '{}', '{"operations":"x"}'])('body %s → readable 400, no ingest', async body => {
+  it.each(['not json', 'null', '{}', '{"operations":"x"}'])('body %s → readable 400, nothing received', async body => {
     const res = await call(SECRET, body)
     expect(res.status).toBe(400)
     expectReadable(res)
-    expect(ingestMock).not.toHaveBeenCalled()
+    expect(receiveMock).not.toHaveBeenCalled()
   })
 
   it('failed write → readable 500', async () => {
     vi.spyOn(console, 'error').mockImplementationOnce(() => {})
-    ingestMock.mockRejectedValue(new Error('disk'))
+    receiveMock.mockRejectedValue(new Error('disk'))
     const res = await call(SECRET)
     expect(res.status).toBe(500)
     expectReadable(res)
