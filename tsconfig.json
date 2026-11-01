@@ -2,7 +2,8 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
-    ".react-router/types/**/*"
+    ".react-router/types/**/*",
+    ".railway/**/*"
   ],
   "compilerOptions": {
     "lib": ["DOM", "DOM.Iterable", "ES2023"],
