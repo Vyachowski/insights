@@ -36,6 +36,13 @@
       "when": 1793472818333,
       "tag": "0004_add_auto_charge_storage",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1793557314883,
+      "tag": "0005_add_hostings",
+      "breakpoints": true
     }
   ]
 }

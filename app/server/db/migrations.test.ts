@@ -6,6 +6,7 @@ import { applyMigrations } from './test-migrations'
 const NEW = '0002_switch_to_new_call_tables'
 const DROP = '0003_drop_old_call_tables'
 const AUTO = '0004_add_auto_charge_storage'
+const HOSTING = '0005_add_hostings'
 const HOUR = 60 * 60 * 1000
 const CSV_DATE = Date.UTC(2026, 5, 1, 12, 0)
 
@@ -191,7 +192,7 @@ describe(DROP, () => {
     sqlite.prepare('SELECT * FROM phone_numbers ORDER BY provider, provider_number_id').all()
 
   it('runs on a fresh empty database', () => {
-    applyMigrations(sqlite, { from: NEW })
+    applyMigrations(sqlite, { from: NEW, to: AUTO })
     expect(oldTables()).toEqual([])
   })
 
@@ -205,7 +206,7 @@ describe(DROP, () => {
     const numbersBefore = numbers()
     expect(callsBefore).toHaveLength(2)
 
-    applyMigrations(sqlite, { from: DROP })
+    applyMigrations(sqlite, { from: DROP, to: AUTO })
 
     expect(oldTables()).toEqual([])
     expect(newCalls()).toEqual(callsBefore)
@@ -225,11 +226,11 @@ describe(AUTO, () => {
 
   function migrateWithNumbers() {
     seedSites()
-    applyMigrations(sqlite, { from: NEW })
+    applyMigrations(sqlite, { from: NEW, to: AUTO })
   }
 
   it('runs on a fresh empty database', () => {
-    applyMigrations(sqlite, { from: NEW })
+    applyMigrations(sqlite, { from: NEW, to: AUTO })
 
     expect(count('expenses')).toEqual({ c: 0 })
     expect(count('charge_schedules')).toEqual({ c: 0 })
@@ -247,7 +248,7 @@ describe(AUTO, () => {
     const before = storedExpenses()
     expect(before).toHaveLength(2)
 
-    applyMigrations(sqlite, { from: AUTO })
+    applyMigrations(sqlite, { from: AUTO, to: AUTO })
 
     expect(storedExpenses()).toEqual(before.map(row => ({ ...row, is_estimate: 0 })))
   })
@@ -299,7 +300,7 @@ describe(AUTO, () => {
   })
 
   it('logs a reconciliation run', () => {
-    applyMigrations(sqlite, { from: NEW })
+    applyMigrations(sqlite, { from: NEW, to: AUTO })
     sqlite.exec(`
       INSERT INTO reconciliation_runs (period_start, period_end, ran_at)
         VALUES ('2026-07-26', '2026-10-31', 123);
@@ -308,5 +309,183 @@ describe(AUTO, () => {
     expect(sqlite.prepare('SELECT * FROM reconciliation_runs').all()).toEqual([
       { id: 1, period_start: '2026-07-26', period_end: '2026-10-31', ran_at: 123 },
     ])
+  })
+})
+
+describe(HOSTING, () => {
+  const all = (query: string) => sqlite.prepare(query).all() as Record<string, unknown>[]
+  const storedExpenses = () => all('SELECT * FROM expenses ORDER BY id')
+  const storedSchedules = () => all('SELECT * FROM charge_schedules ORDER BY id')
+  const hostingId = () => (all('SELECT id FROM hostings')[0] as { id: number }).id
+
+  function migrateToHosting() {
+    applyMigrations(sqlite, { from: NEW, to: AUTO })
+    applyMigrations(sqlite, { from: HOSTING })
+  }
+
+  function seedStoredRows() {
+    seedSites()
+    applyMigrations(sqlite, { from: NEW, to: AUTO })
+    sqlite.exec(`
+      INSERT INTO expenses (id, site_id, date, amount, type, comment, is_estimate, created_at, updated_at) VALUES
+        (1, NULL, '2024-01-01', 30000, 'hosting', 'год', 0, 5, 6),
+        (2, NULL, '2025-01-01', 31000, 'hosting', NULL, 0, 7, 8),
+        (3, 1, '2025-01-01', 32000, 'hosting', NULL, 0, 9, 10),
+        (4, 1, '2026-07-26', 87000, 'telephony', 'Самара', 0, 11, 12),
+        (5, 2, '2026-08-25', 87000, 'telephony', 'Оценка', 1, 13, 14),
+        (6, NULL, '2026-07-26', 100, 'telephony', NULL, 0, 15, 16);
+      INSERT INTO charge_schedules (provider, provider_number_id, enabled, next_date, amount, no_charge_period_end, created_at, updated_at) VALUES
+        ('gudok', '4635', 1, '2026-11-26', 87000, '2026-10-31', 17, 18),
+        ('gudok', '4255', 0, '2026-12-01', 90000, NULL, 19, 20);
+    `)
+    sqlite.prepare("UPDATE charge_schedules SET interval_days = 14 WHERE provider_number_id = '4255'").run()
+  }
+
+  it('runs on a fresh empty database and adds the hosting', () => {
+    migrateToHosting()
+
+    expect(all('SELECT provider, account FROM hostings')).toEqual([
+      { provider: 'sprinthost', account: 'a0181620' },
+    ])
+    expect(all('SELECT * FROM expenses')).toEqual([])
+    expect(storedSchedules()).toEqual([])
+  })
+
+  it('links every stored site and keeps the rest of the row', () => {
+    seedStoredRows()
+    const before = all('SELECT * FROM sites ORDER BY id')
+
+    applyMigrations(sqlite, { from: HOSTING })
+
+    expect(before).toHaveLength(2)
+    expect(all('SELECT * FROM sites ORDER BY id')).toEqual(
+      before.map(row => ({ ...row, hosting_id: hostingId() })),
+    )
+  })
+
+  it('links only hosting rows with no site and changes nothing else in expenses', () => {
+    seedStoredRows()
+    const before = storedExpenses()
+
+    applyMigrations(sqlite, { from: HOSTING })
+
+    const linked = [1, 2]
+    expect(storedExpenses()).toEqual(before.map(row => ({
+      ...row,
+      hosting_id: linked.includes(row.id as number) ? hostingId() : null,
+    })))
+  })
+
+  it('keeps number schedules and their intervals, and seeds no schedule', () => {
+    seedStoredRows()
+    const before = storedSchedules()
+
+    applyMigrations(sqlite, { from: HOSTING })
+
+    expect(storedSchedules()).toEqual(before.map(row => ({ ...row, hosting_id: null, interval_months: null })))
+  })
+
+  describe('after the migration', () => {
+    const insertExpense = (site: number | null, hosting: number | null, date = '2026-03-01', type = 'hosting') =>
+      sqlite
+        .prepare(`INSERT INTO expenses (site_id, hosting_id, date, amount, type, created_at, updated_at)
+          VALUES (?, ?, ?, 100, ?, 0, 0)`)
+        .run(site, hosting, date, type)
+    const insertNumberSchedule = (numberId: string) =>
+      sqlite
+        .prepare(`INSERT INTO charge_schedules (provider, provider_number_id, next_date, amount, created_at, updated_at)
+          VALUES ('gudok', ?, '2026-11-26', 87000, 0, 0)`)
+        .run(numberId)
+    const insertHostingSchedule = (hosting: number | null, months: number | null = 12) =>
+      sqlite
+        .prepare(`INSERT INTO charge_schedules (hosting_id, interval_days, interval_months, next_date, amount, created_at, updated_at)
+          VALUES (?, NULL, ?, '2026-11-26', 87000, 0, 0)`)
+        .run(hosting, months)
+    const addSecondHosting = () =>
+      Number(
+        sqlite
+          .prepare(`INSERT INTO hostings (provider, account, created_at, updated_at)
+            VALUES ('sprinthost', 'b0000000', 0, 0)`)
+          .run().lastInsertRowid,
+      )
+
+    beforeEach(() => {
+      seedSites()
+      applyMigrations(sqlite, { from: NEW, to: AUTO })
+      applyMigrations(sqlite, { from: HOSTING })
+      sqlite.pragma('foreign_keys = ON')
+    })
+
+    it('refuses a second hosting with the same provider and account', () => {
+      expect(() => sqlite.exec(`
+        INSERT INTO hostings (provider, account, created_at, updated_at)
+          VALUES ('sprinthost', 'a0181620', 0, 0);
+      `)).toThrow(/UNIQUE/)
+    })
+
+    it('keeps a site when its hosting is deleted', () => {
+      const id = addSecondHosting()
+      sqlite.prepare('UPDATE sites SET hosting_id = ? WHERE id = 1').run(id)
+
+      sqlite.prepare('DELETE FROM hostings WHERE id = ?').run(id)
+
+      expect(all('SELECT hosting_id FROM sites WHERE id = 1')).toEqual([{ hosting_id: null }])
+    })
+
+    it('refuses to delete a hosting that has charge rows', () => {
+      const id = addSecondHosting()
+      insertExpense(null, id)
+
+      expect(() => sqlite.prepare('DELETE FROM hostings WHERE id = ?').run(id)).toThrow(/FOREIGN KEY/)
+    })
+
+    it('refuses an expense with both a site and a hosting', () => {
+      expect(() => insertExpense(1, hostingId())).toThrow(/CHECK/)
+    })
+
+    it('lets two hostings hold rows on one date, but one hosting only one', () => {
+      insertExpense(null, hostingId())
+      insertExpense(null, addSecondHosting())
+
+      expect(() => insertExpense(null, hostingId())).toThrow(/UNIQUE/)
+    })
+
+    it('still holds one company-level row per date and type with no hosting', () => {
+      insertExpense(null, null)
+
+      expect(() => insertExpense(null, null)).toThrow(/UNIQUE/)
+    })
+
+    it('holds one schedule per hosting and deletes it with the hosting', () => {
+      const id = addSecondHosting()
+      insertHostingSchedule(id)
+
+      expect(() => insertHostingSchedule(id)).toThrow(/UNIQUE/)
+
+      sqlite.prepare('DELETE FROM hostings WHERE id = ?').run(id)
+      expect(storedSchedules()).toEqual([])
+    })
+
+    it('gives a number schedule the default of 30 days', () => {
+      insertNumberSchedule('4635')
+
+      expect(storedSchedules()).toMatchObject([{ interval_days: 30, interval_months: null, hosting_id: null }])
+    })
+
+    it.each([
+      ['a number and a hosting', '\'gudok\', \'4635\', 1, NULL, 12'],
+      ['a number with months', '\'gudok\', \'4635\', NULL, 30, 12'],
+      ['a number with no interval', '\'gudok\', \'4635\', NULL, NULL, NULL'],
+      ['half a number', '\'gudok\', NULL, NULL, 30, NULL'],
+      ['a hosting with days', 'NULL, NULL, 1, 30, 12'],
+      ['a hosting with no months', 'NULL, NULL, 1, NULL, NULL'],
+      ['a hosting with zero months', 'NULL, NULL, 1, NULL, 0'],
+      ['neither', 'NULL, NULL, NULL, NULL, NULL'],
+    ])('refuses a schedule with %s', (_, values) => {
+      expect(() => sqlite.exec(`
+        INSERT INTO charge_schedules (provider, provider_number_id, hosting_id, interval_days, interval_months, next_date, amount, created_at, updated_at)
+          VALUES (${values}, '2026-11-26', 87000, 0, 0);
+      `)).toThrow(/CHECK/)
+    })
   })
 })

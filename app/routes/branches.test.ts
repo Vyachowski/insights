@@ -36,11 +36,16 @@ const schedules = () => sqlite.prepare('SELECT * FROM charge_schedules').all()
 beforeEach(() => {
   sqlite.exec(`
     DELETE FROM charge_schedules; DELETE FROM phone_numbers; DELETE FROM expenses;
-    DELETE FROM sites; DELETE FROM cities;
+    DELETE FROM sites; DELETE FROM cities; DELETE FROM hostings;
     INSERT INTO cities (id, code, slug, name, population, created_at, updated_at)
       VALUES (1, 'VOL', 'volgograd', 'Волгоград', 100, 0, 0);
-    INSERT INTO sites (id, city_id, url, yandex_counter_id, created_at, updated_at)
-      VALUES (5, 1, 'https://volgograd.example.com/', '111', 0, 0);
+    INSERT INTO hostings (id, provider, account, created_at, updated_at) VALUES
+      (1, 'sprinthost', 'a0181620', 0, 0),
+      (2, 'sprinthost', 'b0000000', 0, 0);
+    INSERT INTO sites (id, city_id, url, yandex_counter_id, hosting_id, created_at, updated_at) VALUES
+      (5, 1, 'https://volgograd.example.com/', '111', 1, 0, 0),
+      (6, 1, 'https://volzhsky.example.com/', '222', 1, 0, 0),
+      (7, 1, 'https://kamyshin.example.com/', '333', NULL, 0, 0);
     INSERT INTO phone_numbers (provider, provider_number_id, site_id, created_at, updated_at)
       VALUES ('gudok', '1', 5, 0, 0);
   `)
@@ -94,5 +99,16 @@ describe('branches loader', () => {
     const { numbers } = await loader({ request } as Parameters<typeof loader>[0])
 
     expect(numbers).toMatchObject([{ enabled: false, offer: { nextDate: '2026-11-26', amount: 870 } }])
+  })
+
+  it.each(['admin', 'user'])('gives the %s each hosting with its number of sites', async userId => {
+    const request = new Request('http://test/branches', { headers: { Cookie: await sessionCookie(userId) } })
+
+    const { hostings } = await loader({ request } as Parameters<typeof loader>[0])
+
+    expect(hostings).toEqual([
+      { id: 1, provider: 'sprinthost', account: 'a0181620', siteCount: 2 },
+      { id: 2, provider: 'sprinthost', account: 'b0000000', siteCount: 0 },
+    ])
   })
 })

@@ -1,4 +1,4 @@
-import { and, eq, isNotNull, ne, or } from 'drizzle-orm'
+import { and, eq, isNotNull, ne, or, sql } from 'drizzle-orm'
 
 import { chargeSchedules, phoneNumbers } from '../schema'
 
@@ -9,12 +9,13 @@ export interface NumberId {
   providerNumberId: string
 }
 
+// The join keeps number schedules, and the check holds their interval set
 const selectSchedules = (tx: Tx) => tx
   .select({
     id: chargeSchedules.id,
     nextDate: chargeSchedules.nextDate,
     amount: chargeSchedules.amount,
-    intervalDays: chargeSchedules.intervalDays,
+    intervalDays: sql<number>`${chargeSchedules.intervalDays}`,
     noChargePeriodEnd: chargeSchedules.noChargePeriodEnd,
     siteId: phoneNumbers.siteId,
   })
