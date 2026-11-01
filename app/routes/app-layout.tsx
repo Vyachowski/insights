@@ -9,6 +9,7 @@ import type { Route } from './+types/app-layout'
 import { menuItems } from '@/navigation'
 import { requireUser } from '@/routes/helpers/auth'
 import { isBackupOverdue } from '@/server/jobs/backup'
+import { checkWebhookSilent } from '@/server/services/gudok-calls'
 import { checkReconciliationStale } from '@/server/services/reconciliation'
 
 export async function loader({ request }: Route.LoaderArgs) {
@@ -18,6 +19,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     user,
     backupOverdue: isAdmin && isBackupOverdue(),
     reconciliationStale: isAdmin && await checkReconciliationStale(),
+    webhookSilent: isAdmin && await checkWebhookSilent(),
   }
 }
 

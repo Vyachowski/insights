@@ -3,6 +3,9 @@ import { z } from 'zod'
 export class GudokPayloadError extends Error {}
 
 export const PROVIDER = 'gudok'
+export const WEBHOOK_SOURCE = 'webhook'
+
+const WEBHOOK_MAX_SILENCE_MS = 24 * 60 * 60 * 1000
 
 // Gudok delivers all fields as strings (POST form / GET query) or JSON.
 // Only `id` and `date` are strictly required — `id` is the identity/idempotency
@@ -55,6 +58,11 @@ export function parseGudokPayload(raw: Record<string, unknown>) {
   return { payload: parsed.data, date }
 }
 
+/** Over a day since the last webhook call. With none stored there is nothing to measure from. */
+export function isWebhookSilent(lastStoredAt: Date | null, now: Date) {
+  return lastStoredAt !== null && now.getTime() - lastStoredAt.getTime() > WEBHOOK_MAX_SILENCE_MS
+}
+
 export function toNumberDetails(p: GudokPayload) {
   return {
     number: p.dst.replace(/\D/g, '') || null,
@@ -88,7 +96,7 @@ export function toCallRow(
     callstatus: p.callstatus,
     billsec: p.billsec,
     region: p.region,
-    source: 'webhook',
+    source: WEBHOOK_SOURCE,
     raw: JSON.stringify(raw),
   }
 }

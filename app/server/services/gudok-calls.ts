@@ -2,13 +2,15 @@ import {
   type GudokPayload,
   GudokPayloadError,
   hasNewDetails,
+  isWebhookSilent,
   parseGudokPayload,
   PROVIDER,
   toCallRow,
   toNumberDetails,
+  WEBHOOK_SOURCE,
 } from '@/server/core/gudok-calls'
 import { resolveProjectTitle, toCityToSiteId } from '@/server/core/site-matching'
-import { findCallByProviderId, saveCallWithoutSite, saveWebhookCall } from '@/server/db/queries/calls'
+import { findCallByProviderId, latestCallStoredAt, saveCallWithoutSite, saveWebhookCall } from '@/server/db/queries/calls'
 import { createPhoneNumber, findPhoneNumber, updatePhoneNumber } from '@/server/db/queries/phone-numbers'
 import { findSiteIdByGudokProject, listSiteCities } from '@/server/db/queries/sites'
 
@@ -64,6 +66,11 @@ async function storeCall(row: ReturnType<typeof toCallRow>) {
 
   console.error(`[gudok-webhook] call ${row.providerCallId} clashes with another call, stored without a site`)
   return { stored: await saveCallWithoutSite(row), siteId: null }
+}
+
+/** Whether the admin should look for lost calls. Read from the stored calls, so a restart changes nothing. */
+export async function checkWebhookSilent(now = new Date()) {
+  return isWebhookSilent(await latestCallStoredAt(WEBHOOK_SOURCE), now)
 }
 
 export interface IngestResult {
