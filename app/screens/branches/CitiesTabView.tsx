@@ -4,7 +4,7 @@ import { MapPin, Plus } from 'lucide-react'
 
 import type { City } from '@/server/db/queries/cities'
 
-import { formatNumber } from '@/lib/utils'
+import { formatNumber } from '@/lib/format'
 
 export default function CitiesTabView({ cities }: { cities: City[] }) {
   return (

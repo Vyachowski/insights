@@ -5,7 +5,7 @@ import { Globe, Plus } from 'lucide-react'
 import type { City } from '@/server/db/queries/cities'
 import type { Site } from '@/server/db/queries/sites'
 
-import { getHostname } from '@/lib/utils'
+import { getHostname } from '@/lib/format'
 
 export default function SitesTabView({ sites, cities }: { sites: Site[]; cities: City[] }) {
   function getCityName(cityId: number) {

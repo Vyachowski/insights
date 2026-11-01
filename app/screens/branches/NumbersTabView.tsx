@@ -9,7 +9,7 @@ import type { Site } from '@/server/db/queries/sites'
 import type { NumberCharge, NumberChargeResult } from '@/server/services/auto-charges'
 
 import { useResultToast } from '@/hooks/useResultToast'
-import { formatAmount, formatDate, formatDayMonth, getSiteName } from '@/lib/utils'
+import { formatAmount, formatDate, formatDayMonth, getSiteName } from '@/lib/format'
 
 const TOASTS = {
   on: { color: 'teal', message: 'Автосписание включено' },

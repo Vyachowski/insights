@@ -11,7 +11,8 @@ import type { Revenue } from '@/server/db/queries/revenues'
 import type { Site } from '@/server/db/queries/sites'
 
 import { useTable } from '@/hooks/useTable'
-import { formatAmount, formatDate, getSiteName, sumAmounts } from '@/lib/utils'
+import { formatAmount, formatDate, getSiteName } from '@/lib/format'
+import { sumAmounts } from '@/lib/totals'
 
 interface Props {
   entries: Revenue[]

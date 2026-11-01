@@ -7,7 +7,7 @@ import ValueModeToggle, { type ValueMode } from './ValueModeToggle'
 
 import type { DashboardSummary } from '@/server/core/dashboard'
 
-import { formatNumberDelta, formatYoyDelta } from '@/lib/utils'
+import { formatNumberDelta, formatYoyDelta } from '@/lib/format'
 
 export default function CallsByCityWidget({ cities }: { cities: DashboardSummary['callsByCity'] }) {
   const [mode, setMode] = useState<ValueMode>('pct')

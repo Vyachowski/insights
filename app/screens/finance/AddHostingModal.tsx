@@ -5,7 +5,7 @@ import { useState } from 'react'
 
 import type { Site } from '@/server/db/queries/sites'
 
-import { getHostname } from '@/lib/utils'
+import { getHostname } from '@/lib/format'
 
 interface HostingValues {
   year: string

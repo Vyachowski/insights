@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { formatDayMonth, formatNumber, formatNumberDelta, formatRub, formatRubDelta, formatYoyDelta } from './utils'
+import { formatDayMonth, formatNumber, formatNumberDelta, formatRub, formatRubDelta, formatYoyDelta } from './format'
 
 describe('formatDayMonth', () => {
   it('turns a stored date into day and month', () => {

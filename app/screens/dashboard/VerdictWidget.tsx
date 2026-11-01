@@ -7,7 +7,7 @@ import ValueModeToggle, { type ValueMode } from './ValueModeToggle'
 
 import type { DashboardSummary } from '@/server/core/dashboard'
 
-import { formatRub, formatRubDelta } from '@/lib/utils'
+import { formatRub, formatRubDelta } from '@/lib/format'
 
 const CURRENT_YEAR = new Date().getFullYear()
 const PREVIOUS_YEAR = CURRENT_YEAR - 1

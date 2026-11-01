@@ -22,12 +22,6 @@ export function getSiteName(siteId: number | null, sites: { id: number, url: str
   return site ? getHostname(site.url) : `Сайт #${siteId}`
 }
 
-export const sumAmounts = (rows: { amount: number }[]) =>
-  rows.reduce((sum, row) => sum + row.amount, 0)
-
-export const totalLeads = (metric: { leadsYandex: number, leadsGoogle: number, leadsOther: number }) =>
-  metric.leadsYandex + metric.leadsGoogle + metric.leadsOther
-
 // Signed ruble difference of `current` against `previous` (e.g. «+12 400 ₽», «−3 500 ₽»).
 // Uses U+2212 for the minus, matching the percent-delta sign; a zero difference has no sign.
 export const formatRubDelta = (current: number, previous: number) => {

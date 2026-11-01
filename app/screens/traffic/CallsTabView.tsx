@@ -8,7 +8,7 @@ import type { PeriodFilter } from '@/hooks/usePeriodFilter'
 import type { CallListRow } from '@/server/db/queries/calls'
 
 import { useTable } from '@/hooks/useTable'
-import { formatDate } from '@/lib/utils'
+import { formatDate } from '@/lib/format'
 
 interface Props {
   entries: CallListRow[]

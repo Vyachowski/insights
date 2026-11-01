@@ -3,7 +3,7 @@ import Card from '@ui/Card'
 
 import type { DashboardSummary } from '@/server/core/dashboard'
 
-import { formatRub, formatYoyDelta } from '@/lib/utils'
+import { formatRub, formatYoyDelta } from '@/lib/format'
 
 const CURRENT_YEAR = new Date().getFullYear()
 const PREVIOUS_YEAR = CURRENT_YEAR - 1

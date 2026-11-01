@@ -7,7 +7,7 @@ import ValueModeToggle, { type ValueMode } from './ValueModeToggle'
 
 import type { DashboardSummary } from '@/server/core/dashboard'
 
-import { formatDayMonth, formatNumberDelta, formatRubDelta, formatYoyDelta } from '@/lib/utils'
+import { formatDayMonth, formatNumberDelta, formatRubDelta, formatYoyDelta } from '@/lib/format'
 
 export default function TrendsWidget({ trends }: { trends: DashboardSummary['trends'] }) {
   const [mode, setMode] = useState<ValueMode>('pct')

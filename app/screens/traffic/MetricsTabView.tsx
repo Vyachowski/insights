@@ -9,7 +9,8 @@ import type { SiteMetric } from '@/server/db/queries/metrics'
 import type { Site } from '@/server/db/queries/sites'
 
 import { useTable } from '@/hooks/useTable'
-import { formatDate, formatNumber, getSiteName, totalLeads } from '@/lib/utils'
+import { formatDate, formatNumber, getSiteName } from '@/lib/format'
+import { totalLeads } from '@/lib/totals'
 
 interface Props {
   entries: SiteMetric[]
