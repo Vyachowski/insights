@@ -29,3 +29,24 @@ export function chargesDue(
   }
   return { dates, nextDate: date }
 }
+
+/**
+ * A schedule after a Gudok run: the next date and amount follow the site's last
+ * real charge, and with no real charge at all they stay. `noChargePeriodEnd` is
+ * set only when an estimate in the period had no real charge to back it.
+ */
+export function reconciledSchedule(
+  schedule: { nextDate: string, amount: number, intervalDays: number },
+  { lastCharge, estimated, charged, periodEnd }: {
+    lastCharge?: { date: string, amount: number }
+    estimated: boolean
+    charged: boolean
+    periodEnd: string
+  },
+) {
+  return {
+    nextDate: lastCharge ? addDays(lastCharge.date, schedule.intervalDays) : schedule.nextDate,
+    amount: lastCharge?.amount ?? schedule.amount,
+    noChargePeriodEnd: estimated && !charged ? periodEnd : null,
+  }
+}

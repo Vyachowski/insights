@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest'
 
-import { chargesDue, moscowDay } from './auto-charges'
+import { chargesDue, moscowDay, reconciledSchedule } from './auto-charges'
 
 describe('moscowDay', () => {
   it('turns over at midnight in Moscow, not in UTC', () => {
@@ -33,6 +33,36 @@ describe('chargesDue', () => {
 
   it('refuses an interval that would never pass today', () => {
     expect(() => chargesDue({ ...schedule, intervalDays: 0 }, '2026-10-29')).toThrow(RangeError)
+  })
+})
+
+describe('reconciledSchedule', () => {
+  const schedule = { nextDate: '2026-10-29', amount: 87000, intervalDays: 30 }
+  const run = { estimated: false, charged: false, periodEnd: '2026-10-31' }
+  const lastCharge = { date: '2026-10-27', amount: 90000 }
+
+  it('takes the next date and amount from the last real charge', () => {
+    expect(reconciledSchedule(schedule, { ...run, lastCharge })).toMatchObject({
+      nextDate: '2026-11-26',
+      amount: 90000,
+    })
+  })
+
+  it('steps by the interval of the schedule', () => {
+    expect(reconciledSchedule({ ...schedule, intervalDays: 7 }, { ...run, lastCharge }).nextDate).toBe('2026-11-03')
+  })
+
+  it('keeps its values with no real charge at all', () => {
+    expect(reconciledSchedule(schedule, run)).toMatchObject({ nextDate: '2026-10-29', amount: 87000 })
+  })
+
+  it.each([
+    { estimated: true, charged: false, noChargePeriodEnd: '2026-10-31' },
+    { estimated: true, charged: true, noChargePeriodEnd: null },
+    { estimated: false, charged: true, noChargePeriodEnd: null },
+    { estimated: false, charged: false, noChargePeriodEnd: null },
+  ])('with estimated $estimated and charged $charged stores $noChargePeriodEnd', ({ noChargePeriodEnd, ...flags }) => {
+    expect(reconciledSchedule(schedule, { ...run, ...flags }).noChargePeriodEnd).toBe(noChargePeriodEnd)
   })
 })
 
