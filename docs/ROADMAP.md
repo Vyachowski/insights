@@ -40,12 +40,12 @@ Statuses: `[ ]` not started · `[~]` in progress · `[x]` done.
 
 **Goal:** telephony expenses write themselves, so profit is close to right every day, and Gudok confirms them once a quarter.
 
-- [ ] Schedule table and an estimate mark on `expenses`
+- [x] Schedule table and an estimate mark on `expenses`
 - [x] Hourly job writes estimated charges every 30 days, catching up after downtime
-- [ ] `Номера` tab in `Филиалы`: switch auto charge on per number, one per site
-- [ ] Bookmarklet reconciliation replaces estimates in the period it loaded
-- [ ] `Сверено с Гудком до DD.MM` under `Расходы`
-- [ ] Admin alerts: no Gudok charge, reconciliation over 90 days old, webhook silent over 24 hours
+- [x] `Номера` tab in `Филиалы`: switch auto charge on per number, one per site
+- [x] Bookmarklet reconciliation replaces estimates in the period it loaded
+- [x] `Сверено с Гудком до DD.MM` under `Расходы`
+- [x] Admin alerts: no Gudok charge, reconciliation over 90 days old, webhook silent over 24 hours
 
 ## V2.2.1 — Гудок через JSON
 
