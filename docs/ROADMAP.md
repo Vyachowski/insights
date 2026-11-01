@@ -61,3 +61,9 @@ Statuses: `[ ]` not started · `[~]` in progress · `[x]` done.
 **Goal:** hosting costs reach the dashboard through the same auto charge.
 
 - [ ] Hosting entity linked to sites, with one auto charge per hosting
+
+## Known issues
+
+Problems we know about and do not fix yet.
+
+- `/traffic` sends every call to the browser: `listCalls()` has no limit, and filters and paging run in the browser. On 2026-11-01 that was 34,216 rows, or 4.86 MB in 660 ms, with 14% of the rows in the default year and about 650 new rows a month. `server.ts` has no compression; gzip would cut the same rows to 474 KB. Fix when the page gets slow: move calls to server paging.
