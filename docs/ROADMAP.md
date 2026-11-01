@@ -60,7 +60,7 @@ Statuses: `[ ]` not started · `[~]` in progress · `[x]` done.
 
 **Goal:** hosting costs reach the dashboard through the same auto charge.
 
-- [ ] Hosting entity linked to sites, with one auto charge per hosting
+- [x] Hosting entity linked to sites, with one auto charge per hosting
 
 ## Known issues
 
