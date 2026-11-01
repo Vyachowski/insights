@@ -35,7 +35,7 @@ A service holds the steps of an operation and uses `core` and `db` inside them. 
 
 | Layer | Folder | Does | Never does |
 |---|---|---|---|
-| Route module | `app/routes/` | HTTP, access check, renders one screen | business rules, queries beyond a plain `db` read |
+| Route module | `app/routes/`, shared code in `app/routes/helpers/` | HTTP, access check, renders one screen. One route file is one address; a helper is what routes share | business rules, queries beyond a plain `db` read |
 | Service | `app/server/services/` | runs one operation step by step, owns transactions | SQL, HTTP requests and responses |
 | Core | `app/server/core/` | pure functions: parsing, checks, calculations | database, network, files, the current time |
 | Db | `app/server/db/` (queries in `queries/`) | schema, connection, reads and writes | business decisions, rubles, parsing of CSV or webhooks, HTTP |
