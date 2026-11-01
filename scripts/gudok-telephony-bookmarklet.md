@@ -14,19 +14,26 @@ session. No Gudok credentials are stored anywhere.
 1. Asks the app `GET /webhooks/gudok/expenses/<secret>/since` where to start: the
    date of the oldest estimate, or the latest stored day when no estimates exist.
    With nothing stored it starts 90 days back.
-2. Leaves the page's date range alone if it already starts on or before that day.
-   Otherwise it tries to widen the range. Then it loads the rows (clicks
-   "Показать ещё" only as far back as needed — not to the bottom every time).
-3. Checks that it reached the start date. It did if a loaded row is older than
-   that date, or if the page's own range starts on or before it and the list is
-   fully loaded: a day may have no operations. Anything else stops the run with a
-   message that names the needed date and the loaded date, and nothing is posted.
-4. Posts the `Списание` (charge) rows dated inside the period to
+2. Reads the range of the table's last request (`ajax.params().dates`). The picker
+   does not prove anything: it shows any dates written to it, loaded or not.
+   - A range that starts on or before the start date stays as it is. If it ends
+     before today, the run stops and posts nothing.
+   - Any other range is set to the start date through today, the same way the
+     picker's "Применить" does it. The run waits for the table to redraw and reads
+     the request range again. A range that did not change stops the run.
+3. Loads the rows: clicks "Показать ещё" and waits for each redraw, only as far
+   back as needed — not to the bottom every time.
+4. Checks that it reached the start date. It did if a loaded row is older than
+   that date, or if the whole list is loaded: a day may have no operations.
+   Anything else stops the run, and nothing is posted. Every stop, a failed step
+   included, shows a message with the reason and the period to set. A range the
+   run changed goes back to what it was.
+5. Posts the `Списание` (charge) rows dated inside the period to
    `POST /webhooks/gudok/expenses/<secret>`, with
    `period: { start, end }` in `YYYY-MM-DD`: the start date and today, by the
    browser's local date. A run with no charges still posts the empty list and the
    period.
-5. The server deletes the estimates inside the period, groups charges per
+6. The server deletes the estimates inside the period, groups charges per
    (day, city→site), sums them, and upserts one `telephony` expense per group.
    Estimates outside the period stay. Re-running is safe — it overwrites, never
    duplicates.
@@ -44,21 +51,30 @@ session. No Gudok credentials are stored anywhere.
 ## Use
 
 1. Log into Gudok and open **Операции** (`https://in.gudok.tel/history`).
-2. Click the bookmark. It reports how many charges were created/updated/skipped
+2. Click the bookmark. It sets the period itself when the page's range does not
+   reach the start date. It reports how many charges were created/updated/skipped
    and how many estimates were replaced.
 3. If it says nothing was sent, set the period on the page from the needed date
    through today, and click the bookmark again. The period must end today: the
-   run treats everything up to today as checked, so a period that ends earlier
-   loses the estimates after its end.
+   post always ends today, so a period that ends earlier would lose the estimates
+   after its end. The run stops on such a period.
 4. Run it again in about a quarter — it resumes from the oldest estimate.
 
 ## Maintenance
 
 The scraping depends on Gudok's page markup (table class `.account-operations`,
-`data-column-name` cells, `.load-more-btn`, the date-range picker globals). If
-Gudok changes the page, adjust the selectors / date-range step in the source and
+`data-column-name` cells, `.load-more-btn`) and two page globals:
+`window.goodok_daterangepicker` and `window.data_table_controller`. If Gudok
+changes the page, adjust the selectors / date-range step in the source and
 re-generate the bookmarklet. The server side (parsing, aggregation) is unaffected.
 
-The automatic range step did not work on the live page on 2026-10-31: it loaded
-rows from 2026-10-17 only. Until that is fixed, expect to set the period by hand.
-The stop keeps such a run from posting.
+What the page did when checked on 2026-11-01:
+
+- It opens on the last 14 days, whatever period `localStorage` holds.
+- The table requests `goodok_daterangepicker.interval`. `set_current_date_interval`
+  changes it, updates `#daterangepicker-text` (`DD.MM.YY – DD.MM.YY`) and reloads
+  the table. It also saves the period in `localStorage`, under
+  `history-goodok_date_interval`.
+- "Показать ещё" asks for the whole list again, 10 rows longer. The button stays
+  visible with the same text during the request, so only the table's `draw` event
+  shows that rows arrived. `page.info().end` grows before they do.
