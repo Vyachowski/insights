@@ -53,7 +53,7 @@ function seedHostingSchedule({ hostingId = 1, enabled = 1, nextDate = '2026-10-2
   ).run(hostingId, enabled, nextDate, amount)
 }
 
-function seedHostingExpense(date: string, amount: number, hostingId = 1) {
+function seedHostingExpense(date: string, amount: number, hostingId: number | null = 1) {
   sqlite.prepare(
     "INSERT INTO expenses (date, hosting_id, amount, type, comment, created_at, updated_at) VALUES (?, ?, ?, 'hosting', 'Вручную', 1, 1)",
   ).run(date, hostingId, amount)
@@ -243,6 +243,37 @@ describe('writeDueCharges for a hosting', () => {
 
     expect(expenseRows()).toEqual([stored, expect.objectContaining({ date: '2026-10-29', amount: 1200000 })])
     expect(nextDates()).toEqual(['2027-10-29'])
+  })
+
+  it('leaves a row with no hosting unchanged and counts the date as done', () => {
+    seedHostingSchedule()
+    seedHostingExpense('2026-10-29', 900000, null)
+    const stored = expenseRows()
+
+    expect(writeDueCharges()).toEqual({ checked: 1, written: 0 })
+
+    expect(expenseRows()).toEqual(stored)
+    expect(nextDates()).toEqual(['2027-10-29'])
+  })
+
+  it('closes the date for every hosting on a row with no hosting', () => {
+    seedHostingSchedule({ hostingId: 1 })
+    seedHostingSchedule({ hostingId: 2 })
+    seedHostingExpense('2026-10-29', 900000, null)
+    const stored = expenseRows()
+
+    expect(writeDueCharges()).toEqual({ checked: 2, written: 0 })
+
+    expect(expenseRows()).toEqual(stored)
+  })
+
+  it('writes beside a hosting row with a site', () => {
+    seedHostingSchedule()
+    seedExpense('2026-10-29', 900000, { type: 'hosting' })
+
+    expect(writeDueCharges()).toEqual({ checked: 1, written: 1 })
+
+    expect(expenseRows()).toMatchObject([{ site_id: 5, hosting_id: null }, { site_id: null, hosting_id: 1 }])
   })
 
   it('writes two hostings on one date', () => {

@@ -161,6 +161,54 @@ describe('upsertExpense with a hosting', () => {
       { site_id: 5, hosting_id: null, amount: 100 },
     ])
   })
+
+  it('takes over a row with no hosting and overwrites its amount', async () => {
+    await upsertExpense(charge)
+
+    expect(await upsertExpense({ ...charge, hostingId: 1, amount: 750000 })).toBe('updated')
+    expect(expenseRows()).toMatchObject([{ site_id: null, hosting_id: 1, amount: 750000 }])
+  })
+
+  it('takes over a row with no hosting at the same amount, then skips', async () => {
+    await upsertExpense(charge)
+
+    expect(await upsertExpense({ ...charge, hostingId: 1 })).toBe('updated')
+    expect(expenseRows()).toMatchObject([{ hosting_id: 1, amount: 500000 }])
+    expect(await upsertExpense({ ...charge, hostingId: 1 })).toBe('skipped')
+  })
+
+  it('prefers its own row over a row with no hosting', async () => {
+    await upsertExpense({ ...charge, hostingId: 1 })
+    sqlite.prepare(
+      'INSERT INTO expenses (date, amount, type, created_at, updated_at) VALUES (?, 100, ?, 0, 0)',
+    ).run(charge.date, charge.type)
+
+    await upsertExpense({ ...charge, hostingId: 1, amount: 750000 })
+
+    expect(expenseRows()).toHaveLength(2)
+    expect(expenseRows()).toEqual(expect.arrayContaining([
+      expect.objectContaining({ hosting_id: 1, amount: 750000 }),
+      expect.objectContaining({ hosting_id: null, amount: 100 }),
+    ]))
+  })
+
+  it('gives a row with no hosting to the first hosting only', async () => {
+    await upsertExpense(charge)
+    await upsertExpense({ ...charge, hostingId: 1, amount: 600000 })
+
+    expect(await upsertExpense({ ...charge, hostingId: 2, amount: 700000 })).toBe('created')
+    expect(expenseRows()).toMatchObject([
+      { hosting_id: 1, amount: 600000 },
+      { hosting_id: 2, amount: 700000 },
+    ])
+  })
+
+  it('leaves a hosting row with a site alone on a write with a hosting', async () => {
+    await upsertExpense({ ...charge, siteId: 5, amount: 100 })
+
+    expect(await upsertExpense({ ...charge, hostingId: 1 })).toBe('created')
+    expect(expenseRows()).toMatchObject([{ hosting_id: 1, site_id: null }, { hosting_id: null, site_id: 5, amount: 100 }])
+  })
 })
 
 describe('upsertExpense over an estimate', () => {

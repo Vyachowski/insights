@@ -31,6 +31,14 @@ const realWrite = (amount: number, comment?: string) => ({
   isEstimate: false,
 })
 
+/** A row an expense CSV writes: no site and no hosting. The company-level index holds one per date. */
+const unlinkedRow = (date: string, type: string) => and(
+  eq(expenses.date, date),
+  eq(expenses.type, type),
+  isNull(expenses.siteId),
+  isNull(expenses.hostingId),
+)
+
 export function listExpenses() {
   return db.select().from(expenses).orderBy(expenses.id)
 }
@@ -40,7 +48,9 @@ export function listExpenses() {
  * same matching used by CSV import and the Gudok telephony ingest. Same amount
  * is a no-op; a different amount overwrites; otherwise a new row is inserted.
  * With no hosting a write on (date, no site, 'hosting') still matches a linked
- * row, so an old CSV adds no second row. Every write here is real: over an estimate it overwrites and clears the mark,
+ * row, so an old CSV adds no second row. A write with a hosting and no row of
+ * its own takes over a row with no hosting, so the reverse order adds none
+ * either. Every write here is real: over an estimate it overwrites and clears the mark,
  * even at the same amount. Synchronous, so it can run inside a transaction.
  */
 export function writeRealExpense(
@@ -67,6 +77,14 @@ export function writeRealExpense(
     writer.update(expenses).set(realWrite(amount, comment)).where(eq(expenses.id, existing.id)).run()
     return 'updated'
   }
+  if (hostingId !== undefined) {
+    const { changes } = writer
+      .update(expenses)
+      .set({ ...realWrite(amount, comment), hostingId })
+      .where(unlinkedRow(date, type))
+      .run()
+    if (changes > 0) return 'updated'
+  }
   try {
     writer.insert(expenses).values({ date, siteId, hostingId, amount, type, comment }).run()
     return 'created'
@@ -88,11 +106,16 @@ export function insertEstimate(tx: Tx, row: Required<Omit<UpsertExpenseInput, 'c
   return tx.insert(expenses).values({ ...row, isEstimate: true }).onConflictDoNothing().run().changes > 0
 }
 
-/** Writes a real hosting charge unless the key is taken, so a stored row never changes. */
+/**
+ * Writes a real hosting charge unless the key is taken, so a stored row never
+ * changes. A row with no hosting on the date takes the key too, so the same
+ * charge from a CSV does not count twice.
+ */
 export function insertHostingCharge(
   tx: Tx,
   row: { date: string, hostingId: number, amount: number, type: string },
 ): boolean {
+  if (tx.select({ id: expenses.id }).from(expenses).where(unlinkedRow(row.date, row.type)).get()) return false
   return tx.insert(expenses).values(row).onConflictDoNothing().run().changes > 0
 }
 
