@@ -137,6 +137,12 @@
     // 2. Widen Gudok's date range to [since .. today]. A range that already covers
     //    `since` was set by the admin: leave it alone.
     const found = loadedRange()
+    if (found && found.start <= sinceDate && found.end < today) {
+      // The server would treat the days after this end as checked: it would
+      // delete their estimates and record the reconciliation up to today.
+      stop(`период в Гудке заканчивается ${found.end.toLocaleDateString('ru-RU')}, а нужен по сегодня.`)
+      return
+    }
     if (!found || found.start > sinceDate) {
       const { start, end, 'range-key': rangeKey } = window.goodok_daterangepicker.interval
       undoRange = () => setPeriod(start, end, rangeKey)
