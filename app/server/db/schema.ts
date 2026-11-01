@@ -1,5 +1,6 @@
 import { sql } from 'drizzle-orm'
 import {
+  check,
   foreignKey,
   index,
   integer,
@@ -49,6 +50,18 @@ export const cities = sqliteTable('cities', {
   updatedAt: updatedAt(),
 })
 
+export const hostings = sqliteTable(
+  'hostings',
+  {
+    id: id(),
+    provider: text('provider').notNull(),
+    account: text('account').notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  table => [uniqueIndex('hostings_provider_account_key').on(table.provider, table.account)],
+)
+
 export const sites = sqliteTable(
   'sites',
   {
@@ -64,6 +77,9 @@ export const sites = sqliteTable(
     yandexTagManagerId: text('yandex_tag_manager_id'),
     googleTagManagerId: text('google_tag_manager_id'),
     gudokProjectId: integer('gudok_project_id'),
+    hostingId: integer('hosting_id').references(() => hostings.id, {
+      onDelete: 'set null',
+    }),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
@@ -193,6 +209,8 @@ export const expenses = sqliteTable(
     siteId: integer('site_id').references(() => sites.id, {
       onDelete: 'cascade',
     }),
+    // No cascade: a hosting with charge rows cannot be deleted
+    hostingId: integer('hosting_id').references(() => hostings.id),
     date: text('date').notNull(),
     amount: integer('amount').notNull(),
     type: text('type').notNull(),
@@ -212,21 +230,29 @@ export const expenses = sqliteTable(
     ),
     uniqueIndex('expenses_date_type_null_site_idx')
       .on(table.date, table.type)
-      .where(sql`site_id IS NULL`),
+      .where(sql`site_id IS NULL AND hosting_id IS NULL`),
+    uniqueIndex('expenses_date_hosting_id_key')
+      .on(table.date, table.hostingId)
+      .where(sql`hosting_id IS NOT NULL`),
+    check('expenses_site_or_hosting_check', sql`site_id IS NULL OR hosting_id IS NULL`),
   ],
 )
 
-// A number with no row here has auto charge off
+// A number or hosting with no row here has auto charge off
 export const chargeSchedules = sqliteTable(
   'charge_schedules',
   {
     id: id(),
-    provider: text('provider').notNull(),
-    providerNumberId: text('provider_number_id').notNull(),
+    provider: text('provider'),
+    providerNumberId: text('provider_number_id'),
+    hostingId: integer('hosting_id').references(() => hostings.id, {
+      onDelete: 'cascade',
+    }),
     enabled: integer('enabled', { mode: 'boolean' }).notNull().default(false),
     nextDate: text('next_date').notNull(),
     amount: integer('amount').notNull(),
-    intervalDays: integer('interval_days').notNull().default(30),
+    intervalDays: integer('interval_days').default(30),
+    intervalMonths: integer('interval_months'),
     // End of the checked period in which the number had no real charge
     noChargePeriodEnd: text('no_charge_period_end'),
     createdAt: createdAt(),
@@ -241,6 +267,14 @@ export const chargeSchedules = sqliteTable(
       table.provider,
       table.providerNumberId,
     ),
+    uniqueIndex('charge_schedules_hosting_id_key').on(table.hostingId),
+    // A bare `interval_months >= 1` is NULL on an empty column, and a NULL check passes
+    check('charge_schedules_shape_check', sql`
+      (provider IS NOT NULL AND provider_number_id IS NOT NULL AND interval_days IS NOT NULL
+        AND hosting_id IS NULL AND interval_months IS NULL)
+      OR (provider IS NULL AND provider_number_id IS NULL AND interval_days IS NULL
+        AND hosting_id IS NOT NULL AND interval_months IS NOT NULL AND interval_months >= 1)
+    `),
   ],
 )
 
