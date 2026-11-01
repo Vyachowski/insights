@@ -2,10 +2,11 @@
  * Gudok telephony expense collector — bookmarklet source.
  *
  * Run this on the authenticated Gudok operations page (https://in.gudok.tel/history).
- * It asks our app for the latest day already stored, expands the date range back
- * to that day, loads the in-range operations, scrapes the "Списание" (charge)
- * rows, and posts them to our ingest endpoint. Nothing is stored about your
- * Gudok login — it runs inside your existing session.
+ * It asks our app which day to start from, expands the date range back to that
+ * day, loads the in-range operations, scrapes the "Списание" (charge) rows, and
+ * posts them with the period to our ingest endpoint. A run that did not reach
+ * that day stops and posts nothing. Nothing is stored about your Gudok login —
+ * it runs inside your existing session.
  *
  * Install: set APP_URL and SECRET below, minify to a single line, and prefix
  * with `javascript:` to use as a browser bookmark. See the companion README.
@@ -54,6 +55,13 @@
     const dates = rows.map(r => ruDate(r.date)).filter(Boolean)
     return dates.length ? new Date(Math.min(...dates.map(d => d.getTime()))) : null
   }
+
+  // Date -> local 'YYYY-MM-DD'. toISOString gives the previous day in Moscow.
+  const localDay = d => [
+    d.getFullYear(),
+    String(d.getMonth() + 1).padStart(2, '0'),
+    String(d.getDate()).padStart(2, '0'),
+  ].join('-')
 
   // First day of the page's date range (local midnight), or null when unknown.
   function pageRangeStart() {
@@ -142,15 +150,13 @@
     return
   }
 
-  // 4. Collect charge rows within [since .. today].
+  // 4. Collect charge rows within [since .. today]. An empty list still goes to
+  //    the server: it replaces the estimates of the period.
+  const period = { start: localDay(sinceDate), end: localDay(today) }
   const operations = scrapeRows().filter(r => {
     const d = ruDate(r.date)
-    return r.kind === 'Списание' && d && d >= sinceDate
+    return r.kind === 'Списание' && d && d >= sinceDate && d <= today
   })
-  if (!operations.length) {
-    alert('Не найдено списаний для отправки.')
-    return
-  }
 
   // 5. text/plain keeps it a "simple" CORS request (no preflight).
   try {
@@ -158,11 +164,12 @@
       method: 'POST',
       headers: { 'Content-Type': 'text/plain' },
       credentials: 'omit',
-      body: JSON.stringify({ operations }),
+      body: JSON.stringify({ operations, period }),
     })
     const out = await readReply(res)
     alert(`Готово. Отправлено ${operations.length} списаний.\n`
-      + `Создано: ${out.created}, обновлено: ${out.updated}, пропущено: ${out.skipped}.`)
+      + `Создано: ${out.created}, обновлено: ${out.updated}, пропущено: ${out.skipped}.\n`
+      + `Заменено оценок: ${out.deletedEstimates}.`)
   } catch (e) {
     alert('Ошибка отправки: ' + e)
   }
