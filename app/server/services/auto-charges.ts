@@ -92,3 +92,5 @@ export function changeNumberCharge(form: NumberChargeForm) {
   if (form.intent === 'switch-off') return switchNumberChargeOff(form)
   return { error: 'Неизвестное действие' }
 }
+
+export type NumberChargeResult = ReturnType<typeof changeNumberCharge>

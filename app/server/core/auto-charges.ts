@@ -83,7 +83,9 @@ export function numberCharge<T extends {
 export const isValidInterval = (days: number) => Number.isInteger(days) && days >= 1
 
 /** The next date and amount in kopecks from the form, or what is wrong with them. */
-export function parseScheduleForm(form: Record<string, FormDataEntryValue | undefined>) {
+export function parseScheduleForm(
+  form: Record<string, FormDataEntryValue | undefined>,
+): { error: string } | { nextDate: string, amount: number } {
   const nextDate = String(form.nextDate ?? '')
   if (!isValidIsoDate(nextDate)) return { error: 'Укажите дату' }
 
