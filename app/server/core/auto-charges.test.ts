@@ -74,28 +74,38 @@ describe('reconciledSchedule', () => {
 })
 
 describe('numberCharge', () => {
+  const noSchedule = { enabled: null, nextDate: null, amount: null, noChargePeriodEnd: null }
+
   it('gives an enabled number its next date and amount in rubles', () => {
-    expect(numberCharge({ enabled: true, nextDate: '2026-11-26', amount: 87050 }))
-      .toEqual({ enabled: true, nextDate: '2026-11-26', amount: 870.5, offer: null })
+    expect(numberCharge({ ...noSchedule, enabled: true, nextDate: '2026-11-26', amount: 87050 }))
+      .toEqual({ enabled: true, nextDate: '2026-11-26', amount: 870.5, noChargePeriodEnd: null, offer: null })
   })
 
   it('shows a number with no schedule as off', () => {
-    expect(numberCharge({ enabled: null, nextDate: null, amount: null }))
-      .toEqual({ enabled: false, nextDate: null, amount: null, offer: null })
+    expect(numberCharge(noSchedule))
+      .toEqual({ enabled: false, nextDate: null, amount: null, noChargePeriodEnd: null, offer: null })
   })
 
   it('hides the stored values of a schedule that is off', () => {
-    expect(numberCharge({ enabled: false, nextDate: '2026-11-26', amount: 87000 }))
-      .toEqual({ enabled: false, nextDate: null, amount: null, offer: null })
+    const stored = { enabled: false, nextDate: '2026-11-26', amount: 87000, noChargePeriodEnd: '2026-10-31' }
+
+    expect(numberCharge(stored))
+      .toEqual({ enabled: false, nextDate: null, amount: null, noChargePeriodEnd: null, offer: null })
+  })
+
+  it('gives an enabled number its no-charge mark', () => {
+    const stored = { enabled: true, nextDate: '2026-09-24', amount: 87000, noChargePeriodEnd: '2026-10-31' }
+
+    expect(numberCharge(stored).noChargePeriodEnd).toBe('2026-10-31')
   })
 
   it('keeps the rest of the row', () => {
-    expect(numberCharge({ name: 'Волгоград', enabled: null, nextDate: null, amount: null }))
+    expect(numberCharge({ ...noSchedule, name: 'Волгоград' }))
       .toMatchObject({ name: 'Волгоград' })
   })
 
   it('offers the last real charge + 30 days and its amount, not the stored values', () => {
-    const stored = { enabled: false, nextDate: '2026-01-01', amount: 30000 }
+    const stored = { ...noSchedule, enabled: false, nextDate: '2026-01-01', amount: 30000 }
 
     expect(numberCharge(stored, { date: '2026-10-27', amount: 87050 }).offer)
       .toEqual({ nextDate: '2026-11-26', amount: 870.5 })

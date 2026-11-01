@@ -58,14 +58,15 @@ export function reconciledSchedule(
 }
 
 /**
- * A number as `Номера` shows it: one that is off has no next charge, and the
- * amount is in rubles. `offer` comes from the site's last real charge and never
- * from stored values, so switching on again starts fresh.
+ * A number as `Номера` shows it: one that is off has no next charge and no
+ * no-charge mark, and the amount is in rubles. `offer` comes from the site's
+ * last real charge and never from stored values, so switching on again starts fresh.
  */
 export function numberCharge<T extends {
   enabled: boolean | null
   nextDate: string | null
   amount: number | null
+  noChargePeriodEnd: string | null
 }>(row: T, lastCharge?: { date: string, amount: number }) {
   const enabled = row.enabled === true
   return {
@@ -73,6 +74,7 @@ export function numberCharge<T extends {
     enabled,
     nextDate: enabled ? row.nextDate : null,
     amount: enabled && row.amount !== null ? toRubles(row.amount) : null,
+    noChargePeriodEnd: enabled ? row.noChargePeriodEnd : null,
     offer: lastCharge
       ? { nextDate: addDays(lastCharge.date, DEFAULT_INTERVAL_DAYS), amount: toRubles(lastCharge.amount) }
       : null,

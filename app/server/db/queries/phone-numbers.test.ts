@@ -22,8 +22,8 @@ function seedNumber(id: string, siteId: number | null) {
 
 function seedSchedule(id: string) {
   sqlite.prepare(
-    'INSERT INTO charge_schedules (provider, provider_number_id, enabled, next_date, amount, created_at, updated_at) '
-    + "VALUES ('gudok', ?, 1, '2026-11-26', 87000, 0, 0)",
+    'INSERT INTO charge_schedules (provider, provider_number_id, enabled, next_date, amount, no_charge_period_end, created_at, updated_at) '
+    + "VALUES ('gudok', ?, 1, '2026-11-26', 87000, '2026-10-31', 0, 0)",
   ).run(id)
 }
 
@@ -41,6 +41,7 @@ describe('listNumbersWithSchedules', () => {
       enabled: true,
       nextDate: '2026-11-26',
       amount: 87000,
+      noChargePeriodEnd: '2026-10-31',
     }])
   })
 
@@ -48,7 +49,7 @@ describe('listNumbersWithSchedules', () => {
     seedNumber('1', 5)
 
     expect(await listNumbersWithSchedules()).toMatchObject([
-      { providerNumberId: '1', siteId: 5, enabled: null, nextDate: null, amount: null },
+      { providerNumberId: '1', siteId: 5, enabled: null, nextDate: null, amount: null, noChargePeriodEnd: null },
     ])
   })
 

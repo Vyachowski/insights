@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { sqlite } from '@/server/db/client'
 
-const { writeDueEstimates } = await import('./auto-charges')
+const { changeNumberCharge, listNumberCharges, writeDueEstimates } = await import('./auto-charges')
 const { GudokPayloadError, receiveGudokPost, reconcileTelephony } = await import('./reconciliation')
 
 const NOW = new Date('2026-11-01T09:00:00Z')
@@ -306,6 +306,40 @@ describe('reconcileTelephony', () => {
     } finally {
       sqlite.exec('DROP TRIGGER fail_run')
     }
+  })
+})
+
+describe('no-charge mark', () => {
+  const markOf = async () => (await listNumberCharges())[0]
+
+  beforeEach(() => {
+    seedSchedule({ nextDate: '2026-09-24' })
+    seedExpense('2026-08-25')
+    seedEstimate('2026-09-24')
+    seedEstimate('2026-10-24')
+  })
+
+  it('is set by a run with no real charge, and the number stays on', async () => {
+    await reconcileTelephony([], PERIOD)
+
+    expect(await markOf()).toMatchObject({ enabled: true, noChargePeriodEnd: '2026-10-31' })
+  })
+
+  it('is cleared by the next run with a real charge', async () => {
+    await reconcileTelephony([], PERIOD)
+
+    await reconcileTelephony([charge()], PERIOD)
+
+    expect(await markOf()).toMatchObject({ enabled: true, noChargePeriodEnd: null })
+  })
+
+  it('is cleared by switching the number off', async () => {
+    await reconcileTelephony([], PERIOD)
+
+    changeNumberCharge({ intent: 'switch-off', provider: 'gudok', providerNumberId: '1' })
+
+    expect(await markOf()).toMatchObject({ enabled: false, noChargePeriodEnd: null })
+    expect(scheduleOf().no_charge_period_end).toBeNull()
   })
 })
 
