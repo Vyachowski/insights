@@ -3,7 +3,7 @@ import { LogOut } from 'lucide-react'
 import { useNavigate } from 'react-router'
 
 import { useAuth } from '@/hooks/useAuth'
-import { menuItems } from '@/navigation'
+import { menuItems } from '@/menu-items'
 
 interface HeaderProps {
   activeTabId: string

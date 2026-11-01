@@ -4,7 +4,7 @@ import Logo from '@ui/Logo'
 import { NavLink as RouterNavLink } from 'react-router'
 
 import { useAuth } from '@/hooks/useAuth'
-import { menuItems } from '@/navigation'
+import { menuItems } from '@/menu-items'
 
 interface SidebarProps {
   onClose: () => void
