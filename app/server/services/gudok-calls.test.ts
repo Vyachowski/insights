@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { sqlite } from '@/server/db/client'
 
-const { ingestGudokCall, GudokPayloadError } = await import('./gudok-calls')
+const { checkWebhookSilent, ingestGudokCall, GudokPayloadError } = await import('./gudok-calls')
 
 const basePayload = {
   id: 1001,
@@ -203,5 +203,58 @@ describe('ingestGudokCall', () => {
       GudokPayloadError,
     )
     expect(rows()).toHaveLength(0)
+  })
+})
+
+describe('checkWebhookSilent', () => {
+  const NOW = new Date('2026-11-01T09:00:00Z')
+  const DAY_MS = 24 * 60 * 60 * 1000
+
+  let nextDate = 0
+  const seedCall = (source: string, storedAt: number) => sqlite.prepare(
+    `INSERT INTO calls (provider, src, call_number, date, source, raw, created_at, updated_at)
+      VALUES ('gudok', '79111111111', 1, ?, ?, '{}', ?, ?)`,
+  ).run(nextDate++, source, storedAt, storedAt)
+
+  it('flags just over 24 hours since the last webhook call, not exactly 24', async () => {
+    seedCall('webhook', NOW.getTime() - DAY_MS)
+    expect(await checkWebhookSilent(NOW)).toBe(false)
+
+    sqlite.exec('DELETE FROM calls')
+    seedCall('webhook', NOW.getTime() - DAY_MS - 1)
+    expect(await checkWebhookSilent(NOW)).toBe(true)
+  })
+
+  it('takes the latest webhook call', async () => {
+    seedCall('webhook', NOW.getTime() - 3 * DAY_MS)
+    seedCall('webhook', NOW.getTime() - 1000)
+
+    expect(await checkWebhookSilent(NOW)).toBe(false)
+  })
+
+  it('ignores a recent CSV row beside an old webhook call', async () => {
+    seedCall('webhook', NOW.getTime() - 2 * DAY_MS)
+    seedCall('csv', NOW.getTime() - 1000)
+
+    expect(await checkWebhookSilent(NOW)).toBe(true)
+  })
+
+  it('stays quiet with no calls, and with CSV rows only', async () => {
+    expect(await checkWebhookSilent(NOW)).toBe(false)
+
+    seedCall('csv', NOW.getTime() - 2 * DAY_MS)
+    expect(await checkWebhookSilent(NOW)).toBe(false)
+  })
+
+  it('counts a webhook call that took over a CSV row from when it arrived', async () => {
+    sqlite.prepare(
+      `INSERT INTO calls (site_id, provider, src, call_number, date, source, raw, created_at, updated_at)
+        VALUES (5, 'gudok', ?, 1, ?, 'csv', '{}', 0, 0)`,
+    ).run(basePayload.src, Date.parse(basePayload.date))
+
+    await ingestGudokCall(basePayload)
+
+    expect(rows()).toMatchObject([{ source: 'webhook', created_at: 0 }])
+    expect(await checkWebhookSilent()).toBe(false)
   })
 })

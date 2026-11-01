@@ -3,6 +3,9 @@ import { describe, expect, it, vi } from 'vitest'
 vi.mock('@/server/services/auth', () => ({
   findActiveUser: async (id: string) => ({ id, role: id === 'admin' ? 'ADMIN' : 'USER' }),
 }))
+vi.mock('@/server/services/gudok-calls', () => ({
+  checkWebhookSilent: async () => true,
+}))
 vi.mock('@/server/services/reconciliation', () => ({
   checkReconciliationStale: async () => true,
 }))
@@ -20,11 +23,11 @@ const callLoader = async (userId: string) => {
 }
 
 describe('app layout loader', () => {
-  it('tells the admin about a stale reconciliation', async () => {
-    expect(await callLoader('admin')).toMatchObject({ reconciliationStale: true })
+  it('tells the admin about a stale reconciliation and a silent webhook', async () => {
+    expect(await callLoader('admin')).toMatchObject({ reconciliationStale: true, webhookSilent: true })
   })
 
-  it('hides it from a user', async () => {
-    expect(await callLoader('user')).toMatchObject({ reconciliationStale: false })
+  it('hides them from a user', async () => {
+    expect(await callLoader('user')).toMatchObject({ reconciliationStale: false, webhookSilent: false })
   })
 })

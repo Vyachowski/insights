@@ -1,4 +1,4 @@
-import { and, eq, isNotNull, sql } from 'drizzle-orm'
+import { and, eq, isNotNull, max, sql } from 'drizzle-orm'
 
 import { db } from '../client'
 import { betweenInstants, type Period } from './period'
@@ -64,6 +64,18 @@ export async function saveCallWithoutSite(row: NewCall): Promise<boolean> {
     .onConflictDoNothing({ target: [calls.provider, calls.providerCallId] })
     .returning({ id: calls.id })
   return kept.length > 0
+}
+
+/**
+ * When the latest call of this source was stored, or null. Reads `updated_at`:
+ * a webhook call that takes over a CSV row keeps the row's `created_at`.
+ */
+export async function latestCallStoredAt(source: string): Promise<Date | null> {
+  const [row] = await db
+    .select({ at: max(calls.updatedAt) })
+    .from(calls)
+    .where(eq(calls.source, source))
+  return row?.at ?? null
 }
 
 export type CallListRow = Awaited<ReturnType<typeof listCalls>>[number]

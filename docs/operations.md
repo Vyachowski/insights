@@ -43,6 +43,7 @@ Env validation → open SQLite (WAL, busy_timeout) → Drizzle `migrate()` → e
 
 - Endpoint: `POST`/`GET /webhooks/gudok/:secret` (`app/routes/webhooks.gudok.$secret.ts`).
 - Gudok exposes only a URL and a method, so the secret rides in the path. Set `GUDOK_WEBHOOK_SECRET` and configure the project webhook URL as `<APP_URL>/webhooks/gudok/<secret>`, method POST. A wrong or unset secret returns 404.
+- Admins see the red alert `Вебхук Гудка молчит` when the latest webhook call was stored over 24 hours ago. Age counts from `updated_at` of rows with `source = 'webhook'`, the time of arrival: CSV rows do not count, and a webhook call that takes over a CSV row keeps the row's `created_at`. Exactly 24 hours shows nothing, and with no webhook calls no alert shows. The value comes from the stored calls, so a restart does not reset it. A day with no calls at all also shows it. Check the webhook URL in Gudok and the `[gudok-webhook]` lines in the service logs. The next stored call clears it.
 - After using Gudok's built-in "test" button, find the sample rows and remove them:
 
 ```sql

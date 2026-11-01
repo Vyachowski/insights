@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { GudokPayloadError, parseGudokPayload } from './gudok-calls'
+import { GudokPayloadError, isWebhookSilent, parseGudokPayload } from './gudok-calls'
 
 describe('parseGudokPayload', () => {
   it('coerces a delivery of strings and fills in the defaults', () => {
@@ -44,5 +44,18 @@ describe('parseGudokPayload', () => {
   it('rejects a date that cannot be read', () => {
     expect(() => parseGudokPayload({ id: 1, date: 'not a date' }))
       .toThrow(new GudokPayloadError('Invalid Gudok date'))
+  })
+})
+
+describe('isWebhookSilent', () => {
+  const now = new Date('2026-11-01T09:00:00Z')
+
+  it('flags just over 24 hours, not exactly 24', () => {
+    expect(isWebhookSilent(new Date('2026-10-31T09:00:00.000Z'), now)).toBe(false)
+    expect(isWebhookSilent(new Date('2026-10-31T08:59:59.999Z'), now)).toBe(true)
+  })
+
+  it('stays quiet with no webhook call stored', () => {
+    expect(isWebhookSilent(null, now)).toBe(false)
   })
 })
