@@ -16,7 +16,6 @@
   const SECRET = 'YOUR_GUDOK_WEBHOOK_SECRET'
 
   const base = `${APP_URL}/webhooks/gudok/expenses/${SECRET}`
-  const sleep = ms => new Promise(r => setTimeout(r, ms))
   const cell = (tr, name) =>
     (tr.querySelector(`[data-column-name="${name}"]`)?.textContent || '').trim()
 
@@ -63,14 +62,45 @@
     String(d.getDate()).padStart(2, '0'),
   ].join('-')
 
-  // First day of the page's date range (local midnight), or null when unknown.
-  function pageRangeStart() {
-    const start = window.goodok_daterangepicker?.startDate?.toDate?.()
-    if (start) return new Date(start.getFullYear(), start.getMonth(), start.getDate())
-    const text = document.querySelector('#daterangepicker-text')?.textContent || ''
-    const first = /\d{2}\.\d{2}\.\d{2,4}/.exec(text)
-    return first ? ruDate(first[0]) : null
+  function table() {
+    const dt = window.data_table_controller?.datatable_obj
+    if (!dt) throw new Error('таблица операций не найдена')
+    return dt
   }
+
+  // The dates of the table's last request. Only a request changes them, so
+  // unlike the picker they cannot show a range the page never asked for.
+  function loadedRange() {
+    const dates = table().ajax.params()?.dates
+    const start = ruDate(dates?.[0])
+    const end = ruDate(dates?.[1])
+    return start && end ? { start, end } : null
+  }
+
+  // Runs `action` and waits for the table to redraw. Until then it keeps the old
+  // rows and counts, and the load-more button stays visible.
+  function redraw(action) {
+    return new Promise((resolve, reject) => {
+      const dt = table()
+      const done = () => { clearTimeout(timer); resolve() }
+      const timer = setTimeout(() => {
+        dt.off('draw', done)
+        reject(new Error('таблица не обновилась за 15 секунд'))
+      }, 15000)
+      dt.one('draw', done)
+      action()
+    })
+  }
+
+  // The same path as the picker's "Применить": the table requests dp.interval.
+  function setPeriod(start, end, rangeKey) {
+    const dp = window.goodok_daterangepicker
+    dp.daterangepicker.setStartDate(start)
+    dp.daterangepicker.setEndDate(end)
+    dp.set_current_date_interval(start, end, rangeKey)
+  }
+
+  const allLoaded = () => scrapeRows().length >= table().page.info().recordsDisplay
 
   function moreButton() {
     const btn = document.querySelector('.load-more-btn')
@@ -93,60 +123,50 @@
     ? new Date(`${since}T00:00:00`)
     : new Date(today.getFullYear(), today.getMonth(), today.getDate() - 90)
 
-  // Only the range found here proves anything. After we write to the picker it
-  // shows our dates, whether or not the page loaded them.
-  const foundStart = pageRangeStart()
-  const rangeCovered = Boolean(foundStart) && foundStart <= sinceDate
+  const needed = sinceDate.toLocaleDateString('ru-RU')
   let undoRange = () => {}
 
-  // 2. Best-effort: widen Gudok's date range to [since .. today] via the page's
-  //    own picker, then reload. Selectors/API may drift — adjust to the live page.
-  //    A range that already covers `since` was set by the admin: leave it alone.
-  try {
-    if (!rangeCovered && window.goodok_daterangepicker && window.moment && window.data_table_controller) {
-      const dp = window.goodok_daterangepicker
-      const txt = document.querySelector('#daterangepicker-text')
-      const saved = { start: dp.startDate, end: dp.endDate, text: txt?.textContent }
-      undoRange = () => {
-        dp.startDate = saved.start
-        dp.endDate = saved.end
-        if (txt) txt.textContent = saved.text
-      }
-      dp.startDate = window.moment(sinceDate)
-      dp.endDate = window.moment()
-      if (txt) txt.textContent = `${dp.startDate.format('DD.MM.YY')} – ${dp.endDate.format('DD.MM.YY')}`
-      window.data_table_controller.change_dates()
-      await sleep(1500)
-    }
-  } catch (e) { /* fall through to load-more within the current range */ }
-
-  // 3. Load more until we've covered `since` (rows are date-desc), bounded.
-  let fullyLoaded = false
-  for (let i = 0; i < 200; i++) {
-    const oldest = oldestLoadedDate()
-    if (oldest && oldest < sinceDate) break
-    const btn = moreButton()
-    if (btn) {
-      btn.click()
-      await sleep(700)
-      continue
-    }
-    await sleep(1500) // the button may hide for a moment while rows load
-    if (!moreButton()) {
-      fullyLoaded = true
-      break
-    }
+  function stop(reason) {
+    let note = ''
+    try { undoRange() } catch (e) { note = `\nПериод в Гудке не вернулся: ${e.message}. Обновите страницу.` }
+    alert(`Ничего не отправлено: ${reason}\n`
+      + `Выставьте в Гудке период с ${needed} по сегодня и запустите снова.${note}`)
   }
 
-  // Stop unless the rows prove `since` was reached. The range counts only with
-  // the whole list loaded: a day may have no operations, so no older row exists.
-  const oldest = oldestLoadedDate()
-  if (!(oldest && oldest < sinceDate) && !(rangeCovered && fullyLoaded)) {
-    undoRange() // or the next click would read our dates as the page's own
-    const needed = sinceDate.toLocaleDateString('ru-RU')
-    const loaded = oldest ? `загружены только с ${oldest.toLocaleDateString('ru-RU')}` : 'операции не загружены'
-    alert(`Ничего не отправлено: нужны операции с ${needed}, а ${loaded}.\n`
-      + `Выставьте в Гудке период с ${needed} по сегодня и запустите снова.`)
+  try {
+    // 2. Widen Gudok's date range to [since .. today]. A range that already covers
+    //    `since` was set by the admin: leave it alone.
+    const found = loadedRange()
+    if (!found || found.start > sinceDate) {
+      const { start, end, 'range-key': rangeKey } = window.goodok_daterangepicker.interval
+      undoRange = () => setPeriod(start, end, rangeKey)
+      await redraw(() => setPeriod(window.moment(sinceDate), window.moment(today).endOf('day')))
+      const range = loadedRange()
+      if (!range || range.start > sinceDate || range.end < today) {
+        stop('страница не загрузила нужный период.')
+        return
+      }
+    }
+
+    // 3. Load more until we've covered `since` (rows are date-desc), bounded.
+    for (let i = 0; i < 200 && !allLoaded(); i++) {
+      const oldest = oldestLoadedDate()
+      if (oldest && oldest < sinceDate) break
+      const btn = moreButton()
+      if (!btn) break
+      await redraw(() => btn.click())
+    }
+
+    // The range is proven, so `since` is reached by an older row or by the whole
+    // list: a day may have no operations, so no older row exists.
+    const oldest = oldestLoadedDate()
+    if (!(oldest && oldest < sinceDate) && !allLoaded()) {
+      const loaded = oldest ? `загружены только с ${oldest.toLocaleDateString('ru-RU')}` : 'операции не загружены'
+      stop(`нужны операции с ${needed}, а ${loaded}.`)
+      return
+    }
+  } catch (e) {
+    stop(`не удалось загрузить период: ${e.message}.`)
     return
   }
 
