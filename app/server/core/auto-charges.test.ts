@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it } from 'vitest'
 
 import {
   chargesDue,
+  isReconciliationStale,
   isValidInterval,
   moscowDay,
   numberCharge,
@@ -40,6 +41,34 @@ describe('chargesDue', () => {
 
   it('refuses an interval that would never pass today', () => {
     expect(() => chargesDue({ ...schedule, intervalDays: 0 }, '2026-10-29')).toThrow(RangeError)
+  })
+})
+
+describe('isReconciliationStale', () => {
+  const today = '2026-11-01'
+  const estimates = { hasEstimates: true, today }
+
+  it('allows exactly 90 days and flags 91', () => {
+    expect(isReconciliationStale({ lastRunEnd: '2026-08-03', lastRealDay: null }, estimates)).toBe(false)
+    expect(isReconciliationStale({ lastRunEnd: '2026-08-02', lastRealDay: null }, estimates)).toBe(true)
+  })
+
+  it('counts from the last run even when the last real day is older or newer', () => {
+    expect(isReconciliationStale({ lastRunEnd: '2026-10-01', lastRealDay: '2026-01-01' }, estimates)).toBe(false)
+    expect(isReconciliationStale({ lastRunEnd: '2026-01-01', lastRealDay: '2026-10-01' }, estimates)).toBe(true)
+  })
+
+  it('falls back to the last real day with no recorded run', () => {
+    expect(isReconciliationStale({ lastRunEnd: null, lastRealDay: '2026-08-03' }, estimates)).toBe(false)
+    expect(isReconciliationStale({ lastRunEnd: null, lastRealDay: '2026-08-02' }, estimates)).toBe(true)
+  })
+
+  it('has nothing to check with no estimates', () => {
+    expect(isReconciliationStale({ lastRunEnd: '2026-01-01', lastRealDay: null }, { hasEstimates: false, today })).toBe(false)
+  })
+
+  it('has no age to measure with neither date', () => {
+    expect(isReconciliationStale({ lastRunEnd: null, lastRealDay: null }, estimates)).toBe(false)
   })
 })
 

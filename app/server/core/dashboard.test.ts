@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
-import { buildDashboardSummary, computeVerdict, mergeCallsByCity, type ReconciliationDates, type YearTotals } from './dashboard'
+import { buildDashboardSummary, computeVerdict, mergeCallsByCity, type YearTotals } from './dashboard'
+
+import type { ReconciliationDates } from './auto-charges'
 
 describe('computeVerdict', () => {
   it('reports growth as year-over-year percent against last year', () => {
