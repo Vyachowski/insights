@@ -1,7 +1,8 @@
-import { chargesDue, moscowDay } from '@/server/core/auto-charges'
+import { chargesDue, moscowDay, numberCharge } from '@/server/core/auto-charges'
 import { TELEPHONY_TYPE } from '@/server/core/gudok-history'
 import { listActiveSchedules, setNextChargeDate } from '@/server/db/queries/charge-schedules'
 import { insertEstimate } from '@/server/db/queries/expenses'
+import { listNumbersWithSchedules } from '@/server/db/queries/phone-numbers'
 import { transaction } from '@/server/db/transaction'
 
 /**
@@ -26,3 +27,10 @@ export function writeDueEstimates() {
     return { checked: schedules.length, written }
   })
 }
+
+/** Every number with its auto charge. Amounts are in rubles. */
+export async function listNumberCharges() {
+  return (await listNumbersWithSchedules()).map(numberCharge)
+}
+
+export type NumberCharge = Awaited<ReturnType<typeof listNumberCharges>>[number]

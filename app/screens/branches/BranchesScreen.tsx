@@ -2,19 +2,28 @@ import { Container, Tabs } from '@mantine/core'
 import { useSearchParams } from 'react-router'
 
 import CitiesTabView from './CitiesTabView'
+import NumbersTabView from './NumbersTabView'
 import SitesTabView from './SitesTabView'
 
 import type { City } from '@/server/db/queries/cities'
 import type { Site } from '@/server/db/queries/sites'
+import type { NumberCharge } from '@/server/services/auto-charges'
 
 const TABS = [
   { id: 'cities', label: 'Города' },
   { id: 'sites', label: 'Сайты' },
+  { id: 'numbers', label: 'Номера' },
 ] as const
 
 type TabId = (typeof TABS)[number]['id']
 
-export default function BranchesScreen({ sites, cities }: { sites: Site[], cities: City[] }) {
+interface Props {
+  sites: Site[]
+  cities: City[]
+  numbers: NumberCharge[]
+}
+
+export default function BranchesScreen({ sites, cities, numbers }: Props) {
   const [searchParams, setSearchParams] = useSearchParams()
   const activeTab = (searchParams.get('tab') ?? 'cities') as TabId
 
@@ -36,6 +45,9 @@ export default function BranchesScreen({ sites, cities }: { sites: Site[], citie
         </Tabs.Panel>
         <Tabs.Panel value="sites">
           <SitesTabView sites={sites} cities={cities} />
+        </Tabs.Panel>
+        <Tabs.Panel value="numbers">
+          <NumbersTabView numbers={numbers} sites={sites} />
         </Tabs.Panel>
       </Tabs>
     </Container>
