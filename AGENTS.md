@@ -32,6 +32,7 @@ It is **not** token-golf and **not** broken/caveman grammar — it's relevance a
 
 - Data changes go in order: schema and migration → query in `app/server/db/queries/` → logic in `app/server/core/` → service in `app/server/services/` → route loader or action → screen.
 - Tests sit beside the source as `*.test.ts`. Server logic is the main test surface.
+- A new env variable also goes in `env` in `.railway/railway.ts` with `preserve()`. After any change to that file, show me `railway config plan`, and on my yes run `railway config apply` before the push: a push does not apply it.
 
 ## Where to look
 

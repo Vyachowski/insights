@@ -1,6 +1,6 @@
 # Files never used at runtime — kept out of the Railway deploy context.
-# Do NOT add app/, build/, drizzle/, public/, data/, package.json, railpack.json,
-# or nixpacks.toml here — those are required to build and run.
+# Do NOT add app/, build/, drizzle/, public/, data/, package.json or railpack.json
+# here — those are required to build and run.
 docs/
 .agents/
 .railway/
