@@ -9,7 +9,7 @@ import type { Site } from '@/server/db/queries/sites'
 import type { NumberCharge, NumberChargeResult } from '@/server/services/auto-charges'
 
 import { useResultToast } from '@/hooks/useResultToast'
-import { formatAmount, formatDate, getSiteName } from '@/lib/utils'
+import { formatAmount, formatDate, formatDayMonth, getSiteName } from '@/lib/utils'
 
 const TOASTS = {
   on: { color: 'teal', message: 'Автосписание включено' },
@@ -92,9 +92,16 @@ export default function NumbersTabView({ numbers, sites, isAdmin }: NumbersTabVi
                     <Table.Td>{row.name ?? '—'}</Table.Td>
                     <Table.Td c="dimmed">{getSiteName(row.siteId, sites) ?? '—'}</Table.Td>
                     <Table.Td>
-                      <Badge variant="light" color={row.enabled ? 'teal' : 'gray'} size="sm">
-                        {row.enabled ? 'Включено' : 'Выключено'}
-                      </Badge>
+                      <Stack gap={4} align="flex-start">
+                        <Badge variant="light" color={row.enabled ? 'teal' : 'gray'} size="sm">
+                          {row.enabled ? 'Включено' : 'Выключено'}
+                        </Badge>
+                        {row.noChargePeriodEnd && (
+                          <Badge variant="light" color="red" size="sm" miw="max-content">
+                            {`Нет списания в Гудке до ${formatDayMonth(row.noChargePeriodEnd)}`}
+                          </Badge>
+                        )}
+                      </Stack>
                     </Table.Td>
                     <Table.Td c="dimmed" style={{ whiteSpace: 'nowrap' }}>
                       {row.nextDate ? formatDate(row.nextDate) : '—'}
