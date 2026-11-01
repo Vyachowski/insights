@@ -37,42 +37,44 @@ export function listExpenses() {
  * same matching used by CSV import and the Gudok telephony ingest. Same amount
  * is a no-op; a different amount overwrites; otherwise a new row is inserted.
  * Every write here is real: over an estimate it overwrites and clears the mark,
- * even at the same amount.
+ * even at the same amount. Synchronous, so it can run inside a transaction.
  */
-export async function upsertExpense({
-  date,
-  siteId,
-  type,
-  amount,
-  comment,
-}: UpsertExpenseInput): Promise<UpsertExpenseOutcome> {
+export function writeRealExpense(
+  writer: Pick<Tx, 'select' | 'insert' | 'update'>,
+  { date, siteId, type, amount, comment }: UpsertExpenseInput,
+): UpsertExpenseOutcome {
   const match = and(
     eq(expenses.date, date),
     eq(expenses.type, type),
     siteId === null ? isNull(expenses.siteId) : eq(expenses.siteId, siteId),
   )
 
-  const [existing] = await db
+  const existing = writer
     .select({ id: expenses.id, amount: expenses.amount, isEstimate: expenses.isEstimate })
     .from(expenses)
     .where(match)
     .limit(1)
+    .get()
 
   if (existing && existing.amount === amount && !existing.isEstimate) return 'skipped'
   if (existing) {
-    await db.update(expenses).set(realWrite(amount, comment)).where(eq(expenses.id, existing.id))
+    writer.update(expenses).set(realWrite(amount, comment)).where(eq(expenses.id, existing.id)).run()
     return 'updated'
   }
   try {
-    await db.insert(expenses).values({ date, siteId, amount, type, comment })
+    writer.insert(expenses).values({ date, siteId, amount, type, comment }).run()
     return 'created'
   } catch (err) {
     if (!isUniqueViolation(err)) throw err
     // Lost an insert race against a concurrent add for the same (date, siteId,
     // type); a row exists now — overwrite its amount to stay idempotent.
-    await db.update(expenses).set(realWrite(amount, comment)).where(match)
+    writer.update(expenses).set(realWrite(amount, comment)).where(match).run()
     return 'updated'
   }
+}
+
+export async function upsertExpense(input: UpsertExpenseInput): Promise<UpsertExpenseOutcome> {
+  return writeRealExpense(db, input)
 }
 
 /** Writes an estimate unless the key is taken, so a stored row never changes. */
