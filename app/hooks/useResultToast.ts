@@ -6,7 +6,8 @@ export type ActionResult<Outcome extends string> = { error: string } | { ok: boo
 
 /**
  * Revalidates and shows one toast per settled action result. The ref guard
- * stops the effect looping when revalidate() changes the revalidator identity.
+ * stops a repeat when revalidate() changes the revalidator identity, or a
+ * caller passes new `toasts`.
  */
 export function useResultToast<Outcome extends string>(
   fetcher: { state: string, data?: ActionResult<Outcome> },
@@ -26,8 +27,5 @@ export function useResultToast<Outcome extends string>(
     }
     revalidator.revalidate()
     notifications.show(toasts[result.outcome])
-    // revalidator is intentionally excluded: its identity changes on revalidate,
-    // which would re-run this effect and loop the toast.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fetcher.state, fetcher.data])
+  }, [fetcher.state, fetcher.data, revalidator, toasts])
 }
