@@ -19,7 +19,7 @@ import {
   findHostingSchedule,
   findNumberSchedule,
   hasOtherEnabledNumber,
-  listActiveSchedules,
+  listChargeableSchedules,
   listEnabledHostingSchedules,
   setNextChargeDate,
 } from '@/server/db/queries/charge-schedules'
@@ -57,7 +57,7 @@ export function writeDueCharges() {
   const today = moscowDay(new Date())
 
   return transaction(tx => {
-    const numbers = listActiveSchedules(tx)
+    const numbers = listChargeableSchedules(tx)
     const hostings = listEnabledHostingSchedules(tx)
     let written = 0
     for (const { siteId, amount, ...schedule } of numbers) {

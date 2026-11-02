@@ -3,6 +3,7 @@ import { LogOut } from 'lucide-react'
 import { useNavigate } from 'react-router'
 
 import { useAuth } from '@/hooks/useAuth'
+import { formatLongDate } from '@/lib/format'
 import { menuItems } from '@/menu-items'
 
 interface HeaderProps {
@@ -57,7 +58,7 @@ export default function Header({
 
       <Group gap="sm" wrap="nowrap">
         <Text c="dimmed" size="sm" visibleFrom="md">
-          {new Date().toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })}
+          {formatLongDate(new Date())}
         </Text>
         <Button
           variant="default"

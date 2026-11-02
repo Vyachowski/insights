@@ -25,24 +25,24 @@ async function runStep(step: string, fn: () => Promise<string>): Promise<void> {
   }
 }
 
-function readUserConfig(prefix: 'ADMIN' | 'USER', role: 'ADMIN' | 'USER') {
-  const email = config[`${prefix}_EMAIL`]
-  const password = config[`${prefix}_PASSWORD`]
+function readUserConfig(role: 'ADMIN' | 'USER') {
+  const email = config[`${role}_EMAIL`]
+  const password = config[`${role}_PASSWORD`]
   if (!email || !password) return null
   return {
     email,
     password,
     role,
-    firstName: config[`${prefix}_NAME`] ?? null,
-    lastName: config[`${prefix}_LASTNAME`] ?? null,
+    firstName: config[`${role}_NAME`] ?? null,
+    lastName: config[`${role}_LASTNAME`] ?? null,
   }
 }
 
 async function bootstrapUsers(): Promise<string> {
   if ((await countUsers()) > 0) return 'skipped (table not empty)'
 
-  const admin = readUserConfig('ADMIN', 'ADMIN')
-  const user = readUserConfig('USER', 'USER')
+  const admin = readUserConfig('ADMIN')
+  const user = readUserConfig('USER')
   if (!admin || !user) return 'skipped (ADMIN_*/USER_* env vars not set)'
 
   const values = await Promise.all(

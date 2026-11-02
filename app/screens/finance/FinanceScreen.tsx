@@ -1,5 +1,5 @@
 import { Container, Tabs } from '@mantine/core'
-import { useCallback, useMemo, useState } from 'react'
+import { useState } from 'react'
 import { useFetcher, useSearchParams } from 'react-router'
 
 import AddHostingModal from './AddHostingModal'
@@ -13,6 +13,7 @@ import type { getFinancePage } from '@/server/services/finance'
 
 import CsvImportModal from '@/components/CsvImportModal'
 import { useAuth } from '@/hooks/useAuth'
+import { useCategoryFilter } from '@/hooks/useCategoryFilter'
 import { useCsvImport } from '@/hooks/useCsvImport'
 import { usePeriodFilter, usePeriodRows } from '@/hooks/usePeriodFilter'
 
@@ -50,20 +51,10 @@ export default function FinanceScreen({ revenues, expenses, sites, hostings }: A
 
   const period = usePeriodFilter(activeTab === 'expenses' ? expenses : revenues)
 
-  // Category filter — expenses only
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
-  const expenseCategories = useMemo(
-    () => [...new Set(expenses.map(e => e.type))].sort(),
-    [expenses],
-  )
+  const category = useCategoryFilter(expenses)
 
   const revenueEntries = usePeriodRows(revenues, period)
-
-  const isShownExpense = useCallback(
-    (e: { type: string }) => selectedCategory === null || e.type === selectedCategory,
-    [selectedCategory],
-  )
-  const expenseEntries = usePeriodRows(expenses, period, isShownExpense)
+  const expenseEntries = usePeriodRows(expenses, period, category.matches)
 
   return (
     <Container size="xl" px={0}>
@@ -105,9 +96,9 @@ export default function FinanceScreen({ revenues, expenses, sites, hostings }: A
             entries={expenseEntries}
             sites={sites}
             isAdmin={isAdmin}
-            categories={expenseCategories}
-            selectedCategory={selectedCategory}
-            onCategoryChange={setSelectedCategory}
+            categories={category.categories}
+            selectedCategory={category.selected}
+            onCategoryChange={category.setSelected}
             onImportClick={() => csvImport.open('expenses')}
             onAddClick={() => setShowAddHosting(true)}
           />

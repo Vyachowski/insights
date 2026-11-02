@@ -1,5 +1,5 @@
-import { type ReconciliationDates, reconciledUntil } from './auto-charges'
 import { toRubles } from './money'
+import { type ReconciliationDates, reconciledUntil } from './reconciliation'
 
 // Below this absolute year-over-year swing the verdict reads as gradual;
 // at or above it the «сильно» qualifier is added.
@@ -52,16 +52,14 @@ export interface YearTotals {
 }
 
 function toPeriodData({ revenue, expenses }: YearTotals) {
-  const revenueRubles = toRubles(revenue)
-  const expensesRubles = toRubles(expenses)
-  return { revenue: revenueRubles, expenses: expensesRubles, profit: revenueRubles - expensesRubles }
+  return { revenue: toRubles(revenue), expenses: toRubles(expenses), profit: toRubles(revenue - expenses) }
 }
 
 function buildMonthlyProfit(current: YearTotals, previous: YearTotals, now: Date) {
   // Profit = revenue − expenses per calendar month (no amortization), so the
   // monthly totals sum back to the yearly profit shown in «Итог».
   const profitAt = (year: YearTotals, m: number) =>
-    toRubles(year.monthlyRevenue.get(m) ?? 0) - toRubles(year.monthlyExpenses.get(m) ?? 0)
+    toRubles((year.monthlyRevenue.get(m) ?? 0) - (year.monthlyExpenses.get(m) ?? 0))
 
   const months = Array.from({ length: 12 }, (_, i) => {
     const month = i + 1

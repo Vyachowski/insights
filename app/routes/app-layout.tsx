@@ -8,7 +8,7 @@ import Header from '@/components/Header'
 import Sidebar from '@/components/Sidebar'
 import { menuItems } from '@/menu-items'
 import { requireUser } from '@/routes/helpers/auth'
-import { isBackupOverdue } from '@/server/jobs/backup'
+import { isBackupOverdue } from '@/server/services/backup-health'
 import { checkWebhookSilent } from '@/server/services/gudok-calls'
 import { checkReconciliationStale } from '@/server/services/reconciliation'
 

@@ -3,10 +3,10 @@ import type { Route } from './+types/import'
 import { requireAdmin } from '@/routes/helpers/auth'
 import {
   CsvValidationError,
+  importCsvFromUrl,
   importers,
   type ImportResource,
 } from '@/server/services/csv-imports'
-import { fetchCsvBuffer } from '@/server/services/helpers/fetch-csv'
 
 // Resource route: the single mutation endpoint for CSV imports.
 // Accepts multipart form data: `intent` = resource name, plus either
@@ -16,14 +16,12 @@ export async function action({ request }: Route.ActionArgs) {
 
   const form = await request.formData()
   const intent = String(form.get('intent') ?? '')
-  const importer = importers[intent as ImportResource]
-  if (!importer) {
+  if (!Object.hasOwn(importers, intent)) {
     return Response.json({ error: `Unknown import: ${intent}` }, { status: 400 })
   }
 
   try {
-    const buffer = await readCsvBuffer(form)
-    return Response.json(await importer(buffer))
+    return Response.json(await runImport(form, intent as ImportResource))
   } catch (error) {
     if (error instanceof CsvValidationError) {
       return Response.json({ error: error.message }, { status: 400 })
@@ -32,14 +30,14 @@ export async function action({ request }: Route.ActionArgs) {
   }
 }
 
-async function readCsvBuffer(form: FormData): Promise<Buffer> {
+async function runImport(form: FormData, resource: ImportResource) {
   const file = form.get('file')
   if (file instanceof File && file.size > 0) {
-    return Buffer.from(await file.arrayBuffer())
+    return importers[resource](Buffer.from(await file.arrayBuffer()))
   }
   const url = form.get('url')
   if (typeof url === 'string' && url.length > 0) {
-    return fetchCsvBuffer(url)
+    return importCsvFromUrl(resource, url)
   }
   throw new CsvValidationError('Provide a CSV file or a URL')
 }

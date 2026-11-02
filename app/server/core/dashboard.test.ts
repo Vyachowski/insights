@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { buildDashboardSummary, computeVerdict, mergeCallsByCity, type YearTotals } from './dashboard'
 
-import type { ReconciliationDates } from './auto-charges'
+import type { ReconciliationDates } from './reconciliation'
 
 describe('computeVerdict', () => {
   it('reports growth against last year', () => {
@@ -110,6 +110,19 @@ describe('buildDashboardSummary', () => {
   it('turns stored kopecks into a yearly profit verdict in rubles', () => {
     const { verdict } = buildDashboardSummary(current, previous, cities, now, noDates)
     expect(verdict).toMatchObject({ current: 4500, previous: 2100, isGrowing: true, isStrong: true })
+  })
+
+  it('subtracts in kopecks, so profit stays exact', () => {
+    const year = {
+      ...emptyYear,
+      revenue: 123456,
+      expenses: 100010,
+      monthlyRevenue: new Map([[1, 123456]]),
+      monthlyExpenses: new Map([[1, 100010]]),
+    }
+    const { verdict, monthlyProfit } = buildDashboardSummary(year, emptyYear, cities, now, noDates)
+    expect(verdict.current).toBe(234.46)
+    expect(monthlyProfit.months[0].current).toBe(234.46)
   })
 
   it('takes the reconciled date from the last run, then the last real day', () => {

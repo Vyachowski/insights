@@ -4,6 +4,8 @@ import { db } from '../client'
 import { revenues } from '../schema'
 import { isUniqueViolation } from '../unique-violation'
 
+import type { UpsertOutcome } from '../upsert-outcome'
+
 export type Revenue = typeof revenues.$inferSelect
 
 export interface UpsertRevenueInput {
@@ -13,8 +15,6 @@ export interface UpsertRevenueInput {
   /** integer kopecks */
   amount: number
 }
-
-export type UpsertRevenueOutcome = 'created' | 'updated' | 'skipped'
 
 export function listRevenues() {
   return db.select().from(revenues).orderBy(revenues.id)
@@ -29,7 +29,7 @@ export async function upsertRevenue({
   date,
   siteId,
   amount,
-}: UpsertRevenueInput): Promise<UpsertRevenueOutcome> {
+}: UpsertRevenueInput): Promise<UpsertOutcome> {
   const match = and(
     eq(revenues.date, date),
     siteId === null ? isNull(revenues.siteId) : eq(revenues.siteId, siteId),
