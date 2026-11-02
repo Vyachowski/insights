@@ -1,11 +1,17 @@
 import { describe, expect, it } from 'vitest'
 
-import { formatDayMonth, formatNumber, formatNumberDelta, formatRub, formatRubDelta, formatYoyDelta } from './format'
+import { formatDayMonth, formatLongDate, formatNumber, formatNumberDelta, formatRub, formatRubDelta, formatYoyDelta } from './format'
 
 describe('formatDayMonth', () => {
   it('turns a stored date into day and month', () => {
     expect(formatDayMonth('2026-10-31')).toBe('31.10')
     expect(formatDayMonth('2026-01-05')).toBe('05.01')
+  })
+})
+
+describe('formatLongDate', () => {
+  it('spells out the month', () => {
+    expect(formatLongDate(new Date(2026, 10, 2))).toBe('2 ноября 2026 г.')
   })
 })
 
