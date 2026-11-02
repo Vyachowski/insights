@@ -26,7 +26,7 @@ const selectSchedules = (tx: Tx) => tx
   ))
 
 /** Enabled schedules whose number has a site. */
-export function listActiveSchedules(tx: Tx) {
+export function listChargeableSchedules(tx: Tx) {
   return selectSchedules(tx)
     .where(and(eq(chargeSchedules.enabled, true), isNotNull(phoneNumbers.siteId)))
     .all()
