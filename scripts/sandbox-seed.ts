@@ -22,11 +22,10 @@ const { HOSTING_INTERVAL_MONTHS } = await import('@/server/core/auto-charges')
 const { HOSTING_TYPE } = await import('@/server/core/finance')
 const { TELEPHONY_TYPE } = await import('@/server/core/gudok-history')
 const { toKopecks } = await import('@/server/core/money')
-const { db } = await import('@/server/db/client')
 const { runMigrations } = await import('@/server/db/migrate')
 const { insertCall } = await import('@/server/db/queries/calls')
 const { insertCities, listCities } = await import('@/server/db/queries/cities')
-const { enableHostingSchedule } = await import('@/server/db/queries/charge-schedules')
+const { disableSchedule, enableHostingSchedule, enableSchedule } = await import('@/server/db/queries/charge-schedules')
 const { upsertExpense } = await import('@/server/db/queries/expenses')
 const { listHostings } = await import('@/server/db/queries/hostings')
 const { upsertMetric } = await import('@/server/db/queries/metrics')
@@ -34,7 +33,6 @@ const { createPhoneNumber } = await import('@/server/db/queries/phone-numbers')
 const { upsertRevenue } = await import('@/server/db/queries/revenues')
 const { insertSites, listSites } = await import('@/server/db/queries/sites')
 const { insertUsers } = await import('@/server/db/queries/users')
-const { chargeSchedules } = await import('@/server/db/schema')
 const { transaction } = await import('@/server/db/transaction')
 const { config } = await import('@/server/config')
 
@@ -147,11 +145,13 @@ async function seedFinance(siteIds: number[]) {
 // One number on, one with a schedule that is off, one with no schedule, one with no site, and the hosting on
 async function seedAutoCharges(siteIds: number[]) {
   await createPhoneNumber({ provider: PROVIDER, providerNumberId: 'sandbox-free', number: '70000000000', name: 'Номер без сайта' })
-  const schedule = { provider: PROVIDER, nextDate: isoDate(addDays(now, 10)), amount: toKopecks(870) }
-  await db.insert(chargeSchedules).values([
-    { ...schedule, providerNumberId: `sandbox-${siteIds[0]}`, enabled: true },
-    { ...schedule, providerNumberId: `sandbox-${siteIds[1]}` },
-  ])
+  const schedule = { nextDate: isoDate(addDays(now, 10)), amount: toKopecks(870) }
+  const [on, off] = siteIds.map(siteId => ({ provider: PROVIDER, providerNumberId: `sandbox-${siteId}` }))
+  transaction(tx => {
+    enableSchedule(tx, on, schedule)
+    enableSchedule(tx, off, schedule)
+    disableSchedule(tx, off)
+  })
   const [hosting] = await listHostings()
   transaction(tx => enableHostingSchedule(
     tx,
