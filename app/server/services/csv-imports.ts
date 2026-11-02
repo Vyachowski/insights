@@ -1,6 +1,8 @@
 import { importCallsCsv } from './calls-csv-import'
 import { fetchCsvBuffer } from './helpers/fetch-csv'
 
+import type { UpsertOutcome } from '@/server/db/upsert-outcome'
+
 import {
   assertCsvColumns,
   assertSkipRate,
@@ -37,7 +39,7 @@ export interface ImportResult {
 async function upsertRows<T>(
   rows: CsvRow[],
   parseRow: (row: CsvRow) => T | null,
-  upsert: (value: T) => Promise<'created' | 'updated' | 'skipped'>,
+  upsert: (value: T) => Promise<UpsertOutcome>,
 ): Promise<ImportResult> {
   const parsed = rows.map(row => ({ row, value: parseRow(row) }))
   const disputed = parsed

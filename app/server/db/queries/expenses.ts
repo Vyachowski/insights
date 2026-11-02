@@ -5,6 +5,7 @@ import { expenses } from '../schema'
 import { isUniqueViolation } from '../unique-violation'
 
 import type { Tx } from '../transaction'
+import type { UpsertOutcome } from '../upsert-outcome'
 import type { DayPeriod } from './period'
 
 export type Expense = typeof expenses.$inferSelect
@@ -21,8 +22,6 @@ export interface UpsertExpenseInput {
   /** Left as stored when omitted, except that an estimate's comment is cleared */
   comment?: string
 }
-
-export type UpsertExpenseOutcome = 'created' | 'updated' | 'skipped'
 
 /** The `CASE` reads the row as it was before the write. */
 const realWrite = (amount: number, comment?: string) => ({
@@ -56,7 +55,7 @@ export function listExpenses() {
 export function writeRealExpense(
   writer: Pick<Tx, 'select' | 'insert' | 'update'>,
   { date, siteId, hostingId, type, amount, comment }: UpsertExpenseInput,
-): UpsertExpenseOutcome {
+): UpsertOutcome {
   const match = hostingId === undefined
     ? and(
       eq(expenses.date, date),
@@ -97,7 +96,7 @@ export function writeRealExpense(
   }
 }
 
-export async function upsertExpense(input: UpsertExpenseInput): Promise<UpsertExpenseOutcome> {
+export async function upsertExpense(input: UpsertExpenseInput): Promise<UpsertOutcome> {
   return writeRealExpense(db, input)
 }
 
