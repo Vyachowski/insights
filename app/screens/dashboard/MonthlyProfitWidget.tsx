@@ -5,9 +5,6 @@ import type { DashboardSummary } from '@/server/core/dashboard'
 import Card from '@/components/Card'
 import { formatRub, formatYoyDelta } from '@/lib/format'
 
-const CURRENT_YEAR = new Date().getFullYear()
-const PREVIOUS_YEAR = CURRENT_YEAR - 1
-
 const MONTH_LABELS = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек']
 const CHART_HALF = 60 // px above / below the zero line
 
@@ -19,6 +16,8 @@ function barColor(value: number, isCurrent: boolean) {
 
 export default function MonthlyProfitWidget({ monthly }: { monthly: DashboardSummary['monthlyProfit'] }) {
   const { months, averageCurrent, averagePrevious, elapsedMonths } = monthly
+  const currentYear = new Date().getFullYear()
+  const previousYear = currentYear - 1
   const maxAbs = Math.max(1, ...months.flatMap(m => [Math.abs(m.current ?? 0), Math.abs(m.previous)]))
   const barLen = (value: number) => (value === 0 ? 0 : Math.max(2, Math.round((Math.abs(value) / maxAbs) * CHART_HALF)))
   const hasPrevious = averagePrevious !== 0
@@ -87,8 +86,8 @@ export default function MonthlyProfitWidget({ monthly }: { monthly: DashboardSum
                 label={
                   <Stack gap={2}>
                     <Text size="xs" fw={600}>{MONTH_LABELS[m.month - 1]}</Text>
-                    <Text size="xs">{CURRENT_YEAR}: {future ? '—' : formatRub(m.current)}</Text>
-                    <Text size="xs">{PREVIOUS_YEAR}: {formatRub(m.previous)}</Text>
+                    <Text size="xs">{currentYear}: {future ? '—' : formatRub(m.current)}</Text>
+                    <Text size="xs">{previousYear}: {formatRub(m.previous)}</Text>
                     {!future && m.previous !== 0 && (
                       <Text size="xs" c="dimmed">{formatYoyDelta(m.current, m.previous)}</Text>
                     )}
@@ -113,11 +112,11 @@ export default function MonthlyProfitWidget({ monthly }: { monthly: DashboardSum
       <Group gap="lg" mt="md" justify="center">
         <Group gap={6}>
           <Box w={10} h={10} style={{ background: 'var(--mantine-color-teal-6)', borderRadius: 2 }} />
-          <Text size="xs" c="dimmed">{CURRENT_YEAR} (текущий)</Text>
+          <Text size="xs" c="dimmed">{currentYear} (текущий)</Text>
         </Group>
         <Group gap={6}>
           <Box w={10} h={10} style={{ background: 'var(--mantine-color-teal-2)', borderRadius: 2 }} />
-          <Text size="xs" c="dimmed">{PREVIOUS_YEAR} (прошлый)</Text>
+          <Text size="xs" c="dimmed">{previousYear} (прошлый)</Text>
         </Group>
         <Text size="xs" c="dimmed">· красный — убыток</Text>
       </Group>
