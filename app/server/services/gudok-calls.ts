@@ -34,21 +34,21 @@ async function syncPhoneNumber(p: GudokPayload): Promise<number | null> {
   try {
     if (!p.adv_channel_id) return await resolveSiteId(p)
 
-    const known = await findPhoneNumber(PROVIDER, p.adv_channel_id)
+    const id = { provider: PROVIDER, providerNumberId: p.adv_channel_id }
+    const known = await findPhoneNumber(id)
     siteId = known ? known.siteId : await resolveSiteId(p)
 
     const details = toNumberDetails(p)
     const { number, name } = details
     if (!known) {
       await createPhoneNumber({
-        provider: PROVIDER,
-        providerNumberId: p.adv_channel_id,
+        ...id,
         number,
         siteId,
         name,
       })
     } else if (hasNewDetails(known, details)) {
-      await updatePhoneNumber(PROVIDER, p.adv_channel_id, {
+      await updatePhoneNumber(id, {
         number: number ?? known.number,
         name: name ?? known.name,
       })

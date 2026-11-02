@@ -3,13 +3,15 @@ import { and, eq, sql } from 'drizzle-orm'
 import { db } from '../client'
 import { chargeSchedules, phoneNumbers } from '../schema'
 
-const byId = (provider: string, providerNumberId: string) => and(
+import type { NumberId } from './charge-schedules'
+
+const byId = ({ provider, providerNumberId }: NumberId) => and(
   eq(phoneNumbers.provider, provider),
   eq(phoneNumbers.providerNumberId, providerNumberId),
 )
 
-export async function findPhoneNumber(provider: string, providerNumberId: string) {
-  const [number] = await db.select().from(phoneNumbers).where(byId(provider, providerNumberId))
+export async function findPhoneNumber(id: NumberId) {
+  const [number] = await db.select().from(phoneNumbers).where(byId(id))
   return number
 }
 
@@ -51,9 +53,8 @@ export async function createPhoneNumber(values: typeof phoneNumbers.$inferInsert
 }
 
 export async function updatePhoneNumber(
-  provider: string,
-  providerNumberId: string,
+  id: NumberId,
   values: { number: string | null, name: string | null },
 ): Promise<void> {
-  await db.update(phoneNumbers).set(values).where(byId(provider, providerNumberId))
+  await db.update(phoneNumbers).set(values).where(byId(id))
 }
