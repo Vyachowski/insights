@@ -1,5 +1,5 @@
-import { type ReconciliationDates, reconciledUntil } from './auto-charges'
 import { toRubles } from './money'
+import { type ReconciliationDates, reconciledUntil } from './reconciliation'
 
 // Below this absolute year-over-year swing the verdict reads as gradual;
 // at or above it the «сильно» qualifier is added.
