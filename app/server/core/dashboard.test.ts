@@ -112,6 +112,19 @@ describe('buildDashboardSummary', () => {
     expect(verdict).toMatchObject({ current: 4500, previous: 2100, isGrowing: true, isStrong: true })
   })
 
+  it('subtracts in kopecks, so profit stays exact', () => {
+    const year = {
+      ...emptyYear,
+      revenue: 123456,
+      expenses: 100010,
+      monthlyRevenue: new Map([[1, 123456]]),
+      monthlyExpenses: new Map([[1, 100010]]),
+    }
+    const { verdict, monthlyProfit } = buildDashboardSummary(year, emptyYear, cities, now, noDates)
+    expect(verdict.current).toBe(234.46)
+    expect(monthlyProfit.months[0].current).toBe(234.46)
+  })
+
   it('takes the reconciled date from the last run, then the last real day', () => {
     const summary = (dates: ReconciliationDates) =>
       buildDashboardSummary(current, previous, cities, now, dates).trends.reconciledUntil
