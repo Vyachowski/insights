@@ -1,9 +1,12 @@
 import { Box, Group, Paper, Stack, Text, Tooltip } from '@mantine/core'
+import { useState } from 'react'
+
+import ValueModeToggle, { type ValueMode } from './ValueModeToggle'
 
 import type { DashboardSummary } from '@/server/core/dashboard'
 
 import Card from '@/components/Card'
-import { formatRub, formatYoyDelta } from '@/lib/format'
+import { formatRub, formatRubDelta, formatYoyDelta } from '@/lib/format'
 
 const MONTH_LABELS = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек']
 const CHART_HALF = 60 // px above / below the zero line
@@ -15,6 +18,7 @@ function barColor(value: number, isCurrent: boolean) {
 }
 
 export default function MonthlyProfitWidget({ monthly }: { monthly: DashboardSummary['monthlyProfit'] }) {
+  const [mode, setMode] = useState<ValueMode>('pct')
   const { months, averageCurrent, averagePrevious, elapsedMonths } = monthly
   const currentYear = new Date().getFullYear()
   const previousYear = currentYear - 1
@@ -22,6 +26,9 @@ export default function MonthlyProfitWidget({ monthly }: { monthly: DashboardSum
   const barLen = (value: number) => (value === 0 ? 0 : Math.max(2, Math.round((Math.abs(value) / maxAbs) * CHART_HALF)))
   const hasPrevious = averagePrevious !== 0
   const deltaColor = averageCurrent >= averagePrevious ? 'teal' : 'red'
+  const averageDelta = mode === 'pct'
+    ? formatYoyDelta(averageCurrent, averagePrevious)
+    : `${formatRubDelta(averageCurrent, averagePrevious)}/мес`
 
   // Only reserve space below the zero line when there are actual losses; otherwise
   // the chart collapses to its positive half and the month labels sit right under the bars.
@@ -50,16 +57,17 @@ export default function MonthlyProfitWidget({ monthly }: { monthly: DashboardSum
       <Group justify="space-between" align="flex-start" mb="lg" wrap="wrap" gap="md">
         <Text fz="xl" fw={700}>Прибыль по месяцам</Text>
 
-        <Paper withBorder radius="md" p="sm" ta="right" miw={200}>
-          <Text size="xs" c="dimmed">В среднем прибыль в месяц</Text>
-          <Text fz={26} fw={700} c={averageCurrent < 0 ? 'red' : undefined}>{formatRub(averageCurrent)}</Text>
-          <Text size="xs" c="dimmed">
-            за {elapsedMonths} мес ·{' '}
-            {hasPrevious
-              ? <Text span c={deltaColor} fw={600}>{formatYoyDelta(averageCurrent, averagePrevious)}</Text>
-              : '—'}
-          </Text>
-        </Paper>
+        <Stack gap="xs" align="flex-end">
+          <ValueModeToggle value={mode} onChange={setMode} />
+          <Paper withBorder radius="md" p="sm" ta="right" miw={200}>
+            <Text size="xs" c="dimmed">В среднем прибыль в месяц</Text>
+            <Text fz={26} fw={700} c={averageCurrent < 0 ? 'red' : undefined}>{formatRub(averageCurrent)}</Text>
+            <Text size="xs" c="dimmed">
+              за {elapsedMonths} мес ·{' '}
+              {hasPrevious ? <Text span c={deltaColor} fw={600}>{averageDelta}</Text> : '—'}
+            </Text>
+          </Paper>
+        </Stack>
       </Group>
 
       <Box pos="relative">
@@ -89,7 +97,9 @@ export default function MonthlyProfitWidget({ monthly }: { monthly: DashboardSum
                     <Text size="xs">{currentYear}: {future ? '—' : formatRub(m.current)}</Text>
                     <Text size="xs">{previousYear}: {formatRub(m.previous)}</Text>
                     {!future && m.previous !== 0 && (
-                      <Text size="xs" c="dimmed">{formatYoyDelta(m.current, m.previous)}</Text>
+                      <Text size="xs" c="dimmed">
+                        {mode === 'pct' ? formatYoyDelta(m.current, m.previous) : formatRubDelta(m.current, m.previous)}
+                      </Text>
                     )}
                   </Stack>
                 }

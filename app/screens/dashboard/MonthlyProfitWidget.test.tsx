@@ -21,4 +21,15 @@ describe('MonthlyProfitWidget', () => {
     expect(html).toMatch(/2030\D+текущий/)
     expect(html).toMatch(/2029\D+прошлый/)
   })
+
+  it('offers the shared toggle and starts in percent', () => {
+    const html = renderToString(
+      <MantineProvider>
+        <MonthlyProfitWidget monthly={{ months: [], averageCurrent: 1200, averagePrevious: 1000, elapsedMonths: 1 }} />
+      </MantineProvider>,
+    )
+
+    expect(html).toContain('абс.')
+    expect(html).toContain('+20%')
+  })
 })
