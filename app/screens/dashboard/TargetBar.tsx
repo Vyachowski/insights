@@ -12,7 +12,7 @@ interface TargetBarProps {
   // When true (expenses), staying below the line is good and passing it is bad.
   invert?: boolean
   tooltip: ReactNode
-  // Show the «2025» caption above the target line (once per column is enough).
+  // Show last year as a caption above the target line (once per column is enough).
   showYearLabel?: boolean
 }
 
@@ -41,7 +41,7 @@ export default function TargetBar({
             transform: 'translateX(-50%)',
           }}
         >
-          2025
+          {new Date().getFullYear() - 1}
         </Text>
       )}
       <Tooltip label={tooltip} withArrow position="top" events={{ hover: true, focus: true, touch: true }}>
