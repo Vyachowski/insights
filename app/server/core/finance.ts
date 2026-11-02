@@ -1,3 +1,4 @@
+import { isValidIsoDate } from './iso-date'
 import { toKopecks, toRubles } from './money'
 
 // Expense category of a hosting charge. A single `hosting` expense per
@@ -11,14 +12,6 @@ type ParsedEntry =
   | { error: string }
   | { expense: { date: string, siteId: null, hostingId: number, type: string, amount: number } }
   | { revenue: { date: string, siteId: number | null, amount: number } }
-
-// Shape check plus a round-trip so calendar-invalid dates like 2024-02-30 or
-// 2024-13-01 are rejected regardless of the engine's date-parsing leniency.
-export function isValidIsoDate(value: string): boolean {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false
-  const d = new Date(`${value}T00:00:00Z`)
-  return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === value
-}
 
 function parseHosting(form: EntryForm, amount: number): ParsedEntry {
   const date = String(form.date ?? '')

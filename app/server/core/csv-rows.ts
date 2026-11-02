@@ -1,4 +1,4 @@
-import { isValidIsoDate } from './finance'
+import { isValidIsoDate } from './iso-date'
 import { toKopecks } from './money'
 
 import type { CsvRow } from './csv'

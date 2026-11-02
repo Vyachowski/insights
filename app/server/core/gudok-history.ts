@@ -1,4 +1,5 @@
 import { GudokPayloadError } from './gudok-calls'
+import { isValidIsoDate } from './iso-date'
 import { toKopecks } from './money'
 import { resolveProjectTitle } from './site-matching'
 
@@ -52,13 +53,6 @@ export function parseGudokOperationDate(raw: string): string | null {
   return isNaN(date.getTime()) ? null : date.toISOString().slice(0, 10)
 }
 
-const isDay = (value: unknown): value is string => {
-  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false
-  const time = Date.parse(`${value}T00:00:00Z`)
-  // The round trip refuses a day past the month's end, which parsing can roll over
-  return !isNaN(time) && new Date(time).toISOString().startsWith(value)
-}
-
 const textOf = (html: string) => html
   .replace(/<[^>]*>/g, '')
   .replace(/&(amp|lt|gt|quot|#39|nbsp);/g, (_, name: string) => ENTITIES[name])
@@ -78,7 +72,7 @@ function readReplyRow(raw: unknown, index: number) {
 
   const [date, project, kind, amount] = REPLY_FIELDS.map(field => textOf(cells[field] as string))
   const mismatches = [
-    ...(REPLY_DATE.test(date) && isDay(parseGudokOperationDate(date)) ? [] : [`${label}: дата "${date}"`]),
+    ...(REPLY_DATE.test(date) && isValidIsoDate(parseGudokOperationDate(date) ?? '') ? [] : [`${label}: дата "${date}"`]),
     ...(REPLY_AMOUNT.test(amount) ? [] : [`${label}: сумма "${amount}"`]),
     ...(KNOWN_KINDS.has(kind) ? [] : [`${label}: неизвестный тип "${kind}"`]),
   ]

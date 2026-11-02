@@ -1,4 +1,4 @@
-import { isValidIsoDate } from './finance'
+import { isValidIsoDate } from './iso-date'
 import { toKopecks, toRubles } from './money'
 
 const DAY_MS = 24 * 60 * 60 * 1000
