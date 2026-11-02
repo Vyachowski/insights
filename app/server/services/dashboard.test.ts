@@ -78,7 +78,7 @@ describe('getDashboardSummary', () => {
     expect(monthlyProfit.months).toHaveLength(12)
     expect(monthlyProfit.months[0]).toEqual({ month: 1, current: 700, previous: 800 })
     expect(monthlyProfit.months[1]).toEqual({ month: 2, current: 500, previous: -100 })
-    expect(monthlyProfit.months[11]).toEqual({ month: 12, current: 0, previous: 9999 })
+    expect(monthlyProfit.months[11]).toEqual({ month: 12, current: null, previous: 9999 })
     expect(monthlyProfit).toMatchObject({ elapsedMonths: 2, averageCurrent: 600, averagePrevious: 350 })
     expect(verdict).toMatchObject({ monthlyCurrent: 600, monthlyPrevious: 350 })
   })

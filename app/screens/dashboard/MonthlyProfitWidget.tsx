@@ -18,15 +18,15 @@ function barColor(value: number, isCurrent: boolean) {
 }
 
 export default function MonthlyProfitWidget({ monthly }: { monthly: DashboardSummary['monthlyProfit'] }) {
-  const { months, averageCurrent, averagePrevious, elapsedMonths, currentMonth } = monthly
-  const maxAbs = Math.max(1, ...months.flatMap(m => [Math.abs(m.current), Math.abs(m.previous)]))
+  const { months, averageCurrent, averagePrevious, elapsedMonths } = monthly
+  const maxAbs = Math.max(1, ...months.flatMap(m => [Math.abs(m.current ?? 0), Math.abs(m.previous)]))
   const barLen = (value: number) => (value === 0 ? 0 : Math.max(2, Math.round((Math.abs(value) / maxAbs) * CHART_HALF)))
   const hasPrevious = averagePrevious !== 0
   const deltaColor = averageCurrent >= averagePrevious ? 'teal' : 'red'
 
   // Only reserve space below the zero line when there are actual losses; otherwise
   // the chart collapses to its positive half and the month labels sit right under the bars.
-  const hasLoss = months.some(m => m.current < 0 || m.previous < 0)
+  const hasLoss = months.some(m => (m.current ?? 0) < 0 || m.previous < 0)
   const negHalf = hasLoss ? CHART_HALF : 0
 
   const bar = (value: number, isCurrent: boolean) => {
@@ -77,7 +77,7 @@ export default function MonthlyProfitWidget({ monthly }: { monthly: DashboardSum
         />
         <Group align="stretch" gap="xs" wrap="nowrap">
           {months.map(m => {
-            const future = m.month > currentMonth && m.current === 0 && m.previous === 0
+            const future = m.current === null
             return (
               <Tooltip
                 key={m.month}
@@ -87,9 +87,9 @@ export default function MonthlyProfitWidget({ monthly }: { monthly: DashboardSum
                 label={
                   <Stack gap={2}>
                     <Text size="xs" fw={600}>{MONTH_LABELS[m.month - 1]}</Text>
-                    <Text size="xs">{CURRENT_YEAR}: {formatRub(m.current)}</Text>
+                    <Text size="xs">{CURRENT_YEAR}: {future ? '—' : formatRub(m.current)}</Text>
                     <Text size="xs">{PREVIOUS_YEAR}: {formatRub(m.previous)}</Text>
-                    {m.previous !== 0 && (
+                    {!future && m.previous !== 0 && (
                       <Text size="xs" c="dimmed">{formatYoyDelta(m.current, m.previous)}</Text>
                     )}
                   </Stack>
@@ -97,7 +97,7 @@ export default function MonthlyProfitWidget({ monthly }: { monthly: DashboardSum
               >
                 <Stack gap={6} align="center" style={{ flex: 1, minWidth: 0 }}>
                   <Box style={{ display: 'flex', justifyContent: 'center', gap: 3 }}>
-                    {bar(m.current, true)}
+                    {bar(m.current ?? 0, true)}
                     {bar(m.previous, false)}
                   </Box>
                   <Text size="9px" c={future ? 'dimmed' : undefined} style={{ opacity: future ? 0.5 : 1 }}>
