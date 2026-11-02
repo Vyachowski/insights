@@ -38,6 +38,7 @@ Rules the code cannot explain on its own. UI labels stay in Russian, exactly as 
 - Future months of the current year show as empty, not zero: no bar this year, `—` in the tooltip and no comparison. Last year's bar stays. A future-dated row stays out until its month begins.
 - Monthly profits sum to the yearly profit shown in `Итог`.
 - Average monthly profit divides by the months that have revenue or expense data, and compares with the same months of last year. With no comparable data the comparison is dropped, never divided by zero.
+- `абс.` here is the difference of the two monthly averages, `+X ₽/мес`. A single month's tooltip shows that month's difference, `+X ₽`.
 
 ## Call counting
 
