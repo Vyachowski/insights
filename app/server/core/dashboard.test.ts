@@ -157,7 +157,15 @@ describe('buildDashboardSummary', () => {
       monthlyRevenue: new Map([...current.monthlyRevenue, [11, 700000]]),
     }
     const { monthlyProfit } = buildDashboardSummary(withFutureRow, previous, cities, now, noDates)
-    expect(monthlyProfit).toMatchObject({ elapsedMonths: 2, averageCurrent: 2250, currentMonth: 5 })
+    expect(monthlyProfit).toMatchObject({ elapsedMonths: 2, averageCurrent: 2250 })
+    expect(monthlyProfit.months[10]).toEqual({ month: 11, current: null, previous: 0 })
+  })
+
+  it('keeps months after today empty, not zero', () => {
+    const { months } = buildDashboardSummary(current, previous, cities, now, noDates).monthlyProfit
+    expect(months[4]).toEqual({ month: 5, current: 0, previous: 0 }) // The current month has begun
+    expect(months[5]).toEqual({ month: 6, current: null, previous: 0 })
+    expect(months[7]).toEqual({ month: 8, current: null, previous: 9000 })
   })
 
   it('keeps the verdict monthly figures to the same window as its totals', () => {

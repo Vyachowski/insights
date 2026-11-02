@@ -89,11 +89,11 @@ function buildMonthlyProfit(current: YearTotals, previous: YearTotals, now: Date
   }
 
   return {
-    months,
+    // `null` is a month that has not begun, so it reads as empty, not as a zero profit
+    months: months.map(m => (m.month > currentMonth ? { ...m, current: null } : m)),
     averageCurrent: averageOf('current'),
     averagePrevious: averageOf('previous'),
     elapsedMonths,
-    currentMonth,
   }
 }
 

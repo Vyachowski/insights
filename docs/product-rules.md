@@ -35,7 +35,7 @@ Rules the code cannot explain on its own. UI labels stay in Russian, exactly as 
 
 - Monthly profit = monthly revenue − monthly expenses.
 - Every expense counts in the month it is dated. Annual hosting is not amortized.
-- Future months of the current year show as empty, not zero.
+- Future months of the current year show as empty, not zero: no bar this year, `—` in the tooltip and no comparison. Last year's bar stays. A future-dated row stays out until its month begins.
 - Monthly profits sum to the yearly profit shown in `Итог`.
 - Average monthly profit divides by the months that have revenue or expense data, and compares with the same months of last year. With no comparable data the comparison is dropped, never divided by zero.
 
