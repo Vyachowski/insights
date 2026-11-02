@@ -176,7 +176,7 @@ describe('backup cycle', () => {
     storage.headObject.mockRejectedValue(new Error('S3 HEAD: 403'))
     await runCycle()
 
-    const { isBackupOverdue } = await import('./backup')
+    const { isBackupOverdue } = await import('../services/backup-health')
     expect(isBackupOverdue()).toBe(false)
     // waitFor moves the fake clock a little, so the failure sits just after NOW
     vi.setSystemTime(NOW.getTime() + 25 * HOUR_MS)
@@ -191,7 +191,7 @@ describe('backup cycle', () => {
     storage.headObject.mockResolvedValue(true)
     await vi.advanceTimersByTimeAsync(HOUR_MS)
 
-    const { isBackupOverdue } = await import('./backup')
+    const { isBackupOverdue } = await import('../services/backup-health')
     await vi.waitFor(() => expect(isBackupOverdue()).toBe(false))
   })
 })

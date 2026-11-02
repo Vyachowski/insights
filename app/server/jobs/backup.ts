@@ -3,26 +3,19 @@ import path from 'node:path'
 
 import { config, isStorageConfigured } from '../config'
 import { sqlite } from '../db/client'
+import { noteBackupDone, noteBackupFailed } from '../services/backup-health'
 import { deleteObject, headObject, listObjectKeys, putObject } from '../storage'
 
 const HOUR_MS = 60 * 60 * 1000
 export const RETENTION_DAYS = 14
-const OVERDUE_MS = 24 * HOUR_MS
 // Only daily snapshots expire; a hand-made backup under another name stays
 const DAILY_KEY = /^backups\/insights-\d{4}-\d{2}-\d{2}\.db$/
 
 let isBackingUp = false
-// server.ts runs the scheduler from this file, but route loaders run from the
-// react-router bundle with its own copy of it, so only a global reaches both
-const health = globalThis as { backupFailingSince?: number | null }
 let timer: NodeJS.Timeout | null = null
 
 /** A snapshot is mid-flight; closing the DB now would race `sqlite.backup()`. */
 export const isBackupInFlight = (): boolean => isBackingUp
-
-/** Backups have failed for a day straight, so the admin should be told. */
-export const isBackupOverdue = (): boolean =>
-  health.backupFailingSince != null && Date.now() - health.backupFailingSince >= OVERDUE_MS
 
 const dayKey = (d: Date) => `backups/insights-${d.toISOString().slice(0, 10)}.db`
 const daysAgo = (n: number) => new Date(Date.now() - n * 24 * HOUR_MS)
@@ -59,9 +52,9 @@ async function runCycle(): Promise<void> {
       await pruneExpired()
       console.log(`[backup] uploaded ${todayKey}`)
     }
-    health.backupFailingSince = null
+    noteBackupDone()
   } catch (error) {
-    health.backupFailingSince ??= Date.now()
+    noteBackupFailed()
     const message = error instanceof Error ? error.message : String(error)
     console.error(`[backup] cycle failed: ${message} (retrying next tick)`)
   } finally {
