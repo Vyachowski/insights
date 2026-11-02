@@ -1,4 +1,5 @@
 import { importCallsCsv } from './calls-csv-import'
+import { fetchCsvBuffer } from './helpers/fetch-csv'
 
 import {
   assertCsvColumns,
@@ -94,3 +95,7 @@ export const importers = {
 } as const
 
 export type ImportResource = keyof typeof importers
+
+export async function importCsvFromUrl(resource: ImportResource, url: string) {
+  return importers[resource](await fetchCsvBuffer(url))
+}
