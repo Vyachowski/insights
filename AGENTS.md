@@ -36,11 +36,20 @@ It is **not** token-golf and **not** broken/caveman grammar — it's relevance a
 
 ## Where to look
 
-- Planning a feature: `docs/ROADMAP.md`.
+- Planning a feature: the roadmap in the vault, see «Roadmap and tasks» below.
 - Changing dashboard numbers, call counting or data writes: `docs/product-rules.md`.
 - Deploy, backups, bootstrap or Gudok setup: `docs/operations.md`.
 - Changing architecture or layers: `docs/architecture.md`.
 - A task or temporary spec: `.scratch/<feature>/`.
+
+## Roadmap and tasks
+
+The roadmap and tasks live in the Obsidian vault at `/Users/slava/Library/Mobile Documents/iCloud~md~obsidian/Documents/Life`, not in this repo. This project is `Projects/admin`.
+
+- Stages, features and known issues: `Projects/admin/README.md`. Its `stage` property is the current stage.
+- Tasks of the current stage: `Home.md`, section `Активные проекты`, list `Задачи этапа`. The top open task is next.
+- Read both before planning. When a task or feature is done, tick it there.
+- The vault has its own rules: read its `AGENTS.md` before editing. Vault text is in Russian.
 
 ## Agent skills
 
