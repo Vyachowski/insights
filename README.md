@@ -6,11 +6,11 @@ Stack: React Router 7, Mantine, Drizzle + SQLite, one Node server on Railway.
 
 ## How we work
 
-1. **Plan:** add the feature to the current version in [docs/ROADMAP.md](docs/ROADMAP.md).
+1. **Plan:** add the feature to the current stage in the roadmap. It lives in the Obsidian vault, not here: `Projects/admin/README.md` (see `AGENTS.md`).
 2. **Clarify:** run `/grill-me` until the feature is clear.
 3. **Slice:** run `/to-tickets` to cut it into tasks under `.scratch/<feature>/issues/`. Add `/to-spec` first if the feature is large. Skip this step for a small feature.
 4. **Build:** run `/implement`, one task per clean session.
-5. **Finish:** mark the feature `[x]` in the roadmap and move its folder to `.scratch/archive/`.
+5. **Finish:** mark the feature `[x]` in the vault roadmap and its task in the vault `Home.md`, then move its folder to `.scratch/archive/`.
 
 Each task runs in its own branch and worktree and reaches `main` through a `--no-ff` merge. A hook refuses commits on `main`. `npm run check` runs types, lint, tests, knip and the build. The `pre-push` hook runs it.
 
@@ -20,7 +20,6 @@ Each task runs in its own branch and worktree and reaches `main` through a `--no
 | --- | --- | --- |
 | `README.md` | you | how we work |
 | `AGENTS.md` | agents | the single entry point: rules and pointers |
-| `docs/ROADMAP.md` | you | versions and features |
 | `docs/product-rules.md` | both | rules the code cannot explain |
 | `docs/operations.md` | both | deploy, backups, Gudok setup |
 | `docs/architecture.md` | both | layers and key decisions |
